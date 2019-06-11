@@ -107,7 +107,7 @@ Table of Contents
       |-------|------|------|-------|
       | Stack | O(1) | O(1) | O(n)  |
 
-### [Queue](./queue.py)
+### Queue
 * [Implementation](https://github.com/kissofjudase23/Library-python-common-modules/blob/master/common/ds/queue.py)
 * Time complexity
   * Average and Worst
@@ -133,16 +133,19 @@ Table of Contents
 
 
 
-### [Cache](./cache.py)
+### Cache
 #### LRU Cache
+* ![Flow](https://blog.techbridge.cc/img/kdchang/cs101/algorithm/lru-algorithm.png)
+* [Implementation](https://github.com/kissofjudase23/Library-python-common-modules/blob/master/common/ds/cache.py)
 * Time complexity
+  * Use **Doubly linked List** as underlying data structure for O(1) node remove operation
   * Doubly Linked List + Hash Table
 
     |            | Set  | Get  | Delete |
     |------------|------|------|--------|
     | LRU Cache  | O(1) | O(1) | O(1)   |
 
-###Tree
+### Tree
 * Time complexity
   * Average
 
