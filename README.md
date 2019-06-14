@@ -8,7 +8,10 @@ Table of Contents
   - [Hash Table](#hash-table)
   - [Cache](#cache)
     - [LRU Cache](#lru-cache)
+  - [Tree](#tree)
 - [Algorithm](#algorithm)
+  - [Search](#search)
+  - [Sort](#sort)
 
 ## Reference
 * [Leetcode](https://leetcode.com/)
@@ -167,3 +170,6 @@ Table of Contents
 
 
 ## Algorithm
+### [Search](https://github.com/kissofjudase23/Library-python-common-modules/blob/master/common/algo/search.py)
+  * Binary Search: O(log(n)
+### Sort
