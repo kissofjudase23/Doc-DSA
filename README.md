@@ -14,6 +14,8 @@ Table of Contents
   - [Sort](#sort)
 
 ## Reference
+* Complexity
+  * [bigocheatsheet](http://bigocheatsheet.com/)
 * [Leetcode](https://leetcode.com/)
   * [Classification](https://cspiration.com/leetcodeClassification#103)
     * Array
@@ -73,8 +75,6 @@ Table of Contents
     * Object-Oriented Design
     * System Design
     * Sorting and Searching
-* Complexity
-  * [bigocheatsheet](http://bigocheatsheet.com/)
 
 
 ## [Data Structures](https://github.com/kissofjudase23/Library-python-common-modules/tree/master/common/ds)
@@ -170,6 +170,42 @@ Table of Contents
 
 
 ## Algorithm
-### [Search](https://github.com/kissofjudase23/Library-python-common-modules/blob/master/common/algo/search.py)
-  * Binary Search: O(log(n)
+### Search
+* [Implementation](https://github.com/kissofjudase23/Library-python-common-modules/blob/master/common/algo/search.py)
+* Time Complexity
+
+
+    |                  | Average     | Worst      | Space Worst |
+    |------------------|-------------|------------|-------------|
+    | Binary Search (I)| O(long(n))  | O(long(n)) | O(1)        |
+    | Binary Search (R)| O(long(n))  | O(long(n)) | O(long(n))  |
+
+
 ### Sort
+* Time Complexity
+
+  |                | Best       | Average    | Worst      | Space Complexity | Stable/Unstable |
+  |----------------|------------|------------|------------|------------------|-----------------|
+  | Quick Sort     | O(nlog(n)  | O(nlog(n)  | O(n^2)     | O(log(n)) ~ O(n) | Unstable        |
+  | Merge Sort     | O(nlog(n)  | O(nlog(n)  | O(nlog(n)  | O(n)             | Stable          |
+  | Heap Sort      | O(nlog(n)  | O(nlog(n)  | O(nlog(n)  | O(1)             | Unstable        |
+  | Insertion Sort | O(n)       | O(n^2)     | O(n^2)     | O(1)             | Stable          |
+  | Selection Sort | O(n^2)     | O(n^2)     | O(n^2)     | O(1)             | Unstable        |
+  | Bubble Sort    | O(n)       | O(n^2)     | O(n^2)     | O(1)             | Stable          |
+  | Radix Sort     | O(d*(n+r)) | O(d*(n+r)) | O(d*(n+r)) | O(r*n)           | Stable          |
+
+* Merge Sort
+  * [Implementation](https://github.com/kissofjudase23/Library-python-common-modules/blob/master/common/algo/search.py)
+  * Recursive:
+    * divide
+      * Top Down
+    * Merge
+      * Bottom Up
+
+    * ![flow](https://www.darkwiki.in/wp-content/uploads/2017/12/merge-sort-working-in-hindi-with-example-1.png)
+  * Iterative:
+    * Merge:
+      * Bottom Up
+
+    * ![flow](https://images.slideplayer.com/25/7830874/slides/slide_19.jpg)
+
