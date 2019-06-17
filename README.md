@@ -9,9 +9,15 @@ Table of Contents
   - [Cache](#cache)
     - [LRU Cache](#lru-cache)
   - [Tree](#tree)
-- [Algorithm](#algorithm)
+- [Algorithms](#algorithms)
   - [Search](#search)
+    - [Time Complexity](#time-complexity)
+    - [Implementation](#implementation)
   - [Sort](#sort)
+    - [Time Complexity](#time-complexity-1)
+    - [Implementation](#implementation-1)
+    - [Quick Sort](#quick-sort)
+    - [Merge Sort](#merge-sort)
 
 ## Reference
 * Complexity
@@ -169,20 +175,20 @@ Table of Contents
     | Red-Black Tree     | O(long(n)) | O(long(n)) | O(long(n)) | O(long(n)) |
 
 
-## Algorithm
+## Algorithms
 ### Search
-* [Implementation](https://github.com/kissofjudase23/Library-python-common-modules/blob/master/common/algo/search.py)
-* Time Complexity
+#### Time Complexity
+
+  |                  | Average     | Worst      | Space Worst |
+  |------------------|-------------|------------|-------------|
+  | Binary Search (I)| O(long(n))  | O(long(n)) | O(1)        |
+  | Binary Search (R)| O(long(n))  | O(long(n)) | O(long(n))  |
 
 
-    |                  | Average     | Worst      | Space Worst |
-    |------------------|-------------|------------|-------------|
-    | Binary Search (I)| O(long(n))  | O(long(n)) | O(1)        |
-    | Binary Search (R)| O(long(n))  | O(long(n)) | O(long(n))  |
-
+#### [Implementation](https://github.com/kissofjudase23/Library-python-common-modules/blob/master/common/algo/search.py)
 
 ### Sort
-* Time Complexity
+#### Time Complexity
 
   |                | Best       | Average    | Worst      | Space Complexity | Stable/Unstable |
   |----------------|------------|------------|------------|------------------|-----------------|
@@ -194,8 +200,9 @@ Table of Contents
   | Bubble Sort    | O(n)       | O(n^2)     | O(n^2)     | O(1)             | Stable          |
   | Radix Sort     | O(d*(n+r)) | O(d*(n+r)) | O(d*(n+r)) | O(r*n)           | Stable          |
 
-* Quick Sort
-  * Ref
+#### [Implementation](https://github.com/kissofjudase23/Library-python-common-modules/blob/master/common/algo/search.py)
+#### Quick Sort
+  * FAQ
     * [Why does QuickSort use O(log(n)) extra space?](https://stackoverflow.com/questions/12573330/why-does-quicksort-use-ologn-extra-space)
       * To get rid of the recursive call you would have to use **a stack** in your code, and it would still occupy **log(n)** space.
   * Worst Case:
@@ -221,8 +228,6 @@ Table of Contents
         * partition:
           * pivot: 3
           * [2, 1, 3 ,4*, 4]
-
-  * [Implementation](https://github.com/kissofjudase23/Library-python-common-modules/blob/master/common/algo/search.py)
   * Recursive
     * https://www.geeksforgeeks.org/python-program-for-quicksort/
     * https://www.youtube.com/watch?v=CB_NCoxzQnk
@@ -230,20 +235,13 @@ Table of Contents
   * Iterative
     * https://www.techiedelight.com/iterative-implementation-of-quicksort/
 
-* Merge Sort
+#### Merge Sort
   * Ref
-    *
-  * [Implementation](https://github.com/kissofjudase23/Library-python-common-modules/blob/master/common/algo/search.py)
-  * Recursive:
-    * Divide
-      * Top Down
-    * Merge
-      * Bottom Up
+    * https://www.geeksforgeeks.org/merge-sort/
+    * https://www.youtube.com/watch?v=6pV2IF0fgKY
 
+  * Recursive:
     * ![flow](https://www.darkwiki.in/wp-content/uploads/2017/12/merge-sort-working-in-hindi-with-example-1.png)
   * Iterative:
-    * Merge:
-      * Bottom Up
-
     * ![flow](https://images.slideplayer.com/25/7830874/slides/slide_19.jpg)
 
