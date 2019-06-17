@@ -186,7 +186,7 @@ Table of Contents
 
   |                | Best       | Average    | Worst      | Space Complexity | Stable/Unstable |
   |----------------|------------|------------|------------|------------------|-----------------|
-  | Quick Sort     | O(nlog(n)  | O(nlog(n)  | O(n^2)     | O(log(n)) ~ O(n) | Unstable        |
+  | Quick Sort     | O(nlog(n)  | O(nlog(n)  | O(n^2)     | O(log(n))        | Unstable        |
   | Merge Sort     | O(nlog(n)  | O(nlog(n)  | O(nlog(n)  | O(n)             | Stable          |
   | Heap Sort      | O(nlog(n)  | O(nlog(n)  | O(nlog(n)  | O(1)             | Unstable        |
   | Insertion Sort | O(n)       | O(n^2)     | O(n^2)     | O(1)             | Stable          |
@@ -194,10 +194,48 @@ Table of Contents
   | Bubble Sort    | O(n)       | O(n^2)     | O(n^2)     | O(1)             | Stable          |
   | Radix Sort     | O(d*(n+r)) | O(d*(n+r)) | O(d*(n+r)) | O(r*n)           | Stable          |
 
+* Quick Sort
+  * Ref
+    * [Why does QuickSort use O(log(n)) extra space?](https://stackoverflow.com/questions/12573330/why-does-quicksort-use-ologn-extra-space)
+      * To get rid of the recursive call you would have to use **a stack** in your code, and it would still occupy **log(n)** space.
+  * Worst Case:
+    * [1, 2, 3, 4, 5]
+      * round1:
+        * pivot: 5
+        * left partition [1, 2, 3, 4]
+        * right partition []
+      * round2:
+        * pivot: 4
+        * left partition [1, 2, 3]
+        * right partition []
+      * ...
+    * Solution:
+      * Use median of three to pick pivot
+
+    * T(n) = T(n-1) + cn
+
+  * Unstable Case:
+    * [quicksort algorithm stability](https://stackoverflow.com/questions/13498213/quicksort-algorithm-stability)
+    * [4, 2, 1 ,4*, 3]
+      * round1:
+        * partition:
+          * pivot: 3
+          * [2, 1, 3 ,4*, 4]
+
+  * [Implementation](https://github.com/kissofjudase23/Library-python-common-modules/blob/master/common/algo/search.py)
+  * Recursive
+    * https://www.geeksforgeeks.org/python-program-for-quicksort/
+    * https://www.youtube.com/watch?v=CB_NCoxzQnk
+
+  * Iterative
+    * https://www.techiedelight.com/iterative-implementation-of-quicksort/
+
 * Merge Sort
+  * Ref
+    *
   * [Implementation](https://github.com/kissofjudase23/Library-python-common-modules/blob/master/common/algo/search.py)
   * Recursive:
-    * divide
+    * Divide
       * Top Down
     * Merge
       * Bottom Up
