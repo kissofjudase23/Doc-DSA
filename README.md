@@ -205,6 +205,8 @@ Table of Contents
   * FAQ
     * [Why does QuickSort use O(log(n)) extra space?](https://stackoverflow.com/questions/12573330/why-does-quicksort-use-ologn-extra-space)
       * To get rid of the recursive call you would have to use **a stack** in your code, and it would still occupy **log(n)** space.
+    * [Quick sort implement by queue?](https://stackoverflow.com/questions/39666714/quick-sort-implement-by-queue)
+      * Queue method requires O(n) space for sorting an array of size n.
   * Worst Case:
     * [1, 2, 3, 4, 5]
       * round1:
