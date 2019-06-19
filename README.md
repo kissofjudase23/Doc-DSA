@@ -1,23 +1,26 @@
 Table of Contents
-- [Reference](#reference)
-- [Data Structures](#data-structures)
-  - [General Tips](#general-tips)
-  - [Linked List](#linked-list)
-  - [Stack](#stack)
-  - [Queue](#queue)
-  - [Hash Table](#hash-table)
-  - [Cache](#cache)
-    - [LRU Cache](#lru-cache)
-  - [Tree](#tree)
-- [Algorithms](#algorithms)
-  - [Search](#search)
-    - [Time Complexity](#time-complexity)
-    - [Implementation](#implementation)
-  - [Sort](#sort)
-    - [Time Complexity](#time-complexity-1)
-    - [Implementation](#implementation-1)
-    - [Quick Sort](#quick-sort)
-    - [Merge Sort](#merge-sort)
+- [Reference](#Reference)
+- [Data Structures](#Data-Structures)
+  - [General Tips](#General-Tips)
+  - [Linked List](#Linked-List)
+  - [Stack](#Stack)
+  - [Queue](#Queue)
+  - [Hash Table](#Hash-Table)
+  - [Cache](#Cache)
+    - [LRU Cache](#LRU-Cache)
+  - [Tree](#Tree)
+- [Algorithms](#Algorithms)
+  - [Search](#Search)
+    - [Time Complexity](#Time-Complexity)
+    - [Implementation](#Implementation)
+  - [Sort](#Sort)
+    - [Time Complexity](#Time-Complexity-1)
+    - [Implementation](#Implementation-1)
+    - [Quick Sort](#Quick-Sort)
+    - [Merge Sort](#Merge-Sort)
+  - [Insertion Sort](#Insertion-Sort)
+  - [Selection Sort](#Selection-Sort)
+  - [Bubble](#Bubble)
 
 ## Reference
 * Complexity
@@ -247,3 +250,14 @@ Table of Contents
   * Iterative:
     * ![flow](https://images.slideplayer.com/25/7830874/slides/slide_19.jpg)
 
+### Insertion Sort
+  * Best Case: ascending sequence, [1, 2, 3]
+  * Worst Case: descending sequence, [3, 2, 1]
+### Selection Sort
+  * Unstable: [5, 5*, 3]
+### Bubble
+  * Best Case:
+    * ascending sequence, [1, 2, 3]
+    * (n-1) comparison in round1, and no swap happened.
+  * Worst Case:
+    * descending sequence, [3, 2, 1]
