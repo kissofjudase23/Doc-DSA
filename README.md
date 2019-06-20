@@ -6,7 +6,6 @@ Table of Contents
   - [Interviewbit](#Interviewbit)
   - [Cracking the coding interview](#Cracking-the-coding-interview)
 - [Data Structures](#Data-Structures)
-  - [General Tips](#General-Tips)
   - [Linked List](#Linked-List)
   - [Stack](#Stack)
   - [Queue](#Queue)
@@ -14,8 +13,18 @@ Table of Contents
   - [Cache](#Cache)
     - [LRU Cache](#LRU-Cache)
   - [Tree](#Tree)
+    - [Time complexity](#Time-complexity)
+    - [Binary Tree](#Binary-Tree)
+    - [Binary Heaps (Min-Heaps and Max-Heaps)](#Binary-Heaps-Min-Heaps-and-Max-Heaps)
+    - [AVL Tree](#AVL-Tree)
+    - [Red-Black Tree](#Red-Black-Tree)
+    - [B Tree](#B-Tree)
+    - [Tries (Prefix Trees)](#Tries-Prefix-Trees)
+  - [Graph](#Graph)
+    - [Represent](#Represent)
+    - [Search](#Search)
 - [Algorithms](#Algorithms)
-  - [Search](#Search)
+  - [Search](#Search-1)
     - [Time Complexity](#Time-Complexity)
     - [Implementation](#Implementation)
   - [Sort](#Sort)
@@ -25,7 +34,7 @@ Table of Contents
     - [Merge Sort](#Merge-Sort)
     - [Insertion Sort](#Insertion-Sort)
     - [Selection Sort](#Selection-Sort)
-    - [Bubble](#Bubble)
+    - [Bubble Sort](#Bubble-Sort)
 
 ## Reference
 ### Complexity
@@ -93,12 +102,6 @@ Table of Contents
 
 ## [Data Structures](https://github.com/kissofjudase23/Library-python-common-modules/tree/master/common/ds)
 
-### General Tips
-* The **"Stack"** can help for:
-  * Palindrome issues
-  * DFS
-* The **"Queue"** can help for:
-  * BFS
 
 ### Linked List
 * Tips
@@ -163,7 +166,7 @@ Table of Contents
     | LRU Cache  | O(1) | O(1) | O(1)   |
 
 ### Tree
-* Time complexity
+#### Time complexity
   * Average
 
     |                    | Access     | Search     | Insertion  | Deletion   |
@@ -181,6 +184,84 @@ Table of Contents
     | AVL Tree           | O(long(n)) | O(long(n)) | O(long(n)) | O(long(n)) |
     | B Tree             | O(long(n)) | O(long(n)) | O(long(n)) | O(long(n)) |
     | Red-Black Tree     | O(long(n)) | O(long(n)) | O(long(n)) | O(long(n)) |
+
+#### Binary Tree
+* Unbalanced Tree
+* Types
+  * Binary search Trees:
+    * **All left descendents <= n < all right descendents**
+  * Complete Binary Trees
+    * A binary tree in which every level of the tree if **fully filled, except the rightmost element on the last level.
+  * Full Binary Trees
+    * A binary tree in which every node has **either zero of two children**.
+  * Perfect Binary Trees
+    * A binary tree is one that **full and complete**.
+    * All leaf nodes will be at the same level, and this level has the maximum number of nodes.
+
+* Traversal
+  * In-Order
+    ```python
+      def in_order_traversal(node):
+
+        if not node:
+          return
+
+        in_order_traversal(node.left)
+        visit(node)
+        in_order_traversal(node.right)
+    ```
+  * Pre-Order
+    ```python
+      def pre_order_traversal(node):
+
+        if not node:
+          return
+
+        visit(node)
+        pre_order_traversal(node.left)
+        pre_order_traversal(node.right)
+    ```
+  * Post-Order
+    ```python
+      def post_order_traversal(node):
+
+        if not node:
+          return
+
+        post_order_traversal(node.left)
+        post_order_traversal(node.right)
+        visit(node)
+    ```
+#### Binary Heaps (Min-Heaps and Max-Heaps)
+* **complete binary tree**
+* Min-Heaps
+  * Ascencding order
+* Max-Heaps
+  * Descending Order
+* Insert
+  * Takes O(log(n)) (bubble up)
+  * Insert at the **rightmost spot so as to maintain the complete binary tree**.
+  * **Fix the tree by swapping the new element with parents**, until finding the appropriate spot.
+* Extract minimum (maximum) elements
+  * Takes O(log(n)) (bubble down)
+  * Remove the mimimum element and swap it with the last element in the heap.
+  * Bubble down this element, swapping it with one of its children until the min-heap property is restored.
+
+#### AVL Tree
+* Balanced Tree
+#### Red-Black Tree
+* Balanced Tree
+#### B Tree
+* Balanced Tree
+#### Tries (Prefix Trees)
+
+### Graph
+#### Represent
+  * Adjacency List
+  * Adjacency Matrices
+#### Search
+  * Depth-First Search (DFS)
+  * Breadth-First Search (BFS)
 
 
 ## Algorithms
@@ -260,7 +341,7 @@ Table of Contents
   * Worst Case: descending sequence, [3, 2, 1]
 #### Selection Sort
   * Unstable: [5, 5*, 3]
-#### Bubble
+#### Bubble Sort
   * Best Case:
     * ascending sequence, [1, 2, 3]
     * (n-1) comparison in round1, and no swap happened.
