@@ -1,5 +1,10 @@
 Table of Contents
 - [Reference](#Reference)
+  - [Complexity](#Complexity)
+  - [Leetcode](#Leetcode)
+  - [Codeforces](#Codeforces)
+  - [Interviewbit](#Interviewbit)
+  - [Cracking the coding interview](#Cracking-the-coding-interview)
 - [Data Structures](#Data-Structures)
   - [General Tips](#General-Tips)
   - [Linked List](#Linked-List)
@@ -18,14 +23,14 @@ Table of Contents
     - [Implementation](#Implementation-1)
     - [Quick Sort](#Quick-Sort)
     - [Merge Sort](#Merge-Sort)
-  - [Insertion Sort](#Insertion-Sort)
-  - [Selection Sort](#Selection-Sort)
-  - [Bubble](#Bubble)
+    - [Insertion Sort](#Insertion-Sort)
+    - [Selection Sort](#Selection-Sort)
+    - [Bubble](#Bubble)
 
 ## Reference
-* Complexity
+### Complexity
   * [bigocheatsheet](http://bigocheatsheet.com/)
-* [Leetcode](https://leetcode.com/)
+### [Leetcode](https://leetcode.com/)
   * [Classification](https://cspiration.com/leetcodeClassification#103)
     * Array
     * String
@@ -45,9 +50,9 @@ Table of Contents
     * Union Find
     * Trie
     * Design
-* [Codeforces](https://codeforces.com/)
+### [Codeforces](https://codeforces.com/)
   * If you can achieve **1800 scores within 1 hour** that would be highly recommended for Google applicants.
-* [Interviewbit](https://www.interviewbit.com/courses/programming/)
+### [Interviewbit](https://www.interviewbit.com/courses/programming/)
   * Level1:
     * Time Complexity
   * Level2:
@@ -72,7 +77,7 @@ Table of Contents
     * Greedy Algorithm
   * Level8
     * Graph Data Structure & Algorithms
-* [Cracking the coding interview](http://www.crackingthecodinginterview.com/)
+### [Cracking the coding interview](http://www.crackingthecodinginterview.com/)
   * Data Structures
     * Arrays and Strings
     * Linked List
@@ -250,12 +255,12 @@ Table of Contents
   * Iterative:
     * ![flow](https://images.slideplayer.com/25/7830874/slides/slide_19.jpg)
 
-### Insertion Sort
+#### Insertion Sort
   * Best Case: ascending sequence, [1, 2, 3]
   * Worst Case: descending sequence, [3, 2, 1]
-### Selection Sort
+#### Selection Sort
   * Unstable: [5, 5*, 3]
-### Bubble
+#### Bubble
   * Best Case:
     * ascending sequence, [1, 2, 3]
     * (n-1) comparison in round1, and no swap happened.
