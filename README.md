@@ -159,6 +159,7 @@ Table of Contents
 * [Implementation](https://github.com/kissofjudase23/Library-python-common-modules/blob/master/common/ds/cache.py)
 * Time complexity
   * Use **Doubly linked List** as underlying data structure for O(1) node remove operation
+  * Use **hash table** for O(1) lookup
   * Doubly Linked List + Hash Table
 
     |            | Set  | Get  | Delete |
@@ -191,7 +192,7 @@ Table of Contents
   * Binary search Trees:
     * **All left descendents <= n < all right descendents**
   * Complete Binary Trees
-    * A binary tree in which every level of the tree if **fully filled, except the rightmost element on the last level.
+    * A binary tree in which every level of the tree is **fully filled**, except the rightmost element on the last level.
   * Full Binary Trees
     * A binary tree in which every node has **either zero of two children**.
   * Perfect Binary Trees
@@ -233,27 +234,45 @@ Table of Contents
         visit(node)
     ```
 #### Binary Heaps (Min-Heaps and Max-Heaps)
+* Ref:
+  * https://towardsdatascience.com/data-structure-heap-23d4c78a6962
 * **complete binary tree**
 * Min-Heaps
   * Ascencding order
 * Max-Heaps
   * Descending Order
 * Insert
-  * Takes O(log(n)) (bubble up)
+  * **bubble up** Operation which takes **O(log(n))**
   * Insert at the **rightmost spot so as to maintain the complete binary tree**.
   * **Fix the tree by swapping the new element with parents**, until finding the appropriate spot.
 * Extract minimum (maximum) elements
-  * Takes O(log(n)) (bubble down)
+  * **bubble down** which takes **O(log(n))**
   * Remove the mimimum element and swap it with the last element in the heap.
   * Bubble down this element, swapping it with one of its children until the min-heap property is restored.
 
+#### Tries (Prefix Trees)
+* Ref:
+  * https://leetcode.com/articles/implement-trie-prefix-tree/
+  * https://www.youtube.com/watch?v=AXjmTQ8LEoI
+  * https://www.youtube.com/watch?v=zIjfhVPRZCg
+
+* A trie is a variant of an n-ary tree in which characters are stored at each node. Each path down the tree may represent a word.
+* Used to store collections of words.
+  * If 2 words have a common prefix then they will have the same ancesctors in this trie.
+  * CAD and CARD
+  * ![image](./image/ds/tries.png)
+* Use cases:
+  * **Prefix** lookups.
+  * **Whole word** lookups.
+
 #### AVL Tree
 * Balanced Tree
+
 #### Red-Black Tree
 * Balanced Tree
+
 #### B Tree
 * Balanced Tree
-#### Tries (Prefix Trees)
 
 ### Graph
 #### Represent
