@@ -187,7 +187,6 @@ Table of Contents
     | Red-Black Tree     | O(long(n)) | O(long(n)) | O(long(n)) | O(long(n)) |
 
 #### Binary Tree
-* Unbalanced Tree
 * Types
   * Binary search Trees:
     * **All left descendents <= n < all right descendents**
@@ -259,11 +258,30 @@ Table of Contents
 * A trie is a variant of an n-ary tree in which characters are stored at each node. Each path down the tree may represent a word.
 * Used to store collections of words.
   * If 2 words have a common prefix then they will have the same ancesctors in this trie.
-  * CAD and CARD
+  * abcl
+  * abgd
   * ![image](./image/ds/tries.png)
+
+* [Implementation](https://github.com/kissofjudase23/Library-python-common-modules/blob/master/common/ds/trie.py)
+  ```python
+    class TrieNode(object):
+      def __init__(self):
+          self.children = dict()
+          self.end_of_word = False
+  ```
+
 * Use cases:
   * **Prefix** lookups.
   * **Whole word** lookups.
+  * Autocomplete
+  * Spell checker
+
+* FAQ
+  * Compare with Hash Table
+    * While a hash table can quickly loop up whether a string is a valid word, **it cannot tell us if a string is a prefix of any words**.
+    * A trie can check if a string is a valid prefix in O(k), where k is the length of the string. Although we often refer to hash table loopups as being O(1) time, this isn't entirely true. **A hash table must read though all the characters in the input**, which takes **O(k)** time in the case of a word lookup.
+
+
 
 #### AVL Tree
 * Balanced Tree
