@@ -2,10 +2,15 @@ Table of Contents
 - [Reference](#Reference)
   - [Complexity](#Complexity)
   - [Leetcode](#Leetcode)
+    - [Classification](#Classification)
   - [Codeforces](#Codeforces)
   - [Interviewbit](#Interviewbit)
   - [Cracking the coding interview](#Cracking-the-coding-interview)
+  - [FAQ](#FAQ)
 - [Data Structures](#Data-Structures)
+  - [Array](#Array)
+  - [String](#String)
+  - [Matrix](#Matrix)
   - [Linked List](#Linked-List)
   - [Stack](#Stack)
   - [Queue](#Queue)
@@ -16,10 +21,10 @@ Table of Contents
     - [Time complexity](#Time-complexity)
     - [Binary Tree](#Binary-Tree)
     - [Binary Heaps (Min-Heaps and Max-Heaps)](#Binary-Heaps-Min-Heaps-and-Max-Heaps)
+    - [Tries (Prefix Trees)](#Tries-Prefix-Trees)
     - [AVL Tree](#AVL-Tree)
     - [Red-Black Tree](#Red-Black-Tree)
     - [B Tree](#B-Tree)
-    - [Tries (Prefix Trees)](#Tries-Prefix-Trees)
   - [Graph](#Graph)
     - [Represent](#Represent)
     - [Search](#Search)
@@ -35,30 +40,37 @@ Table of Contents
     - [Insertion Sort](#Insertion-Sort)
     - [Selection Sort](#Selection-Sort)
     - [Bubble Sort](#Bubble-Sort)
+  - [Backtracking](#Backtracking)
+  - [Dynamic Programming](#Dynamic-Programming)
+  - [Greddy](#Greddy)
+  - [Topoligical Sort](#Topoligical-Sort)
+- [Others](#Others)
+  - [Bit Mamipulation](#Bit-Mamipulation)
+
 
 ## Reference
 ### Complexity
   * [bigocheatsheet](http://bigocheatsheet.com/)
 ### [Leetcode](https://leetcode.com/)
-  * [Classification](https://cspiration.com/leetcodeClassification#103)
-    * Array
-    * String
-    * Math
-    * Tree
-    * Backtracking
-    * Dynamic Programming
-    * LinkedList
-    * Binary Search
-    * Matrix
-    * DFS & BFS
-    * Stack & Priority Queue
-    * Bit Mamipulation
-    * Topological Sort
-    * Random
-    * Graph
-    * Union Find
-    * Trie
-    * Design
+#### [Classification](https://cspiration.com/leetcodeClassification#103)
+  * Array
+  * String
+  * Math
+  * Tree
+  * Backtracking
+  * Dynamic Programming
+  * LinkedList
+  * Binary Search
+  * Matrix
+  * DFS & BFS
+  * Stack & Priority Queue
+  * Bit Mamipulation
+  * Topological Sort
+  * Random
+  * Graph
+  * Union Find
+  * Trie
+  * Design
 ### [Codeforces](https://codeforces.com/)
   * If you can achieve **1800 scores within 1 hour** that would be highly recommended for Google applicants.
 ### [Interviewbit](https://www.interviewbit.com/courses/programming/)
@@ -98,10 +110,17 @@ Table of Contents
     * Object-Oriented Design
     * System Design
     * Sorting and Searching
+### FAQ
+  * [What is tail recursion?](https://stackoverflow.com/questions/33923/what-is-tail-recursion)
 
 
 ## [Data Structures](https://github.com/kissofjudase23/Library-python-common-modules/tree/master/common/ds)
 
+### Array
+
+### String
+
+### Matrix
 
 ### Linked List
 * Tips
@@ -165,6 +184,10 @@ Table of Contents
     |            | Set  | Get  | Delete |
     |------------|------|------|--------|
     | LRU Cache  | O(1) | O(1) | O(1)   |
+
+* LeetCode
+  * [146, LRU Cache](https://leetcode.com/problems/lru-cache/)
+    * medium
 
 ### Tree
 #### Time complexity
@@ -232,6 +255,21 @@ Table of Contents
         post_order_traversal(node.right)
         visit(node)
     ```
+* LeetCode
+  * Basic
+    * 144: Binary Tree Preorder Traversal
+      * medium (iterative)
+      * Use one stack
+    * 94: Binary Tree Inorder Traversal
+      * medium (iterative)
+      * Use one stack
+    * 145: Binary Tree Postorder Traversal
+      * hard (iterative)
+      * Use two stacks
+    * 102: Binary Tree Level Order Traversal
+      * medium (iterative)
+      * Use the length of the queue for each round
+
 #### Binary Heaps (Min-Heaps and Max-Heaps)
 * Ref:
   * https://towardsdatascience.com/data-structure-heap-23d4c78a6962
@@ -269,7 +307,6 @@ Table of Contents
           self.children = dict()
           self.end_of_word = False
   ```
-
 * Use cases:
   * **Prefix** lookups.
   * **Whole word** lookups.
@@ -281,6 +318,16 @@ Table of Contents
     * While a hash table can quickly loop up whether a string is a valid word, **it cannot tell us if a string is a prefix of any words**.
     * A trie can check if a string is a valid prefix in O(k), where k is the length of the string. Although we often refer to hash table loopups as being O(1) time, this isn't entirely true. **A hash table must read though all the characters in the input**, which takes **O(k)** time in the case of a word lookup.
 
+* LeetCode
+  * [208: Implement Trie (Prefix Tree)](https://leetcode.com/problems/implement-trie-prefix-tree/)
+    * medium
+    * serach word and search prefix
+  * [211: Add and Search Word - Data structure design](https://leetcode.com/problems/add-and-search-word-data-structure-design/)
+    * medium
+    * search word (support wildcard)
+      * For wildcard word, use stack for iterative methods
+  * 212: Word Search II
+    * hard
 
 
 #### AVL Tree
@@ -384,3 +431,16 @@ Table of Contents
     * (n-1) comparison in round1, and no swap happened.
   * Worst Case:
     * descending sequence, [3, 2, 1]
+
+### Backtracking
+
+
+### Dynamic Programming
+
+### Greddy
+
+
+### Topoligical Sort
+
+## Others
+### Bit Mamipulation
