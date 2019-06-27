@@ -137,6 +137,27 @@ Table of Contents
     | Singly Linked List with tail | O(n)   | O(1)       | O(1)      | O(n)        |
     | Doubly Linked List with tail | O(n)   | O(1)       | O(1)      | O(1)        |
 
+* LeetCode
+  * 206: Reverse Linked List (E)
+  * 92: Reverse Linked List II (M)
+    * Reverse a linked list from position m to n. Do it in **one-pass**.
+    * Consider to use **dummy node** as initialization of prev, besides, dummy.next will be the new head node
+  * 141: Linked List **Cycle** (E)
+    * The **"Runner"** Techinique
+  * 142: Linked List Cycle II (M)
+    * Given a linked list, return the node where the cycle begins. If there is no cycle, return null.
+    * The **"Runner"** Techinique
+  * 24: Swap Nodes in Pairs (M)
+    * Use 3 pointers, prev ,current and next
+    * Consider to use **dummy node** as initialization of prev, besides, dummy.next will be the new head node
+  * 328: Odd Even Linked List (M)
+    * Create **two linked lists** and **merge** them
+  * 237: Delete Node in a Linked List (E)
+    * ...-.-
+  * 19: Remove Nth Node From End of List (M)
+    * Consider to use **dummy node** as initialization of prev, besides, dummy.next will be the new head node
+
+
 ### Stack
 * [Implementation](https://github.com/kissofjudase23/Library-python-common-modules/blob/master/common/ds/stack.py)
 * Time complexity
@@ -186,8 +207,7 @@ Table of Contents
     | LRU Cache  | O(1) | O(1) | O(1)   |
 
 * LeetCode
-  * [146, LRU Cache](https://leetcode.com/problems/lru-cache/)
-    * medium
+  * [146, LRU Cache](https://leetcode.com/problems/lru-cache/) (M)
 
 ### Tree
 #### Time complexity
@@ -256,19 +276,14 @@ Table of Contents
         visit(node)
     ```
 * LeetCode
-  * Basic
-    * 144: Binary Tree Preorder Traversal
-      * medium (iterative)
-      * Use one stack
-    * 94: Binary Tree Inorder Traversal
-      * medium (iterative)
-      * Use one stack
-    * 145: Binary Tree Postorder Traversal
-      * hard (iterative)
-      * Use two stacks
-    * 102: Binary Tree Level Order Traversal
-      * medium (iterative)
-      * Use the length of the queue for each round
+  * 144: Binary Tree Preorder Traversal (M)
+    * Use **one stack** for iterative method
+  * 94: Binary Tree Inorder Traversal (M)
+    * Use **one stack** for iterative method
+  * 145: Binary Tree Postorder Traversal (H)
+    * Use **two stacks** for iterative method
+  * 102: Binary Tree Level Order Traversal (M)
+    * Use **the length of the queue** for each round
 
 #### Binary Heaps (Min-Heaps and Max-Heaps)
 * Ref:
@@ -325,7 +340,8 @@ Table of Contents
   * [211: Add and Search Word - Data structure design](https://leetcode.com/problems/add-and-search-word-data-structure-design/)
     * medium
     * search word (support wildcard)
-      * For wildcard word, use stack for iterative methods
+      * For iterative methods
+        * Use **stack** for traversal, and **use continue instead of return false when not found**.
   * 212: Word Search II
     * hard
 
