@@ -180,7 +180,7 @@ Table of Contents
         * Use the **merge sort** algorithm (iterative version)
           * Having to implement split and merge funcitons
           * Having to handle linking issue between two sorted lists
-    * *61: Rotate Lis
+    * *61: Rotate list
       * The rotate length k may be greater than the linked list length
 
   * 2: Add Two Numbers (M)
