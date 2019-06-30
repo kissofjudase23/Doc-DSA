@@ -138,24 +138,68 @@ Table of Contents
     | Doubly Linked List with tail | O(n)   | O(1)       | O(1)      | O(1)        |
 
 * LeetCode
-  * 206: Reverse Linked List (E)
-  * 92: Reverse Linked List II (M)
-    * Reverse a linked list from position m to n. Do it in **one-pass**.
-    * Consider to use **dummy node** as initialization of prev, besides, dummy.next will be the new head node
-  * 141: Linked List **Cycle** (E)
-    * The **"Runner"** Techinique
-  * 142: Linked List Cycle II (M)
-    * Given a linked list, return the node where the cycle begins. If there is no cycle, return null.
-    * The **"Runner"** Techinique
-  * 24: Swap Nodes in Pairs (M)
-    * Use 3 pointers, prev ,current and next
-    * Consider to use **dummy node** as initialization of prev, besides, dummy.next will be the new head node
-  * 328: Odd Even Linked List (M)
-    * Create **two linked lists** and **merge** them
-  * 237: Delete Node in a Linked List (E)
-    * ...-.-
-  * 19: Remove Nth Node From End of List (M)
-    * Consider to use **dummy node** as initialization of prev, besides, dummy.next will be the new head node
+  * Tips:
+    * The <font color='yellow'>**"Runner"**</font> Techinique
+    * The <font color='yellow'>**"dummy node"**</font> Techinique
+      * <font color='yellow'>**dummy.next**</font> will be the new head node
+    * <font color='yellow'>Use **reverse** instead of **stack**</font> for space complexity reduction.
+      * However, reverse will change the data of the input, use it carefully.
+
+ * Reverse
+    * 206: Reverse Linked List (E)
+    * <font color='red'>92: Reverse Linked List II (M)</font> *
+      * From **position m to n**. Do it in **one-pass**.
+       * Using **"dummy node"**.
+ * Circle
+    * Use the **"Runner"** Techinique
+    * 141: Linked List **Cycle** (E)
+    * <font color='red'>142: Linked List Cycle II (M)</font> *
+      * Given a linked list, return the node where the cycle begins. If there is no cycle, return null.
+  * Remove
+    * Use the **"Runner"** Techinique
+    * 237: Delete Node in a Linked List (E)
+    * 19: Remove Nth Node From End of List (M)
+      * Use the **"Runner"** Techinique
+    * 203:	Remove Linked List Elements (E)
+    * 83: Remove Duplicates from Sorted List (M)
+  * Reorder
+    * Using the **"dymmy node"** Techinique
+    * <font color='red'>24: Swap Nodes in Pair (M)</font> *
+      * Using the **"dymmy node"** Techinique
+      * Use 3 pointers, prev ,current and next
+    * 328: Odd Even Linked List (M)
+      * Create **two linked lists** and **merge** them
+    * <font color='red'>143: Reorder List (M)</font> *
+      * <font color='red'>Space O(1):</font> *
+        * Use the **"Runner"** Techinique
+        * Reverse the last half of the linked list
+        * Combine the first half and last half
+      * Space O(n):
+        * use a stack to store last half of the linked list
+    * <font color='red'>148: sort list</font> *
+      * For constance space complexity
+        * Use the **merge sort** algorithm (iterative version)
+          * Having to implement split and merge funcitons
+          * Having to handle linking issue between two
+    * <font color='red'>61: Rotate List</font> *
+      * The rotate length k may be greater than the linked list length
+
+  * 2: Add Two Numbers (M)
+    * When using one loop
+      * <font color='red'>don't forget the last carry</font>. *
+  * 160	Intersection of Two Linked Lists (E)
+    * Use difference of length
+  * 21: Merge Two Sorted Lists (E)
+    * The concept is like merge step in the merge sort.
+  * 234: Palindrome Linked List(M)
+    * <font color='red'>Space O(1):</font> *
+      * Reverse first half of the linked list, but it is not a pratical solution since we should not modity the constant function of the input.
+    * Space O(n):
+      * use a stack
+
+
+
+
 
 
 ### Stack
