@@ -7,9 +7,11 @@ Table of Contents
   - [Interviewbit](#Interviewbit)
   - [Cracking the coding interview](#Cracking-the-coding-interview)
   - [FAQ](#FAQ)
+- [Math](#Math)
+  - [Sum](#Sum)
 - [Data Structures](#Data-Structures)
-  - [Array](#Array)
   - [String](#String)
+  - [Array](#Array)
   - [Matrix](#Matrix)
   - [Linked List](#Linked-List)
   - [Stack](#Stack)
@@ -113,13 +115,67 @@ Table of Contents
 ### FAQ
   * [What is tail recursion?](https://stackoverflow.com/questions/33923/what-is-tail-recursion)
 
+## Math
+### Sum
+  * Two Sum (E)
+    * Use hash table
+  * 3Sum (M)
+  * 4Sum (M)
+
 
 ## [Data Structures](https://github.com/kissofjudase23/Library-python-common-modules/tree/master/common/ds)
 
-### Array
-
 ### String
 
+### Array
+  * LeetCode:
+    * 27: Remove elements (E)
+      * The concept is like partition step in quick sort
+    * 26: Remove Duplicates from Sorted Array (E)
+    * 80: Remove Duplicates from Sorted Array II (M)
+      * Need a counter
+    * 277: [Find the Celebrity](https://pandaforme.github.io/2016/12/09/Celebrity-Problem/) (M) *
+      1. Find a celebrity candidate who has does **max number** of unknown people
+      2. Check the people before the celebrity candidate
+         * The celebrity does not know them and they know the celebrity
+      3. Check the people before the celebrity candidate
+         * They know the celebrity
+
+          ````c++
+          bool knows(int a, int b);
+
+          class Solution {
+            public:
+                int findCelebrity(int n) {
+                    int res = 0;
+
+                    for (int i = 0; i < n; ++i) {
+                        if (!knows(res, i)) {
+                          continue;
+                        }
+                        res = i;
+                    }
+
+                    for (int i = 0; i < res; ++i) {
+                        if (!knows(res, i) && knows(i, res)) {
+                          continue
+                        }
+                        return -1;
+                    }
+
+                    for (int i = res + 1; i < n; ++i) {
+                        if (knows(i, res)){
+                          continue;
+                        }
+                        return -1;
+                    }
+
+                    return res;
+                }
+            };
+          ````
+    * 189: Rotate Array (E)
+      *
 ### Matrix
 
 ### Linked List
@@ -138,31 +194,32 @@ Table of Contents
     | Doubly Linked List with tail | O(n)   | O(1)       | O(1)      | O(1)        |
 
 * LeetCode
-  * Tips:
+  * Techinique: ***
     * The **"Runner"** Techinique
     * The **"dummy node"** Techinique
-      * **dummy.next** will be the new head node
+      * **dummy.next** will be the new head node, it very useful if the first node in the list will be modified.
     * Use **reverse** instead of **stack** for space complexity reduction.
       * However, reverse will change the data of the input, use it carefully.
-
  * Reverse
     * 206: Reverse Linked List (E)
     * 92: Reverse Linked List II (M) *
       * From **position m to n**. Do it in **one-pass**.
-       * Using **"dummy node"**.
+      * Using **"dummy node"**.
  * Circle
-    * Use the **"Runner"** Techinique
+    * Using the **"Runner"** Techinique
     * 141: Linked List **Cycle** (E)
     * 142: Linked List Cycle II (M) *
       * Given a linked list, return the node where the cycle begins. If there is no cycle, return null.
   * Remove
     * 237: Delete Node in a Linked List (E)
     * 19: Remove Nth Node From End of List (M)
-      * Use the **"Runner"** Techinique
-    * 203:	Remove Linked List Elements (E)
+      * Using the **"Runner"** Techinique
+      * Using **"dummy node"**
+    * 203: Remove Linked List Elements (E)
     * 83: Remove Duplicates from Sorted List (M)
-  * Reorder *
-    * Using the **"dymmy node"** Techinique
+    * 82:	Remove Duplicates from Sorted List II (M)
+      * Need should_delete flag and prev pointer
+  * Reorder
     * Swap Nodes in Pair (M) *
       * Using the **"dymmy node"** Techinique
       * Use 3 pointers, prev ,current and next
@@ -170,36 +227,39 @@ Table of Contents
       * Create **two linked lists** and **merge** them
     * 143: Reorder List (M) *
       * Space O(1): *
-        * Use the **"Runner"** Techinique
+        * Using the **"Runner"** Techinique
         * Reverse the last half of the linked list
         * Combine the first half and last half
       * Space O(n):
         * use a stack to store last half of the linked list
-    * 148: sort list *
+    * 148: Sort list *
       * For constance space complexity
         * Use the **merge sort** algorithm (iterative version)
-          * Having to implement split and merge funcitons
-          * Having to handle linking issue between two sorted lists
-    * *61: Rotate list
-      * The rotate length k may be greater than the linked list length
-
+          * Having to implement **split** and **merge** funcitons
+          * Having to handle **linking issue** between two sorted lists **after merging**
+    * 61: Rotate list
+      * The rotate length k may be greater than the length of linked list
   * 2: Add Two Numbers (M)
     * When using one loop
-      * don't forget the last carry. *
+      * don't forget the **last carry**. *
   * 160	Intersection of Two Linked Lists (E)
     * Use difference of length
   * 21: Merge Two Sorted Lists (E)
-    * The concept is like merge step in the merge sort.
+    * The concept is like merge step in the **merge sort**.
   * 234: Palindrome Linked List(M)
     * Space O(1) *:
       * Reverse first half of the linked list, but it is not a pratical solution since we should not modity the constant function of the input.
     * Space O(n):
       * use a stack
-
-
-
-
-
+  * 369	[Plus One Linked List](https://www.geeksforgeeks.org/add-1-number-represented-linked-list/)
+    1. Reverse given linked list. For example, 1-> 9-> 9 -> 9 is converted to 9-> 9 -> 9 ->1.
+    2. Start traversing linked list from leftmost node and add 1 to it. If there is a carry, move to the next node. Keep moving to the next node while there is a carry.
+    3. Reverse modified linked list and return head.
+  * TODO
+    * 25	Reverse Nodes in k-Group
+    * 86	Partition List
+    * 23	Merge k Sorted Lists
+    * 147	Insertion Sort List
 
 ### Stack
 * [Implementation](https://github.com/kissofjudase23/Library-python-common-modules/blob/master/common/ds/stack.py)
