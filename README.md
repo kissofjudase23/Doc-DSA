@@ -179,11 +179,6 @@ Table of Contents
 ### Matrix
 
 ### Linked List
-* Tips
-  * The **"Runner"** Techinique (or second pointer)
-    * The runner techinique means that you iterate through the linked list with two pointers simultaneously, with one head of the other.
-    * Loop issues, find the middle, etc.
-
 * [Implementation](https://github.com/kissofjudase23/Library-python-common-modules/blob/master/common/ds/linkedlist.py)
 * Time complexity
   * Average and Worst
@@ -194,43 +189,50 @@ Table of Contents
     | Doubly Linked List with tail | O(n)   | O(1)       | O(1)      | O(1)        |
 
 * LeetCode
-  * Techinique: ***
-    * The **"Runner"** Techinique
-    * The **"dummy node"** Techinique
+  * **Techinique**:
+    * The **"Runner"**
+      * The runner techinique means that you iterate through the linked list with **two pointers** simultaneously, with one head of the other.
+    * The **"dummy node"**
       * **dummy.next** will be the new head node, it very useful if the first node in the list will be modified.
     * Use **reverse** instead of **stack** for space complexity reduction.
       * However, reverse will change the data of the input, use it carefully.
- * Reverse
+
+  * **Reverse**
     * 206: Reverse Linked List (E)
     * 92: Reverse Linked List II (M) *
       * From **position m to n**. Do it in **one-pass**.
       * Using **"dummy node"**.
- * Circle
-    * Using the **"Runner"** Techinique
+
+  * **Circle**
     * 141: Linked List **Cycle** (E)
+      * Using the **"Runner"** Techinique
     * 142: Linked List Cycle II (M) *
       * Given a linked list, return the node where the cycle begins. If there is no cycle, return null.
-  * Remove
-    * 237: Delete Node in a Linked List (E)
-    * 19: Remove Nth Node From End of List (M)
       * Using the **"Runner"** Techinique
-      * Using **"dummy node"**
-    * 203: Remove Linked List Elements (E)
-    * 83: Remove Duplicates from Sorted List (M)
-    * 82:	Remove Duplicates from Sorted List II (M)
-      * Need should_delete flag and prev pointer
-  * Reorder
+
+   * **Remove**
+     * 237: Delete Node in a Linked List (E)
+     * 19: Remove Nth Node From End of List (M)
+       * Using the **"Runner"** and **"dummy node"** Techinique
+     * 203: Remove Linked List Elements (E)
+       * Using the **"dummy node"** Techinique
+     * 83: Remove Duplicates from Sorted List (M)
+     * 82:	Remove Duplicates from Sorted List II (M)
+       * Using the **"dummy node"** Techinique
+       * Need **should_delete** flag and prev pointer
+
+  * **Reorder**
     * Swap Nodes in Pair (M) *
       * Using the **"dymmy node"** Techinique
       * Use 3 pointers, prev ,current and next
     * 328: Odd Even Linked List (M)
       * Create **two linked lists** and **merge** them
     * 143: Reorder List (M) *
-      * Space O(1): *
-        * Using the **"Runner"** Techinique
-        * Reverse the last half of the linked list
-        * Combine the first half and last half
-      * Space O(n):
+      * Space Complexity O(1): *
+        1. Using the **"Runner"** Techinique to seprate first half and second half of the linked list
+        2. Reverse the second half of the linked list
+        3. Combine the first half and second half
+      * Space Complexity O(n):
         * use a stack to store last half of the linked list
     * 148: Sort list *
       * For constance space complexity
@@ -247,9 +249,10 @@ Table of Contents
   * 21: Merge Two Sorted Lists (E)
     * The concept is like merge step in the **merge sort**.
   * 234: Palindrome Linked List(M)
-    * Space O(1) *:
+    * Space Complexity O(1) *:
       * Reverse first half of the linked list, but it is not a pratical solution since we should not modity the constant function of the input.
-    * Space O(n):
+    * Space Complexity
+    * O(n):
       * use a stack
   * 369	[Plus One Linked List](https://www.geeksforgeeks.org/add-1-number-represented-linked-list/)
     1. Reverse given linked list. For example, 1-> 9-> 9 -> 9 is converted to 9-> 9 -> 9 ->1.
@@ -379,14 +382,17 @@ Table of Contents
         visit(node)
     ```
 * LeetCode
-  * 144: Binary Tree Preorder Traversal (M)
+  * 144: Binary Tree **Preorder** Traversal (M)
     * Use **one stack** for iterative method
-  * 94: Binary Tree Inorder Traversal (M)
+  * 94: Binary Tree **Inorder** Traversal (M)
     * Use **one stack** for iterative method
-  * 145: Binary Tree Postorder Traversal (H)
+  * 145: Binary Tree **Postorder** Traversal (H)
     * Use **two stacks** for iterative method
-  * 102: Binary Tree Level Order Traversal (M)
+  * 102: Binary **Tree Level** Order Traversal (M) *
     * Use **the length of the queue** for each round
+  * 173. Binary Search Tree Iterator (M) *
+    * Use the concept of inorder Traversal
+
 
 #### Binary Heaps (Min-Heaps and Max-Heaps)
 * Ref:
