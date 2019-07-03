@@ -140,6 +140,7 @@ Table of Contents
          * The celebrity does not know them and they know the celebrity
       3. Check the people before the celebrity candidate
          * They know the celebrity
+       * Solution
 
           ````c++
           bool knows(int a, int b);
@@ -175,7 +176,64 @@ Table of Contents
             };
           ````
     * 189: Rotate Array (E)
-      *
+      * Space Complexity **O(1)**, use three reverse operations
+    * 41: First missing positive (H) *
+      * [Time:O(n) and Space O(1)](https://leetcode.com/problems/first-missing-positive/discuss/17071/My-short-c%2B%2B-solution-O(1)-space-and-O(n)-time) *
+         1. Each number will be put in its right place at most once after first loop *
+         2. Traverse the array
+         * Solution
+
+            ```python
+            def firstMissingPositive(self, nums: List[int]) -> int:
+              length = len(nums)
+
+              for i in range(length):
+                  # We visit each number once, and each number will
+                  # be put in its right place at most once
+                  while 0 < nums[i] <= length and nums[nums[i]-1] != nums[i]:
+                      # the correct position of nums[i] is in
+                      # nums[nums[i]#-1]
+                      correct = nums[i]-1  # need this correct
+                      nums[i], nums[correct] = nums[correct] , nums[i]
+
+              for i in range(length):
+                  if nums[i] != i+1:
+                      return i+1
+
+              return length+1
+            ```
+      * Time O(n), Space O(n)
+        * The same concept, but use extra space to keep the sorted positve numbers
+        * Solution
+
+          ```python
+          def firstMissingPositive(self, nums: List[int]) -> int:
+
+          length = len(nums)
+          sorted_positive_nums = [None] * length
+
+          for i in range(length):
+              if 0 < nums[i] <= length:
+                  # the correct position of nums[i] is in nums[nums[i]-1]
+                  correct = nums[i]-1  # need this correct
+                  sorted_positive_nums[correct] = nums[i]
+
+          for i in range(length):
+              if sorted_positive_nums[i] != i+1:
+                  return i+1
+
+          return length+1
+          ```
+      * 299. Bulls and Cows (M)
+        * Time O(n), Space O(n) and one pass
+          * Use hash Table
+    * Interval
+    * Counter
+    * Sort
+      * 88. Merge Sorted Array
+        * You may assume that nums1 has enough space (size that is greater or equal to m + n) to hold additional elements from nums2.
+        * [Space Complexity O(1)](https://leetcode.com/problems/merge-sorted-array/discuss/29755/Python-easy-to-follow-solution.): *
+          * Fill the arrary **from the end to the start**
 ### Matrix
 
 ### Linked List
@@ -349,38 +407,111 @@ Table of Contents
 
 * Traversal
   * In-Order
-    ```python
-      def in_order_traversal(node):
+    * recursive
 
-        if not node:
-          return
+        ```python
+        def in_order_traversal(node):
 
-        in_order_traversal(node.left)
-        visit(node)
-        in_order_traversal(node.right)
-    ```
+          if not node:
+            return
+
+          in_order_traversal(node.left)
+          visit(node)
+          in_order_traversal(node.right)
+        ```
+    * iterative
+
+        ```python
+        def in_order_traversal(node):
+
+          current = node
+          stack = list()
+
+          while current or stack:
+
+            if current:
+              stack.append(current)
+              current = current.left
+
+            else:
+              node = stack.pop()
+              visit(node)
+              current = current.right
+
+        ```
   * Pre-Order
-    ```python
-      def pre_order_traversal(node):
+    * recursive
 
-        if not node:
-          return
+      ```python
+        def pre_order_traversal(node):
 
-        visit(node)
-        pre_order_traversal(node.left)
-        pre_order_traversal(node.right)
-    ```
+          if not node:
+            return
+
+          visit(node)
+          pre_order_traversal(node.left)
+          pre_order_traversal(node.right)
+      ```
+    * iterative
+
+      ```python
+        def pre_order_traversal(node):
+
+          if not node:
+            return
+
+          current = node
+          stack = list()
+
+          while current or stack:
+            if not current:
+              current = stack.pop()
+
+            visit(current)
+            if current.right
+              stack.append(current.right)
+            current = current.left
+
+
+      ```
   * Post-Order
-    ```python
-      def post_order_traversal(node):
+    * recursive
 
-        if not node:
-          return
+      ```python
+        def post_order_traversal(node):
 
-        post_order_traversal(node.left)
-        post_order_traversal(node.right)
-        visit(node)
-    ```
+          if not node:
+            return
+
+          post_order_traversal(node.left)
+          post_order_traversal(node.right)
+          visit(node)
+      ```
+
+    * iterative
+
+      ```python
+        def post_order_traversal(node):
+
+          if not node:
+            return
+
+          s1 , s2 = list(), list()
+          stack.append(node)
+
+          while s1:
+            node = s1.pop()
+            if node.left:
+              s1.append(node.left)
+
+            if node.right:
+              s1.append(node.right)
+
+          while s2:
+            node = s2.pop()
+            visit(node)
+      ```
+
 * LeetCode
   * 144: Binary Tree **Preorder** Traversal (M)
     * Use **one stack** for iterative method
