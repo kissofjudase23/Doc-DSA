@@ -6,7 +6,9 @@ Table of Contents
   - [Codeforces](#Codeforces)
   - [Interviewbit](#Interviewbit)
   - [Cracking the coding interview](#Cracking-the-coding-interview)
-  - [FAQ](#FAQ)
+- [FAQ](#FAQ)
+- [Walking through a Problem](#Walking-through-a-Problem)
+- [Optimize & Solve Technique](#Optimize--Solve-Technique)
 - [Math](#Math)
   - [Sum](#Sum)
 - [Data Structures](#Data-Structures)
@@ -55,24 +57,6 @@ Table of Contents
   * [bigocheatsheet](http://bigocheatsheet.com/)
 ### [Leetcode](https://leetcode.com/)
 #### [Classification](https://cspiration.com/leetcodeClassification#103)
-  * Array
-  * String
-  * Math
-  * Tree
-  * Backtracking
-  * Dynamic Programming
-  * LinkedList
-  * Binary Search
-  * Matrix
-  * DFS & BFS
-  * Stack & Priority Queue
-  * Bit Mamipulation
-  * Topological Sort
-  * Random
-  * Graph
-  * Union Find
-  * Trie
-  * Design
 ### [Codeforces](https://codeforces.com/)
   * If you can achieve **1800 scores within 1 hour** that would be highly recommended for Google applicants.
 ### [Interviewbit](https://www.interviewbit.com/courses/programming/)
@@ -101,19 +85,141 @@ Table of Contents
   * Level8
     * Graph Data Structure & Algorithms
 ### [Cracking the coding interview](http://www.crackingthecodinginterview.com/)
-  * Data Structures
-    * Arrays and Strings
-    * Linked List
-    * Stacks and Queues
-    * Tree and Graphs
-  * Concepts and Algorithms
-    * Bit Manipulation
-    * Math and Logic Puzzles
-    * Object-Oriented Design
-    * System Design
-    * Sorting and Searching
-### FAQ
+
+
+## FAQ
   * [What is tail recursion?](https://stackoverflow.com/questions/33923/what-is-tail-recursion)
+
+## [Walking through a Problem](http://www.crackingthecodinginterview.com/resources.html)
+  1. Listen Carefully
+     * For example:
+       * Given two arrays that are **sorted** ...
+  2. Draw an Example
+     * There'a an art to drawing an example though.
+     * Most examples are too small or are special cases.
+  3. State a Brute Force
+     * Even if it's obvious for you, it's not ncecessarily obvious for all candidates. You don't want your interviewer to think you're struggling to see even the wasy solution.
+  4. Optimize
+     * Look for any **unused information**.
+     * Use a fresh example
+     * Solve it "incorrectly"
+     * Make **time vs. space** tradeoff
+     * **Precompute** information
+       * Is there a way that you can reorganize the data (sortig, etc.)
+     * Use a **hash table**
+     * Thank about the best conceivable runtime
+  5. Walk Through
+     * Whiteboard coding is **slow**, you need to make sure that you get is as close to "perfect" in the beginning as possible.
+  6. Implement
+     * Modularized code
+     * Error checks
+       * A good compromise here is to add a todo and then just explain out loud what you'd like to test
+     * Use other classes/structs where appropriate
+     * Good variable names
+  7. Test
+     * Conceptual test
+       * Does the code do what you think it should do?
+     * Weird looking code
+       * Doulbe check that line of code that says x = length -2.
+     * Hot spots
+       * Like base cases in recursive code. Integer division. Null nodes in binary tree.
+     * Small test cases
+     * Special cases
+       * null of single element values.
+
+## [Optimize & Solve Technique](http://www.crackingthecodinginterview.com/resources.html)
+1. Look for **BUD**
+   * **B**ottlenecks *
+    * For example, suppose you have a two-step algorithm where you first sort the array and then you find elements with a particular property.
+      * The first step is O(nlong(n)) and the second step if O(n).
+      * Perhaps you could reduce the second step to O(1), but would it matter? Not too much as o(nlong(n)) is the bottleneck
+   * **U**nnecessary work
+   * **D**uplicated work
+2. Do it yourself
+3. **Simplify and Generalize** *
+   * First, we simplify or tweak some constraint, such as the data type. Then we solve this new simplified version of the problem. Finally, once we have an algorithm for the simplified problem, we try to adapt it for the more complex version.
+4. **Base case and Build** **
+   * Solve the problem first for a base case (e.g., n=1) and then try to build up from there. **When we get to more complex cases (often n=3 or n=4), we try to build those using the prior solution**.
+5. Data Structure Brainstorm **
+   * Try to run through a list of data structures and try to apply each one.
+6. **Best Conceivable Runtime** (BCR)
+   * The best conceivable runtie is, literally, the **best runtime** you could conceive of a solution to a problem. You can easily prove that there is no way you could beat the BCR.
+
+## Recursion and Dynamic Programming
+   * Recursive
+     * By definition, are built off solutions to subproblems.
+     * Bottom-Up Approach
+       * It often the most intuitive.
+     * Top-Down Approach
+       * The top-down solution can be more complex since it's less concrete.
+     * Half-and-Half Approach
+       * Like merge sort and binary search
+     * Recursive vs. Iteration Solutions
+       * Recursive algorithms can be very **space inefficient**. Each recursive call adds a new layer to the stack.
+       * For this reason, it's often better to implement a recurisve algorithm iteratively.
+
+## Dynamic Programming & Memorization
+  * Dynamic Programming is mostly just a matter of taking a **recursive algorithm** and **finding the overlapping subproblems**. You then cache those results for future recursive calls.
+  * Example:
+    * resursive: O(n^2), O(n)
+
+      ```python
+      def fib(i):
+        if i == 0 or i == 1:
+            return i
+
+        return fib(i-1) + fib(i-2)
+      ```
+    * Iterative: O(n), O(1)
+
+      ```python
+      def fib(i):
+         if i == 0 or i == 1:
+            return i
+
+          a, b = 0, 1
+          for _ in range(2, i+1):
+            a, b = b, a + b
+
+          return a
+
+      ```
+    * **Top-Down** Dynamic Programming (or Memoization): O(n), O(n)
+
+      ```python
+      def fib(i):
+
+        memo = dict()
+
+        def _fib(i):
+          if i == 0 or i == 1:
+            return i
+
+          if i not in memo:
+            memo[i] = _fib(i-1), _fib(i-2)
+
+          return memo[i]
+
+        return _fib(i)
+
+      ```
+    * **Bottom-Up** Dynamic Programming: O(n), O(n)
+
+      ```python
+      def fib(i):
+
+        if i == 0 or i == 1:
+            return i
+
+        memo = dict()
+        memo[0] = 0
+        memo[1] = 1
+
+        for f in range(2, i+1):
+          memo[f] = memo[f-1] + memo[f-2]
+
+        return memo[i]
+      ```
 
 ## Math
 ### Sum
@@ -135,12 +241,12 @@ Table of Contents
     * 80: Remove Duplicates from Sorted Array II (M)
       * Need a counter
     * 277: [Find the Celebrity](https://pandaforme.github.io/2016/12/09/Celebrity-Problem/) (M) *
-      1. Find a celebrity candidate who has does **max number** of unknown people
-      2. Check the people before the celebrity candidate
-         * The celebrity does not know them and they know the celebrity
-      3. Check the people before the celebrity candidate
-         * They know the celebrity
-       * Solution
+      1. Find a celebrity candidate having **max number** of unknown people
+      2. Check the people before the celebrity candidate:
+         * The celebrity does not know them but they know the celebrity.
+      3. Check the people after the celebrity candidate:
+         * They should know the celebrity
+       * Solution (C++)
 
           ````c++
           bool knows(int a, int b);
@@ -176,11 +282,14 @@ Table of Contents
             };
           ````
     * 189: Rotate Array (E)
-      * Space Complexity **O(1)**, use three reverse operations
+      * Space Complexity **O(1)**
+        * use **three reverse** operations
     * 41: First missing positive (H) *
+      * [concept](https://leetcode.com/problems/first-missing-positive/discuss/17073/Share-my-O(n)-time-O(1)-space-solution):
+        * The basic idea is **for any k positive numbers (duplicates allowed), the first missing positive number must be within [0,k]**. The reason is **like you put k balls into k+1 bins**, there must be a bin empty, the empty bin can be viewed as the missing number.
       * [Time:O(n) and Space O(1)](https://leetcode.com/problems/first-missing-positive/discuss/17071/My-short-c%2B%2B-solution-O(1)-space-and-O(n)-time) *
          1. Each number will be put in its right place at most once after first loop *
-         2. Traverse the array
+         2. Traverse the array to find the unmatch number
          * Solution
 
             ```python
@@ -224,11 +333,15 @@ Table of Contents
 
           return length+1
           ```
-      * 299. Bulls and Cows (M)
-        * Time O(n), Space O(n) and one pass
-          * Use hash Table
+    * 299. Bulls and Cows (M)
+      * Time O(n), Space O(n) and **one pass**
+        * Use hash Table
+    * 121. Best Time to Buy and Sell Stock (E)
+      * keep the minimum of buy price
     * Interval
     * Counter
+      * 53. Maximum Subarray (E)
+        * [**Kadane's Algorithm**](https://leetcode.com/problems/maximum-subarray/discuss/20211/Accepted-O(n)-solution-in-java) *
     * Sort
       * 88. Merge Sorted Array
         * You may assume that nums1 has enough space (size that is greater or equal to m + n) to hold additional elements from nums2.
@@ -252,14 +365,8 @@ Table of Contents
       * The runner techinique means that you iterate through the linked list with **two pointers** simultaneously, with one head of the other.
     * The **"dummy node"**
       * **dummy.next** will be the new head node, it very useful if the first node in the list will be modified.
-    * Use **reverse** instead of **stack** for space complexity reduction.
+    * **Use reverse instead of stack for space complexity** reduction.
       * However, reverse will change the data of the input, use it carefully.
-
-  * **Reverse**
-    * 206: Reverse Linked List (E)
-    * 92: Reverse Linked List II (M) *
-      * From **position m to n**. Do it in **one-pass**.
-      * Using **"dummy node"**.
 
   * **Circle**
     * 141: Linked List **Cycle** (E)
@@ -275,23 +382,27 @@ Table of Contents
      * 203: Remove Linked List Elements (E)
        * Using the **"dummy node"** Techinique
      * 83: Remove Duplicates from Sorted List (M)
-     * 82:	Remove Duplicates from Sorted List II (M)
+     * 82: Remove Duplicates from Sorted List II (M) *
        * Using the **"dummy node"** Techinique
        * Need **should_delete** flag and prev pointer
 
   * **Reorder**
+    *  206: Reverse Linked List (E)
+    * 92: Reverse Linked List II (M) *
+      * From **position m to n**. Do it in **one-pass**.
+      * Using **"dummy node"**.
     * Swap Nodes in Pair (M) *
-      * Using the **"dymmy node"** Techinique
-      * Use 3 pointers, prev ,current and next
+      * Using the **"dymmy node"** Techinique.
+      * Use 3 pointers, prev ,current and next.
     * 328: Odd Even Linked List (M)
-      * Create **two linked lists** and **merge** them
+      * Create **two linked lists** and **merge** them.
     * 143: Reorder List (M) *
       * Space Complexity O(1): *
-        1. Using the **"Runner"** Techinique to seprate first half and second half of the linked list
-        2. Reverse the second half of the linked list
-        3. Combine the first half and second half
+        1. Using the **"Runner"** Techinique to seprate first half and second half of the linked list.
+        2. **Reverse the second half** of the linked list.
+        3. Combine the first half and second half by iterative through out the second half linked list.
       * Space Complexity O(n):
-        * use a stack to store last half of the linked list
+        * Use a stack to store last half of the linked list.
     * 148: Sort list *
       * For constance space complexity
         * Use the **merge sort** algorithm (iterative version)
@@ -300,22 +411,21 @@ Table of Contents
     * 61: Rotate list
       * The rotate length k may be greater than the length of linked list
   * 2: Add Two Numbers (M)
-    * When using one loop
+    * Time complexity O(n) and one pass
       * don't forget the **last carry**. *
   * 160	Intersection of Two Linked Lists (E)
-    * Use difference of length
+    * Use **difference** of length
   * 21: Merge Two Sorted Lists (E)
     * The concept is like merge step in the **merge sort**.
   * 234: Palindrome Linked List(M)
     * Space Complexity O(1) *:
       * Reverse first half of the linked list, but it is not a pratical solution since we should not modity the constant function of the input.
-    * Space Complexity
-    * O(n):
-      * use a stack
+    * Space Complexity O(n):
+      * Use a stack
   * 369	[Plus One Linked List](https://www.geeksforgeeks.org/add-1-number-represented-linked-list/)
-    1. Reverse given linked list. For example, 1-> 9-> 9 -> 9 is converted to 9-> 9 -> 9 ->1.
+    1. **Reverse** given linked list. For example, 1-> 9-> 9 -> 9 is converted to 9-> 9 -> 9 ->1.
     2. Start traversing linked list from leftmost node and add 1 to it. If there is a carry, move to the next node. Keep moving to the next node while there is a carry.
-    3. Reverse modified linked list and return head.
+    3. **Reverse** modified linked list and return head.
   * TODO
     * 25	Reverse Nodes in k-Group
     * 86	Partition List
