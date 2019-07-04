@@ -9,6 +9,8 @@ Table of Contents
 - [FAQ](#FAQ)
 - [Walking through a Problem](#Walking-through-a-Problem)
 - [Optimize & Solve Technique](#Optimize--Solve-Technique)
+- [Recursion and Dynamic Programming](#Recursion-and-Dynamic-Programming)
+- [Dynamic Programming & Memorization](#Dynamic-Programming--Memorization)
 - [Math](#Math)
   - [Sum](#Sum)
 - [Data Structures](#Data-Structures)
