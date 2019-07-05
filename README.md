@@ -149,7 +149,7 @@ Table of Contents
 
 ## Recursion and Dynamic Programming
    * Recursive
-     * By definition, are built off solutions to subproblems.
+     * By definition, are built of solutions to subproblems.
      * Bottom-Up Approach
        * It often the most intuitive.
      * Top-Down Approach
@@ -237,59 +237,58 @@ Table of Contents
 
 ### Array
   * LeetCode:
-    * 27: Remove elements (E)
-      * The concept is like partition step in quick sort
-    * 26: Remove Duplicates from Sorted Array (E)
-    * 80: Remove Duplicates from Sorted Array II (M)
-      * Need a counter
+    * Remove
+      * 27: Remove elements (E)
+        * The concept is like partition step in quick sort
+      * 26: Remove Duplicates from Sorted Array (E)
+      * 80: Remove Duplicates from Sorted Array II (M)
+        * Need a counter
     * 277: [Find the Celebrity](https://pandaforme.github.io/2016/12/09/Celebrity-Problem/) (M) *
-      1. Find a celebrity candidate having **max number** of unknown people
-      2. Check the people before the celebrity candidate:
-         * The celebrity does not know them but they know the celebrity.
-      3. Check the people after the celebrity candidate:
-         * They should know the celebrity
-       * Solution (C++)
+      1. Find a **celebrity candidate** having **max number** of unknown people
+      2. Check if the candidate is the celebrity
+         * Check the people before the celebrity candidate:
+            * The celebrity does not know them but they know the celebrity.
+         * Check the people after the celebrity candidate:
+           * They should know the celebrity
+       * Solution
 
-          ````c++
-          bool knows(int a, int b);
+          ````python
+          # Return True if a knows b
 
-          class Solution {
-            public:
-                int findCelebrity(int n) {
-                    int res = 0;
+          def knows(a,  b)
 
-                    for (int i = 0; i < n; ++i) {
-                        if (!knows(res, i)) {
-                          continue;
-                        }
-                        res = i;
-                    }
+          def find_celebrity(n)
+              unknown = -1
+              celebrity = 0
 
-                    for (int i = 0; i < res; ++i) {
-                        if (!knows(res, i) && knows(i, res)) {
-                          continue
-                        }
-                        return -1;
-                    }
+              # find the celebrity candidate
+              for people in range(1, n):
+                if not knows(celebrity, people):
+                    continue
+                celebrity = people
 
-                    for (int i = res + 1; i < n; ++i) {
-                        if (knows(i, res)){
-                          continue;
-                        }
-                        return -1;
-                    }
+              # check people before the celebrity candidate
+              for people in range(0, celebrity):
+                if not knows(celebrity, people) and knows(people, celebrity):
+                  continue
+                return unknown
 
-                    return res;
-                }
-            };
+              # check people before the celebrity candidate
+              for people in range(celebrity+1, n):
+                if knows(people, celebrity):
+                  continue
+                return -1
+
+              return celebrity;
           ````
     * 189: Rotate Array (E)
       * Space Complexity **O(1)**
         * use **three reverse** operations
     * 41: First missing positive (H) *
       * [concept](https://leetcode.com/problems/first-missing-positive/discuss/17073/Share-my-O(n)-time-O(1)-space-solution):
-        * The basic idea is **for any k positive numbers (duplicates allowed), the first missing positive number must be within [0,k]**. The reason is **like you put k balls into k+1 bins**, there must be a bin empty, the empty bin can be viewed as the missing number.
-      * [Time:O(n) and Space O(1)](https://leetcode.com/problems/first-missing-positive/discuss/17071/My-short-c%2B%2B-solution-O(1)-space-and-O(n)-time) *
+        * The idea is **for any k positive numbers (duplicates allowed), the first missing positive number must be within [0,k]**.
+          * The reason is **like you put k balls into k+1 bins**, there must be a bin empty, the empty bin can be viewed as the missing number**.
+      * [Time:O(n), Space:O(1)](https://leetcode.com/problems/first-missing-positive/discuss/17071/My-short-c%2B%2B-solution-O(1)-space-and-O(n)-time) *
          1. Each number will be put in its right place at most once after first loop *
          2. Traverse the array to find the unmatch number
          * Solution
@@ -335,17 +334,32 @@ Table of Contents
 
           return length+1
           ```
-    * 299. Bulls and Cows (M)
+    * 299: Bulls and Cows (M)
       * Time O(n), Space O(n) and **one pass**
+        * Use **hash Table**
+    * 134: Gas Station (M) **
+        * **if sum of gas is more than sum of cost, then there must be a solution**.
+           And the question guaranteed that the solution is unique
+           (The first one I found is the right one).
+        * The tank should never be negative, so restart whenever there is a negative number.
+    * Best Time to Buy and Sell Stock
+      * [general solution](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/discuss/108870/Most-consistent-ways-of-dealing-with-the-series-of-stock-problems)
+      * 121: Best Time to Buy and Sell Stock (E)
+        * keep the minimum of buy price
+      * 122: Best Time to Buy and Sell Stock II (E)
+        * [**Peak Valley** Approach](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/solution/)
+    * Duplicate
+      * 217: Contains Duplicate (E)
         * Use hash Table
-    * 121. Best Time to Buy and Sell Stock (E)
-      * keep the minimum of buy price
+      * 219: Contains Duplicate II (E)
+        * Use hash Table
+    * Shortest Word Distance
     * Interval
     * Counter
-      * 53. Maximum Subarray (E)
+      * 53: Maximum Subarray (E)
         * [**Kadane's Algorithm**](https://leetcode.com/problems/maximum-subarray/discuss/20211/Accepted-O(n)-solution-in-java) *
     * Sort
-      * 88. Merge Sorted Array
+      * 88: Merge Sorted Array
         * You may assume that nums1 has enough space (size that is greater or equal to m + n) to hold additional elements from nums2.
         * [Space Complexity O(1)](https://leetcode.com/problems/merge-sorted-array/discuss/29755/Python-easy-to-follow-solution.): *
           * Fill the arrary **from the end to the start**
@@ -366,7 +380,7 @@ Table of Contents
     * The **"Runner"**
       * The runner techinique means that you iterate through the linked list with **two pointers** simultaneously, with one head of the other.
     * The **"dummy node"**
-      * **dummy.next** will be the new head node, it very useful if the first node in the list will be modified.
+      * **dummy.next** alwasy point to the head node, it very useful if the head node in the list will be changed.
     * **Use reverse instead of stack for space complexity** reduction.
       * However, reverse will change the data of the input, use it carefully.
 
@@ -389,29 +403,31 @@ Table of Contents
        * Need **should_delete** flag and prev pointer
 
   * **Reorder**
-    *  206: Reverse Linked List (E)
+    * 206: Reverse Linked List (E)
     * 92: Reverse Linked List II (M) *
-      * From **position m to n**. Do it in **one-pass**.
       * Using **"dummy node"**.
+      * From **position m to n**. Do it in **one-pass**.
     * Swap Nodes in Pair (M) *
       * Using the **"dymmy node"** Techinique.
       * Use 3 pointers, prev ,current and next.
     * 328: Odd Even Linked List (M)
       * Create **two linked lists** and **merge** them.
     * 143: Reorder List (M) *
-      * Space Complexity O(1): *
+      * Space O(1): *
         1. Using the **"Runner"** Techinique to seprate first half and second half of the linked list.
         2. **Reverse the second half** of the linked list.
         3. Combine the first half and second half by iterative through out the second half linked list.
-      * Space Complexity O(n):
+      * Space: O(n):
         * Use a stack to store last half of the linked list.
-    * 148: Sort list *
-      * For constance space complexity
-        * Use the **merge sort** algorithm (iterative version)
-          * Having to implement **split** and **merge** funcitons
-          * Having to handle **linking issue** between two sorted lists **after merging**
+    * 148: Sort list **
+      * Time: O(nlog(n), Space:O(1)
+        * Use the **merge sort** (iterative version)
+          * **Split** the linked with window size 1,2,4,8, etc.
+          * **Merge** the splitted linked lists.
+            * Having to handle **linking issue** between two sorted lists **after merging**.
     * 61: Rotate list
       * The rotate length k may be greater than the length of linked list
+
   * 2: Add Two Numbers (M)
     * Time complexity O(n) and one pass
       * don't forget the **last carry**. *
