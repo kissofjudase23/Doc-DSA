@@ -234,9 +234,14 @@ Table of Contents
 ## [Data Structures](https://github.com/kissofjudase23/Library-python-common-modules/tree/master/common/ds)
 
 ### String
-
+  * **Techinique**
+  * LeetCode:
+    * 161. One Edit Distance (M)
+      * Time O(1), Space (1):
+        * Use short and long string pointers
 ### Array
   * LeetCode:
+    *  **Techinique**
     * Remove
       * 27: Remove elements (E)
         * The concept is like partition step in quick sort
@@ -254,32 +259,31 @@ Table of Contents
 
           ````python
           # Return True if a knows b
-
           def knows(a,  b)
 
-          def find_celebrity(n)
+          def findCelebrity(self, n):
+              """
+              :type n: int
+              :rtype: int
+              """
               unknown = -1
               celebrity = 0
+              for p in range(1, n):
+                  if not knows(celebrity, p):
+                      continue
+                  celebrity = p
 
-              # find the celebrity candidate
-              for people in range(1, n):
-                if not knows(celebrity, people):
-                    continue
-                celebrity = people
+              for p in range(celebrity):
+                  if knows(p, celebrity) and not knows(celebrity, p):
+                      continue
+                  return unknown
 
-              # check people before the celebrity candidate
-              for people in range(0, celebrity):
-                if not knows(celebrity, people) and knows(people, celebrity):
-                  continue
-                return unknown
+              for p in range(celebrity+1, n):
+                  if knows(p, celebrity):
+                      continue
+                  return unknown
 
-              # check people before the celebrity candidate
-              for people in range(celebrity+1, n):
-                if knows(people, celebrity):
-                  continue
-                return -1
-
-              return celebrity;
+              return celebrity
           ````
     * 189: Rotate Array (E)
       * Space Complexity **O(1)**
@@ -341,20 +345,98 @@ Table of Contents
         * **if sum of gas is more than sum of cost, then there must be a solution**.
            And the question guaranteed that the solution is unique
            (The first one I found is the right one).
-        * The tank should never be negative, so restart whenever there is a negative number.
+        * **The tank should never be negative**, so restart whenever there is a negative number.
+
+          ```python
+          for i in range(len(gas)):
+              sum_gas += gas[i]
+              sum_cost += cost[i]
+
+              tank += gas[i] - cost[i]
+
+              # try another start
+              if tank < 0:
+                  start = i+1
+                  tank = 0
+          ```
     * Best Time to Buy and Sell Stock
-      * [general solution](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/discuss/108870/Most-consistent-ways-of-dealing-with-the-series-of-stock-problems)
+      * [General solution](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/discuss/108870/Most-consistent-ways-of-dealing-with-the-series-of-stock-problems)
       * 121: Best Time to Buy and Sell Stock (E)
-        * keep the minimum of buy price
+        * 1 transaction only.
+        * Keep the minimum of buy price and update best sell prcie.
       * 122: Best Time to Buy and Sell Stock II (E)
+        * Multiple transcation allowed.
         * [**Peak Valley** Approach](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/solution/)
+      * 714. [Best Time to Buy and Sell Stock with Transaction Fee](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/solution/) (M)
+        * Cash(i):
+          * The cash in hand, if you are **not holding the stock** at the end of day(i):
+            * case1: cash[i] = cash[i-1]
+            * case2: cash[i] = hold[i-1] + prcie[i] - fee
+            * max(case1, case2) = max(cash[i-1], hold[i-1] + prcie[i] - fee)
+        * Hold(i):
+          * The cash in hand, if you are **holding the stock** at the end of day(i):
+            * case1: hold[i] = hold[i-1]
+            * case2: hold[i] = **hold[i-1] + price[i] - fee** - price[i]
+            * case3: hold[i] = **cash[i-1]** - price[i]
+            * max[case1, case2, case3] = max[hold[i-1], cash[i]-price[i]]
+              * case2 and case3 can be reduced to cash[i] - price[i]
     * Duplicate
       * 217: Contains Duplicate (E)
         * Use hash Table
       * 219: Contains Duplicate II (E)
         * Use hash Table
-    * Shortest Word Distance
+    * Shortest Word Distance **
+      *  243. Shortest Word Distance (E) *
+         *  Keep the shortest distance in each round.
+      * 245. Shortest Word Distance III (M) *
+        * Allow **duplicated** words
+        * Keep the shortest distance in each round.
+
+            ```python
+            for index, word in enumerate(words):
+
+              if word == word1:
+                  if same:
+                      index1, index2 = index2, index
+                  else:
+                      index1 = index
+
+              elif word == word2:
+                  index2 = index
+
+              if index1 != -1 and index2 != -1:
+                  dist = min(dist, abs(index1-index2))
+            ```
+
+      *  244. Shortest Word Distance II (M) **
+         * Init once and search multiple time.
+         * Using **Preprocessed Sorted Indices** and two pointers to traverse
+           * Space: O(n)
+             * For or the dictionary that we prepare in the constructor.
+               * The keys represent all the unique words in the input and the values represent all of the indices from 0 ... N0...N.
+           * Time:
+             * Init O(n)
+             * Shortest O(max(K,L))
+               * where K and L represent the number of occurrences of the two words.
+           * code snippet for shortest operation
+
+              ```python
+              i = j = 0
+              while i < len(list1) and j < len(list2):
+
+                index1, index2 = list1[i], list2[j]
+
+                if index1 < index2:
+                    dist = min(dist, index2-index1)
+                    i +=1
+
+                else: # index2 < index1
+                    dist = min(dist, index1-index2)
+                    j += 1
+              ```
     * Interval
+      * 252. Meeting Rooms (E)
+      * 253. Meeting Rooms II (M)
     * Counter
       * 53: Maximum Subarray (E)
         * [**Kadane's Algorithm**](https://leetcode.com/problems/maximum-subarray/discuss/20211/Accepted-O(n)-solution-in-java) *
@@ -458,6 +540,11 @@ Table of Contents
       |       | Push | Pop  | Search|
       |-------|------|------|-------|
       | Stack | O(1) | O(1) | O(n)  |
+
+* LeetCode
+  * 155. Min Stack (E)
+    * Space (n)
+      * Use extra space to keep minimum
 
 ### Queue
 * [Implementation](https://github.com/kissofjudase23/Library-python-common-modules/blob/master/common/ds/queue.py)
