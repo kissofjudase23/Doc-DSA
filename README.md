@@ -159,9 +159,9 @@ Table of Contents
 ## [Data Structures](https://github.com/kissofjudase23/Library-python-common-modules/tree/master/common/ds)
 
 ### String
-  * **Techinique**
   * LeetCode:
-    * 161. One Edit Distance (M)
+    * **Techinique**
+    * 161: One Edit Distance (M)
       * Time O(1), Space (1):
         * Use short and long string pointers
 ### Array
@@ -284,6 +284,23 @@ Table of Contents
                   start = i+1
                   tank = 0
           ```
+    * H-Index
+      * 274. H-Index
+        * Time O(n), Space O(n)
+          * Concept
+            * **The max index in the array would be len(array)**, that is we can restrict the number of the buckets.
+          * Use Hash table to accumulate the cnt of citations
+
+            ```python
+            for index, val in enumerate(citations):
+              if val >= max_cita:
+                  d[max_cita] += 1
+              else:
+                  d[val] += 1
+            ```
+        * Time(nlog(n)), Space(1)
+          * sort the citations array in descending order. (draw it)
+          * After sorting, if citations [i] citations[i]>i, then papers 0 to i all have at least i+1 citations.
     * Best Time to Buy and Sell Stock
       * [General solution](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/discuss/108870/Most-consistent-ways-of-dealing-with-the-series-of-stock-problems)
       * 121: Best Time to Buy and Sell Stock (E)
@@ -292,6 +309,29 @@ Table of Contents
       * 122: Best Time to Buy and Sell Stock II (E)
         * Multiple transcation allowed.
         * [**Peak Valley** Approach](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/solution/)
+          * solution1
+             ```python
+             valley = peak = prices[0];
+             maxprofit = 0
+             while i < len(prices) - 1:
+                # find the valley
+                while i < len(prices) - 1 and price[i] >= prices[i+1]:
+                    i += 1
+                valley = prices[i]
+
+                while i < len(prices) - 1 and price[i] <= prices[i+1]:
+                    i += 1
+                peak = prices[i]
+
+                maxprofit += (peak - valley);
+             ```
+          * solution2
+            ```python
+            maxprofit = 0
+            for i in range(1, len(prices)):
+                if prices[i] > price[i-1]:
+                    maxprofit += prices[i] - price[i-1]
+            ```
       * 714. [Best Time to Buy and Sell Stock with Transaction Fee](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/solution/) (M)
         * Cash(i):
           * The cash in hand, if you are **not holding the stock** at the end of day(i):
