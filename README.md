@@ -9,8 +9,6 @@ Table of Contents
 - [FAQ](#FAQ)
 - [Walking through a Problem](#Walking-through-a-Problem)
 - [Optimize & Solve Technique](#Optimize--Solve-Technique)
-- [Recursion and Dynamic Programming](#Recursion-and-Dynamic-Programming)
-- [Dynamic Programming & Memorization](#Dynamic-Programming--Memorization)
 - [Math](#Math)
   - [Sum](#Sum)
 - [Data Structures](#Data-Structures)
@@ -48,6 +46,8 @@ Table of Contents
     - [Bubble Sort](#Bubble-Sort)
   - [Backtracking](#Backtracking)
   - [Dynamic Programming](#Dynamic-Programming)
+    - [Recursion and Dynamic Programming](#Recursion-and-Dynamic-Programming)
+    - [Dynamic Programming & Memorization](#Dynamic-Programming--Memorization)
   - [Greddy](#Greddy)
   - [Topoligical Sort](#Topoligical-Sort)
 - [Others](#Others)
@@ -147,83 +147,8 @@ Table of Contents
 6. **Best Conceivable Runtime** (BCR)
    * The best conceivable runtie is, literally, the **best runtime** you could conceive of a solution to a problem. You can easily prove that there is no way you could beat the BCR.
 
-## Recursion and Dynamic Programming
-   * Recursive
-     * By definition, are built of solutions to subproblems.
-     * Bottom-Up Approach
-       * It often the most intuitive.
-     * Top-Down Approach
-       * The top-down solution can be more complex since it's less concrete.
-     * Half-and-Half Approach
-       * Like merge sort and binary search
-     * Recursive vs. Iteration Solutions
-       * Recursive algorithms can be very **space inefficient**. Each recursive call adds a new layer to the stack.
-       * For this reason, it's often better to implement a recurisve algorithm iteratively.
-
-## Dynamic Programming & Memorization
-  * Dynamic Programming is mostly just a matter of taking a **recursive algorithm** and **finding the overlapping subproblems**. You then cache those results for future recursive calls.
-  * Example:
-    * resursive: O(n^2), O(n)
-
-      ```python
-      def fib(i):
-        if i == 0 or i == 1:
-            return i
-
-        return fib(i-1) + fib(i-2)
-      ```
-    * Iterative: O(n), O(1)
-
-      ```python
-      def fib(i):
-         if i == 0 or i == 1:
-            return i
-
-          a, b = 0, 1
-          for _ in range(2, i+1):
-            a, b = b, a + b
-
-          return a
-
-      ```
-    * **Top-Down** Dynamic Programming (or Memoization): O(n), O(n)
-
-      ```python
-      def fib(i):
-
-        memo = dict()
-
-        def _fib(i):
-          if i == 0 or i == 1:
-            return i
-
-          if i not in memo:
-            memo[i] = _fib(i-1), _fib(i-2)
-
-          return memo[i]
-
-        return _fib(i)
-
-      ```
-    * **Bottom-Up** Dynamic Programming: O(n), O(n)
-
-      ```python
-      def fib(i):
-
-        if i == 0 or i == 1:
-            return i
-
-        memo = dict()
-        memo[0] = 0
-        memo[1] = 1
-
-        for f in range(2, i+1):
-          memo[f] = memo[f-1] + memo[f-2]
-
-        return memo[i]
-      ```
-
 ## Math
+
 ### Sum
   * Two Sum (E)
     * Use hash table
@@ -907,6 +832,81 @@ Table of Contents
 
 
 ### Dynamic Programming
+#### Recursion and Dynamic Programming
+   * Recursive
+     * By definition, are built of solutions to subproblems.
+     * **Bottom-Up** Approach
+       * It often the most intuitive.
+     * **Top-Down** Approach
+       * The top-down solution can be more complex since it's less concrete.
+     * **Half-and-Half** Approach
+       * Like merge sort and binary search
+     * Recursive vs. Iteration Solutions
+       * Recursive algorithms can be very **space inefficient**. Each recursive call adds a new layer to the stack.
+       * For this reason, it's often better to implement a recurisve algorithm iteratively.
+
+#### Dynamic Programming & Memorization
+  * Dynamic Programming is mostly just a matter of taking a **recursive algorithm** and **finding the overlapping subproblems**. You then cache those results for future recursive calls.
+  * Example:
+    * resursive: O(n^2), O(n)
+
+      ```python
+      def fib(i):
+        if i == 0 or i == 1:
+            return i
+
+        return fib(i-1) + fib(i-2)
+      ```
+    * Iterative: O(n), O(1)
+
+      ```python
+      def fib(i):
+         if i == 0 or i == 1:
+            return i
+
+          a, b = 0, 1
+          for _ in range(2, i+1):
+            a, b = b, a + b
+
+          return a
+
+      ```
+    * **Top-Down** Dynamic Programming (or Memoization): O(n), O(n)
+
+      ```python
+      def fib(i):
+
+        memo = dict()
+
+        def _fib(i):
+          if i == 0 or i == 1:
+            return i
+
+          if i not in memo:
+            memo[i] = _fib(i-1), _fib(i-2)
+
+          return memo[i]
+
+        return _fib(i)
+
+      ```
+    * **Bottom-Up** Dynamic Programming: O(n), O(n)
+
+      ```python
+      def fib(i):
+
+        if i == 0 or i == 1:
+            return i
+
+        memo = dict()
+        memo[0] = 0
+        memo[1] = 1
+
+        for f in range(2, i+1):
+          memo[f] = memo[f-1] + memo[f-2]
+
+        return memo[i]
+      ```
 
 ### Greddy
 
