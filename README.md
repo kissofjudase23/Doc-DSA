@@ -313,22 +313,22 @@ Table of Contents
                   memo = [Status.UNKNOWN] * length
                   memo[length-1] = Status.GOOD
 
-                  def can_jump_from_position(nums: List[int], position: int):
+                  def can_jump_from_position(nums: List[int], start: int):
 
-                      if memo[position] is not Status.UNKNOWN:
-                          return True if memo[position] is Status.GOOD else False
+                      if memo[start] is not Status.UNKNOWN:
+                          return True if memo[start] is Status.GOOD else False
 
-                      max_jump = min(length-1, position + nums[position])
+                      max_jump = min(length-1, start + nums[start])
 
-                      for jump in range(position+1, max_jump+1):
-                          if can_jump_from_position(nums, jump):
+                      for jump in range(start+1, max_jump+1):
+                          if can_jump_from_position(nums, start=jump):
                               memo[jump] = Status.GOOD
                               return True
 
                       memo[jump] = Status.BAD
                       return False
 
-                  return can_jump_from_position(nums, 0)
+                  return can_jump_from_position(nums, start=0)
               ```
           * Buttom Up Approach
             * Time: O(n^2), Space: O(n)
@@ -367,8 +367,24 @@ Table of Contents
 
                 return last_good_index == 0
             ```
+      * 45: Jump Game II (H) *
+        * [Greedy](https://leetcode.com/problems/jump-game-ii/discuss/18014/Concise-O(n)-one-loop-JAVA-solution-based-on-Greedy)
+          *  cur == cur_end means you visited all the items on the current level
+          *  Incrementing jumps+=1 is like incrementing the level you are on.
+          *  And cur_end = cur_farthest is like getting the queue size (level size) for the next level you are traversing.
+            ```python
+            def jump(self, nums: List[int]) -> int:
+              cur_farthest = jump = cur_end = 0
 
+              for cur in range(0, len(nums)-1):
+                  cur_farthest = max(cur_farthest, cur+nums[cur])
 
+                  if cur == cur_end:
+                      jump +=1
+                      cur_end = cur_farthest
+
+              return jump
+            ```
     * H-Index
       * 274. H-Index (M)
         * Time O(n), Space O(n)
@@ -383,7 +399,7 @@ Table of Contents
               else:
                   d[val] += 1
             ```
-        * Time(nlog(n)), Space(1)
+        * Time: O(nlog(n)), Space: O(1)
           * Sort the citations array in descending order(draw it).
           * After sorting, if citations [i] citations[i]>i, then papers 0 to i all have at least i+1 citations.
     * Best Time to Buy and Sell Stock
@@ -417,7 +433,7 @@ Table of Contents
                 if prices[i] > price[i-1]:
                     maxprofit += prices[i] - price[i-1]
             ```
-      * 714. [Best Time to Buy and Sell Stock with Transaction Fee](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/solution/) (M)
+      * 714: [Best Time to Buy and Sell Stock with Transaction Fee](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/solution/) (M)
         * Cash(i):
           * The cash in hand, if you are **not holding the stock** at the end of day(i):
             * case1: cash[i] = cash[i-1]
@@ -430,6 +446,16 @@ Table of Contents
             * case3: hold[i] = **cash[i-1]** - price[i]
             * max[case1, case2, case3] = max[hold[i-1], cash[i]-price[i]]
               * case2 and case3 can be reduced to cash[i] - price[i]
+
+            ```python
+            def maxProfit(self, prices: List[int], fee: int) -> int:
+              cash = 0
+              hold = -prices[0]
+              for i in range(1, len(prices)):
+                  cash = max(cash, hold+prices[i]-fee)
+                  hold = max(hold, cash-prices[i])
+              return cash
+            ```
     * Duplicate
       * 217: Contains Duplicate (E)
         * Use hash Table
