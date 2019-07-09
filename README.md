@@ -97,7 +97,7 @@ Table of Contents
      * For example:
        * Given two arrays that are **sorted** ...
   2. Draw an Example
-     * There'a an art to drawing an example though.
+     * **There'a an art to drawing an example though**.
      * Most examples are too small or are special cases.
   3. State a Brute Force
      * Even if it's obvious for you, it's not ncecessarily obvious for all candidates. You don't want your interviewer to think you're struggling to see even the wasy solution.
@@ -160,13 +160,15 @@ Table of Contents
 
 ### String
   * LeetCode:
-    * **Techinique**
+    * **Techiniques**
+    * 344: Reverse String (E)
     * 161: One Edit Distance (M)
       * Time O(1), Space (1):
-        * Use short and long string pointers
+        * Merge the insert and remove cases
+          * Use short and long string pointers
 ### Array
   * LeetCode:
-    *  **Techinique**
+    *  **Techiniques**
     * Remove
       * 27: Remove elements (E)
         * The concept is like partition step in quick sort
@@ -273,6 +275,7 @@ Table of Contents
         * **The tank should never be negative**, so restart whenever there is a negative number.
 
           ```python
+          not_found = -1
           for i in range(len(gas)):
               sum_gas += gas[i]
               sum_cost += cost[i]
@@ -283,9 +286,91 @@ Table of Contents
               if tank < 0:
                   start = i+1
                   tank = 0
+
+          return start if sum_gas >= sum_cost else not_found
           ```
+    * 11: Container With Most Water (M)
+      * Time O(n)
+        * [Use two pointer approach](https://leetcode.com/problems/container-with-most-water/) *
+        * One pointer start at index 0, another start at index length-1.
+    * Jump Game:
+      * 55: Jump Game (M)
+        * [Solution](https://leetcode.com/problems/jump-game/solution/)
+        * Dynamic Programming
+          * We call a position in the array a "good index" if starting at that position, we can reach the last index. Otherwise, that index is called a "bad index".
+             ```python
+             class Status(object):
+                UNKNOWN = 1
+                GOOD = 2
+                BAD = 3
+             ```
+          * Top Down Approach
+            * Time: O(n^2), Space: O(n)
+              ```python
+                  def canJump(self, nums: List[int]) -> bool:
+
+                  length = len(nums)
+                  memo = [Status.UNKNOWN] * length
+                  memo[length-1] = Status.GOOD
+
+                  def can_jump_from_position(nums: List[int], position: int):
+
+                      if memo[position] is not Status.UNKNOWN:
+                          return True if memo[position] is Status.GOOD else False
+
+                      max_jump = min(length-1, position + nums[position])
+
+                      for jump in range(position+1, max_jump+1):
+                          if can_jump_from_position(nums, jump):
+                              memo[jump] = Status.GOOD
+                              return True
+
+                      memo[jump] = Status.BAD
+                      return False
+
+                  return can_jump_from_position(nums, 0)
+              ```
+          * Buttom Up Approach
+            * Time: O(n^2), Space: O(n)
+              ```python
+                  def canJump(self, nums: List[int]) -> bool:
+                    length = len(nums)
+                    memo = [Status.UNKNOWN] * length
+                    memo[length-1] = Status.GOOD
+
+                    # start from length-2 to 0
+                    for start in range(length-2, 0, -1):
+                        max_jump = min(length-1, start+nums[start])
+
+                        # jump from start + 1 to max_jump
+                        for jump in range(start+1, max_jump+1):
+                            if memo[jump] == Status.GOOD:
+                                memo[jump] = Status.GOOD
+                                break
+
+                    return memo[0] == Status.GOOD
+              ```
+
+        * Greedy
+          * Time: O(n), Space: O(1)
+          * **The main concept is to keep the left most good index**
+            * If we can reach a GOOD index, then our position is itself GOOD. Also, this new GOOD position will be the new leftmost GOOD index.
+            ```python
+                def canJump(self, nums: List[int]) -> bool:
+                  length = len(nums)
+                  last_good_index = length - 1
+
+                  for start in range(length-1, -1, -1):
+                    max_jump = nums[start]
+                    if start + max_jump >= last_good_index:
+                        last_good_index = start
+
+                return last_good_index == 0
+            ```
+
+
     * H-Index
-      * 274. H-Index
+      * 274. H-Index (M)
         * Time O(n), Space O(n)
           * Concept
             * **The max index in the array would be len(array)**, that is we can restrict the number of the buckets.
@@ -299,7 +384,7 @@ Table of Contents
                   d[val] += 1
             ```
         * Time(nlog(n)), Space(1)
-          * sort the citations array in descending order. (draw it)
+          * Sort the citations array in descending order(draw it).
           * After sorting, if citations [i] citations[i]>i, then papers 0 to i all have at least i+1 citations.
     * Best Time to Buy and Sell Stock
       * [General solution](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/discuss/108870/Most-consistent-ways-of-dealing-with-the-series-of-stock-problems)
@@ -423,7 +508,7 @@ Table of Contents
     | Doubly Linked List with tail | O(n)   | O(1)       | O(1)      | O(1)        |
 
 * LeetCode
-  * **Techinique**:
+  * **Techiniques**:
     * The **"Runner"**
       * The runner techinique means that you iterate through the linked list with **two pointers** simultaneously, with one head of the other.
     * The **"dummy node"**
@@ -435,15 +520,15 @@ Table of Contents
     * 141: Linked List **Cycle** (E)
       * Using the **"Runner"** Techinique
     * 142: Linked List Cycle II (M) *
-      * Given a linked list, return the node where the cycle begins. If there is no cycle, return null.
+      * Given a linked list, return the node **where the cycle begins**. If there is no cycle, return null.
       * Using the **"Runner"** Techinique
 
    * **Remove**
      * 237: Delete Node in a Linked List (E)
      * 19: Remove Nth Node From End of List (M)
-       * Using the **"Runner"** and **"dummy node"** Techinique
+       * Using the **"Runner"** and **"dummy node"** Techiniques.
      * 203: Remove Linked List Elements (E)
-       * Using the **"dummy node"** Techinique
+       * Using the **"dummy node"** Techiniques.
      * 83: Remove Duplicates from Sorted List (M)
      * 82: Remove Duplicates from Sorted List II (M) *
        * Using the **"dummy node"** Techinique
@@ -452,14 +537,16 @@ Table of Contents
   * **Reorder**
     * 206: Reverse Linked List (E)
     * 92: Reverse Linked List II (M) *
-      * Using **"dummy node"**.
       * From **position m to n**. Do it in **one-pass**.
+      * Using **"dummy node"**.
+    * 25: Reverse Nodes in k-Group (H) *
+      * Enhancement of 92.
     * Swap Nodes in Pair (M) *
       * Using the **"dymmy node"** Techinique.
       * Use 3 pointers, prev ,current and next.
     * 328: Odd Even Linked List (M)
       * Create **two linked lists** and **merge** them.
-    * 143: Reorder List (M) *
+    * 143: Reorder List(M) *
       * Space O(1): *
         1. Using the **"Runner"** Techinique to seprate first half and second half of the linked list.
         2. **Reverse the second half** of the linked list.
@@ -492,7 +579,6 @@ Table of Contents
     2. Start traversing linked list from leftmost node and add 1 to it. If there is a carry, move to the next node. Keep moving to the next node while there is a carry.
     3. **Reverse** modified linked list and return head.
   * TODO
-    * 25	Reverse Nodes in k-Group
     * 86	Partition List
     * 23	Merge k Sorted Lists
     * 147	Insertion Sort List
