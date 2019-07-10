@@ -214,7 +214,7 @@ Table of Contents
     *  **Techiniques**
     * Remove
       * 27: Remove elements (E)
-        * The concept is like partition step in quick sort
+        * Copy the wanted elements to the front of the array
       * 26: Remove Duplicates from Sorted Array (E)
       * 80: Remove Duplicates from Sorted Array II (M)
         * Need a counter
@@ -338,7 +338,7 @@ Table of Contents
       * 11: Container With Most Water (M)
         * Time O(n)
           * [Use two pointer approach](https://leetcode.com/problems/container-with-most-water/) *
-          * One pointer start at index 0, another start at index length-1.
+          * One pointer starts at index 0, another starts at index length-1.
       * 42: Trapping Rain Water (H)
     * Jump Game:
       * 55: Jump Game (M)
@@ -370,12 +370,13 @@ Table of Contents
 
                       max_jump = min(start+nums[start], length-1)
 
-                      for jump in range(start+1, max_jump+1):
+                      # from max_jump to start + 1
+                      for jump in range(max_jump ,start, -1):
                           if _can_jump_from_position(nums, start=jump):
-                              memo[jump] = Status.GOOD
+                              memo[start] = Status.GOOD
                               return True
 
-                      memo[jump] = Status.BAD
+                      memo[start] = Status.BAD
                       return False
 
                  return _can_jump_from_position(nums, start=0)
@@ -391,14 +392,14 @@ Table of Contents
                 memo[length-1] = Status.GOOD
 
                 # start from length-2 to 0
-                for start in range(length-2, 0, -1):
+                for start in range(length-2, -1, -1):
                     max_jump = min(start+nums[start], length-1)
 
-                    # jump from start + 1 to max_jump
-                    for jump in range(start+1, max_jump+1):
+                    # jump from max_jump to start
+                    for jump in range(max_jump, start, -1):
                         # find the first good index
                         if memo[jump] == Status.GOOD:
-                            memo[jump] = Status.GOOD
+                            memo[start] = Status.GOOD
                             break
 
                 return memo[0] == Status.GOOD
@@ -414,10 +415,11 @@ Table of Contents
               length = len(nums)
               left_most_good_idx = length - 1
 
-              for start in range(length-1, -1, -1):
+              # from length-2 to 0
+              for start in range(length-2, -1, -1):
                 max_jump = nums[start]
                 if start + max_jump >= left_most_good_idx:
-                    left_most_good = start
+                    left_most_good_idx = start
 
               return left_most_good_idx == 0
             ```
@@ -450,7 +452,6 @@ Table of Contents
           * Concept
             * **The max index in the array would be len(array)**, that is we can restrict the number of the buckets.
           * Use Hash table to accumulate the cnt of citations
-
             ```python
             for index, val in enumerate(citations):
               if val >= max_cita:
