@@ -447,7 +447,7 @@ Table of Contents
             ```
 
     * H-Index
-      * 274. H-Index (M)
+      * 274: H-Index (M)
         * Time O(n), Space O(n)
           * Concept
             * **The max index in the array would be len(array)**, that is we can restrict the number of the buckets.
@@ -504,7 +504,7 @@ Table of Contents
             * case1: hold[i] = hold[i-1]
             * case2: hold[i] = **hold[i-1] + price[i] - fee** - price[i]
             * case3: hold[i] = **cash[i-1]** - price[i]
-            * max[case1, case2, case3] = max[hold[i-1], cash[i]-price[i]]
+            * max(case1, case2, case3) = max(hold[i-1], cash[i]-price[i])
               * case2 and case3 can be reduced to cash[i] - price[i]
 
             ```python
@@ -578,7 +578,7 @@ Table of Contents
             > max(interval1.start, interval2.start)
 
         ```
-      * 252. Meeting Rooms (E)
+      * 252: Meeting Rooms (E)
         * Time: O(nlog(n))
           * Check if the intervals have overlap.
           * Sort by start time first
@@ -590,14 +590,26 @@ Table of Contents
                   return False
             return True
             ```
-      * 253. Meeting Rooms II (M)
-        *
+      * 253: Meeting Rooms II (M)
+
 
     * Interval
 
     * Counter
       * 53: Maximum Subarray (E)
         * [**Kadane's Algorithm**](https://leetcode.com/problems/maximum-subarray/discuss/20211/Accepted-O(n)-solution-in-java) *
+          ```python
+          def maxSubArray(self, nums: List[int]) -> int:
+
+              max_sum_so_far = max_sum = nums[0]
+
+              for i in range(1, len(nums)):
+                  num = nums[i]
+                  max_sum_so_far = max(num, max_sum_so_far+num)
+                  max_sum = max(max_sum, max_sum_so_far)
+
+              return max_sum
+          ```
     * Sort
       * 88: Merge Sorted Array
         * You may assume that nums1 has enough space (size that is greater or equal to m + n) to hold additional elements from nums2.
