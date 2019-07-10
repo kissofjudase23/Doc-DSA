@@ -153,6 +153,49 @@ Table of Contents
   * Two Sum (E)
     * Use hash table
   * 3Sum (M)
+    * Sort First
+    * Chose a target (from 0 to n-3)
+      * find left and right that target + left + right = 0
+      * Time O(n^2)
+        ```python
+        def threeSum(self, nums: List[int]) -> List[List[int]]:
+
+          res = list()
+          nums.sort()
+
+          for i in range(0, len(nums)-2):
+
+              # skip duplicate
+              if i > 0 and nums[i] == nums[i-1]:
+                  continue
+
+              l, r = i+1, len(nums)-1
+
+              while l < r:
+
+                  s = nums[i] + nums[l] + nums[r]
+
+                  if s < 0:
+                      l += 1
+
+                  elif s > 0:
+                      r -= 1
+
+                  else:
+                      res.append([nums[i],nums[l],nums[r]])
+
+                      # skip duplicate
+                      while l < r and nums[l] == nums[l+1]:
+                          l += 1
+                      while l < r and nums[r] == nums[r-1]:
+                          r -= 1
+
+                      l+=1
+                      r-=1
+
+            return res
+
+        ```
   * 4Sum (M)
 
 
@@ -275,6 +318,7 @@ Table of Contents
         * **The tank should never be negative**, so restart whenever there is a negative number.
 
           ```python
+          start = 0
           not_found = -1
           for i in range(len(gas)):
               sum_gas += gas[i]
@@ -289,102 +333,117 @@ Table of Contents
 
           return start if sum_gas >= sum_cost else not_found
           ```
-    * 11: Container With Most Water (M)
-      * Time O(n)
-        * [Use two pointer approach](https://leetcode.com/problems/container-with-most-water/) *
-        * One pointer start at index 0, another start at index length-1.
+
+    * Container
+      * 11: Container With Most Water (M)
+        * Time O(n)
+          * [Use two pointer approach](https://leetcode.com/problems/container-with-most-water/) *
+          * One pointer start at index 0, another start at index length-1.
+      * 42: Trapping Rain Water (H)
     * Jump Game:
       * 55: Jump Game (M)
         * [Solution](https://leetcode.com/problems/jump-game/solution/)
         * Dynamic Programming
-          * We call a position in the array a "good index" if starting at that position, we can reach the last index. Otherwise, that index is called a "bad index".
+          * We call a position in the array a **"good index" if starting at that position, we can reach the last index.** Otherwise, that index is called a "bad index".
+
              ```python
              class Status(object):
                 UNKNOWN = 1
                 GOOD = 2
                 BAD = 3
              ```
+
           * Top Down Approach
             * Time: O(n^2), Space: O(n)
+
               ```python
-                  def canJump(self, nums: List[int]) -> bool:
+              def canJump(self, nums: List[int]) -> bool:
 
                   length = len(nums)
                   memo = [Status.UNKNOWN] * length
                   memo[length-1] = Status.GOOD
 
-                  def can_jump_from_position(nums: List[int], start: int):
+                  def _can_jump_from_position(nums: List[int], start: int):
 
                       if memo[start] is not Status.UNKNOWN:
                           return True if memo[start] is Status.GOOD else False
 
-                      max_jump = min(length-1, start + nums[start])
+                      max_jump = min(start+nums[start], length-1)
 
                       for jump in range(start+1, max_jump+1):
-                          if can_jump_from_position(nums, start=jump):
+                          if _can_jump_from_position(nums, start=jump):
                               memo[jump] = Status.GOOD
                               return True
 
                       memo[jump] = Status.BAD
                       return False
 
-                  return can_jump_from_position(nums, start=0)
+                 return _can_jump_from_position(nums, start=0)
               ```
+
           * Buttom Up Approach
             * Time: O(n^2), Space: O(n)
+
               ```python
-                  def canJump(self, nums: List[int]) -> bool:
-                    length = len(nums)
-                    memo = [Status.UNKNOWN] * length
-                    memo[length-1] = Status.GOOD
+              def canJump(self, nums: List[int]) -> bool:
+                length = len(nums)
+                memo = [Status.UNKNOWN] * length
+                memo[length-1] = Status.GOOD
 
-                    # start from length-2 to 0
-                    for start in range(length-2, 0, -1):
-                        max_jump = min(length-1, start+nums[start])
+                # start from length-2 to 0
+                for start in range(length-2, 0, -1):
+                    max_jump = min(start+nums[start], length-1)
 
-                        # jump from start + 1 to max_jump
-                        for jump in range(start+1, max_jump+1):
-                            if memo[jump] == Status.GOOD:
-                                memo[jump] = Status.GOOD
-                                break
+                    # jump from start + 1 to max_jump
+                    for jump in range(start+1, max_jump+1):
+                        # find the first good index
+                        if memo[jump] == Status.GOOD:
+                            memo[jump] = Status.GOOD
+                            break
 
-                    return memo[0] == Status.GOOD
+                return memo[0] == Status.GOOD
               ```
 
         * Greedy
           * Time: O(n), Space: O(1)
           * **The main concept is to keep the left most good index**
             * If we can reach a GOOD index, then our position is itself GOOD. Also, this new GOOD position will be the new leftmost GOOD index.
+
             ```python
-                def canJump(self, nums: List[int]) -> bool:
-                  length = len(nums)
-                  last_good_index = length - 1
+            def canJump(self, nums: List[int]) -> bool:
+              length = len(nums)
+              left_most_good_idx = length - 1
 
-                  for start in range(length-1, -1, -1):
-                    max_jump = nums[start]
-                    if start + max_jump >= last_good_index:
-                        last_good_index = start
+              for start in range(length-1, -1, -1):
+                max_jump = nums[start]
+                if start + max_jump >= left_most_good_idx:
+                    left_most_good = start
 
-                return last_good_index == 0
+              return left_most_good_idx == 0
             ```
+
       * 45: Jump Game II (H) *
         * [Greedy](https://leetcode.com/problems/jump-game-ii/discuss/18014/Concise-O(n)-one-loop-JAVA-solution-based-on-Greedy)
           *  cur == cur_end means you visited all the items on the current level
           *  Incrementing jumps+=1 is like incrementing the level you are on.
           *  And cur_end = cur_farthest is like getting the queue size (level size) for the next level you are traversing.
+
             ```python
             def jump(self, nums: List[int]) -> int:
+
               cur_farthest = jump = cur_end = 0
 
               for cur in range(0, len(nums)-1):
                   cur_farthest = max(cur_farthest, cur+nums[cur])
 
+                  # the boundary need to jump
                   if cur == cur_end:
                       jump +=1
                       cur_end = cur_farthest
 
               return jump
             ```
+
     * H-Index
       * 274. H-Index (M)
         * Time O(n), Space O(n)
@@ -510,9 +569,31 @@ Table of Contents
                     dist = min(dist, index1-index2)
                     j += 1
               ```
-    * Interval
+    * Meeting Rooms
+      * Check overlap
+        ```python
+        def overlap(interval1, interval2):
+            return min(interval1.end, interval2.end) \
+            > max(interval1.start, interval2.start)
+
+        ```
       * 252. Meeting Rooms (E)
+        * Time: O(nlog(n))
+          * Check if the intervals have overlap.
+          * Sort by start time first
+            ```python
+            start, end = 0, 1
+            intervals.sort(key=lambda interval: interval[start])
+            for i in range(1, len(intervals)):
+                if intervals[i][start] < intervals[i-1][end]:
+                  return False
+            return True
+            ```
       * 253. Meeting Rooms II (M)
+        *
+
+    * Interval
+
     * Counter
       * 53: Maximum Subarray (E)
         * [**Kadane's Algorithm**](https://leetcode.com/problems/maximum-subarray/discuss/20211/Accepted-O(n)-solution-in-java) *
