@@ -345,7 +345,7 @@ Table of Contents
     * Container
       * 11: Container With Most Water (M)
         * Time O(n)
-          * [Use two pointer approach](https://leetcode.com/problems/container-with-most-water/solution/) *
+          * [Use 2 pointers approach](https://leetcode.com/problems/container-with-most-water/solution/) *
             * Left pointer starts at index 0
             * Right starts at index length-1
             * Move the shorter index to find bigger area.
@@ -358,6 +358,7 @@ Table of Contents
             * Water area in ith bin would be:
               * min(left_border, right_border) - height
         * Dynamic Programming:
+          * Time: O(n), Space: O(n)
           * Keep two arrays
             * left_max
               * The left_max[i] is the left border in ith bin
@@ -390,6 +391,39 @@ Table of Contents
 
                 for l_max, r_max, h in zip(left_max, right_max, height):
                     area += min(l_max, r_max) - h
+
+                return area
+              ```
+          * [2 pointers approach](https://leetcode.com/problems/trapping-rain-water/solution/)
+            * Time: O(n), Space: O(1)
+            * Python Solution
+              ```python
+              def trap(self, height: List[int]) -> int:
+                area = 0
+                if not height:
+                    return area
+
+                left, right = 0, len(height)-1
+                max_left = max_right = 0
+
+                while left <= right:
+
+                    # determine the border
+                    # area depends on left (border is right)
+                    if height[left] <= height[right]:
+                        if height[left] >= max_left:
+                            max_left = height[left]
+                        else:
+                            area += (max_left - height[left])
+                        left += 1
+
+                    # area depends on right (border is left)
+                    else:
+                        if height[right] > max_right:
+                            max_right = height[right]
+                        else:
+                            area += (max_right - height[right])
+                        right -= 1
 
                 return area
               ```
