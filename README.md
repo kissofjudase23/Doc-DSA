@@ -153,10 +153,21 @@ Table of Contents
   * Two Sum (E)
     * Use hash table
   * 3Sum (M)
-    * Sort First
-    * Chose a target (from 0 to n-3)
-      * find left and right that target + left + right = 0
-      * Time O(n^2)
+    * Algo (Time O(n^2))
+      1. Sort first
+      2. For each target (from 0 to n-3)
+           * Find left and right pair that num[target] + num[left] + num[right] = 0
+    * Why does the algorithm work?
+        * Assume that we find a correct answer num[target] + num[left] + num[right]
+          * case1: x
+            * nums[left+1] + nums[right+1] > 0.
+          * case2: x
+            * nums[left-1] + nums[right-1] < 0.
+          * case3: ✓
+            * nums[left+1] + nums[right-1] may be possible.
+          * case4: x
+            * nums[left-1] + nums[r+1] has been traverse before.
+    * Python Solution
         ```python
         def threeSum(self, nums: List[int]) -> List[List[int]]:
 
@@ -194,7 +205,6 @@ Table of Contents
                       r-=1
 
             return res
-
         ```
   * 4Sum (M)
 
@@ -207,13 +217,14 @@ Table of Contents
     * 344: Reverse String (E)
     * 161: One Edit Distance (M)
       * Time O(1), Space (1):
-        * Merge the insert and remove cases
-          * Use short and long string pointers
+        * Merge the insert and remove cases (find the short one)
+        * Use short and long string pointers to traverse and compare
 ### Array
   * LeetCode:
     *  **Techiniques**
     * Remove
       * 27: Remove elements (E)
+        * Like partition step of quick sort (keep the border)
         * Copy the wanted elements to the front of the array
       * 26: Remove Duplicates from Sorted Array (E)
       * 80: Remove Duplicates from Sorted Array II (M)
@@ -225,7 +236,7 @@ Table of Contents
             * The celebrity does not know them but they know the celebrity.
          * Check the people after the celebrity candidate:
            * They should know the celebrity
-       * Solution
+       * Python Solution
 
           ````python
           # Return True if a knows b
@@ -265,8 +276,7 @@ Table of Contents
       * [Time:O(n), Space:O(1)](https://leetcode.com/problems/first-missing-positive/discuss/17071/My-short-c%2B%2B-solution-O(1)-space-and-O(n)-time) *
          1. Each number will be put in its right place at most once after first loop *
          2. Traverse the array to find the unmatch number
-         * Solution
-
+         * Python Solution
             ```python
             def firstMissingPositive(self, nums: List[int]) -> int:
               length = len(nums)
@@ -288,8 +298,7 @@ Table of Contents
             ```
       * Time O(n), Space O(n)
         * The same concept, but use extra space to keep the sorted positve numbers
-        * Solution
-
+        * Python Solution
           ```python
           def firstMissingPositive(self, nums: List[int]) -> int:
 
@@ -316,7 +325,7 @@ Table of Contents
            And the question guaranteed that the solution is unique
            (The first one I found is the right one).
         * **The tank should never be negative**, so restart whenever there is a negative number.
-
+        * Python Solution
           ```python
           start = 0
           not_found = -1
@@ -333,13 +342,57 @@ Table of Contents
 
           return start if sum_gas >= sum_cost else not_found
           ```
-
     * Container
       * 11: Container With Most Water (M)
         * Time O(n)
-          * [Use two pointer approach](https://leetcode.com/problems/container-with-most-water/) *
-          * One pointer starts at index 0, another starts at index length-1.
-      * 42: Trapping Rain Water (H)
+          * [Use two pointer approach](https://leetcode.com/problems/container-with-most-water/solution/) *
+            * Left pointer starts at index 0
+            * Right starts at index length-1
+            * Move the shorter index to find bigger area.
+      * 42: Trapping Rain Water (H) *
+        * [Solution](https://leetcode.com/problems/trapping-rain-water/solution/)
+        * How to calculate the area
+          * Sum water amount of each bin (width=1)
+            * Find left border
+            * Find right border
+            * Water area in ith bin would be:
+              * min(left_border, right_border) - height
+        * Dynamic Programming:
+          * Keep two arrays
+            * left_max
+              * The left_max[i] is the left border in ith bin
+            * right_max
+              * The right_max[i] is the right border in ith bin
+            * Python Solution
+              ```python
+              def trap(self, height: List[int]) -> int:
+
+                area = 0
+
+                if not height:
+                    return area
+
+                length = len(height)
+
+                left_max = [None] * length
+                right_max = [None] * length
+
+                left_max[0]=height[0]
+                right_max[length-1]=height[length-1]
+
+                # from 1 to l-1
+                for i in range(1, length):
+                    left_max[i] = max(height[i], left_max[i-1])
+
+                # from l-2 to 0
+                for i in range(length-2, -1, -1):
+                    right_max[i] = max(height[i], right_max[i+1])
+
+                for l_max, r_max, h in zip(left_max, right_max, height):
+                    area += min(l_max, r_max) - h
+
+                return area
+              ```
     * Jump Game:
       * 55: Jump Game (M)
         * [Solution](https://leetcode.com/problems/jump-game/solution/)
@@ -352,13 +405,11 @@ Table of Contents
                 GOOD = 2
                 BAD = 3
              ```
-
           * Top Down Approach
             * Time: O(n^2), Space: O(n)
-
+            * Python Solution
               ```python
               def canJump(self, nums: List[int]) -> bool:
-
                   length = len(nums)
                   memo = [Status.UNKNOWN] * length
                   memo[length-1] = Status.GOOD
@@ -375,16 +426,15 @@ Table of Contents
                           if _can_jump_from_position(nums, start=jump):
                               memo[start] = Status.GOOD
                               return True
-
+                      # failed
                       memo[start] = Status.BAD
                       return False
 
                  return _can_jump_from_position(nums, start=0)
               ```
-
           * Buttom Up Approach
             * Time: O(n^2), Space: O(n)
-
+            * Python Solution
               ```python
               def canJump(self, nums: List[int]) -> bool:
                 length = len(nums)
@@ -404,12 +454,11 @@ Table of Contents
 
                 return memo[0] == Status.GOOD
               ```
-
         * Greedy
           * Time: O(n), Space: O(1)
           * **The main concept is to keep the left most good index**
             * If we can reach a GOOD index, then our position is itself GOOD. Also, this new GOOD position will be the new leftmost GOOD index.
-
+          * Python Solution
             ```python
             def canJump(self, nums: List[int]) -> bool:
               length = len(nums)
@@ -423,54 +472,68 @@ Table of Contents
 
               return left_most_good_idx == 0
             ```
-
       * 45: Jump Game II (H) *
         * [Greedy](https://leetcode.com/problems/jump-game-ii/discuss/18014/Concise-O(n)-one-loop-JAVA-solution-based-on-Greedy)
-          *  cur == cur_end means you visited all the items on the current level
-          *  Incrementing jumps+=1 is like incrementing the level you are on.
-          *  And cur_end = cur_farthest is like getting the queue size (level size) for the next level you are traversing.
+          * Greedy
+            *  **cur == cur_end** means you visited all the items on the current level
+            *  Incrementing jumps+=1 is like incrementing the level you are on.
+            *  And **cur_end = cur_farthest** is like getting the queue size (level size) for the next level you are traversing.
+          *  Python Solution
+              ```python
+              def jump(self, nums: List[int]) -> int:
 
-            ```python
-            def jump(self, nums: List[int]) -> int:
+                cur_farthest = jump = cur_end = 0
 
-              cur_farthest = jump = cur_end = 0
+                for cur in range(0, len(nums)-1):
+                    cur_farthest = max(cur_farthest, cur+nums[cur])
 
-              for cur in range(0, len(nums)-1):
-                  cur_farthest = max(cur_farthest, cur+nums[cur])
+                    # the boundary need to jump
+                    if cur == cur_end:
+                        jump +=1
+                        # determine the next boundary
+                        cur_end = cur_farthest
 
-                  # the boundary need to jump
-                  if cur == cur_end:
-                      jump +=1
-                      cur_end = cur_farthest
-
-              return jump
-            ```
-
+                return jump
+              ```
     * H-Index
       * 274: H-Index (M)
-        * Time O(n), Space O(n)
+        * Use Hash Table:
+          * Time O(n), Space O(n)
           * Concept
             * **The max index in the array would be len(array)**, that is we can restrict the number of the buckets.
           * Use Hash table to accumulate the cnt of citations
-            ```python
-            for index, val in enumerate(citations):
-              if val >= max_cita:
-                  d[max_cita] += 1
-              else:
-                  d[val] += 1
-            ```
-        * Time: O(nlog(n)), Space: O(1)
+          * Python Solution
+              ```python
+              def hIndex(self, citations: List[int]) -> int:
+
+                  max_cita = len(citations)
+                  d = collections.defaultdict(int)
+
+                  for index, val in enumerate(citations):
+                    d[min(max_cita, val)] += 1
+
+                  res = cita_cnt = 0
+                  for cita in range(max_cita, 0, -1):
+                    cita_cnt += d[cita]
+                    if cita_cnt >= cita:
+                      res = cita
+                      break
+
+                  return res
+              ```
+        * Use Sort
+          * Time: O(nlog(n)), Space: O(1)
           * Sort the citations array in descending order(draw it).
-          * After sorting, if citations [i] citations[i]>i, then papers 0 to i all have at least i+1 citations.
+          * After sorting, if citations[i]>i, then papers 0 to i all have at least i+1 citations.
     * Best Time to Buy and Sell Stock
       * [General solution](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/discuss/108870/Most-consistent-ways-of-dealing-with-the-series-of-stock-problems)
       * 121: Best Time to Buy and Sell Stock (E)
-        * 1 transaction only.
-        * Keep the minimum of buy price and update best sell prcie.
+        * Allow 1 transaction only.
+        * For each round, keep the current minimum buy price and update best sell prcie.
       * 122: Best Time to Buy and Sell Stock II (E)
         * Multiple transcation allowed.
         * [**Peak Valley** Approach](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/solution/)
-          * solution1
+          * Python Solution1
              ```python
              valley = peak = prices[0];
              maxprofit = 0
@@ -486,14 +549,14 @@ Table of Contents
 
                 maxprofit += (peak - valley);
              ```
-          * solution2
+          * Python Solution2
             ```python
             maxprofit = 0
             for i in range(1, len(prices)):
                 if prices[i] > price[i-1]:
                     maxprofit += prices[i] - price[i-1]
             ```
-      * 714: [Best Time to Buy and Sell Stock with Transaction Fee](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/solution/) (M)
+      * 714: [Best Time to Buy and Sell Stock with Transaction Fee](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/solution/) (M) **
         * Cash(i):
           * The cash in hand, if you are **not holding the stock** at the end of day(i):
             * case1: cash[i] = cash[i-1]
@@ -506,8 +569,8 @@ Table of Contents
             * case3: hold[i] = **cash[i-1]** - price[i]
             * max(case1, case2, case3) = max(hold[i-1], cash[i]-price[i])
               * case2 and case3 can be reduced to cash[i] - price[i]
-
-            ```python
+        * Python Solution
+            ```pythonf
             def maxProfit(self, prices: List[int], fee: int) -> int:
               cash = 0
               hold = -prices[0]
@@ -523,12 +586,15 @@ Table of Contents
         * Use hash Table
     * Shortest Word Distance **
       *  243. Shortest Word Distance (E) *
-         *  Keep the shortest distance in each round.
+         *  Calculate the distance and update the shortest distance in each round.
       * 245. Shortest Word Distance III (M) *
-        * Allow **duplicated** words
+        * Allow **duplicated** words.
         * Keep the shortest distance in each round.
-
+        * Python Solution
             ```python
+            index1 = index2 = -1
+            same = True if word1 == word2 else False
+
             for index, word in enumerate(words):
 
               if word == word1:
@@ -543,25 +609,26 @@ Table of Contents
               if index1 != -1 and index2 != -1:
                   dist = min(dist, abs(index1-index2))
             ```
-
       *  244. Shortest Word Distance II (M) **
-         * Init once and search multiple time.
+         * Init once and search for multiple time.
          * Using **Preprocessed Sorted Indices** and two pointers to traverse
            * Space: O(n)
              * For or the dictionary that we prepare in the constructor.
                * The keys represent all the unique words in the input and the values represent all of the indices from 0 ... N0...N.
-           * Time:
-             * Init O(n)
-             * Shortest O(max(K,L))
-               * where K and L represent the number of occurrences of the two words.
-           * code snippet for shortest operation
-
+           * Time Complexity:
+             * Init step:
+               * O(n)
+             * Find the shortest distance :
+               * O(max(K,L)), where K and L represent the number of occurrences of the two words.
+           * Python Solution
               ```python
               i = j = 0
+
               while i < len(list1) and j < len(list2):
 
                 index1, index2 = list1[i], list2[j]
 
+                # move the smaller one
                 if index1 < index2:
                     dist = min(dist, index2-index1)
                     i +=1
@@ -571,50 +638,83 @@ Table of Contents
                     j += 1
               ```
     * Meeting Rooms
-      * Check overlap
-        ```python
-        def overlap(interval1, interval2):
-            return min(interval1.end, interval2.end) \
-            > max(interval1.start, interval2.start)
-
-        ```
+      * How to check overlap
+        * Python Solution
+          ```python
+          def overlap(interval1, interval2):
+              return min(interval1.end, interval2.end) \
+              > max(interval1.start, interval2.start)
+          ```
       * 252: Meeting Rooms (E)
-        * Time: O(nlog(n))
-          * Check if the intervals have overlap.
-          * Sort by start time first
-            ```python
-            start, end = 0, 1
-            intervals.sort(key=lambda interval: interval[start])
-            for i in range(1, len(intervals)):
-                if intervals[i][start] < intervals[i-1][end]:
-                  return False
-            return True
-            ```
+        * Check if one person can attend all meetings.
+        * Algo:
+          * Time: O(nlog(n))
+          * Sort by start time
+          * Check if two intervals have overlap
+          * Note:
+            * for sorted: interval1, interval2, interval3
+              * If interval 3 and interval1 have overlap, then interval2 and interval1 must have overlap as well, since interval2.start < interval3.start
+        * Python Solution
+          ```python
+          start, end = 0, 1
+
+          intervals.sort(key=lambda interval: interval[start])
+
+          for i in range(1, len(intervals)):
+              if intervals[i][start] < intervals[i-1][end]:
+                return False
+          return True
+          ```
       * 253: Meeting Rooms II (M)
-
-
+        * Find the minimum requirement of the meeting rooms.
     * Interval
-
     * Counter
       * 53: Maximum Subarray (E)
         * [**Kadane's Algorithm**](https://leetcode.com/problems/maximum-subarray/discuss/20211/Accepted-O(n)-solution-in-java) *
-          ```python
-          def maxSubArray(self, nums: List[int]) -> int:
+         * Python Solution
+            ```python
+            def maxSubArray(self, nums: List[int]) -> int:
 
-              max_sum_so_far = max_sum = nums[0]
+                max_sum_so_far = max_sum = nums[0]
 
-              for i in range(1, len(nums)):
-                  num = nums[i]
-                  max_sum_so_far = max(num, max_sum_so_far+num)
-                  max_sum = max(max_sum, max_sum_so_far)
+                for i in range(1, len(nums)):
+                    num = nums[i]
+                    max_sum_so_far = max(num, max_sum_so_far+num)
+                    max_sum = max(max_sum, max_sum_so_far)
 
-              return max_sum
-          ```
+                return max_sum
+            ```
     * Sort
-      * 88: Merge Sorted Array
+      * 88: Merge Sorted Array (E)
         * You may assume that nums1 has enough space (size that is greater or equal to m + n) to hold additional elements from nums2.
-        * [Space Complexity O(1)](https://leetcode.com/problems/merge-sorted-array/discuss/29755/Python-easy-to-follow-solution.): *
+        * Space O(1):
           * Fill the arrary **from the end to the start**
+      * 283: Move Zeroes (E)
+        * Like the partition step of quick sort
+          * **keep the border pointing to next available position.**
+
+      * 280: Wiggle Sort (M) *
+        * Definition
+          * **nums[0] <= nums[1] >= nums[2] <= nums[3]...**
+        * O(log(n))
+          * Sort and then pair swapping
+        * O(n)
+          * Greedy from left to right
+            ```python
+            def wiggleSort(self, nums: List[int]) -> None:
+                less = True
+
+                for i in range(len(nums)-1):
+                  if less:
+                    if nums[i] > nums[i+1]:
+                      nums[i], nums[i+1] = nums[i+1], nums[i]
+                  else:
+                    if nums[i] < nums[i+1]:
+                      nums[i], nums[i+1] = nums[i+1], nums[i]
+
+                less = not less
+            ```
+
 ### Matrix
 
 ### Linked List
@@ -661,7 +761,7 @@ Table of Contents
       * Using **"dummy node"**.
     * 25: Reverse Nodes in k-Group (H) *
       * Enhancement of 92.
-    * Swap Nodes in Pair (M) *
+    * 24: Swap Nodes in Pair (M) *
       * Using the **"dymmy node"** Techinique.
       * Use 3 pointers, prev ,current and next.
     * 328: Odd Even Linked List (M)
