@@ -367,9 +367,7 @@ Table of Contents
             * Python Solution
               ```python
               def trap(self, height: List[int]) -> int:
-
                 area = 0
-
                 if not height:
                     return area
 
@@ -701,6 +699,33 @@ Table of Contents
           ```
       * 253: Meeting Rooms II (M)
         * Find the minimum requirement of the meeting rooms.
+        * [Use Min Heap to store end time of intervals]((https://leetcode.com/problems/meeting-rooms-ii/solution/))
+          * * Time: O(nlog(n)), Space: O(n)
+          * Sort the intervals by start time
+          * For every meeting room check if the minimum element of the heap is free or not.
+            * If the room is free, then we extract the topmost element and add it back with the ending time of the current meeting we are processing.
+            * If not, then we allocate a new room and add it to the heap.
+          * Python Solution
+            ```python
+            def minMeetingRooms(self, intervals: List[List[int]]) -> int:
+              if not intervals:
+                  return 0
+
+              start, end = 0, 1
+              intervals.sort(key=lambda interval:interval[start])
+              heap = list()
+
+              for i in intervals:
+                  if not heap or i[start] < heap[0]:
+                      # need a new room
+                      heapq.heappush(heap, i[end])
+                  else:
+                      # pop min end time and push a new one
+                      heapq.heapreplace(heap, i[end])
+
+              return len(heap)
+            ```
+
     * Interval
     * Counter
       * 53: Maximum Subarray (E)
@@ -928,10 +953,8 @@ Table of Contents
 * Traversal
   * In-Order
     * recursive
-
         ```python
         def in_order_traversal(node):
-
           if not node:
             return
 
@@ -957,11 +980,9 @@ Table of Contents
               node = stack.pop()
               visit(node)
               current = current.right
-
         ```
   * Pre-Order
     * recursive
-
       ```python
         def pre_order_traversal(node):
 
@@ -973,7 +994,6 @@ Table of Contents
           pre_order_traversal(node.right)
       ```
     * iterative
-
       ```python
         def pre_order_traversal(node):
 
@@ -991,12 +1011,9 @@ Table of Contents
             if current.right
               stack.append(current.right)
             current = current.left
-
-
       ```
   * Post-Order
     * recursive
-
       ```python
         def post_order_traversal(node):
 
@@ -1007,9 +1024,7 @@ Table of Contents
           post_order_traversal(node.right)
           visit(node)
       ```
-
     * iterative
-
       ```python
         def post_order_traversal(node):
 
@@ -1041,26 +1056,70 @@ Table of Contents
     * Use **two stacks** for iterative method
   * 102: Binary **Tree Level** Order Traversal (M) *
     * Use **the length of the queue** for each round
-  * 173. Binary Search Tree Iterator (M) *
-    * Use the concept of inorder Traversal
+  * 173: Binary Search Tree Iterator (M) *
+    * Python Solution
+      ```python
+      class BSTIterator:
 
+        def __init__(self, root: TreeNode):
+            self.stack = list()
+            self._push_all(root)
+
+        def next(self) -> int:
+            """
+            @return the next smallest number
+            """
+            current = self.stack.pop()
+            self._push_all(current.right)
+            return current.val
+
+        def hasNext(self) -> bool:
+            """
+            @return whether we have a next smallest number
+            """
+            return len(self.stack) != 0
+
+        def _push_all(self, current: TreeNode):
+            while current:
+                self.stack.append(current)
+                current = current.left
+      ```
 
 #### Binary Heaps (Min-Heaps and Max-Heaps)
 * Ref:
   * https://towardsdatascience.com/data-structure-heap-23d4c78a6962
+  * [MIT OpenCourseWare](https://www.youtube.com/watch?v=B7hVxCmfPtM)
 * **complete binary tree**
 * Min-Heaps
   * Ascencding order
 * Max-Heaps
   * Descending Order
-* Insert
-  * **bubble up** Operation which takes **O(log(n))**
+* Array Implementation:
+  * Index of Left Child
+    * 2i + 1
+  * Index of Right Child
+    * 2i + 2
+  * Index of Parent
+    * (i - 1) // 2
+* Heapify)
+  * Time: **O(n)**
+  * Create a heap from an array, build from index n/2 to 1 (skip the last level)
+    ```python
+      def build_min_heap(array)
+        # from n/2 downto 1
+        for i in range(len(array)//2, 0, -1)
+            min_heapify(array, i)
+    ```
+* Insert (heap_push)
+  * Time: **O(log(n))**
+    * **bubble up** Operation
   * Insert at the **rightmost spot so as to maintain the complete binary tree**.
   * **Fix the tree by swapping the new element with parents**, until finding the appropriate spot.
-* Extract minimum (maximum) elements
-  * **bubble down** which takes **O(log(n))**
+* Extract minimum (maximum) elements (heap_pop)
+  * Time: **O(log(n))**
+    * **bubble down** Operation
   * Remove the mimimum element and swap it with the last element in the heap.
-  * Bubble down this element, swapping it with one of its children until the min-heap property is restored.
+  * Bubble down this element, swapping it with one of its children until the min-heap property is )restored.
 
 #### Tries (Prefix Trees)
 * Ref:
