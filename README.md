@@ -1089,19 +1089,21 @@ Table of Contents
 * Ref:
   * https://towardsdatascience.com/data-structure-heap-23d4c78a6962
   * [MIT OpenCourseWare](https://www.youtube.com/watch?v=B7hVxCmfPtM)
-* **complete binary tree**
+* **Complete Binary Tree**
 * Min-Heaps
   * Ascencding order
 * Max-Heaps
   * Descending Order
 * Array Implementation:
-  * Index of Left Child
-    * 2i + 1
-  * Index of Right Child
-    * 2i + 2
-  * Index of Parent
-    * (i - 1) // 2
-* Heapify)
+  * Index
+    * Left Child
+      * 2i + 1
+    * Right Child
+      * 2i + 2
+    * Parent
+      * (i - 1) // 2
+
+* **Heapify**
   * Time: **O(n)**
   * Create a heap from an array, build from index n/2 to 1 (skip the last level)
     ```python
@@ -1110,12 +1112,12 @@ Table of Contents
         for i in range(len(array)//2, 0, -1)
             min_heapify(array, i)
     ```
-* Insert (heap_push)
+* **Insert**
   * Time: **O(log(n))**
     * **bubble up** Operation
   * Insert at the **rightmost spot so as to maintain the complete binary tree**.
   * **Fix the tree by swapping the new element with parents**, until finding the appropriate spot.
-* Extract minimum (maximum) elements (heap_pop)
+* **Extract minimum (maximum) elements**
   * Time: **O(log(n))**
     * **bubble down** Operation
   * Remove the mimimum element and swap it with the last element in the heap.
