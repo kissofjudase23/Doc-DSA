@@ -44,6 +44,7 @@ Table of Contents
     - [Insertion Sort](#Insertion-Sort)
     - [Selection Sort](#Selection-Sort)
     - [Bubble Sort](#Bubble-Sort)
+    - [Heap Sort](#Heap-Sort)
   - [Backtracking](#Backtracking)
   - [Dynamic Programming](#Dynamic-Programming)
     - [Recursion and Dynamic Programming](#Recursion-and-Dynamic-Programming)
@@ -1268,6 +1269,11 @@ Table of Contents
     * (n-1) comparison in round1, and no swap happened.
   * Worst Case:
     * descending sequence, [3, 2, 1]
+#### [Heap Sort](https://www.geeksforgeeks.org/iterative-heap-sort/)
+  * Build the Max Heap first
+  * Iteratve n-1 round, for i in range(n-1, 0, -1)
+    * Swap the current max(0th index) to the ith index
+    * heapify from 0 to i-1
 
 ### Backtracking
 
