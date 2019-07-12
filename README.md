@@ -155,15 +155,16 @@ Table of Contents
     * Use hash table
   * 3Sum (M)
     * Algo (Time O(n^2))
-      1. Sort first
+      1. **Sort** first
       2. For each target (from 0 to n-3)
            * Find left and right pair that num[target] + num[left] + num[right] = 0
+           * Target = -num[target] = num[left] + num[right]
     * Why does the algorithm work?
-        * Assume that we find a correct answer num[target] + num[left] + num[right]
+        * Assume that we find a correct target for num[left] + num[right]
           * case1: x
-            * nums[left+1] + nums[right+1] > 0.
+            * nums[left+1] + nums[right+1] > Target
           * case2: x
-            * nums[left-1] + nums[right-1] < 0.
+            * nums[left-1] + nums[right-1] < Target.
           * case3: ✓
             * nums[left+1] + nums[right-1] may be possible.
           * case4: x
@@ -231,7 +232,7 @@ Table of Contents
       * 80: Remove Duplicates from Sorted Array II (M)
         * Need a counter
     * 277: [Find the Celebrity](https://pandaforme.github.io/2016/12/09/Celebrity-Problem/) (M) *
-      1. Find a **celebrity candidate** having **max number** of unknown people
+      1. Find the **celebrity candidate**
       2. Check if the candidate is the celebrity
          * Check the people before the celebrity candidate:
             * The celebrity does not know them but they know the celebrity.
@@ -250,16 +251,19 @@ Table of Contents
               """
               unknown = -1
               celebrity = 0
+              # find the celebrity candidate
               for p in range(1, n):
                   if not knows(celebrity, p):
                       continue
                   celebrity = p
 
+              # check people in the left side
               for p in range(celebrity):
                   if knows(p, celebrity) and not knows(celebrity, p):
                       continue
                   return unknown
 
+              # # check people in the right side
               for p in range(celebrity+1, n):
                   if knows(p, celebrity):
                       continue
@@ -269,11 +273,31 @@ Table of Contents
           ````
     * 189: Rotate Array (E)
       * Space Complexity **O(1)**
-        * use **three reverse** operations
+        * Use **three reverse** operations can solve this problem.
     * 41: First missing positive (H) *
       * [concept](https://leetcode.com/problems/first-missing-positive/discuss/17073/Share-my-O(n)-time-O(1)-space-solution):
-        * The idea is **for any k positive numbers (duplicates allowed), the first missing positive number must be within [0,k]**.
-          * The reason is **like you put k balls into k+1 bins**, there must be a bin empty, the empty bin can be viewed as the missing number**.
+          * The idea is **like you put k balls into k+1 bins**, there must be a bin empty, the empty bin can be viewed as the missing number.
+      * Time O(n), Space O(n)
+        * Use extra space to keep the sorted positve numbers.
+        * Python Solution
+          ```python
+          def firstMissingPositive(self, nums: List[int]) -> int:
+            length = len(nums)
+            sorted_positive_nums = [None] * length
+
+            for i in range(length):
+                if 0 < nums[i] <= length:
+                    # the correct position of nums[i] is in nums[nums[i]-1]
+                    correct = nums[i]-1  # need this correct
+                    sorted_positive_nums[correct] = nums[i]
+
+            for i in range(length):
+                if sorted_positive_nums[i] != i+1:
+                    return i+1
+
+            # not found from 0 to length-1, so the first missing is in length-th
+            return length+1
+          ```
       * [Time:O(n), Space:O(1)](https://leetcode.com/problems/first-missing-positive/discuss/17071/My-short-c%2B%2B-solution-O(1)-space-and-O(n)-time) *
          1. Each number will be put in its right place at most once after first loop *
          2. Traverse the array to find the unmatch number
@@ -294,33 +318,32 @@ Table of Contents
               for i in range(length):
                   if nums[i] != i+1:
                       return i+1
-
+               not found from 0 to length-1, so the first missing is in length-th
               return length+1
             ```
-      * Time O(n), Space O(n)
-        * The same concept, but use extra space to keep the sorted positve numbers
-        * Python Solution
-          ```python
-          def firstMissingPositive(self, nums: List[int]) -> int:
 
-          length = len(nums)
-          sorted_positive_nums = [None] * length
-
-          for i in range(length):
-              if 0 < nums[i] <= length:
-                  # the correct position of nums[i] is in nums[nums[i]-1]
-                  correct = nums[i]-1  # need this correct
-                  sorted_positive_nums[correct] = nums[i]
-
-          for i in range(length):
-              if sorted_positive_nums[i] != i+1:
-                  return i+1
-
-          return length+1
-          ```
     * 299: Bulls and Cows (M)
       * Time O(n), Space O(n) and **one pass**
-        * Use **hash Table**
+        * Use **hash Table** to count cows.
+        * Python solution
+          ```python
+          for s,g in zip(secret, guess):
+            if s == g:
+                bull += 1
+            else:  # s != g
+                if hash_table[s] < 0:
+                    # s appears in guess before
+                    cow += 1
+
+                if hash_table[g] > 0:
+                    # g appears in secret before
+                    cow += 1
+
+                hash_table[s] += 1
+                hash_table[g] -= 1
+
+          return f'{bull}A{cow}B'
+          ```
     * 134: Gas Station (M) **
         * **if sum of gas is more than sum of cost, then there must be a solution**.
            And the question guaranteed that the solution is unique
@@ -328,12 +351,11 @@ Table of Contents
         * **The tank should never be negative**, so restart whenever there is a negative number.
         * Python Solution
           ```python
-          start = 0
-          not_found = -1
+          start, not_found = 0, -1
+
           for i in range(len(gas)):
               sum_gas += gas[i]
               sum_cost += cost[i]
-
               tank += gas[i] - cost[i]
 
               # try another start
@@ -346,54 +368,59 @@ Table of Contents
     * Container
       * 11: Container With Most Water (M)
         * Time O(n)
-          * [Use 2 pointers approach](https://leetcode.com/problems/container-with-most-water/solution/) *
+          * [2 pointers approach](https://leetcode.com/problems/container-with-most-water/solution/) *
             * Left pointer starts at index 0
             * Right starts at index length-1
-            * Move the shorter index to find bigger area.
+            * Move the index with shorter height to find the bigger area.
       * 42: Trapping Rain Water (H) *
         * [Solution](https://leetcode.com/problems/trapping-rain-water/solution/)
-        * How to calculate the area
+        * How to calculate the area ?
           * Sum water amount of each bin (width=1)
             * Find left border
             * Find right border
-            * Water area in ith bin would be:
-              * min(left_border, right_border) - height
+            * Water area in the ith bin would be:
+              * **min(left_border, right_border) - height of ith bin**
         * Dynamic Programming:
           * Time: O(n), Space: O(n)
           * Keep two arrays
             * left_max
-              * The left_max[i] is the left border in ith bin
+              * The left_max[i] is the **left border** in ith bin.
             * right_max
-              * The right_max[i] is the right border in ith bin
+              * The right_max[i] is the **right border** in ith bin.
             * Python Solution
               ```python
               def trap(self, height: List[int]) -> int:
                 area = 0
                 if not height:
-                    return area
+                    return 0
 
                 length = len(height)
 
                 left_max = [None] * length
                 right_max = [None] * length
 
-                left_max[0]=height[0]
-                right_max[length-1]=height[length-1]
+                left_max[0] = height[0]
+                right_max[length-1] = height[length-1]
 
-                # from 1 to l-1
+                # calculate left border array
                 for i in range(1, length):
                     left_max[i] = max(height[i], left_max[i-1])
 
-                # from l-2 to 0
+                # calculate right border array
                 for i in range(length-2, -1, -1):
                     right_max[i] = max(height[i], right_max[i+1])
 
+                # sum the area for each bin
                 for l_max, r_max, h in zip(left_max, right_max, height):
                     area += min(l_max, r_max) - h
 
                 return area
               ```
           * [2 pointers approach](https://leetcode.com/problems/trapping-rain-water/solution/)
+            * Concept
+              * If the right border > left border, the area of ith bin is determined by the left border.
+              * vice versa
+              * So we fix the higher border, and move the lower border to calcualte the area
             * Time: O(n), Space: O(1)
             * Python Solution
               ```python
@@ -406,9 +433,8 @@ Table of Contents
                 max_left = max_right = 0
 
                 while left <= right:
-
                     # determine the border
-                    # area depends on left (border is right)
+                    # area depends on left border
                     if height[left] <= height[right]:
                         if height[left] >= max_left:
                             max_left = height[left]
@@ -416,7 +442,7 @@ Table of Contents
                             area += (max_left - height[left])
                         left += 1
 
-                    # area depends on right (border is left)
+                    # area depends on right border
                     else:
                         if height[right] > max_right:
                             max_right = height[right]
@@ -431,7 +457,6 @@ Table of Contents
         * [Solution](https://leetcode.com/problems/jump-game/solution/)
         * Dynamic Programming
           * We call a position in the array a **"good index" if starting at that position, we can reach the last index.** Otherwise, that index is called a "bad index".
-
              ```python
              class Status(object):
                 UNKNOWN = 1
@@ -490,7 +515,7 @@ Table of Contents
         * Greedy
           * Time: O(n), Space: O(1)
           * **The main concept is to keep the left most good index**
-            * If we can reach a GOOD index, then our position is itself GOOD. Also, this new GOOD position will be the new leftmost GOOD index.
+            * If we can reach a GOOD index, then our position is a GOOD index as well. and this new GOOD index will be the new leftmost GOOD index.
           * Python Solution
             ```python
             def canJump(self, nums: List[int]) -> bool:
@@ -507,9 +532,12 @@ Table of Contents
             ```
       * 45: Jump Game II (H) *
         * [Greedy](https://leetcode.com/problems/jump-game-ii/discuss/18014/Concise-O(n)-one-loop-JAVA-solution-based-on-Greedy)
+          * Find the minimum jump
           * Greedy
-            *  **cur == cur_end** means you visited all the items on the current level
-            *  Incrementing jumps+=1 is like incrementing the level you are on.
+            * Time: O(n), Space: O(1)
+            *  **cur == cur_end**
+               *  means you visited all the items on the current level
+               *  Incrementing jumps+=1 is like incrementing the level you are on.
             *  And **cur_end = cur_farthest** is like getting the queue size (level size) for the next level you are traversing.
           *  Python Solution
               ```python
@@ -592,18 +620,24 @@ Table of Contents
       * 714: [Best Time to Buy and Sell Stock with Transaction Fee](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/solution/) (M) **
         * Cash(i):
           * The cash in hand, if you are **not holding the stock** at the end of day(i):
-            * case1: cash[i] = cash[i-1]
-            * case2: cash[i] = hold[i-1] + prcie[i] - fee
-            * max(case1, case2) = max(cash[i-1], hold[i-1] + prcie[i] - fee)
+            * case1:
+              * cash[i] = cash[i-1]
+            * case2:
+              * cash[i] = hold[i-1] + prcie[i] - fee
+            * cash[i]
+              * max(case1, case2) = max(cash[i-1], hold[i-1] + prcie[i] - fee)
         * Hold(i):
           * The cash in hand, if you are **holding the stock** at the end of day(i):
-            * case1: hold[i] = hold[i-1]
-            * case2: hold[i] = **hold[i-1] + price[i] - fee** - price[i]
-            * case3: hold[i] = **cash[i-1]** - price[i]
+            * case1:
+              * hold[i] = hold[i-1]
+            * case2:
+              * hold[i] = **hold[i-1] + price[i] - fee** - price[i]
+            * case3:
+              * hold[i] = **cash[i-1]** - price[i]
             * max(case1, case2, case3) = max(hold[i-1], cash[i]-price[i])
               * case2 and case3 can be reduced to cash[i] - price[i]
         * Python Solution
-            ```pythonf
+            ```python
             def maxProfit(self, prices: List[int], fee: int) -> int:
               cash = 0
               hold = -prices[0]
@@ -621,7 +655,7 @@ Table of Contents
       *  243. Shortest Word Distance (E) *
          *  Calculate the distance and update the shortest distance in each round.
       * 245. Shortest Word Distance III (M) *
-        * Allow **duplicated** words.
+        * Allow **duplicated words**.
         * Keep the shortest distance in each round.
         * Python Solution
             ```python
@@ -682,10 +716,10 @@ Table of Contents
         * Check if one person can attend all meetings.
         * Algo:
           * Time: O(nlog(n))
-          * Sort by start time
-          * Check if two intervals have overlap
+          * Sort by start time of intervals
+          * Check if interval[i] and intervalp[i+1] have overlap.
           * Note:
-            * for sorted: interval1, interval2, interval3
+            * For sorted: interval1, interval2, interval3
               * If interval 3 and interval1 have overlap, then interval2 and interval1 must have overlap as well, since interval2.start < interval3.start
         * Python Solution
           ```python
@@ -701,7 +735,7 @@ Table of Contents
       * 253: Meeting Rooms II (M)
         * Find the minimum requirement of the meeting rooms.
         * [Use Min Heap to store end time of intervals]((https://leetcode.com/problems/meeting-rooms-ii/solution/))
-          * * Time: O(nlog(n)), Space: O(n)
+          * Time: O(nlog(n)), Space: O(n)
           * Sort the intervals by start time
           * For every meeting room check if the minimum element of the heap is free or not.
             * If the room is free, then we extract the topmost element and add it back with the ending time of the current meeting we are processing.
@@ -726,7 +760,6 @@ Table of Contents
 
               return len(heap)
             ```
-
     * Interval
     * Counter
       * 53: Maximum Subarray (E)
