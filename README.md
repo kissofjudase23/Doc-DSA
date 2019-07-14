@@ -217,10 +217,128 @@ Table of Contents
   * LeetCode:
     * **Techiniques**
     * 344: Reverse String (E)
+    * 58: Length of Last Word (E)
+      * Seach from the end to the beginning.
     * 161: One Edit Distance (M)
       * Time O(1), Space (1):
         * Merge the insert and remove cases (find the short one)
         * Use short and long string pointers to traverse and compare
+    * 28: Implement strStr(E)
+      * Find Sub-String
+      * Brute Force
+        * Time: O(mn), Space(1)
+      * KMP (substring match) (M)
+        * Time: O(m+n), Space: O(n), where n is the length of the pattern string.
+        * Reference ***:
+          * [Concept](https://www.youtube.com/watch?v=GTJr8OvyEVQ)
+          * [The partial match table](http://jakeboxer.com/blog/2009/12/13/the-knuth-morris-pratt-algorithm-in-my-own-words/)
+            * The length of the longest proper prefix in the (sub)pattern that matches a proper suffix in the same (sub)pattern.
+        * Python Solution
+          ```python
+
+          def get_lps(pattern):
+
+              # init lps array
+              lps = [None] * len(pattern)
+              lps[0] = 0
+
+              p = 0  # prefix pointer
+              s = 1  # suffix pointer
+
+              while s < len(pattern):
+                  if pattern[s] == pattern[p]:
+                      p += 1
+                      lps[s] = p  # update suffix length
+                      s += 1
+                  else:
+                      if p != 0:
+                          # backward the prefix pointer to the position
+                          # after the matched prefix/suffix string
+                          p = lps[p-1]
+                      else:
+                          # do not match anything
+                          lps[s] = 0
+                          s += 1
+              return lps
+
+          def strStr(self, txt: str, pattern: str) -> int:
+              if not pattern or len(pattern) == 0:
+                  return 0
+
+              lps = self.get_lps(pattern)
+              i = j = 0
+              res = -1
+              while i < len(txt):
+                  if txt[i] == pattern[j]:
+                      i += 1
+                      j += 1
+                      if j == len(pattern):
+                          res =  i - j
+                          break
+                  else:
+                      if j != 0:
+                          # backward the prefix pointer to the position
+                          # after the matched prefix/suffix string
+                          j = lps[j-1]
+                      else:
+                          # do not match anything
+                          i += 1
+              return res
+          ```
+        * 14: Longest Common Prefix (E)
+          * Use vertical scanning
+            * Time: O(nm)
+              * Where n is the len(strs) and m is the minimum str length among strs/
+            * Python Solution
+                ```python
+                def longestCommonPrefix(self, strs: List[str]) -> str:
+
+                  if not strs:
+                      return ""
+
+                  prefix = strs[0]
+
+                  # Vertical Scanning
+                  for i in range(0, len(prefix)):
+                      c = prefix[i]
+                      for j in range(1, len(strs)):
+                          # c is invalid common prefix
+                          if i == len(strs[j]) or strs[j][i] != c:
+                              prefix = prefix[:i]
+                              found = True
+                              break
+
+                      if found:
+                          break
+
+                  return prefix
+                ```
+    * SubString
+    * Palindrome
+    * Parentheses
+      * 20: Valid Parentheses (E)
+        * Python Solution
+          ```python
+          BRACKET_MAP = {'(': ')', '[': ']', '{': '}'}
+
+          def isValid(self, s: str) -> bool:
+
+              if not s:
+                  return True
+
+              ret = True
+              stack = list()
+
+              for c in s:
+                  if c in BRACKET_MAP:
+                      stack.append(c)
+                  else:
+                      if not stack or c != BRACKET_MAP[stack.pop()]:
+                          return False
+
+              return len(stack) == 0
+          ```
+    * Subsequence
 ### Array
   * LeetCode:
     *  **Techiniques**
@@ -712,15 +830,20 @@ Table of Contents
               return min(interval1.end, interval2.end) \
               > max(interval1.start, interval2.start)
           ```
+        * For sorted intervals
+          * Check overlap between interval[i] and interval[i+1] would be
+            * ```python
+              interval[i].end > interval[i+1],start
+              ```
+            * If interval 3 and interval1 have overlap, then interval2 and interval1 must have overlap as well, since interval2.start < interval3.start.
+
       * 252: Meeting Rooms (E)
         * Check if one person can attend all meetings.
         * Algo:
           * Time: O(nlog(n))
           * Sort by start time of intervals
           * Check if interval[i] and intervalp[i+1] have overlap.
-          * Note:
-            * For sorted: interval1, interval2, interval3
-              * If interval 3 and interval1 have overlap, then interval2 and interval1 must have overlap as well, since interval2.start < interval3.start
+
         * Python Solution
           ```python
           start, end = 0, 1
