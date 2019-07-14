@@ -215,10 +215,9 @@ Table of Contents
 
 ### String
   * LeetCode:
-    * **Techiniques**
     * 344: Reverse String (E)
     * 58: Length of Last Word (E)
-      * Seach from the end to the beginning.
+      * Seach **from the end to the beginning**.
     * 161: One Edit Distance (M)
       * Time O(1), Space (1):
         * Merge the insert and remove cases (find the short one)
@@ -227,9 +226,13 @@ Table of Contents
       * Find Sub-String
       * Brute Force
         * Time: O(mn), Space(1)
-      * KMP (substring match) (M)
-        * Time: O(m+n), Space: O(n), where n is the length of the pattern string.
-        * Reference ***:
+      * **KMP (substring match)** ***
+        * Time: O(m+n), Space: O(n),
+          * where m is the length of txt stringm n is the length of the pattern string.
+        * Consider a worst case in brute force:
+          * txt='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab', pattern='aaaaaab'
+          * KMP can get great benefit from such cases.
+        * Reference:
           * [Concept](https://www.youtube.com/watch?v=GTJr8OvyEVQ)
           * [The partial match table](http://jakeboxer.com/blog/2009/12/13/the-knuth-morris-pratt-algorithm-in-my-own-words/)
             * The length of the longest proper prefix in the (sub)pattern that matches a proper suffix in the same (sub)pattern.
@@ -261,13 +264,13 @@ Table of Contents
                           s += 1
               return lps
 
-          def strStr(self, txt: str, pattern: str) -> int:
+          def is_substring(txt: str, pattern: str) -> int:
               if not pattern or len(pattern) == 0:
                   return 0
 
-              lps = self.get_lps(pattern)
+              res = not_found = -1
+              lps = get_lps(pattern)
               i = j = 0
-              res = -1
               while i < len(txt):
                   if txt[i] == pattern[j]:
                       i += 1
@@ -286,23 +289,20 @@ Table of Contents
               return res
           ```
         * 14: Longest Common Prefix (E)
-          * Use vertical scanning
-            * Time: O(nm)
-              * Where n is the len(strs) and m is the minimum str length among strs/
+          * Use **vertical scanning**
+            * Time: O(mn)
+              * Where m is the minimum length of str in strs and n is the len(strs).
             * Python Solution
                 ```python
-                def longestCommonPrefix(self, strs: List[str]) -> str:
-
+                def longest_common_prefix(self, strs: List[str]) -> str:
                   if not strs:
                       return ""
 
                   prefix = strs[0]
-
                   # Vertical Scanning
                   for i in range(0, len(prefix)):
                       c = prefix[i]
                       for j in range(1, len(strs)):
-                          # c is invalid common prefix
                           if i == len(strs[j]) or strs[j][i] != c:
                               prefix = prefix[:i]
                               found = True
@@ -321,8 +321,7 @@ Table of Contents
           ```python
           BRACKET_MAP = {'(': ')', '[': ']', '{': '}'}
 
-          def isValid(self, s: str) -> bool:
-
+          def ia_valid_parentheses(self, s: str) -> bool:
               if not s:
                   return True
 
@@ -339,9 +338,9 @@ Table of Contents
               return len(stack) == 0
           ```
     * Subsequence
+
 ### Array
   * LeetCode:
-    *  **Techiniques**
     * Remove
       * 27: Remove elements (E)
         * Like partition step of quick sort (keep the border)
@@ -357,12 +356,11 @@ Table of Contents
          * Check the people after the celebrity candidate:
            * They should know the celebrity
        * Python Solution
-
           ````python
           # Return True if a knows b
           def knows(a,  b)
 
-          def findCelebrity(self, n):
+          def find_celebrity(self, n):
               """
               :type n: int
               :rtype: int
@@ -439,7 +437,6 @@ Table of Contents
                not found from 0 to length-1, so the first missing is in length-th
               return length+1
             ```
-
     * 299: Bulls and Cows (M)
       * Time O(n), Space O(n) and **one pass**
         * Use **hash Table** to count cows.
@@ -452,7 +449,6 @@ Table of Contents
                 if hash_table[s] < 0:
                     # s appears in guess before
                     cow += 1
-
                 if hash_table[g] > 0:
                     # g appears in secret before
                     cow += 1
@@ -486,9 +482,11 @@ Table of Contents
     * Container
       * 11: Container With Most Water (M)
         * Time O(n)
+          * Area:
+            * min(left_border, right_border) * width
           * [2 pointers approach](https://leetcode.com/problems/container-with-most-water/solution/) *
-            * Left pointer starts at index 0
-            * Right starts at index length-1
+            * Left pointer starts at position 0
+            * Right starts at position length-1
             * Move the index with shorter height to find the bigger area.
       * 42: Trapping Rain Water (H) *
         * [Solution](https://leetcode.com/problems/trapping-rain-water/solution/)
@@ -642,8 +640,7 @@ Table of Contents
 
               # from length-2 to 0
               for start in range(length-2, -1, -1):
-                max_jump = nums[start]
-                if start + max_jump >= left_most_good_idx:
+                if start + nums[start] >= left_most_good_idx:
                     left_most_good_idx = start
 
               return left_most_good_idx == 0
@@ -653,7 +650,7 @@ Table of Contents
           * Find the minimum jump
           * Greedy
             * Time: O(n), Space: O(1)
-            *  **cur == cur_end**
+            *  **cur == cur_border**
                *  means you visited all the items on the current level
                *  Incrementing jumps+=1 is like incrementing the level you are on.
             *  And **cur_end = cur_farthest** is like getting the queue size (level size) for the next level you are traversing.
@@ -661,15 +658,14 @@ Table of Contents
               ```python
               def jump(self, nums: List[int]) -> int:
 
-                cur_farthest = jump = cur_end = 0
+                jump = cur_border = cur_farthest = 0
 
                 for cur in range(0, len(nums)-1):
                     cur_farthest = max(cur_farthest, cur+nums[cur])
-
                     # the boundary need to jump
-                    if cur == cur_end:
+                    if cur == cur_border:
                         jump +=1
-                        # determine the next boundary
+                        # determine the next border
                         cur_end = cur_farthest
 
                 return jump
@@ -707,8 +703,21 @@ Table of Contents
     * Best Time to Buy and Sell Stock
       * [General solution](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/discuss/108870/Most-consistent-ways-of-dealing-with-the-series-of-stock-problems)
       * 121: Best Time to Buy and Sell Stock (E)
-        * Allow 1 transaction only.
+        * Allow **1 transaction only**.
         * For each round, keep the current minimum buy price and update best sell prcie.
+        * Python Solution:
+          ```python
+          def maxProfit(self, prices: List[int]) -> int:
+            min_price = float('inf')
+            best_profit = 0
+
+            for price in prices:
+                min_price = min(price, min_price)
+                profit = price - min_price
+                best_profit = max(profit, best_profit)
+
+            return best_profit
+          ```
       * 122: Best Time to Buy and Sell Stock II (E)
         * Multiple transcation allowed.
         * [**Peak Valley** Approach](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/solution/)
@@ -756,7 +765,7 @@ Table of Contents
               * case2 and case3 can be reduced to cash[i] - price[i]
         * Python Solution
             ```python
-            def maxProfit(self, prices: List[int], fee: int) -> int:
+            def max_profit(self, prices: List[int], fee: int) -> int:
               cash = 0
               hold = -prices[0]
               for i in range(1, len(prices)):
@@ -795,22 +804,21 @@ Table of Contents
                   dist = min(dist, abs(index1-index2))
             ```
       *  244. Shortest Word Distance II (M) **
-         * Init once and search for multiple time.
+         * **Init once** and **search for multiple time**.
          * Using **Preprocessed Sorted Indices** and two pointers to traverse
            * Space: O(n)
              * For or the dictionary that we prepare in the constructor.
                * The keys represent all the unique words in the input and the values represent all of the indices from 0 ... N0...N.
            * Time Complexity:
              * Init step:
-               * O(n)
+               * O(n), where n is the number of words.
              * Find the shortest distance :
-               * O(max(K,L)), where K and L represent the number of occurrences of the two words.
+               * O(K + L)), where K and L represent the number of occurrences of the two words.
            * Python Solution
               ```python
               i = j = 0
 
               while i < len(list1) and j < len(list2):
-
                 index1, index2 = list1[i], list2[j]
 
                 # move the smaller one
@@ -826,11 +834,10 @@ Table of Contents
       * How to check overlap
         * Python Solution
           ```python
-          def overlap(interval1, interval2):
-              return min(interval1.end, interval2.end) \
+              min(interval1.end, interval2.end) \
               > max(interval1.start, interval2.start)
           ```
-        * For sorted intervals
+        * For **sorted intervals**
           * Check overlap between interval[i] and interval[i+1] would be
             * ```python
               interval[i].end > interval[i+1],start
@@ -865,23 +872,20 @@ Table of Contents
             * If not, then we allocate a new room and add it to the heap.
           * Python Solution
             ```python
-            def minMeetingRooms(self, intervals: List[List[int]]) -> int:
-              if not intervals:
-                  return 0
+            start, end = 0, 1
+            intervals.sort(key=lambda interval:interval[start])
+            heap = list()
 
-              start, end = 0, 1
-              intervals.sort(key=lambda interval:interval[start])
-              heap = list()
+            for i in intervals:
+                # heap[0] stores the minimun end time
+                if not heap or i[start] < heap[0]:
+                    # need a new room
+                    heapq.heappush(heap, i[end])
+                else:
+                    # pop min end time and push a new one
+                    heapq.heapreplace(heap, i[end])
 
-              for i in intervals:
-                  if not heap or i[start] < heap[0]:
-                      # need a new room
-                      heapq.heappush(heap, i[end])
-                  else:
-                      # pop min end time and push a new one
-                      heapq.heapreplace(heap, i[end])
-
-              return len(heap)
+            return len(heap)
             ```
     * Interval
     * Counter
@@ -889,8 +893,7 @@ Table of Contents
         * [**Kadane's Algorithm**](https://leetcode.com/problems/maximum-subarray/discuss/20211/Accepted-O(n)-solution-in-java) *
          * Python Solution
             ```python
-            def maxSubArray(self, nums: List[int]) -> int:
-
+            def max_sub_array(self, nums: List[int]) -> int:
                 max_sum_so_far = max_sum = nums[0]
 
                 for i in range(1, len(nums)):
@@ -902,7 +905,7 @@ Table of Contents
             ```
     * Sort
       * 88: Merge Sorted Array (E)
-        * You may assume that nums1 has enough space (size that is greater or equal to m + n) to hold additional elements from nums2.
+        * You may **assume that nums1 has enough space** (size that is greater or equal to m + n) to hold additional elements from nums2.
         * Space O(1):
           * Fill the arrary **from the end to the start**
       * 283: Move Zeroes (E)
@@ -958,6 +961,7 @@ Table of Contents
     * 142: Linked List Cycle II (M) *
       * Given a linked list, return the node **where the cycle begins**. If there is no cycle, return null.
       * Using the **"Runner"** Techinique
+      * Need 3 runners. Fast, Slow1, Slow2
 
    * **Remove**
      * 237: Delete Node in a Linked List (E)
@@ -977,16 +981,93 @@ Table of Contents
       * Using **"dummy node"**.
     * 25: Reverse Nodes in k-Group (H) *
       * Enhancement of 92.
+      * Python Solution
+        ```python
+        if k > length or k == 1:
+            return head
+
+        # total group number
+        group_cnt = length // k
+
+        # prepare dummy node
+        prev = prev_end = dummy = ListNode(0)
+        cur = dummy.next = head
+
+        for _ in range(group_cnt):
+            # reverse for each group
+            for _ in range(k):
+                cur.next, prev, cur = prev, cur, cur.next
+
+            next_prev_end = prev_end.next
+            prev_end.next = prev
+            next_prev_end.next = cur
+            prev = prev_end = next_prev_end
+
+        return dummy.next
+        ```
     * 24: Swap Nodes in Pair (M) *
       * Using the **"dymmy node"** Techinique.
       * Use 3 pointers, prev ,current and next.
+        ```python solution
+        if not head or not head.next:
+            return head
+
+        prev = dummy = ListNode(0)
+        cur = head
+
+        while cur and cur.next:
+            nxt = cur.next
+            prev.next = nxt
+            cur.next = nxt.next
+            nxt.next = cur
+            prev, cur = cur, cur.next
+
+        return dummy.next
+        ```
     * 328: Odd Even Linked List (M)
       * Create **two linked lists** and **merge** them.
+      *
     * 143: Reorder List(M) *
+      * Given a singly linked list L: L0→L1→…→Ln-1→Ln, reorder it to: L0→Ln→L1→Ln-1→L2→Ln-2→…
       * Space O(1): *
-        1. Using the **"Runner"** Techinique to seprate first half and second half of the linked list.
-        2. **Reverse the second half** of the linked list.
-        3. Combine the first half and second half by iterative through out the second half linked list.
+          1. Using the **"Runner"** Techinique to seprate first half and second half of the linked list.
+          2. **Reverse the second half** of the linked list.
+          3. Combine the first half and second half by iterative through out the second half linked list.
+        * Python Solution
+        ```python
+        if not head or not head.next:
+            return
+
+        # Ensure the 1st part has the same or one more node
+        slow, fast = head, head.next
+        while fast and fast.next:
+            fast = fast.next.next
+            slow = slow.next
+
+        # The end of the 1st part
+        reverse_runner = slow.next
+        slow.next = None
+
+        # reverse the 2nd half part
+        prev = None
+        while reverse_runner:
+            nxt = reverse_runner.next
+            reverse_runner.next = prev
+            prev, reverse_runner = reverse_runner, nxt
+
+        first_runner = head
+        second_runner = prev
+
+        # merge to two lists
+        while second_runner:
+            second_next = second_runner.next
+            second_runner.next = first_runner.next
+            first_runner.next = second_runner
+
+            # update
+            first_runner = second_runner.next
+            second_runner = second_next
+        ```
       * Space: O(n):
         * Use a stack to store last half of the linked list.
     * 148: Sort list **
