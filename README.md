@@ -229,16 +229,23 @@ Table of Contents
       * **KMP (substring match)** ***
         * Time: O(m+n), Space: O(n),
           * where m is the length of txt stringm n is the length of the pattern string.
-        * Consider a worst case in brute force:
-          * txt='aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab', pattern='aaaaaab'
-          * KMP can get great benefit from such cases.
         * Reference:
           * [Concept](https://www.youtube.com/watch?v=GTJr8OvyEVQ)
-          * [The partial match table](http://jakeboxer.com/blog/2009/12/13/the-knuth-morris-pratt-algorithm-in-my-own-words/)
-            * The length of the longest proper prefix in the (sub)pattern that matches a proper suffix in the same (sub)pattern.
+          * [The LPS table](http://jakeboxer.com/blog/2009/12/13/the-knuth-morris-pratt-algorithm-in-my-own-words/)
+            * Definiton of Proper Prefix and Suffix
+              * For a pattern: "Snape"
+                * The proper prefix would be
+                  * S, Sn, Sna, Snap
+                * The proper suffix would be
+                  * nape, ape, pe, e
+            * Definition of the value in prefix suffix table
+              * **The length of the longest proper prefix** in the (sub)pattern that matches a proper suffix in the same (sub)pattern.
+          * Example
+            * ![KMP example](./image/algo/KMP.png)
+              * When un-macth happends, **the max reusable string range for next round is in suffix range**.
+              * Seach from LPS array and find the proper start position of pattern comparison pointer (in this example, index 3).
         * Python Solution
           ```python
-
           def get_lps(pattern):
 
               # init lps array
@@ -254,11 +261,12 @@ Table of Contents
                       lps[s] = p  # update suffix length
                       s += 1
                   else:
-                      if p != 0:
-                          # backward the prefix pointer to the position
-                          # after the matched prefix/suffix string
+                      if p > 0:
+                          # reuse the prefix string that has been scanned.
+                          # The length of the longest common prefix suffix
+                          # are put in lps[p-1]
                           p = lps[p-1]
-                      else:
+                      else:  # p = 0
                           # do not match anything
                           lps[s] = 0
                           s += 1
@@ -279,11 +287,12 @@ Table of Contents
                           res =  i - j
                           break
                   else:
-                      if j != 0:
-                          # backward the prefix pointer to the position
-                          # after the matched prefix/suffix string
+                      if j > 0:
+                          # reuse the prefix string that has been scanned.
+                          # The length of the longest common prefix suffix
+                          # are put in lps[p-1]
                           j = lps[j-1]
-                      else:
+                      else: # j = 0
                           # do not match anything
                           i += 1
               return res
@@ -1026,7 +1035,30 @@ Table of Contents
         ```
     * 328: Odd Even Linked List (M)
       * Create **two linked lists** and **merge** them.
-      *
+      * Python Solution
+        ```python
+        odd = dummy1 = ListNode(0)
+        even = dummy2 = ListNode(0)
+        cur = head
+
+        i = 1
+        while cur:
+            if i % 2:
+              odd.next = cur
+              odd = cur
+            else:
+              even.next = cur
+              even = cur
+
+            cur = cur.next
+            i+=1
+
+        odd.next = dummy2.next
+        even.next = None
+
+        return dummy1.next
+        ```
+
     * 143: Reorder List(M) *
       * Given a singly linked list L: L0→L1→…→Ln-1→Ln, reorder it to: L0→Ln→L1→Ln-1→L2→Ln-2→…
       * Space O(1): *
