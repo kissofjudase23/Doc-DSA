@@ -1041,9 +1041,9 @@ Table of Contents
         even = dummy2 = ListNode(0)
         cur = head
 
-        i = 1
+        odd_flag = True
         while cur:
-            if i % 2:
+            if odd:
               odd.next = cur
               odd = cur
             else:
@@ -1051,7 +1051,7 @@ Table of Contents
               even = cur
 
             cur = cur.next
-            i+=1
+            odd_flag = not odd_flag
 
         odd.next = dummy2.next
         even.next = None
@@ -1108,6 +1108,83 @@ Table of Contents
           * **Split** the linked with window size 1,2,4,8, etc.
           * **Merge** the splitted linked lists.
             * Having to handle **linking issue** between two sorted lists **after merging**.
+          * Python Solution
+          ```python
+
+          def split_list(self, head, n):
+              first_runner = head
+              second_head = None
+
+              for _ in range(n-1):
+                  if not first_runner:
+                      break
+                  first_runner = first_runner.next
+
+              if not first_runner:
+                  return None
+
+              second_head = first_runner.next
+              first_runner.next = None
+              return second_head
+
+
+          def merge_two_lists(self, l1, l2, tail):
+              runner1 , runner2 = l1, l2
+              merge_runner = dummy = ListNode(0)
+
+              while runner1 and runner2:
+                  if runner1.val <= runner2.val:
+                      merge_runner.next = runner1
+                      runner1 = runner1.next
+                  else:
+                      merge_runner.next = runner2
+                      runner2 = runner2.next
+                  merge_runner = merge_runner.next
+
+              while runner1:
+                  merge_runner.next = runner1
+                  runner1 = runner1.next
+                  merge_runner = merge_runner.next
+
+              while runner2:
+                  merge_runner.next = runner2
+                  runner2 = runner2.next
+                  merge_runner = merge_runner.next
+
+              # previous tail
+              tail.next = dummy.next
+              # new tail
+              return merge_runner
+
+
+          # use merge sort
+          def sortList(self, head: ListNode) -> ListNode:
+              if not head or not head.next:
+                  return head
+
+              length = 0
+              runner = head
+              while runner:
+                  length += 1
+                  runner = runner.next
+
+              window_size = 1
+              dummy = ListNode(0)
+              left = dummy.next = head
+              while window_size < length:
+                  left, tail = dummy.next, dummy
+
+                  while left:
+                      # left, right, next_left
+                      right = self.split_list(left, window_size)
+                      next_left = self.split_list(right, window_size)
+                      tail = self.merge_two_lists(left, right, tail)
+                      left = next_left
+
+                  window_size *= 2
+
+              return dummy.next
+          ```
     * 61: Rotate list
       * The rotate length k may be greater than the length of linked list
 
