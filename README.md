@@ -10,7 +10,6 @@ Table of Contents
 - [Walking through a Problem](#Walking-through-a-Problem)
 - [Optimize & Solve Technique](#Optimize--Solve-Technique)
 - [Math](#Math)
-  - [Sum](#Sum)
 - [Data Structures](#Data-Structures)
   - [String](#String)
   - [Array](#Array)
@@ -149,211 +148,106 @@ Table of Contents
    * The best conceivable runtie is, literally, the **best runtime** you could conceive of a solution to a problem. You can easily prove that there is no way you could beat the BCR.
 
 ## Math
+* LeetCode
+  * Reorder
+    * 7: Reverse Integer
+      * Notice the boundary
+      ```python
+      def reverse(self, x: int) -> int:
+        is_positive = True if x >=0 else False
+        reverse = 0
+        boundary = (2 ** 31)//10 # 2147483640
 
-### Reverse
-* 7. Reverse Integer
-  * Notice the boundary
-  ```python
-  def reverse(self, x: int) -> int:
-    is_positive = True if x >=0 else False
-    reverse = 0
-    boundary = (2 ** 31)//10 # 2147483640
+        if not is_positive:
+            x = -x
 
-    if not is_positive:
-        x = -x
+        while x:
+            pop = x % 10
+            x //= 10
+            # boundary = 214748364
+            # boundary * 10 = 2147483640
+            # 2**31 = 2147483648 = 2147483640 + 8 = boundary * 10 + 8
+            if reverse > boundary or reverse == boundary and pop > 7 :
+                return 0
 
-    while x:
-        pop = x % 10
-        x //= 10
-        # boundary = 214748364
-        # boundary * 10 = 2147483640
-        # 2**31 = 2147483648 = 2147483640 + 8 = boundary * 10 + 8
-        if reverse > boundary or reverse == boundary and pop > 7 :
-            return 0
+            reverse = reverse * 10 + pop
 
-        reverse = reverse * 10 + pop
+        if not is_positive:
+            reverse = -reverse
 
-    if not is_positive:
-        reverse = -reverse
+        return reverse
+      ```
+  * Sum
+    * 1: Two Sum (E)
+      * Time: O(n), Space: O(n)
+        * Use hash table
+    * 15: 3Sum (M)
+      * Time O(n^2)
+        1. **Sort** first
+        2. For each target (from 0 to n-3)
+             * Find left and right pair that num[target] + num[left] + num[right] = 0
+             * Target = -num[target] = num[left] + num[right]
+      * Why does the algorithm work?
+          * Assume that we find a correct target for num[left] + num[right]
+            * case1: x
+              * nums[left+1] + nums[right+1] > Target
+            * case2: x
+              * nums[left-1] + nums[right-1] < Target.
+            * case3: ✓
+              * nums[left+1] + nums[right-1] may be possible.
+            * case4: x
+              * nums[left-1] + nums[r+1] has been traverse before.
+      * Python Solution
+          ```python
+          def threeSum(self, nums: List[int]) -> List[List[int]]:
 
-    return reverse
-  ```
-### Sum
-  * 1: Two Sum (E)
-    * Time: O(n), Space: O(n)
-      * Use hash table
-  * 15: 3Sum (M)
-    * Time O(n^2)
-      1. **Sort** first
-      2. For each target (from 0 to n-3)
-           * Find left and right pair that num[target] + num[left] + num[right] = 0
-           * Target = -num[target] = num[left] + num[right]
-    * Why does the algorithm work?
-        * Assume that we find a correct target for num[left] + num[right]
-          * case1: x
-            * nums[left+1] + nums[right+1] > Target
-          * case2: x
-            * nums[left-1] + nums[right-1] < Target.
-          * case3: ✓
-            * nums[left+1] + nums[right-1] may be possible.
-          * case4: x
-            * nums[left-1] + nums[r+1] has been traverse before.
-    * Python Solution
-        ```python
-        def threeSum(self, nums: List[int]) -> List[List[int]]:
+            res = list()
+            nums.sort()
 
-          res = list()
-          nums.sort()
+            for i in range(0, len(nums)-2):
 
-          for i in range(0, len(nums)-2):
+                # skip duplicate
+                if i > 0 and nums[i] == nums[i-1]:
+                    continue
 
-              # skip duplicate
-              if i > 0 and nums[i] == nums[i-1]:
-                  continue
+                l, r = i+1, len(nums)-1
 
-              l, r = i+1, len(nums)-1
+                while l < r:
 
-              while l < r:
+                    s = nums[i] + nums[l] + nums[r]
 
-                  s = nums[i] + nums[l] + nums[r]
+                    if s < 0:
+                        l += 1
 
-                  if s < 0:
-                      l += 1
+                    elif s > 0:
+                        r -= 1
 
-                  elif s > 0:
-                      r -= 1
+                    else:
+                        res.append([nums[i],nums[l],nums[r]])
 
-                  else:
-                      res.append([nums[i],nums[l],nums[r]])
+                        # skip duplicate
+                        while l < r and nums[l] == nums[l+1]:
+                            l += 1
+                        while l < r and nums[r] == nums[r-1]:
+                            r -= 1
 
-                      # skip duplicate
-                      while l < r and nums[l] == nums[l+1]:
-                          l += 1
-                      while l < r and nums[r] == nums[r-1]:
-                          r -= 1
+                        l+=1
+                        r-=1
 
-                      l+=1
-                      r-=1
-
-            return res
-        ```
-  * 4Sum (M)
-
+              return res
+          ```
+    * 4Sum (M)
+  * Other
 
 ## [Data Structures](https://github.com/kissofjudase23/Library-python-common-modules/tree/master/common/ds)
 
 ### String
   * LeetCode:
-    * 387. First Unique Character in a String
-      * Time: O(n), Space: O(c)
-        * Use Hash Table
-    * 344: Reverse String (E)
-    * 58: Length of Last Word (E)
-      * Seach **from the end to the beginning**.
-    * 161: One Edit Distance (M)
-      * Time O(1), Space (1):
-        * Merge the insert and remove cases (find the short one)
-        * Use short and long string pointers to traverse and compare
-    * 28: Implement strStr(E)
-      * Find Sub-String
-      * Brute Force
-        * Time: O(mn), Space(1)
-      * **KMP (substring match)** ***
-        * Time: O(m+n), Space: O(n),
-          * where m is the length of txt stringm n is the length of the pattern string.
-        * Reference:
-          * [Concept](https://www.youtube.com/watch?v=GTJr8OvyEVQ)
-          * [The LPS table](http://jakeboxer.com/blog/2009/12/13/the-knuth-morris-pratt-algorithm-in-my-own-words/)
-            * Definiton of Proper Prefix and Suffix
-              * For a pattern: "Snape"
-                * The proper prefix would be
-                  * S, Sn, Sna, Snap
-                * The proper suffix would be
-                  * nape, ape, pe, e
-            * Definition of the value in prefix suffix table
-              * **The length of the longest proper prefix** in the (sub)pattern that matches a proper suffix in the same (sub)pattern.
-          * Example
-            * ![KMP example](./image/algo/KMP.png)
-              * When un-macth happends, **the max reusable string range for next round is in suffix range**.
-              * Seach from LPS array and find the proper start position of pattern comparison pointer (in this example, index 3).
-        * Python Solution
-          ```python
-          def get_lps(pattern):
-
-              # init lps array
-              lps = [None] * len(pattern)
-              lps[0] = 0
-
-              p = 0  # prefix pointer
-              s = 1  # suffix pointer
-
-              while s < len(pattern):
-                  if pattern[s] == pattern[p]:
-                      p += 1
-                      lps[s] = p  # update suffix length
-                      s += 1
-                  else:
-                      if p > 0:
-                          # reuse the prefix string that has been scanned.
-                          # The length of the longest common prefix suffix
-                          # are put in lps[p-1]
-                          p = lps[p-1]
-                      else:  # p = 0
-                          # do not match anything
-                          lps[s] = 0
-                          s += 1
-              return lps
-
-          def is_substring(txt: str, pattern: str) -> int:
-              if not pattern or len(pattern) == 0:
-                  return 0
-
-              res = not_found = -1
-              lps = get_lps(pattern)
-              i = j = 0
-              while i < len(txt):
-                  if txt[i] == pattern[j]:
-                      i += 1
-                      j += 1
-                      if j == len(pattern):
-                          res =  i - j
-                          break
-                  else:
-                      if j > 0:
-                          # reuse the prefix string that has been scanned.
-                          # The length of the longest common prefix suffix
-                          # are put in lps[p-1]
-                          j = lps[j-1]
-                      else: # j = 0
-                          # do not match anything
-                          i += 1
-              return res
-          ```
-        * 14: Longest Common Prefix (E)
-          * Use **vertical scanning**
-            * Time: O(mn)
-              * Where m is the minimum length of str in strs and n is the len(strs).
-            * Python Solution
-                ```python
-                def longest_common_prefix(self, strs: List[str]) -> str:
-                  if not strs:
-                      return ""
-
-                  prefix = strs[0]
-                  # Vertical Scanning
-                  for i in range(0, len(prefix)):
-                      c = prefix[i]
-                      for j in range(1, len(strs)):
-                          if i == len(strs[j]) or strs[j][i] != c:
-                              prefix = prefix[:i]
-                              found = True
-                              break
-
-                      if found:
-                          break
-
-                  return prefix
-                ```
+    * Edit Distance
+      * 161: One Edit Distance (M)
+        * Time O(1), Space (1):
+          * Merge the insert and remove cases (find the short one)
+          * Use short and long string pointers to traverse and compare
     * SubString
     * Palindrome
     * Parentheses
@@ -379,6 +273,114 @@ Table of Contents
               return len(stack) == 0
           ```
     * Subsequence
+    * Reorder
+      * 344: Reverse String (E)
+    * Other
+      * 387: First Unique Character in a String (E)
+        * Time: O(n), Space: O(c)
+          * Use Hash Table
+      * 58: Length of Last Word (E)
+        * Seach **from the end to the beginning**.
+      * 28: Implement strStr (E)
+        * Find Sub-String
+        * Brute Force
+          * Time: O(mn), Space(1)
+        * **KMP (substring match)** ***
+          * Time: O(m+n), Space: O(n),
+            * where m is the length of txt stringm n is the length of the pattern string.
+          * Reference:
+            * [Concept](https://www.youtube.com/watch?v=GTJr8OvyEVQ)
+            * [The LPS table](http://jakeboxer.com/blog/2009/12/13/the-knuth-morris-pratt-algorithm-in-my-own-words/)
+              * Definiton of Proper Prefix and Suffix
+                * For a pattern: "Snape"
+                  * The proper prefix would be
+                    * S, Sn, Sna, Snap
+                  * The proper suffix would be
+                    * nape, ape, pe, e
+              * Definition of the value in prefix suffix table
+                * **The length of the longest proper prefix** in the (sub)pattern that matches a proper suffix in the same (sub)pattern.
+            * Example
+              * ![KMP example](./image/algo/KMP.png)
+                * When un-macth happends, **the max reusable string range for next round is in suffix range**.
+                * Seach from LPS array and find the proper start position of pattern comparison pointer (in this example, index 3).
+          * Python Solution
+            ```python
+            def get_lps(pattern):
+
+                # init lps array
+                lps = [None] * len(pattern)
+                lps[0] = 0
+
+                p = 0  # prefix pointer
+                s = 1  # suffix pointer
+
+                while s < len(pattern):
+                    if pattern[s] == pattern[p]:
+                        p += 1
+                        lps[s] = p  # update suffix length
+                        s += 1
+                    else:
+                        if p > 0:
+                            # reuse the prefix string that has been scanned.
+                            # The length of the longest common prefix suffix
+                            # are put in lps[p-1]
+                            p = lps[p-1]
+                        else:  # p = 0
+                            # do not match anything
+                            lps[s] = 0
+                            s += 1
+                return lps
+
+            def is_substring(txt: str, pattern: str) -> int:
+                if not pattern or len(pattern) == 0:
+                    return 0
+
+                res = not_found = -1
+                lps = get_lps(pattern)
+                i = j = 0
+                while i < len(txt):
+                    if txt[i] == pattern[j]:
+                        i += 1
+                        j += 1
+                        if j == len(pattern):
+                            res =  i - j
+                            break
+                    else:
+                        if j > 0:
+                            # reuse the prefix string that has been scanned.
+                            # The length of the longest common prefix suffix
+                            # are put in lps[p-1]
+                            j = lps[j-1]
+                        else: # j = 0
+                            # do not match anything
+                            i += 1
+                return res
+            ```
+          * 14: Longest Common Prefix (E)
+            * Use **vertical scanning**
+              * Time: O(mn)
+                * Where m is the minimum length of str in strs and n is the len(strs).
+              * Python Solution
+                  ```python
+                  def longest_common_prefix(self, strs: List[str]) -> str:
+                    if not strs:
+                        return ""
+
+                    prefix = strs[0]
+                    # Vertical Scanning
+                    for i in range(0, len(prefix)):
+                        c = prefix[i]
+                        for j in range(1, len(strs)):
+                            if i == len(strs[j]) or strs[j][i] != c:
+                                prefix = prefix[:i]
+                                found = True
+                                break
+
+                        if found:
+                            break
+
+                    return prefix
+                  ```
 
 ### Array
   * LeetCode:
@@ -1390,22 +1392,23 @@ Table of Contents
     * 61: Rotate list
       * The rotate length k may be greater than the length of linked list
 
-  * 2: Add Two Numbers (M)
-    * Time complexity O(n) and one pass
-      * don't forget the **last carry**. *
-  * 160	Intersection of Two Linked Lists (E)
-    * Use **difference** of length
-  * 21: Merge Two Sorted Lists (E)
-    * The concept is like merge step in the **merge sort**.
-  * 234: Palindrome Linked List(M)
-    * Space Complexity O(1) *:
-      * Reverse first half of the linked list, but it is not a pratical solution since we should not modity the constant function of the input.
-    * Space Complexity O(n):
-      * Use a stack
-  * 369	[Plus One Linked List](https://www.geeksforgeeks.org/add-1-number-represented-linked-list/)
-    1. **Reverse** given linked list. For example, 1-> 9-> 9 -> 9 is converted to 9-> 9 -> 9 ->1.
-    2. Start traversing linked list from leftmost node and add 1 to it. If there is a carry, move to the next node. Keep moving to the next node while there is a carry.
-    3. **Reverse** modified linked list and return head.
+  * Other
+    * 2: Add Two Numbers (M)
+      * Time complexity O(n) and one pass
+        * don't forget the **last carry**. *
+    * 160	Intersection of Two Linked Lists (E)
+      * Use **difference** of length
+    * 21: Merge Two Sorted Lists (E)
+      * The concept is like merge step in the **merge sort**.
+    * 234: Palindrome Linked List(M)
+      * Space Complexity O(1) *:
+        * Reverse first half of the linked list, but it is not a pratical solution since we should not modity the constant function of the input.
+      * Space Complexity O(n):
+        * Use a stack
+    * 369	[Plus One Linked List](https://www.geeksforgeeks.org/add-1-number-represented-linked-list/)
+      1. **Reverse** given linked list. For example, 1-> 9-> 9 -> 9 is converted to 9-> 9 -> 9 ->1.
+      2. Start traversing linked list from leftmost node and add 1 to it. If there is a carry, move to the next node. Keep moving to the next node while there is a carry.
+      3. **Reverse** modified linked list and return head.
   * TODO
     * 86	Partition List
     * 23	Merge k Sorted Lists
