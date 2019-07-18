@@ -150,11 +150,40 @@ Table of Contents
 
 ## Math
 
+### Reverse
+* 7. Reverse Integer
+  * Notice the boundary
+  ```python
+  def reverse(self, x: int) -> int:
+    is_positive = True if x >=0 else False
+    reverse = 0
+    boundary = (2 ** 31)//10 # 2147483640
+
+    if not is_positive:
+        x = -x
+
+    while x:
+        pop = x % 10
+        x //= 10
+        # boundary = 214748364
+        # boundary * 10 = 2147483640
+        # 2**31 = 2147483648 = 2147483640 + 8 = boundary * 10 + 8
+        if reverse > boundary or reverse == boundary and pop > 7 :
+            return 0
+
+        reverse = reverse * 10 + pop
+
+    if not is_positive:
+        reverse = -reverse
+
+    return reverse
+  ```
 ### Sum
-  * Two Sum (E)
-    * Use hash table
-  * 3Sum (M)
-    * Algo (Time O(n^2))
+  * 1: Two Sum (E)
+    * Time: O(n), Space: O(n)
+      * Use hash table
+  * 15: 3Sum (M)
+    * Time O(n^2)
       1. **Sort** first
       2. For each target (from 0 to n-3)
            * Find left and right pair that num[target] + num[left] + num[right] = 0
@@ -215,6 +244,9 @@ Table of Contents
 
 ### String
   * LeetCode:
+    * 387. First Unique Character in a String
+      * Time: O(n), Space: O(c)
+        * Use Hash Table
     * 344: Reverse String (E)
     * 58: Length of Last Word (E)
       * Seach **from the end to the beginning**.
@@ -839,27 +871,27 @@ Table of Contents
                     dist = min(dist, index1-index2)
                     j += 1
               ```
-    * Meeting Rooms
-      * How to check overlap
-        * Python Solution
-          ```python
-              min(interval1.end, interval2.end) \
-              > max(interval1.start, interval2.start)
-          ```
-        * For **sorted intervals**
-          * Check overlap between interval[i] and interval[i+1] would be
-            * ```python
-              interval[i].end > interval[i+1],start
-              ```
-            * If interval 3 and interval1 have overlap, then interval2 and interval1 must have overlap as well, since interval2.start < interval3.start.
 
+            ```
+    * Interval
       * 252: Meeting Rooms (E)
         * Check if one person can attend all meetings.
-        * Algo:
-          * Time: O(nlog(n))
-          * Sort by start time of intervals
-          * Check if interval[i] and intervalp[i+1] have overlap.
-
+        * How to check overlap
+          * Python Solution
+            ```python
+                min(interval1.end, interval2.end) \
+                > max(interval1.start, interval2.start)
+            ```
+          * For **sorted intervals**
+            * Check overlap between interval[i] and interval[i+1] would be
+              * ```python
+                interval[i].end > interval[i+1],start
+                ```
+              * If interval 3 and interval1 have overlap, then interval2 and interval1 must have overlap as well, since interval2.start < interval3.start.
+          * Algo:
+            * Time: O(nlog(n))
+            * Sort by start time of intervals
+            * Check if interval[i] and intervalp[i+1] have overlap.
         * Python Solution
           ```python
           start, end = 0, 1
@@ -895,8 +927,31 @@ Table of Contents
                     heapq.heapreplace(heap, i[end])
 
             return len(heap)
+      * 56:	Merge Intervals (M)
+        * Time: O(nlogn), Space: O(1)
+          * Sort the intervals by start time,
+          * Update the output if there exists interval overlap.
+          * Python Solution
+            ```python
+            start, end = 0, 1
+            intervals.sort(key=lambda interval: interval[start])
+            output = list()
+            output.append(intervals[0].copy())
+
+            for i in range(1, len(intervals)):
+                # merge
+                cur = intervals[i]
+                last = output[-1]
+                if last[end] >= cur[start]:
+                    last[end] = max(last[end], cur[end])
+                else:
+                    output.append(cur.copy())
+
+            return output
             ```
-    * Interval
+      * 57:	Insert Interval (H)
+      * 352: Data Stream as Disjoint Intervals (H)
+
     * Counter
       * 53: Maximum Subarray (E)
         * [**Kadane's Algorithm**](https://leetcode.com/problems/maximum-subarray/discuss/20211/Accepted-O(n)-solution-in-java) *
@@ -906,12 +961,163 @@ Table of Contents
                 max_sum_so_far = max_sum = nums[0]
 
                 for i in range(1, len(nums)):
-                    num = nums[i]
-                    max_sum_so_far = max(num, max_sum_so_far+num)
+                    max_sum_so_far = max(nums[i], max_sum_so_far+nums[i])
                     max_sum = max(max_sum, max_sum_so_far)
 
                 return max_sum
             ```
+      * 152: Maximum **Product** Subarray (M)
+        * Time: O(n), Space: O(1)
+          * The concept is just like 53: maximum subarray
+          * Python Solution
+            ```python
+            def maxProduct(self, nums: List[int]) -> int:
+
+            g_max = cur_min = cur_max = nums[0]
+
+            for i in range(1, len(nums)):
+                # multiplied by a negative makes big number smaller,
+                # small number bigger so we redefine the extremums
+                # by swapping them
+                if nums[i] < 0:
+                    cur_min, cur_max = cur_max, cur_min
+
+                cur_max = max(nums[i], cur_max*nums[i])
+                cur_min = min(nums[i], cur_min*nums[i])
+
+                g_max = max(cur_max, g_max)
+
+            return g_max
+            ```
+      * 325: Maximum Size Subarray Sum **Equals k** (E)
+        * Time: O(n), Space: O(n)
+          * [Concept](https://leetcode.com/problems/maximum-size-subarray-sum-equals-k/discuss/77784/O(n)-super-clean-9-line-Java-solution-with-HashMap)
+            * Use hash table to keep acc value.
+            * Use incremental val to find the max size of subarray.
+          * Python Solution
+            ```python
+            def maxSubArrayLen(self, nums: List[int], k: int) -> int:
+              acc = max_len = 0
+              d = dict()
+
+              for i, v in enumerate(nums):
+                  acc += v
+
+                  if acc == k:
+                      max_len = i + 1
+
+                  else:
+                      val_of_start = acc - k
+                      if val_of_start in d:
+                          # incrmental from d[val_of_start]) to i is k
+                          max_len = max(max_len, i-d[val_of_start])
+
+                  if acc not in d:
+                      d[acc] = i
+
+              return max_len
+            ```
+      * 560: Subarray Sum **Equals K**
+        * [Solution](https://leetcode.com/problems/subarray-sum-equals-k/solution/)
+        * Time: O(n^2)m, Space: O(1)
+          * python solution
+            ```python
+            def subarraySum(self, nums: List[int], k: int) -> int:
+              cnt = 0
+
+              for start in range(0, len(nums)):
+                acc = 0
+                for end in range(start, len(nums)):
+                  acc += nums[s]
+                  if acc == k:
+                    cnt += 1
+
+              return cnt
+            ```
+        * Time: O(n), Space: O(n)
+          * Use hash table to keep acc value.
+          * Use incremental val to find the max size of subarray.
+          * Python Solution
+            ```python
+            def subarraySum(self, nums: List[int], k: int) -> int:
+              acc = cnt = 0
+              d = collections.defaultdict(int)
+
+              for i, v in enumerate(nums):
+                  acc += v
+
+                  if acc == k:
+                      cnt += 1
+
+                  val_of_start = acc - k
+                  # incrmental from d[start_val]) to current index is k
+                  if val_of_start in d:
+                      cnt += d[val_of_start]
+
+                  d[acc] += 1
+
+              return cnt
+            ```
+      * 238: Product of Array Except Self (M)
+        * Allow Division
+          * We can simply take the product of all the elements in the given array and then, for each of the elements xx of the array, we can simply find product of array except self value by dividing the product by xx.
+          * Special cases
+            * exactly 1 zero
+            * more than 1 zero
+          * Python Solution
+            ```python
+            def product_except_self(self, nums: List[int]) -> List[int]:
+                zero_cnt = 0
+                products = 1
+                output = [0] * len(nums)
+
+                for i, num in enumerate(nums):
+                    if num != 0:
+                        products *= num
+                    else:
+                        zero_idx = i
+                        zero_cnt += 1
+
+                if zero_cnt > 1:
+                    pass
+                elif zero_cnt == 1:
+                    output[zero_idx] = products
+                else:
+                    for i in range(0, len(nums)):
+                        output[i] = int(products/nums[i])
+
+                return output
+              ```
+        * Not Allow Division:
+          * [Concept](https://leetcode.com/problems/product-of-array-except-self/solution/)
+            * **For every given index i, we will make use of the product of all the numbers to the left of it and multiply it by the product of all the numbers to the right**=.
+            * Python Solution:
+              ```python
+              def product_except_self(self, nums: List[int]) -> List[int]:
+
+                output = [0] * len(nums)
+                output[0] = 1
+
+                # left array, for nums[a,b,c,d]
+                # left would be [1, a, a*b, a*b*c]
+                for i in range(1, len(output)):
+                    output[i] = output[i-1] * nums[i-1]
+
+                # right would be [b*c*d, c*d, d, 1]
+                # use r to keep the right val
+                r = 1
+                for i in range(len(output)-1, -1, -1):
+                    output[i] = output[i] * r
+                    r *= nums[i]
+
+                return output
+              ```
+      * 228: Summary Ranges (M)
+      * 163: Missing Ranges (M)
+      * 239: Sliding Window Maximum (H)
+      * 295: Find Median from Data Stream (H)
+
+
     * Sort
       * 88: Merge Sorted Array (E)
         * You may **assume that nums1 has enough space** (size that is greater or equal to m + n) to hold additional elements from nums2.
