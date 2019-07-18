@@ -382,144 +382,18 @@ Table of Contents
 
 ### Array
   * LeetCode:
-    * Remove
+    * Check Duplicate
+      * 217: Contains Duplicate (E)
+        * Use hash Table
+      * 219: Contains Duplicate II (E)
+        * Use hash Table
+    * Remove Duplicate
       * 27: Remove elements (E)
         * Like partition step of quick sort (keep the border)
         * Copy the wanted elements to the front of the array
       * 26: Remove Duplicates from Sorted Array (E)
       * 80: Remove Duplicates from Sorted Array II (M)
         * Need a counter
-    * 277: [Find the Celebrity](https://pandaforme.github.io/2016/12/09/Celebrity-Problem/) (M) *
-      1. Find the **celebrity candidate**
-      2. Check if the candidate is the celebrity
-         * Check the people before the celebrity candidate:
-            * The celebrity does not know them but they know the celebrity.
-         * Check the people after the celebrity candidate:
-           * They should know the celebrity
-       * Python Solution
-          ````python
-          # Return True if a knows b
-          def knows(a,  b)
-
-          def find_celebrity(self, n):
-              """
-              :type n: int
-              :rtype: int
-              """
-              unknown = -1
-              celebrity = 0
-              # find the celebrity candidate
-              for p in range(1, n):
-                  if not knows(celebrity, p):
-                      continue
-                  celebrity = p
-
-              # check people in the left side
-              for p in range(celebrity):
-                  if knows(p, celebrity) and not knows(celebrity, p):
-                      continue
-                  return unknown
-
-              # # check people in the right side
-              for p in range(celebrity+1, n):
-                  if knows(p, celebrity):
-                      continue
-                  return unknown
-
-              return celebrity
-          ````
-    * 189: Rotate Array (E)
-      * Space Complexity **O(1)**
-        * Use **three reverse** operations can solve this problem.
-    * 41: First missing positive (H) *
-      * [concept](https://leetcode.com/problems/first-missing-positive/discuss/17073/Share-my-O(n)-time-O(1)-space-solution):
-          * The idea is **like you put k balls into k+1 bins**, there must be a bin empty, the empty bin can be viewed as the missing number.
-      * Time O(n), Space O(n)
-        * Use extra space to keep the sorted positve numbers.
-        * Python Solution
-          ```python
-          def firstMissingPositive(self, nums: List[int]) -> int:
-            length = len(nums)
-            sorted_positive_nums = [None] * length
-
-            for i in range(length):
-                if 0 < nums[i] <= length:
-                    # the correct position of nums[i] is in nums[nums[i]-1]
-                    correct = nums[i]-1  # need this correct
-                    sorted_positive_nums[correct] = nums[i]
-
-            for i in range(length):
-                if sorted_positive_nums[i] != i+1:
-                    return i+1
-
-            # not found from 0 to length-1, so the first missing is in length-th
-            return length+1
-          ```
-      * [Time:O(n), Space:O(1)](https://leetcode.com/problems/first-missing-positive/discuss/17071/My-short-c%2B%2B-solution-O(1)-space-and-O(n)-time) *
-         1. Each number will be put in its right place at most once after first loop *
-         2. Traverse the array to find the unmatch number
-         * Python Solution
-            ```python
-            def firstMissingPositive(self, nums: List[int]) -> int:
-              length = len(nums)
-
-              for i in range(length):
-                  # We visit each number once, and each number will
-                  # be put in its right place at most once
-                  while 0 < nums[i] <= length and nums[nums[i]-1] != nums[i]:
-                      # the correct position of nums[i] is in
-                      # nums[nums[i]#-1]
-                      correct = nums[i]-1  # need this correct
-                      nums[i], nums[correct] = nums[correct] , nums[i]
-
-              for i in range(length):
-                  if nums[i] != i+1:
-                      return i+1
-               not found from 0 to length-1, so the first missing is in length-th
-              return length+1
-            ```
-    * 299: Bulls and Cows (M)
-      * Time O(n), Space O(n) and **one pass**
-        * Use **hash Table** to count cows.
-        * Python solution
-          ```python
-          for s,g in zip(secret, guess):
-            if s == g:
-                bull += 1
-            else:  # s != g
-                if hash_table[s] < 0:
-                    # s appears in guess before
-                    cow += 1
-                if hash_table[g] > 0:
-                    # g appears in secret before
-                    cow += 1
-
-                hash_table[s] += 1
-                hash_table[g] -= 1
-
-          return f'{bull}A{cow}B'
-          ```
-    * 134: Gas Station (M) **
-        * **if sum of gas is more than sum of cost, then there must be a solution**.
-           And the question guaranteed that the solution is unique
-           (The first one I found is the right one).
-        * **The tank should never be negative**, so restart whenever there is a negative number.
-        * Python Solution
-          ```python
-          start, not_found = 0, -1
-
-          for i in range(len(gas)):
-              sum_gas += gas[i]
-              sum_cost += cost[i]
-              tank += gas[i] - cost[i]
-
-              # try another start
-              if tank < 0:
-                  start = i+1
-                  tank = 0
-
-          return start if sum_gas >= sum_cost else not_found
-          ```
     * Container
       * 11: Container With Most Water (M)
         * Time O(n)
@@ -814,15 +688,10 @@ Table of Contents
                   hold = max(hold, cash-prices[i])
               return cash
             ```
-    * Duplicate
-      * 217: Contains Duplicate (E)
-        * Use hash Table
-      * 219: Contains Duplicate II (E)
-        * Use hash Table
-    * Shortest Word Distance **
-      *  243. Shortest Word Distance (E) *
+    * Shortest Word Distance
+      * 243: Shortest Word Distance (E) *
          *  Calculate the distance and update the shortest distance in each round.
-      * 245. Shortest Word Distance III (M) *
+      * 245: Shortest Word Distance III (M) *
         * Allow **duplicated words**.
         * Keep the shortest distance in each round.
         * Python Solution
@@ -844,7 +713,7 @@ Table of Contents
               if index1 != -1 and index2 != -1:
                   dist = min(dist, abs(index1-index2))
             ```
-      *  244. Shortest Word Distance II (M) **
+      * 244: Shortest Word Distance II (M) **
          * **Init once** and **search for multiple time**.
          * Using **Preprocessed Sorted Indices** and two pointers to traverse
            * Space: O(n)
@@ -951,7 +820,6 @@ Table of Contents
             ```
       * 57:	Insert Interval (H)
       * 352: Data Stream as Disjoint Intervals (H)
-
     * Counter
       * 53: Maximum Subarray (E)
         * [**Kadane's Algorithm**](https://leetcode.com/problems/maximum-subarray/discuss/20211/Accepted-O(n)-solution-in-java) *
@@ -973,21 +841,21 @@ Table of Contents
             ```python
             def maxProduct(self, nums: List[int]) -> int:
 
-            g_max = cur_min = cur_max = nums[0]
+              g_max = cur_min = cur_max = nums[0]
 
-            for i in range(1, len(nums)):
-                # multiplied by a negative makes big number smaller,
-                # small number bigger so we redefine the extremums
-                # by swapping them
-                if nums[i] < 0:
-                    cur_min, cur_max = cur_max, cur_min
+              for i in range(1, len(nums)):
+                  # multiplied by a negative makes big number smaller,
+                  # small number bigger so we redefine the extremums
+                  # by swapping them
+                  if nums[i] < 0:
+                      cur_min, cur_max = cur_max, cur_min
 
-                cur_max = max(nums[i], cur_max*nums[i])
-                cur_min = min(nums[i], cur_min*nums[i])
+                  cur_max = max(nums[i], cur_max*nums[i])
+                  cur_min = min(nums[i], cur_min*nums[i])
 
-                g_max = max(cur_max, g_max)
+                  g_max = max(cur_max, g_max)
 
-            return g_max
+              return g_max
             ```
       * 325: Maximum Size Subarray Sum **Equals k** (E)
         * Time: O(n), Space: O(n)
@@ -1116,9 +984,10 @@ Table of Contents
       * 163: Missing Ranges (M)
       * 239: Sliding Window Maximum (H)
       * 295: Find Median from Data Stream (H)
-
-
-    * Sort
+    * Reorder and Sort
+      * 189: Rotate Array (E)
+        * Space Complexity **O(1)**
+          * Use **three reverse** operations can solve this problem.
       * 88: Merge Sorted Array (E)
         * You may **assume that nums1 has enough space** (size that is greater or equal to m + n) to hold additional elements from nums2.
         * Space O(1):
@@ -1126,7 +995,6 @@ Table of Contents
       * 283: Move Zeroes (E)
         * Like the partition step of quick sort
           * **keep the border pointing to next available position.**
-
       * 280: Wiggle Sort (M) *
         * Definition
           * **nums[0] <= nums[1] >= nums[2] <= nums[3]...**
@@ -1148,7 +1016,135 @@ Table of Contents
 
                 less = not less
             ```
+    * Other:
+      * 277: [Find the Celebrity](https://pandaforme.github.io/2016/12/09/Celebrity-Problem/) (M) *
+        1. Find the **celebrity candidate**
+        2. Check if the candidate is the celebrity
+           * Check the people before the celebrity candidate:
+              * The celebrity does not know them but they know the celebrity.
+           * Check the people after the celebrity candidate:
+             * They should know the celebrity
+         * Python Solution
+            ````python
+            # Return True if a knows b
+            def knows(a,  b)
 
+            def find_celebrity(self, n):
+                """
+                :type n: int
+                :rtype: int
+                """
+                unknown = -1
+                celebrity = 0
+                # find the celebrity candidate
+                for p in range(1, n):
+                    if not knows(celebrity, p):
+                        continue
+                    celebrity = p
+
+                # check people in the left side
+                for p in range(celebrity):
+                    if knows(p, celebrity) and not knows(celebrity, p):
+                        continue
+                    return unknown
+
+                # # check people in the right side
+                for p in range(celebrity+1, n):
+                    if knows(p, celebrity):
+                        continue
+                    return unknown
+
+                return celebrity
+            ````
+      * 41: First missing positive (H) *
+        * [concept](https://leetcode.com/problems/first-missing-positive/discuss/17073/Share-my-O(n)-time-O(1)-space-solution):
+            * The idea is **like you put k balls into k+1 bins**, there must be a bin empty, the empty bin can be viewed as the missing number.
+        * Time O(n), Space O(n)
+          * Use extra space to keep the sorted positve numbers.
+          * Python Solution
+            ```python
+            def firstMissingPositive(self, nums: List[int]) -> int:
+              length = len(nums)
+              sorted_positive_nums = [None] * length
+
+              for i in range(length):
+                  if 0 < nums[i] <= length:
+                      # the correct position of nums[i] is in nums[nums[i]-1]
+                      correct = nums[i]-1  # need this correct
+                      sorted_positive_nums[correct] = nums[i]
+
+              for i in range(length):
+                  if sorted_positive_nums[i] != i+1:
+                      return i+1
+
+              # not found from 0 to length-1, so the first missing is in length-th
+              return length+1
+            ```
+        * [Time:O(n), Space:O(1)](https://leetcode.com/problems/first-missing-positive/discuss/17071/My-short-c%2B%2B-solution-O(1)-space-and-O(n)-time) *
+           1. Each number will be put in its right place at most once after first loop *
+           2. Traverse the array to find the unmatch number
+           * Python Solution
+              ```python
+              def firstMissingPositive(self, nums: List[int]) -> int:
+                length = len(nums)
+
+                for i in range(length):
+                    # We visit each number once, and each number will
+                    # be put in its right place at most once
+                    while 0 < nums[i] <= length and nums[nums[i]-1] != nums[i]:
+                        # the correct position of nums[i] is in
+                        # nums[nums[i]#-1]
+                        correct = nums[i]-1  # need this correct
+                        nums[i], nums[correct] = nums[correct] , nums[i]
+
+                for i in range(length):
+                    if nums[i] != i+1:
+                        return i+1
+                 not found from 0 to length-1, so the first missing is in length-th
+                return length+1
+              ```
+      * 299: Bulls and Cows (M)
+        * Time O(n), Space O(n) and **one pass**
+          * Use **hash Table** to count cows.
+          * Python solution
+            ```python
+            for s,g in zip(secret, guess):
+              if s == g:
+                  bull += 1
+              else:  # s != g
+                  if hash_table[s] < 0:
+                      # s appears in guess before
+                      cow += 1
+                  if hash_table[g] > 0:
+                      # g appears in secret before
+                      cow += 1
+
+                  hash_table[s] += 1
+                  hash_table[g] -= 1
+
+            return f'{bull}A{cow}B'
+            ```
+      * 134: Gas Station (M) **
+          * **if sum of gas is more than sum of cost, then there must be a solution**.
+             And the question guaranteed that the solution is unique
+             (The first one I found is the right one).
+          * **The tank should never be negative**, so restart whenever there is a negative number.
+          * Python Solution
+            ```python
+            start, not_found = 0, -1
+
+            for i in range(len(gas)):
+                sum_gas += gas[i]
+                sum_cost += cost[i]
+                tank += gas[i] - cost[i]
+
+                # try another start
+                if tank < 0:
+                    start = i+1
+                    tank = 0
+
+            return start if sum_gas >= sum_cost else not_found
+            ```
 ### Matrix
 
 ### Linked List
