@@ -102,8 +102,6 @@ Table of Contents
     |------------|------|------|--------|
     | LRU Cache  | O(1) | O(1) | O(1)   |
 
-* LeetCode
-  * [146, LRU Cache](https://leetcode.com/problems/lru-cache/) (M)
 #### LFU Cache
 ### Tree
 #### Time complexity
