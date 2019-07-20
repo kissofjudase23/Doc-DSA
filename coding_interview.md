@@ -241,9 +241,9 @@ Table of Content
      * 387: First Unique Character in a String (E)
        * Time: O(n), Space: O(c)
          * Use Hash Table
-     * 58: Length of Last Word (E)
+     * 058: Length of Last Word (E)
        * Seach **from the end to the beginning**.
-     * 28: Implement strStr (E)
+     * 028: Implement strStr (E)
        * Find Sub-String
        * Brute Force
          * Time: O(mn), Space(1)
@@ -252,12 +252,15 @@ Table of Content
            * where m is the length of txt stringm n is the length of the pattern string.
          * Reference:
            * [Concept](https://www.youtube.com/watch?v=GTJr8OvyEVQ)
+             * **Reuse the longest common prefix suffix for next pattern searching**.
+               * **The current suffix range is the next prefix range**.
+                 * please see the figure below
            * [The LPS table](http://jakeboxer.com/blog/2009/12/13/the-knuth-morris-pratt-algorithm-in-my-own-words/)
-             * Definiton of Proper Prefix and Suffix
+             * Definiton of **Proper Prefix** and **Proper Suffix**
                * For a pattern: "Snape"
-                 * The proper prefix would be
+                 * The **Proper Prefix** would be:
                    * S, Sn, Sna, Snap
-                 * The proper suffix would be
+                 * The **Proper Suffix** would be:
                    * nape, ape, pe, e
              * Definition of the value in prefix suffix table
                * **The length of the longest proper prefix** in the (sub)pattern that matches a proper suffix in the same (sub)pattern.
@@ -564,19 +567,37 @@ Table of Content
                 for index, val in enumerate(citations):
                   d[min(max_cita, val)] += 1
 
-                res = cita_cnt = 0
+                h_index = cita_cnt = 0
+                # from max_cita to 1
                 for cita in range(max_cita, 0, -1):
                   cita_cnt += d[cita]
                   if cita_cnt >= cita:
-                    res = cita
+                    h_index = cita
                     break
 
-                return res
+                return h_index
             ```
       * Use Sort
         * Time: O(nlog(n)), Space: O(1)
-        * Sort the citations array in descending order(draw it).
-        * After sorting, if citations[i]>i, then papers 0 to i all have at least i+1 citations.
+        * Sort the citations array in **descending order** (draw it).
+        * After sorting, if citations[i]>i, then papers 0 to i all have at least i+1 citations, where i in the index of the array
+    * 275: H-Index II
+      * The input citataions is **ascending sorted**, please refer method2 of 274
+      * Python Solution
+        ```python
+        def hIndex(self, citations: List[int]) -> int:
+            h_index = 0
+            # from len(citations)-1 to 0
+            for i in range(len(citations)-1, -1, -1):
+                h_index += 1
+                cita = citations[i]
+
+                if cita < h_index:
+                    h_index -= 1
+                    break
+
+            return h_index
+        ```
   * Best Time to Buy and Sell Stock
     * [General solution](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/discuss/108870/Most-consistent-ways-of-dealing-with-the-series-of-stock-problems)
     * 121: Best Time to Buy and Sell Stock (E)
@@ -585,15 +606,20 @@ Table of Content
       * Python Solution:
         ```python
         def maxProfit(self, prices: List[int]) -> int:
-          min_price = float('inf')
-          best_profit = 0
 
-          for price in prices:
-              min_price = min(price, min_price)
-              profit = price - min_price
-              best_profit = max(profit, best_profit)
+          max_profit = 0
 
-          return best_profit
+          if not prices:
+              return  max_profit
+
+          min_price = prices[0]
+
+          for i in range(1, len(prices)):
+              profit = prices[i] - min_price
+              max_profit = max(profit, max_profit)
+              min_price = min(prices[i], min_price)
+
+          return max_profit
         ```
     * 122: Best Time to Buy and Sell Stock II (E)
       * Multiple transcation allowed.
@@ -601,7 +627,7 @@ Table of Content
         * Python Solution1
            ```python
            valley = peak = prices[0];
-           maxprofit = 0
+           max_profit = 0
            while i < len(prices) - 1:
               # find the valley
               while i < len(prices) - 1 and price[i] >= prices[i+1]:
@@ -612,14 +638,14 @@ Table of Content
                   i += 1
               peak = prices[i]
 
-              maxprofit += (peak - valley);
+              max_profit += (peak - valley);
            ```
         * Python Solution2
           ```python
-          maxprofit = 0
+          max_profit = 0
           for i in range(1, len(prices)):
               if prices[i] > price[i-1]:
-                  maxprofit += prices[i] - price[i-1]
+                  max_profit += prices[i] - price[i-1]
           ```
     * 714: [Best Time to Buy and Sell Stock with Transaction Fee](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/solution/) (M) **
       * Cash(i):
@@ -645,9 +671,11 @@ Table of Content
           def max_profit(self, prices: List[int], fee: int) -> int:
             cash = 0
             hold = -prices[0]
+
             for i in range(1, len(prices)):
                 cash = max(cash, hold+prices[i]-fee)
                 hold = max(hold, cash-prices[i])
+
             return cash
           ```
   * Shortest Word Distance
@@ -758,7 +786,7 @@ Table of Content
                   heapq.heapreplace(heap, i[end])
 
           return len(heap)
-    * 56:	Merge Intervals (M)
+    * 056:	Merge Intervals (M)
       * Time: O(nlogn), Space: O(1)
         * Sort the intervals by start time,
         * Update the output if there exists interval overlap.
@@ -780,10 +808,10 @@ Table of Content
 
           return output
           ```
-    * 57:	Insert Interval (H)
+    * 057:	Insert Interval (H)
     * 352: Data Stream as Disjoint Intervals (H)
   * Counter
-    * 53: Maximum Subarray (E)
+    * 053: Maximum Subarray (E)
       * [**Kadane's Algorithm**](https://leetcode.com/problems/maximum-subarray/discuss/20211/Accepted-O(n)-solution-in-java) *
        * Python Solution
           ```python
@@ -943,6 +971,7 @@ Table of Content
               return output
             ```
     * 228: Summary Ranges (M)
+      *
       * Python Solution
       ```python
       def summaryRanges(self, nums: List[int]) -> List[str]:
@@ -970,13 +999,41 @@ Table of Content
         return output
       ```
     * 163: Missing Ranges (M)
+      * Need to know how to handle the boundary.
+      * Python Solution
+      ```python
+          def format_result(left_boundary, right_boundary, output):
+              diff = right_boundary - left_boundary
+              if diff < 2:
+                  return
+              elif diff == 2:
+                  output.append(str(left_boundary+1))
+              else: # diff > 2
+                  output.append(f"{left_boundary+1}->{right_boundary-1}")
+
+          def findMissingRanges(self, nums: List[int], lower: int, upper: int) -> List[str]:
+
+              left_boundary = lower - 1
+
+              output = list()
+
+              for right_boundary in nums:
+                  format_result(left_boundary, right_boundary, output)
+                  left_boundary = right_boundary
+
+              # final
+              right_boundary = upper + 1
+              format_result(left_boundary, right_boundary, output)
+
+              return output
+      ```
     * 239: Sliding Window Maximum (H)
     * 295: Find Median from Data Stream (H)
   * Reorder and Sort
     * 189: Rotate Array (E)
       * Space Complexity **O(1)**
         * Use **three reverse** operations can solve this problem.
-    * 88: Merge Sorted Array (E)
+    * 088: Merge Sorted Array (E)
       * You may **assume that nums1 has enough space** (size that is greater or equal to m + n) to hold additional elements from nums2.
       * Space O(1):
         * Fill the arrary **from the end to the start**
@@ -1044,7 +1101,7 @@ Table of Content
 
               return celebrity
           ````
-    * 41: First missing positive (H) *
+    * 041: First missing positive (H) *
       * [concept](https://leetcode.com/problems/first-missing-positive/discuss/17073/Share-my-O(n)-time-O(1)-space-solution):
           * The idea is **like you put k balls into k+1 bins**, there must be a bin empty, the empty bin can be viewed as the missing number.
       * Time O(n), Space O(n)
@@ -1113,26 +1170,111 @@ Table of Content
           return f'{bull}A{cow}B'
           ```
     * 134: Gas Station (M) **
-        * **if sum of gas is more than sum of cost, then there must be a solution**.
-           And the question guaranteed that the solution is unique
-           (The first one I found is the right one).
-        * **The tank should never be negative**, so restart whenever there is a negative number.
+        * Time: O(n)
+          * Concept
+            * **If car starts at A and can not reach B. Any station between A and B can not reach B.**
+              * If A can't reach B, and there exists C between A & B which can reach B, then A can reach C first, then reach B from C, which is conflict with our init statement: A can't reach B. so, the assume that such C exists is invalid.
+            * **If the total number of gas is bigger than the total number of cost, there must be a solution.**
+              * [Proof](https://leetcode.com/problems/gas-station/discuss/287303/Proof%3A-if-the-sum-of-gas-greater-sum-of-cost-there-will-always-be-a-solution)
+          * Python Solution
+            ```python
+            start = 0
+            not_found = -1
+            total_tank = 0
+            cur_tank = 0
+
+            for i in range(len(gas)):
+                remain = gas[i] - cost[i]
+                total_tank += remain
+                cur_tank += remain
+
+                # try another start
+                if cur_tank < 0:
+                    start = i+1
+                    cur_tank = 0
+
+            return start if total_tank >= 0 else not_found
+            ```
+    * 289: Game of Life (M)
+      * Time: O(mn), Space: O(mn)
         * Python Solution
           ```python
-          start, not_found = 0, -1
+          def gameOfLife(self, board: List[List[int]]) -> None:
+            # coordinate diff for 8 neighbors
+            neighbors = [(1, 0), (1, -1), (0, -1), (-1, -1),
+                        (-1, 0), (-1,1), (0, 1), (1, 1)]
 
-          for i in range(len(gas)):
-              sum_gas += gas[i]
-              sum_cost += cost[i]
-              tank += gas[i] - cost[i]
+            rows = len(board)
+            cols = len(board[0])
 
-              # try another start
-              if tank < 0:
-                  start = i+1
-                  tank = 0
+            # copy board for reference
+            r_board = [[board[row][col] for col in range(cols)] for row in range(rows)]
 
-          return start if sum_gas >= sum_cost else not_found
+            for row in range(rows):
+                for col in range(cols):
+                    # calculate the cnt of live neighbors
+                    live_neighbors = 0
+                    for n in neighbors:
+                        r, c = row + n[0], col + n[1]
+                        if 0 <= r < rows and 0 <= c < cols \
+                          and r_board[r][c] == 1:
+                            live_neighbors += 1
+
+                    # change status
+                    if r_board[row][col] == 1:
+                        if live_neighbors < 2 or live_neighbors > 3:
+                            board[row][col] = 0
+
+                    else: # ref_board[row][col] == 0
+                        if live_neighbors == 3:
+                            board[row][col] = 1
           ```
+      * Time: O(mn), Space: O(1)
+        * Use two temp status, live_2_dead and dead_2_live
+        * Python Solution
+        ```python
+        class Status(object):
+          live_2_dead = -1
+          dead = 0
+          live = 1
+          dead_2_live = 2
+
+        def gameOfLife(self, board: List[List[int]]) -> None:
+          # coordinate diff for 8 neighbors
+          neighbors = [(1, 0), (1, -1), (0, -1), (-1, -1),
+                      (-1, 0), (-1,1), (0, 1), (1, 1)]
+
+          rows = len(board)
+          cols = len(board[0])
+
+          for row in range(rows):
+              for col in range(cols):
+                  # calculate the cnt of live neighbors
+                  live_neighbors = 0
+                  for n in neighbors:
+                      r, c = row + n[0], col + n[1]
+                      if 0 <= r < rows and 0 <= c < cols \
+                        and abs(board[r][c]) == 1:  # Status.live and Status.live_2_dead
+                          live_neighbors += 1
+
+                  # change status
+                  if board[row][col] == Status.live:
+                      if live_neighbors < 2 or live_neighbors > 3:
+                          board[row][col] = Status.live_2_dead
+
+                  else: # ref_board[row][col] == 0
+                      if live_neighbors == 3:
+                          board[row][col] = Status.dead_2_live
+
+          for row in range(rows):
+              for col in range(cols):
+                  if board[row][col] > 0:
+                      board[row][col] = Status.live
+                  else:
+                      board[row][col] = Status.dead
+        ```
+      * Infinite array
+        * [Solution](https://leetcode.com/problems/game-of-life/discuss/73217/Infinite-board-solution/201780)
 ### Matrix
 ### Linked List
 * **Techiniques**:
@@ -1151,20 +1293,20 @@ Table of Content
     * Need 3 runners. Fast, Slow1, Slow2
 * **Remove**
    * 237: Delete Node in a Linked List (E)
-   * 19: Remove Nth Node From End of List (M)
+   * 019: Remove Nth Node From End of List (M)
      * Using the **"Runner"** and **"dummy node"** Techiniques.
    * 203: Remove Linked List Elements (E)
      * Using the **"dummy node"** Techiniques.
-   * 83: Remove Duplicates from Sorted List (M)
-   * 82: Remove Duplicates from Sorted List II (M) *
+   * 083: Remove Duplicates from Sorted List (M)
+   * 082: Remove Duplicates from Sorted List II (M) *
      * Using the **"dummy node"** Techinique
      * Need **should_delete** flag and prev pointer
 * **Reorder**
   * 206: Reverse Linked List (E)
-  * 92: Reverse Linked List II (M) *
+  * 092: Reverse Linked List II (M) *
     * From **position m to n**. Do it in **one-pass**.
     * Using **"dummy node"**.
-  * 25: Reverse Nodes in k-Group (H) *
+  * 025: Reverse Nodes in k-Group (H) *
     * Enhancement of 92.
     * Python Solution
       ```python
@@ -1190,7 +1332,7 @@ Table of Content
 
       return dummy.next
       ```
-  * 24: Swap Nodes in Pair (M) *
+  * 024: Swap Nodes in Pair (M) *
     * Using the **"dymmy node"** Techinique.
     * Use 3 pointers, prev ,current and next.
       ```python solution
@@ -1234,7 +1376,6 @@ Table of Content
 
       return dummy1.next
       ```
-
   * 143: Reorder List(M) *
     * Given a singly linked list L: L0→L1→…→Ln-1→Ln, reorder it to: L0→Ln→L1→Ln-1→L2→Ln-2→…
     * Space O(1): *
@@ -1361,15 +1502,15 @@ Table of Content
 
             return dummy.next
         ```
-  * 61: Rotate list
+  * 061: Rotate list
     * The rotate length k may be greater than the length of linked list
 * Other
-  * 2: Add Two Numbers (M)
+  * 002: Add Two Numbers (M)
     * Time complexity O(n) and one pass
       * don't forget the **last carry**. *
   * 160	Intersection of Two Linked Lists (E)
     * Use **difference** of length
-  * 21: Merge Two Sorted Lists (E)
+  * 021: Merge Two Sorted Lists (E)
     * The concept is like merge step in the **merge sort**.
   * 234: Palindrome Linked List(M)
     * Space Complexity O(1) *:
@@ -1437,11 +1578,6 @@ Table of Content
       * For iterative methods
         * Use **stack** for traversal, and **use continue instead of return false when not found**.
   * 212: Word Search II (H)
-
-
-
-
-
 ### BFS & DFS
 ### Dynamic Programming
 ### Topological Sort
