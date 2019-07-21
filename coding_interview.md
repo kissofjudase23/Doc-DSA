@@ -144,11 +144,15 @@ Table of Content
         return reverse
       ```
   * Sum
-    * 1: Two Sum (E)
+    * 01: Two Sum (E)
       * Time: O(n), Space: O(n)
         * Use hash table
+      * Find all available 2 sums:
+        * O(nlogn)
+          * Sorting
+          * Left pointer and right pointer to find sum of left + right == target
     * 15: 3Sum (M)
-      * Time O(n^2)
+      * Time **O(n^2)**
         1. **Sort** first
         2. For each target (from 0 to n-3)
              * Find left and right pair that num[target] + num[left] + num[right] = 0
@@ -202,7 +206,7 @@ Table of Content
 
               return res
           ```
-    * 4Sum (M)
+    * 18: 4Sum (M)
   * Other
 ### String
    * Edit Distance
@@ -210,6 +214,7 @@ Table of Content
        * Time O(1), Space (1):
          * Merge the insert and remove cases (find the short one)
          * Use short and long string pointers to traverse and compare
+     * 072: Edit Distance (H)
    * SubString
    * Palindrome
    * Parentheses
@@ -351,23 +356,54 @@ Table of Content
     * 217: Contains Duplicate (E)
       * Use hash Table
     * 219: Contains Duplicate II (E)
-      * Use hash Table
+      * Use hash Table to store index.
+      * Python Solution
+      ```python
+      def containsNearbyDuplicate(self, nums: List[int], k: int) -> bool:
+        hash_table = dict()
+        for i, num in enumerate(nums):
+
+            if num in hash_table and (i - hash_table[num]) <= k:
+                return True
+
+            hash_table[num] = i
+
+        return False
+      ```
   * Remove Duplicate
     * 27: Remove elements (E)
       * Like partition step of quick sort (keep the border)
       * Copy the wanted elements to the front of the array
-    * 26: Remove Duplicates from Sorted Array (E)
-    * 80: Remove Duplicates from Sorted Array II (M)
+    * 26: Remove **Duplicates** from **Sorted Array** (E)
+    * 80: Remove **Duplicates** from **Sorted Array** II (M)
       * Need a counter
   * Container
     * 11: Container With Most Water (M)
-      * Time O(n)
-        * Area:
+      * Greedy, Time O(n)
+        * Hot to calculate the area:
           * min(left_border, right_border) * width
-        * [2 pointers approach](https://leetcode.com/problems/container-with-most-water/solution/) *
-          * Left pointer starts at position 0
-          * Right starts at position length-1
+        * [2 pointers approach](https://leetcode.com/problems/container-with-most-water/solution/)
           * Move the index with shorter height to find the bigger area.
+        * Python Solution
+        ```python
+        def maxArea(self, height: List[int]) -> int:
+          start, end = 0, len(height)-1
+          max_area = 0
+
+          while start < end:
+              h = min(height[start], height[end])
+              w = end - start
+              cur_area = h*w
+              max_area = max(max_area, cur_area)
+
+              # move the smaller one
+              if height[start] <= height[end]:
+                  start += 1
+              else:
+                  end -= 1
+
+          return max_area
+        ```
     * 42: Trapping Rain Water (H) *
       * [Solution](https://leetcode.com/problems/trapping-rain-water/solution/)
       * How to calculate the area ?
@@ -376,8 +412,7 @@ Table of Content
           * Find right border
           * Water area in the ith bin would be:
             * **min(left_border, right_border) - height of ith bin**
-      * Dynamic Programming:
-        * Time: O(n), Space: O(n)
+      * Dynamic Programming, Time: O(n), Space: O(n):
         * Keep two arrays
           * left_max
             * The left_max[i] is the **left border** in ith bin.
@@ -412,12 +447,11 @@ Table of Content
 
               return area
             ```
-        * [2 pointers approach](https://leetcode.com/problems/trapping-rain-water/solution/)
-          * Concept
+      * 2 pointers approach, Time: O(n), Space: O(1)
+          * [Concept]((https://leetcode.com/problems/trapping-rain-water/solution/))
             * If the right border > left border, the area of ith bin is determined by the left border.
             * vice versa
             * So we fix the higher border, and move the lower border to calcualte the area
-          * Time: O(n), Space: O(1)
           * Python Solution
             ```python
             def trap(self, height: List[int]) -> int:
@@ -459,8 +493,7 @@ Table of Content
               GOOD = 2
               BAD = 3
            ```
-        * Top Down Approach
-          * Time: O(n^2), Space: O(n)
+        * Top Down Approach, Time: O(n^2), Space: O(n)
           * Python Solution
             ```python
             def canJump(self, nums: List[int]) -> bool:
@@ -473,6 +506,7 @@ Table of Content
                     if memo[start] is not Status.UNKNOWN:
                         return True if memo[start] is Status.GOOD else False
 
+                    # max_jump = 0 would cause Status.BAD
                     max_jump = min(start+nums[start], length-1)
 
                     # from max_jump to start + 1
@@ -480,14 +514,14 @@ Table of Content
                         if _can_jump_from_position(nums, start=jump):
                             memo[start] = Status.GOOD
                             return True
+
                     # failed
                     memo[start] = Status.BAD
                     return False
 
                return _can_jump_from_position(nums, start=0)
             ```
-        * Buttom Up Approach
-          * Time: O(n^2), Space: O(n)
+        * Buttom Up Approach, Time: O(n^2), Space: O(n)
           * Python Solution
             ```python
             def canJump(self, nums: List[int]) -> bool:
@@ -508,8 +542,7 @@ Table of Content
 
               return memo[0] == Status.GOOD
             ```
-      * Greedy
-        * Time: O(n), Space: O(1)
+      * Greedy, Time: O(n), Space: O(1)
         * **The main concept is to keep the left most good index**
           * If we can reach a GOOD index, then our position is a GOOD index as well. and this new GOOD index will be the new leftmost GOOD index.
         * Python Solution
@@ -552,8 +585,7 @@ Table of Content
             ```
   * H-Index
     * 274: H-Index (M)
-      * Use Hash Table:
-        * Time O(n), Space O(n)
+      * Use Hash Table, Time O(n), Space O(n)
         * Concept
           * **The max index in the array would be len(array)**, that is we can restrict the number of the buckets.
         * Use Hash table to accumulate the cnt of citations
@@ -564,7 +596,7 @@ Table of Content
                 max_cita = len(citations)
                 d = collections.defaultdict(int)
 
-                for index, val in enumerate(citations):
+                for val in citations:
                   d[min(max_cita, val)] += 1
 
                 h_index = cita_cnt = 0
@@ -577,27 +609,64 @@ Table of Content
 
                 return h_index
             ```
-      * Use Sort
-        * Time: O(nlog(n)), Space: O(1)
-        * Sort the citations array in **descending order** (draw it).
-        * After sorting, if citations[i]>i, then papers 0 to i all have at least i+1 citations, where i in the index of the array
+      * Use Sort, Time: O(nlog(n)), Space: O(1)
+        * Concept:
+          * Refer 275: H-Index II
     * 275: H-Index II
-      * The input citataions is **ascending sorted**, please refer method2 of 274
-      * Python Solution
-        ```python
-        def hIndex(self, citations: List[int]) -> int:
+      * linear search: O(n)
+        * Concept
+          * Sort the citations array in **ascending order** (draw it).
+          * c = citations[i]. We would know that the number of articles whose citation number is higher than c would be n - i - 1.
+          * And together with the current article, **there are n - i articles that are cited at least c times**.
+        * Python Solution
+          ```python
+          def hIndex(self, citations: List[int]) -> int:
             h_index = 0
-            # from len(citations)-1 to 0
-            for i in range(len(citations)-1, -1, -1):
-                h_index += 1
-                cita = citations[i]
+            max_cita = len(citations)
 
-                if cita < h_index:
-                    h_index -= 1
-                    break
+            for idx, cita in enumerate(citations):
+              if cita >= max_cita-idx:
+                  h_index = max_cita-idx
+                break
 
-            return h_index
-        ```
+            return max_cita_index
+          ```
+      * Binary Search: O(log(n))
+        * Ref:
+          * https://leetcode.com/problems/h-index-ii/discuss/71063/Standard-binary-search
+          * https://leetcode.com/problems/h-index-ii/solution/
+        * About final condition max_cita - (right + 1) = max_cita - left
+          * The algorithm will jump out op while loop. We know for binary search, if it cannot find the target, **pointers left and right will be right besides the location which should be the target**.
+              ```text
+                  left
+                    v
+              0, 1, 4, 5, 7
+                 ^
+              right
+              ```
+        * Python Solution
+          ```python
+          def hIndex(self, citations: List[int]) -> int:
+            max_cita = len(citations)
+            left = 0
+            right = max_cita - 1
+
+            while left <= right:
+                mid = (left + right) // 2
+                if citations[mid] == max_cita - mid:
+                    return max_cita - mid
+
+                # search right section
+                elif citations[mid] < max_cita - mid:
+                    left = mid + 1
+
+                # search left section
+                else:
+                    right = mid - 1
+
+            #return max_cita - left
+            return max_cita - (right+1)
+          ```
   * Best Time to Buy and Sell Stock
     * [General solution](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/discuss/108870/Most-consistent-ways-of-dealing-with-the-series-of-stock-problems)
     * 121: Best Time to Buy and Sell Stock (E)
@@ -664,8 +733,10 @@ Table of Content
             * hold[i] = **hold[i-1] + price[i] - fee** - price[i]
           * case3:
             * hold[i] = **cash[i-1]** - price[i]
-          * max(case1, case2, case3) = max(hold[i-1], cash[i]-price[i])
-            * case2 and case3 can be reduced to cash[i] - price[i]
+          * case2 and case3 can be reduced to
+            *  **cash[i]** - price[i]
+          * hold[i]
+            * max(case1, case2, case3) = max(hold[i-1], **cash[i]-price[i]**)
       * Python Solution
           ```python
           def max_profit(self, prices: List[int], fee: int) -> int:
@@ -717,21 +788,16 @@ Table of Content
          * Python Solution
             ```python
             i = j = 0
-
             while i < len(list1) and j < len(list2):
               index1, index2 = list1[i], list2[j]
-
               # move the smaller one
               if index1 < index2:
                   dist = min(dist, index2-index1)
                   i +=1
-
               else: # index2 < index1
                   dist = min(dist, index1-index2)
                   j += 1
             ```
-
-          ```
   * Interval
     * 252: Meeting Rooms (E)
       * Check if one person can attend all meetings.
@@ -786,7 +852,7 @@ Table of Content
                   heapq.heapreplace(heap, i[end])
 
           return len(heap)
-    * 056:	Merge Intervals (M)
+    * 056: Merge Intervals (M)
       * Time: O(nlogn), Space: O(1)
         * Sort the intervals by start time,
         * Update the output if there exists interval overlap.
@@ -808,7 +874,7 @@ Table of Content
 
           return output
           ```
-    * 057:	Insert Interval (H)
+    * 057: Insert Interval (H)
     * 352: Data Stream as Disjoint Intervals (H)
   * Counter
     * 053: Maximum Subarray (E)
@@ -917,7 +983,7 @@ Table of Content
             return cnt
           ```
     * 238: **Product** of Array **Except Self** (M)
-      * Allow Division
+      * Allow to use Division
         * We can simply take the product of all the elements in the given array and then, for each of the elements xx of the array, we can simply find product of array except self value by dividing the product by xx.
         * Special cases
           * exactly 1 zero
@@ -946,7 +1012,7 @@ Table of Content
 
               return output
             ```
-      * Not Allow Division:
+      * Not Allow to use Division:
         * [Concept](https://leetcode.com/problems/product-of-array-except-self/solution/)
           * **For every given index i, we will make use of the product of all the numbers to the left of it and multiply it by the product of all the numbers to the right**=.
           * Python Solution:
@@ -970,8 +1036,7 @@ Table of Content
 
               return output
             ```
-    * 228: Summary Ranges (M)
-      *
+    * 228: **Summary** Ranges (M)
       * Python Solution
       ```python
       def summaryRanges(self, nums: List[int]) -> List[str]:
@@ -998,16 +1063,19 @@ Table of Content
 
         return output
       ```
-    * 163: Missing Ranges (M)
+    * 163: **Missing** Ranges (M)
       * Need to know how to handle the boundary.
       * Python Solution
       ```python
           def format_result(left_boundary, right_boundary, output):
               diff = right_boundary - left_boundary
+              # no missing
               if diff < 2:
                   return
+              # missing one
               elif diff == 2:
                   output.append(str(left_boundary+1))
+              # missining more than one
               else: # diff > 2
                   output.append(f"{left_boundary+1}->{right_boundary-1}")
 
@@ -1284,28 +1352,150 @@ Table of Content
     * **dummy.next** alwasy point to the head node, it very useful if the head node in the list will be changed.
   * **Use reverse instead of stack for space complexity** reduction.
     * However, reverse will change the data of the input, use it carefully.
+
 * **Circle**
   * 141: Linked List **Cycle** (E)
     * Using the **"Runner"** Techinique
   * 142: Linked List Cycle II (M) *
     * Given a linked list, return the node **where the cycle begins**. If there is no cycle, return null.
     * Using the **"Runner"** Techinique
-    * Need 3 runners. Fast, Slow1, Slow2
+      * Need 3 runners. Fast, slow, target
+    * Python Solution
+        ```python
+        def detectCycle(self, head):
+          if not head:
+              return None
+
+          fast = slow = target = head
+          find_loop = False
+
+          while fast and fast.next:
+              fast = fast.next.next
+              slow = slow.next
+              if fast is slow:
+                  find_loop = True
+                  break
+
+          if not find_loop:
+            return None
+
+          while target and slow:
+              if target is slow:
+                  break
+
+              target = target.next
+              slow = slow.next
+
+          return target
+        ```
+
 * **Remove**
    * 237: Delete Node in a Linked List (E)
    * 019: Remove Nth Node From End of List (M)
-     * Using the **"Runner"** and **"dummy node"** Techiniques.
+     * Python Solution
+        ```python
+        def removeNthFromEnd(self, head, n):
+          slow = dummy = ListNode(0)
+          fast = dummy.next = head
+          for _ in range(n):
+              fast = fast.next
+
+          while fast:
+              slow, fast = slow.next, fast.next
+
+          slow.next = slow.next.next
+
+          return dummy.next
+        ```
    * 203: Remove Linked List Elements (E)
-     * Using the **"dummy node"** Techiniques.
+     * Python Solution
+        ```python
+        def removeElements(self, head: ListNode, val: int) -> ListNode:
+          cur = dummy = ListNode(0)
+          dummy.next = head
+
+          while cur and cur.next:
+              if cur.next.val == val:
+                  cur.next = cur.next.next
+              else:
+                  cur = cur.next
+
+          return dummy.next
+        ```
    * 083: Remove Duplicates from Sorted List (M)
+     * Python Solution
+          ```python
+          def deleteDuplicates(self, head: ListNode) -> ListNode:
+
+            if not head or not head.next:
+              return head
+
+            cur = head
+
+            while cur and cur.next:
+              if cur.val == cur.next.val:
+                  cur.next = cur.next.next
+              else:
+                  cur = cur.next
+
+            return head
+          ```
    * 082: Remove Duplicates from Sorted List II (M) *
-     * Using the **"dummy node"** Techinique
-     * Need **should_delete** flag and prev pointer
+     * Python Solution
+       ```python
+        def deleteDuplicates(self, head: ListNode) -> ListNode:
+          if not head:
+              return head
+
+          prev = dummy = ListNode(0)
+          cur = dummy.next = head
+          should_delete=False
+
+          while cur and cur.next:
+              if cur.val == cur.next.val:
+                  should_delete=True
+                  cur.next = cur.next.next
+              else:
+                  if should_delete:
+                      cur = prev.next = cur.next
+                      should_delete = False
+                  else:
+                      prev, cur = cur, cur.next
+
+          if should_delete:
+              prev.next = cur.next
+
+          return dummy.next
+       ```
+
 * **Reorder**
   * 206: Reverse Linked List (E)
   * 092: Reverse Linked List II (M) *
     * From **position m to n**. Do it in **one-pass**.
     * Using **"dummy node"**.
+    * Python Solution
+      ```python
+        def reverseBetween(self, head: ListNode, m: int, n: int) -> ListNode:
+
+          if n - m < 1:
+              return head
+
+          prev_end = dummy = ListNode(0)
+          dummy.next = head
+          for _ in range(0, m-1):
+              prev_end = prev_end.next
+
+          prev, cur = prev_end, prev_end.next
+          for _ in range(0, n-m+1):
+              nxt = cur.next
+              cur.next = prev
+              prev, cur = cur, nxt
+
+          prev_end.next.next = cur
+          prev_end.next = prev
+
+          return dummy.next
+      ```
   * 025: Reverse Nodes in k-Group (H) *
     * Enhancement of 92.
     * Python Solution
@@ -1404,15 +1594,13 @@ Table of Content
           reverse_runner.next = prev
           prev, reverse_runner = reverse_runner, nxt
 
+      # merge to two lists
       first_runner = head
       second_runner = prev
-
-      # merge to two lists
       while second_runner:
           second_next = second_runner.next
           second_runner.next = first_runner.next
           first_runner.next = second_runner
-
           # update
           first_runner = second_runner.next
           second_runner = second_next
@@ -1489,8 +1677,8 @@ Table of Content
             dummy = ListNode(0)
             left = dummy.next = head
             while window_size < length:
-                left, tail = dummy.next, dummy
-
+                tail = dummy
+                left = head
                 while left:
                     # left, right, next_left
                     right = self.split_list(left, window_size)
@@ -1504,17 +1692,69 @@ Table of Content
         ```
   * 061: Rotate list
     * The rotate length k may be greater than the length of linked list
+    * Split out rotate list and merge again, Time O(n), Space O(1)
+      * Python Solution
+          ```python
+          def rotateRight(self, head: ListNode, k: int) -> ListNode:
+            if not head or not head.next:
+                return head
+
+            length = 1
+            old_tail = head
+            while old_tail.next:
+                length += 1
+                old_tail = old_tail.next
+
+            k = k % length
+            if k == 0:
+                return head
+
+            new_tail = head
+            for _ in range(length-k-1):
+                new_tail = new_tail.next
+
+            new_head = new_tail.next
+            old_tail.next = head
+            new_tail.next = None
+
+            return new_head
+          ```
+
 * Other
   * 002: Add Two Numbers (M)
     * Time complexity O(n) and one pass
-      * don't forget the **last carry**. *
+      * Don't forget the **last carry**.
+      * Python Solution
+        ```python
+        def addTwoNumbers(self, l1: ListNode, l2: ListNode) -> ListNode:
+          l1_runner, l2_runner = l1, l2
+          cur = dummy = ListNode(0)
+          carry = 0
+
+          while l1_runner or l2_runner or carry:
+              val = carry
+
+              if l1_runner:
+                  val += l1_runner.val
+                  l1_runner = l1_runner.next
+
+              if l2_runner:
+                  val += l2_runner.val
+                  l2_runner = l2_runner.next
+
+              cur.next = ListNode(val % 10)
+              cur = cur.next
+              carry = val // 10
+
+          return dummy.next
+        ```
   * 160	Intersection of Two Linked Lists (E)
     * Use **difference** of length
   * 021: Merge Two Sorted Lists (E)
     * The concept is like merge step in the **merge sort**.
-  * 234: Palindrome Linked List(M)
+  * 234: **Palindrome** Linked List(M)
     * Space Complexity O(1) *:
-      * Reverse first half of the linked list, but it is not a pratical solution since we should not modity the constant function of the input.
+      * Reverse first half of the linked list, but it is not a pratical solution since we should not modify the constant function of the input.
     * Space Complexity O(n):
       * Use a stack
   * 369	[Plus One Linked List](https://www.geeksforgeeks.org/add-1-number-represented-linked-list/)
