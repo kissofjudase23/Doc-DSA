@@ -242,6 +242,141 @@ Table of Content
    * Subsequence
    * Reorder
      * 344: Reverse String (E)
+     * 541: Reverse String II (E)
+       * Python Solution
+        ```python
+          def reverseStr(self, s: str, k: int) -> str:
+              if k <= 1 :
+                  return s
+
+              l = list(s)
+              length = len(l)
+              start = 0
+
+              while start < length:
+                  end = min(length-1, start+(k-1))
+                  self.reverse_list(l, start, end)
+                  start += 2*k
+
+              return ''.join(l)
+        ```
+     * 151:	Reverse Words in a String	(M)
+       * Time O(n), Space O(n) (one pass)
+         * From end to beginning of the string
+         * Python solution
+          ```python
+          def reverseWords(self, s: str) -> str:
+            end = len(s) - 1
+            left_boundary = -1
+            output = list()
+
+            while end > left_boundary:
+                while end-1 > left_boundary and s[end].isspace():
+                    end -= 1
+
+                # can not find the word
+                if s[end].isspace():
+                    break
+
+                start = end
+                while start-1 > left_boundary and not s[start-1].isspace():
+                    start -= 1
+
+                if output:
+                    output.append(" ")
+                output.append(s[start:end+1])
+
+                end = start - 1
+
+            return "".join(output)
+          ```
+       * Time O(n), Space O(n)
+         * Reverse the string, from left to right, reverse each word.
+         * Python solution
+          ```python
+          def reverseWords(self, s: str) -> str:
+            # 1. trim extra space
+            # 2. transfer to list
+            # 3. reverse the list
+            l = list(" ".join(s.split()))[::-1]
+
+            w_start = 0
+            while w_start < len(l):
+                while w_start+1 < len(l) and l[w_start].isspace():
+                    w_start += 1
+
+                # can not find the word
+                if l[w_start].isspace():
+                    break
+
+                w_end = w_start
+                while w_end+1 < len(l) and not l[w_end+1].isspace():
+                    w_end +=1
+
+                self.reverse_list(l, w_start, w_end)
+
+                w_start = w_end + 1
+
+            return "".join(l)
+            ```
+     * 186:	Reverse Words in a String II (M)
+       * Python Solution
+       ```python
+        def reverse_list(l, start, end):
+
+            while start < end:
+                l[start], l[end] = l[end], l[start]
+                start += 1
+                end -= 1
+
+        def reverseWords(self, s: List[str]) -> None:
+            """
+            Do not return anything, modify s in-place instead.
+            """
+            self.reverse_list(s, 0, len(s)-1)
+
+            w_start = 0
+            boundary = len(s)
+
+            while w_start < boundary:
+                while w_start + 1 < boundary and s[w_start].isspace():
+                    w_start += 1
+
+                if s[w_start].isspace():
+                    break
+
+                w_end = w_start
+                while w_end + 1 < boundary and not s[w_end + 1].isspace():
+                    w_end += 1
+
+                reverse_list(s, w_start, w_end)
+
+                w_start = w_end + 1
+       ```
+     * 345:	Reverse Vowels of a String (E)
+       * Python Solution
+       ```python
+        def reverseVowels(self, s: str) -> str:
+          vowels = collections.Counter('aeiouAEIOU')
+          l = list(s)
+          start,end = 0, len(l) - 1
+
+          while start < end:
+              while start < len(l) and l[start] not in vowels:
+                  start += 1
+
+              while end > -1 and l[end] not in vowels:
+                  end -= 1
+
+              if start >= end:
+                  break
+
+              l[start], l[end] = l[end], l[start]
+              start +=1
+              end -= 1
+
+         return "".join(l)
+       ```
    * Other
      * 387: First Unique Character in a String (E)
        * Time: O(n), Space: O(c)
@@ -351,6 +486,9 @@ Table of Content
 
                    return prefix
                  ```
+    * 383: Ransom Note (E)
+      * Use Hash Table
+    *
 ### Array
   * Check Duplicate
     * 217: Contains Duplicate (E)
@@ -644,6 +782,11 @@ Table of Content
                  ^
               right
               ```
+          * For the case, (left, **right, new_left**)
+            * Old range can not satisfied the requirement.
+          * For the case, (**new_right, left**, right)
+            * Old range can satisfied the requirement.
+
         * Python Solution
           ```python
           def hIndex(self, citations: List[int]) -> int:
