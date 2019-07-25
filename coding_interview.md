@@ -216,174 +216,7 @@ Table of Content
          * Use short and long string pointers to traverse and compare
      * 072: Edit Distance (H)
    * SubString
-   * Palindrome
-   * Parentheses
-     * 20: Valid Parentheses (E)
-       * Python Solution
-         ```python
-         BRACKET_MAP = {'(': ')', '[': ']', '{': '}'}
-
-         def ia_valid_parentheses(self, s: str) -> bool:
-             if not s:
-                 return True
-
-             ret = True
-             stack = list()
-
-             for c in s:
-                 if c in BRACKET_MAP:
-                     stack.append(c)
-                 else:
-                     if not stack or c != BRACKET_MAP[stack.pop()]:
-                         return False
-
-             return len(stack) == 0
-         ```
-   * Subsequence
-   * Reorder
-     * 344: Reverse String (E)
-     * 541: Reverse String II (E)
-       * Python Solution
-        ```python
-          def reverseStr(self, s: str, k: int) -> str:
-              if k <= 1 :
-                  return s
-
-              l = list(s)
-              length = len(l)
-              start = 0
-
-              while start < length:
-                  end = min(length-1, start+(k-1))
-                  self.reverse_list(l, start, end)
-                  start += 2*k
-
-              return ''.join(l)
-        ```
-     * 151:	Reverse Words in a String	(M)
-       * Time O(n), Space O(n) (one pass)
-         * From end to beginning of the string
-         * Python solution
-          ```python
-          def reverseWords(self, s: str) -> str:
-            end = len(s) - 1
-            left_boundary = -1
-            output = list()
-
-            while end > left_boundary:
-                while end-1 > left_boundary and s[end].isspace():
-                    end -= 1
-
-                # can not find the word
-                if s[end].isspace():
-                    break
-
-                start = end
-                while start-1 > left_boundary and not s[start-1].isspace():
-                    start -= 1
-
-                if output:
-                    output.append(" ")
-                output.append(s[start:end+1])
-
-                end = start - 1
-
-            return "".join(output)
-          ```
-       * Time O(n), Space O(n)
-         * Reverse the string, from left to right, reverse each word.
-         * Python solution
-          ```python
-          def reverseWords(self, s: str) -> str:
-            # 1. trim extra space
-            # 2. transfer to list
-            # 3. reverse the list
-            l = list(" ".join(s.split()))[::-1]
-
-            w_start = 0
-            while w_start < len(l):
-                while w_start+1 < len(l) and l[w_start].isspace():
-                    w_start += 1
-
-                # can not find the word
-                if l[w_start].isspace():
-                    break
-
-                w_end = w_start
-                while w_end+1 < len(l) and not l[w_end+1].isspace():
-                    w_end +=1
-
-                self.reverse_list(l, w_start, w_end)
-
-                w_start = w_end + 1
-
-            return "".join(l)
-            ```
-     * 186:	Reverse Words in a String II (M)
-       * Python Solution
-       ```python
-        def reverse_list(l, start, end):
-
-            while start < end:
-                l[start], l[end] = l[end], l[start]
-                start += 1
-                end -= 1
-
-        def reverseWords(self, s: List[str]) -> None:
-            """
-            Do not return anything, modify s in-place instead.
-            """
-            self.reverse_list(s, 0, len(s)-1)
-
-            w_start = 0
-            boundary = len(s)
-
-            while w_start < boundary:
-                while w_start + 1 < boundary and s[w_start].isspace():
-                    w_start += 1
-
-                if s[w_start].isspace():
-                    break
-
-                w_end = w_start
-                while w_end + 1 < boundary and not s[w_end + 1].isspace():
-                    w_end += 1
-
-                reverse_list(s, w_start, w_end)
-
-                w_start = w_end + 1
-       ```
-     * 345:	Reverse Vowels of a String (E)
-       * Python Solution
-       ```python
-        def reverseVowels(self, s: str) -> str:
-          vowels = collections.Counter('aeiouAEIOU')
-          l = list(s)
-          start,end = 0, len(l) - 1
-
-          while start < end:
-              while start < len(l) and l[start] not in vowels:
-                  start += 1
-
-              while end > -1 and l[end] not in vowels:
-                  end -= 1
-
-              if start >= end:
-                  break
-
-              l[start], l[end] = l[end], l[start]
-              start +=1
-              end -= 1
-
-         return "".join(l)
-       ```
-   * Other
-     * 387: First Unique Character in a String (E)
-       * Time: O(n), Space: O(c)
-         * Use Hash Table
-     * 058: Length of Last Word (E)
-       * Seach **from the end to the beginning**.
-     * 028: Implement strStr (E)
+     * 028: Implement **strStr** (E)
        * Find Sub-String
        * Brute Force
          * Time: O(mn), Space(1)
@@ -461,34 +294,501 @@ Table of Content
                            i += 1
                return res
            ```
-         * 14: Longest Common Prefix (E)
-           * Use **vertical scanning**
-             * Time: O(mn)
-               * Where m is the minimum length of str in strs and n is the len(strs).
-             * Python Solution
-                 ```python
-                 def longest_common_prefix(self, strs: List[str]) -> str:
-                   if not strs:
-                       return ""
+     * 003:	Longest Substring Without Repeating Characters (M)
+     * 395: Longest Substring with At Least K Repeating Characters (M)
+     * 030: Substring with Concatenation of All Words (H)
+     * 076: Minimum Window Substring (H)
+     * 340: Longest Substring with At Most K Distinct Characters (H)
+     * 159: Longest Substring with At Most Two Distinct Characters (H)
+   * **Palindrome**
+     * 125:	Valid Palindrome (E)
+       * Time O(n), Space O(1)
+       * Python Solution
+        ```python
+        def isPalindrome(self, s: str) -> bool:
+            l = 0
+            r = len(s)-1
+            while l < r:
+                while l < r and not s[l].isalnum():
+                    l += 1
+                while l < r and not s[r].isalnum():
+                    r -= 1
 
-                   prefix = strs[0]
-                   # Vertical Scanning
-                   for i in range(0, len(prefix)):
-                       c = prefix[i]
-                       for j in range(1, len(strs)):
-                           if i == len(strs[j]) or strs[j][i] != c:
-                               prefix = prefix[:i]
-                               found = True
-                               break
+                if l >= r:
+                    break
 
-                       if found:
+                if s[l].lower() != s[r].lower():
+                    return False
+
+                l += 1
+                r -= 1
+
+            return True
+          ```
+     * 266:	Palindrome Permutation (E)
+       * Time O(n), Space O(c)
+       * Python Solution
+          ```python
+          def canPermutePalindrome(self, s: str) -> bool:
+            d = collections.defaultdict(int)
+            odd = 0
+
+            for c in s:
+                d[c] += 1
+                # odd
+                if d[c] % 2 == 1:
+                    odd += 1
+                # even
+                else:
+                    odd -= 1
+
+            return odd <= 1
+          ```
+     * 005: Longest Palindromic Substring (M)
+       * Ref:
+         * https://leetcode.com/problems/longest-palindromic-substring/solution/
+       * Time: O(n^2), Space: O(n^2)
+         * Rule1: (single character)
+           * P(i,i)=true
+         * Rule2: (two characters)
+           * P(i,i+1)=(S(i)==S(i+1))
+         * Rule3:
+           * P(i,j)=(P(i+1,j-1) and S(i)==S(j))
+         * Python Solution
+            ```python
+            def longestPalindrome(self, s: str) -> str:
+              if not s:
+                  return ""
+
+              l = len(s)
+              # memo[i][j], s[i:j+1] is a palindrom or not
+              memo = [[False for _ in range(l)] for _ in range(l)]
+              max_length = start = end = 0
+
+              for i in range(0, l):
+                  # case1: single character
+                  # [0,0], [1,1], ...
+                  memo[i][i] = True
+
+                  if i+1 == l:
+                    break
+
+                  # case2: two characters
+                  # [0, 1], [1, 2], ...
+                  if s[i] == s[i+1]:
+                      memo[i][i+1] = True
+                      # i-j + 1 = 2 in this case
+                      if 2 > max_length:
+                          max_length = 2
+                          start, end = i, i+1
+                  else:
+                      memo[i][i+1] = False
+
+              # (5,5)       -> skip the length <= 2
+              # (4,4) (4,5) -> skip the length <= 2
+              # (3,3) (3,4) -> skip, (3,5) start
+              # (2,2) (2,3) -> skip, (2,4), (2,5) start
+              # ....
+              # from l-3 to 0
+              for i in range(l-3, -1, -1):
+                  # from i+2 to l-1, skip case1 and case2
+                  for j in range(i+2, l):
+                      # case3
+                      if s[i] == s[j] and memo[i+1][j-1]:
+                          memo[i][j] = True
+                          if (j - i + 1) > max_length:
+                              max_length = j - i + 1
+                              start, end = i, j
+                      else:
+                          memo[i][j] = False
+
+              return s[start:end+1]
+            ```
+       * Time: O(n^2), Space: O(1)
+         * Expand the center, there are total 2n-1 center
+           * odd case:
+             * aba -> the center is b
+           * even case
+             * abba -> the center is between bb
+         * Python Solution
+          ```python
+          def expand_center(s, left, right):
+              while left > -1 and right < len(s) and s[left] == s[right]:
+                  left -= 1
+                  right += 1
+
+              return left+1, right-1
+
+          def longestPalindrome(self, s: str) -> str:
+              l, r = 0, 0
+              # total 2n-1 center
+              for center in range(len(s)):
+                  # odd case, like aba
+                  l1, r1 = expand_center(s, center, center)
+                  if (r1 - l1) > (r - l):
+                      l, r = l1, r1
+
+                  # even case, like abba
+                  l2, r2 = expand_center(s, center, center+1)
+                  if (r2 - l2) > (r - l):
+                      l, r = l2, r2
+
+              return s[l:r+1]
+            ```
+       * Time: O(n), Space: O(n^2), Manacher's Algorithm
+   * **Parentheses**
+     * 020: Valid Parentheses (E)
+       * Python Solution
+         ```python
+         BRACKET_MAP = {'(': ')', '[': ']', '{': '}'}
+
+         def ia_valid_parentheses(self, s: str) -> bool:
+             if not s:
+                 return True
+
+             ret = True
+             stack = list()
+
+             for c in s:
+                 if c in BRACKET_MAP:
+                     stack.append(c)
+                 else:
+                     if not stack or c != BRACKET_MAP[stack.pop()]:
+                         return False
+
+             return len(stack) == 0
+         ```
+     * 022: Generate Parentheses (M)
+     * 241: Generate Parentheses (M)
+     * 032:	Longest Valid Parentheses (H)
+     * 301: Remove Invalid Parentheses
+   * Subsequence
+     * Longest Common Subsequence (LCS)
+       * Ref:
+         * https://www.youtube.com/watch?v=NnD96abizww
+       * Python Solution
+         ```python
+          if not s1 or not s2:
+              return 0
+
+          l1, l2 = len(s1), len(s2)
+          # memo[i][j]
+          # The longest common subsequence betwwen s1[0:i+1] and s2[0:j+1]
+          memo = [[0 for _ in range(l2)] for _ in range(l1)]
+
+          if s1[0] == s2[0]:
+              memo[0][0] = 1
+
+          # init first row
+          for j in range(1, l2):
+              if memo[0][j-1] or s1[0] == s2[j]:
+                  memo[0][j] = 1
+
+          # init first column
+          for i in range(1, l1):
+              if memo[i-1][0] or s1[i] == s2[0]:
+                  memo[i][0] = 1
+
+          for i in range(1, l1):
+              for j in range(1, l2):
+                  if s1[i] == s2[j]:
+                      memo[i][j] = memo[i-1][j-1] + 1
+                  else:
+                      memo[i][j] = max(memo[i-1][j], memo[i][j-1])
+
+          # traverse the lcs array to find subsequence
+          lcs_cnt = memo[l1-1][l2-1]
+          i, j = l1-1, l2-1
+          lcs = list()
+          while lcs_cnt:
+              if s1[i] == s2[j]:
+                  lcs.append(s1[i])
+                  i -= 1
+                  j -= 1
+                  lcs_cnt -= 1
+              else:
+                  if memo[i][j] == memo[i-1][j]:
+                      i -= 1
+                  else:  # memo[i][j] == memo[i][j-1]
+                      j -= 1
+
+          return ''.join(lcs[::-1])
+         ```
+   * **Reorder**
+     * 344: Reverse String (E)
+     * 541: Reverse String II (E)
+       * Python Solution
+        ```python
+          def reverseStr(self, s: str, k: int) -> str:
+              if k <= 1 :
+                  return s
+
+              l = list(s)
+              length = len(l)
+              start = 0
+
+              while start < length:
+                  end = min(length-1, start+(k-1))
+                  self.reverse_list(l, start, end)
+                  start += 2*k
+
+              return ''.join(l)
+        ```
+     * 151:	Reverse **Words** in a String	(M)
+       * Time O(n), Space O(n) (one pass)
+         * From end to beginning of the string
+         * Python solution
+          ```python
+          def reverseWords(self, s: str) -> str:
+            end = len(s) - 1
+            left_boundary = -1
+            output = list()
+
+            while end > left_boundary:
+                while end-1 > left_boundary and s[end].isspace():
+                    end -= 1
+
+                # can not find the word
+                if s[end].isspace():
+                    break
+
+                start = end
+                while start-1 > left_boundary and not s[start-1].isspace():
+                    start -= 1
+
+                if output:
+                    output.append(" ")
+                output.append(s[start:end+1])
+
+                end = start - 1
+
+            return "".join(output)
+          ```
+       * Time O(n), Space O(n)
+         * Reverse the string, from left to right, reverse each word.
+         * Python solution
+          ```python
+          def reverseWords(self, s: str) -> str:
+            # 1. trim extra space
+            # 2. transfer to list
+            # 3. reverse the list
+            l = list(" ".join(s.split()))[::-1]
+
+            w_start = 0
+            while w_start < len(l):
+                while w_start+1 < len(l) and l[w_start].isspace():
+                    w_start += 1
+
+                # can not find the word
+                if l[w_start].isspace():
+                    break
+
+                w_end = w_start
+                while w_end+1 < len(l) and not l[w_end+1].isspace():
+                    w_end +=1
+
+                self.reverse_list(l, w_start, w_end)
+
+                w_start = w_end + 1
+
+            return "".join(l)
+            ```
+     * 186:	Reverse **Words** in a String II (M)
+       * Python Solution
+       ```python
+        def reverse_list(l, start, end):
+
+            while start < end:
+                l[start], l[end] = l[end], l[start]
+                start += 1
+                end -= 1
+
+        def reverseWords(self, s: List[str]) -> None:
+            """
+            Do not return anything, modify s in-place instead.
+            """
+            self.reverse_list(s, 0, len(s)-1)
+
+            w_start = 0
+            boundary = len(s)
+
+            while w_start < boundary:
+                while w_start + 1 < boundary and s[w_start].isspace():
+                    w_start += 1
+
+                if s[w_start].isspace():
+                    break
+
+                w_end = w_start
+                while w_end + 1 < boundary and not s[w_end + 1].isspace():
+                    w_end += 1
+
+                reverse_list(s, w_start, w_end)
+
+                w_start = w_end + 1
+       ```
+     * 345:	Reverse **Vowels** of a String (E)
+       * Python Solution
+       ```python
+        def reverseVowels(self, s: str) -> str:
+          vowels = collections.Counter('aeiouAEIOU')
+          l = list(s)
+          start,end = 0, len(l) - 1
+
+          while start < end:
+              while start < end and l[start] not in vowels:
+                  start += 1
+
+              while start < end and l[end] not in vowels:
+                  end -= 1
+
+              if start >= end:
+                  break
+
+              l[start], l[end] = l[end], l[start]
+              start +=1
+              end -= 1
+
+         return "".join(l)
+       ```
+   * Isomorphism
+     * 205: **Isomorphic** Strings (E)
+        * example:
+          * aabbaa,  112233 -> False
+          * aabbaa,  112211 -> True
+        * Use hash Table to store **last seen index**
+        * Python Solution
+          ```python
+          def isIsomorphic(self, s: str, t: str) -> bool:
+            # -1 means that this char does not appear before
+            f = lambda: -1
+            d1 = collections.defaultdict(f)
+            d2 = collections.defaultdict(f)
+
+            for i in range(0, len(s)):
+                if d1[s[i]] != d2[t[i]]:
+                    return False
+
+                d1[s[i]] = i
+                d2[t[i]] = i
+
+            return True
+          ```
+   * Other
+     * 387: First Unique Character in a String (E)
+       * Time: O(n), Space: O(c)
+         * Use Hash Table
+     * 058: Length of Last Word (E)
+       * Seach **from the end to the beginning**.
+       * Python Solution
+        ```python
+        def lengthOfLastWord(self, s: str) -> int:
+          count = 0
+          find = False
+          # traverse from end to start
+          for i in range(len(s)-1, -1, -1):
+              if s[i] != ' ':
+                  count += 1
+                  find = True
+              else:
+                  # we have found a word before
+                  if find:
+                      break
+
+          return count
+        ```
+     * 014: Longest Common Prefix (E)
+       * Use **vertical scanning**
+         * Time: O(mn)
+           * Where m is the minimum length of str in strs and n is the len(strs).
+         * Python Solution
+             ```python
+             def longest_common_prefix(self, strs: List[str]) -> str:
+               if not strs:
+                   return ""
+
+               prefix = strs[0]
+               # Vertical Scanning
+               for i in range(0, len(prefix)):
+                   c = prefix[i]
+                   for j in range(1, len(strs)):
+                       if i == len(strs[j]) or strs[j][i] != c:
+                           # backward one character
+                           prefix = prefix[:i]
+                           found = True
                            break
 
-                   return prefix
-                 ```
-    * 383: Ransom Note (E)
-      * Use Hash Table
-    *
+                   if found:
+                       break
+
+               return prefix
+             ```
+     * 383: Ransom Note (E)
+        * Use Hash Table
+     * 293: Flip Game (E)
+        * python solution
+        ```python
+        def generatePossibleNextMoves(self, s: str) -> List[str]:
+          output = list()
+          # from 0 to n-2
+          for i in range(len(s)-1):
+              if s[i] == s[i+1] == '+':
+                  output.append(f"{s[0:i]}--{s[i+2:]}")
+
+          return output
+        ```
+     * 294. Flip Game II (M)
+       * backtracking: Time: O(n!!), Space: O(n*2)
+         * Double factorial: (n-1) * (n-3) * (n-3) * ... 1=
+          * python solution
+            ```python
+            def canWin(self, s: str) -> bool:
+              # from 0 to len(s)-2
+              for i in range(0, len(s)-1):
+                  if s[i] == s[i+1] == '+':
+                      first_flip_s = f"{s[0:i]}--{s[i+2:]}"
+
+                      # the 2nd flip
+                      if not self.canWin(first_flip_s):
+                          # first person wins the game
+                          return True
+
+              # can not make any flips
+              # first person loses the game
+              return False
+            ```
+       * backtracking with memo
+         * time complexity:
+           * number_of_distinct_strings * each_unique_string_first_time_computation_contribution
+             * O(2^n) * n (not sure)
+         * space complexity:
+           * O(n^2)
+         * python solution
+            ```python
+            def canWin(self, s: str) -> bool:
+              memo = dict()
+
+              def _canWin(self, s):
+                  if s in memo:
+                      return memo[s]
+
+                  # from 0 to len(s)-2
+                  for i in range(0, len(s)-1):
+                      if s[i] == s[i+1] == '+':
+                          first_flip_s = f"{s[0:i]}--{s[i+2:]}"
+                          # the 2nd flip
+                          if not self.canWin(first_flip_s):
+                              # first person wins the game
+                              memo[s] = True
+                              return True
+
+                  # can not make any flips
+                  # first person loses the game
+                  memo[s] = False
+                  return False
+
+              return _canWin(self, s)
+            ```
 ### Array
   * Check Duplicate
     * 217: Contains Duplicate (E)
@@ -1963,5 +2263,60 @@ Table of Content
   * 212: Word Search II (H)
 ### BFS & DFS
 ### Dynamic Programming
+### Backtracking
+  * Ref
+    * [General Approach](https://leetcode.com/problems/permutations/discuss/18239/A-general-approach-to-backtracking-questions-in-Java-(Subsets-Permutations-Combination-Sum-Palindrome-Partioning))
+  * Subset
+    * 078: Subsets (M)
+    * 090: Subsets II (M)
+  * Combinations
+    * 077: Combinations (M)
+    * 039: Combination Sum (M)
+    * 040: Combination Sum II (M)
+    * 216:	Combination Sum III (M)
+    * 377:	Combination Sum IV (M)
+  * Permutation
+    * 046: Permutations (M)
+      * Time: O(n!), Space: O(n!), Top Down Recursive
+        * Python Solution
+          ```python
+          def permute(self, nums: List[int]) -> List[List[int]]:
+            def _permute(nums, first):
+                if first == len(nums):
+                    output.append(nums.copy())
+
+                for i in range(first, len(nums)):
+                    nums[first], nums[i] = nums[i], nums[first]
+                    _permute(nums, first+1)
+                    nums[first], nums[i] = nums[i], nums[first]
+
+            output = list()
+            _permute(nums, 0)
+            return output
+          ```
+      * Time: O(n!), Space: O(n!), Bottom up Iterative
+        * example:
+          * {a,b} insert c
+            * {c, a, b}, {a, c, b}, {a, b, c}
+        * Python Solution
+          ```python
+          def permute(self, nums: List[int]) -> List[List[int]]:
+            perms = [[nums[0]]]
+            for i in range(1, len(nums)):
+                new = nums[i]
+                new_perms = []
+                for perm in perms:
+                    # total n + 1 positions for each
+                    for b in range(0, len(perm)+1):
+                        new_perms.append(perm[:b] + [new] + perm[b:])
+
+                perms = new_perms
+
+            return perms
+          ```
+    * 047: Permutations II (M)
+    * 031: Next Permutation (M)
+    * 060: Permutation Sequence (M)
+  * 291	Word Pattern II
 ### Topological Sort
 ### Bit Mamipulation
