@@ -468,51 +468,66 @@ Table of Content
          * https://www.youtube.com/watch?v=NnD96abizww
        * Python Solution
          ```python
-          if not s1 or not s2:
-              return 0
+          @staticmethod
+          def traverse_lcs_memo(s1, s1_idx, s2, s2_idx, memo):
+              """ traverse the memo array to find lcs
+              """
+              lcs_len = memo[s1_idx][s2_idx]
+              lcs = [None] * lcs_len
+              i, j = s1_idx, s2_idx
 
-          l1, l2 = len(s1), len(s2)
-          # memo[i][j]
-          # The longest common subsequence betwwen s1[0:i+1] and s2[0:j+1]
-          memo = [[0 for _ in range(l2)] for _ in range(l1)]
-
-          if s1[0] == s2[0]:
-              memo[0][0] = 1
-
-          # init first row
-          for j in range(1, l2):
-              if memo[0][j-1] or s1[0] == s2[j]:
-                  memo[0][j] = 1
-
-          # init first column
-          for i in range(1, l1):
-              if memo[i-1][0] or s1[i] == s2[0]:
-                  memo[i][0] = 1
-
-          for i in range(1, l1):
-              for j in range(1, l2):
+              while lcs_len:
                   if s1[i] == s2[j]:
-                      memo[i][j] = memo[i-1][j-1] + 1
-                  else:
-                      memo[i][j] = max(memo[i-1][j], memo[i][j-1])
-
-          # traverse the lcs array to find subsequence
-          lcs_cnt = memo[l1-1][l2-1]
-          i, j = l1-1, l2-1
-          lcs = list()
-          while lcs_cnt:
-              if s1[i] == s2[j]:
-                  lcs.append(s1[i])
-                  i -= 1
-                  j -= 1
-                  lcs_cnt -= 1
-              else:
-                  if memo[i][j] == memo[i-1][j]:
+                      lcs_len -= 1
+                      lcs[lcs_len] = s1[i]
                       i -= 1
-                  else:  # memo[i][j] == memo[i][j-1]
                       j -= 1
+                  else:
+                      if memo[i][j] == memo[i-1][j]:
+                          i -= 1
+                      else:  # memo[i][j] == memo[i][j-1]
+                          j -= 1
 
-          return ''.join(lcs[::-1])
+              return "".join(lcs)
+
+          @staticmethod
+          def lcs(s1, s2):
+              """
+              Longest common sequence
+              Time: O(n^2), Space: O(n^2)
+              Ref: https://www.youtube.com/watch?v=NnD96abizww
+              """
+              if not s1 or not s2:
+                  return ""
+
+              l1, l2 = len(s1), len(s2)
+
+              memo = [[0 for _ in range(l2)] for _ in range(l1)]
+
+              if s1[0] == s2[0]:
+                  memo[0][0] = 1
+
+              # init first row
+              for j in range(1, l2):
+                  if memo[0][j-1] or s2[j] == s1[0]:
+                      memo[0][j] = 1
+
+              # init first column
+              for i in range(1, l1):
+                  if memo[i-1][0] or s1[i] == s2[0]:
+                      memo[i][0] = 1
+
+              # complete the memo
+              for i in range(1, l1):
+                  for j in range(1, l2):
+                      if s1[i] == s2[j]:
+                          memo[i][j] = memo[i-1][j-1] + 1
+                      else:
+                          memo[i][j] = max(memo[i-1][j], memo[i][j-1])
+
+              return StrUtils.traverse_lcs_memo(s1, l1-1,
+                                                s2, l2-1,
+                                                memo)
          ```
    * **Reorder**
      * 344: Reverse String (E)
@@ -674,6 +689,31 @@ Table of Content
 
             return True
           ```
+     * 290: Word Pattern (E)
+       * The same concept as 205
+       * Python Solution
+         ```python
+         def wordPattern(self, pattern: str, str: str) -> bool:
+
+          if not str or not pattern:
+              return False
+
+          f = lambda : -1
+          d1 = collections.defaultdict(f)
+          d2 = collections.defaultdict(f)
+
+          txt = str.split()
+
+          if len(pattern) != len(txt):
+              return False
+
+          for i in range(len(pattern)):
+              if d1[pattern[i]] != d2[txt[i]]:
+                  return False
+              d1[pattern[i]] = d2[txt[i]] = i
+
+          return True
+         ```
    * Other
      * 387: First Unique Character in a String (E)
        * Time: O(n), Space: O(c)
@@ -739,7 +779,7 @@ Table of Content
         ```
      * 294. Flip Game II (M)
        * backtracking: Time: O(n!!), Space: O(n*2)
-         * Double factorial: (n-1) * (n-3) * (n-3) * ... 1=
+         * Double factorial: (n-1) * (n-3) * (n-5) * ... 1=
           * python solution
             ```python
             def canWin(self, s: str) -> bool:
@@ -2268,52 +2308,203 @@ Table of Content
     * [General Approach](https://leetcode.com/problems/permutations/discuss/18239/A-general-approach-to-backtracking-questions-in-Java-(Subsets-Permutations-Combination-Sum-Palindrome-Partioning))
   * Subset
     * 078: Subsets (M)
+      * Ref:
+        * [C++ Recursive/Iterative/Bit-Manipulation](https://leetcode.com/problems/subsets/discuss/27278/C%2B%2B-RecursiveIterativeBit-Manipulation)
+      * Recursive Time: O(n*2^n), Space:(2^n):
+        * DFS Traverse
+        * Example:
+          * []
+          * starts wtih 1: [1], [1,2], [1,2,3], [1,3]
+          * starts wtih 2: [2], [2,3]
+          * starts wtih 3: [3]
+        * Time: O(n*2^n)
+          * total 2^n subset, each subset need O(n) to copy
+        * Space: O(2^n)
+          * Total (2^n) subsets
+        * Python Solution
+          ```python
+          def subsets_rec(nums: List[int]) -> List[List[int]]:
+              def _subsets(cur: list, start):
+              # make a copy
+              subs.append(cur[:])
+
+              if start == len(nums):
+                  return
+
+              for i in range(start, len(nums)):
+                  cur.append(nums[i])
+                  # !!! start = i =1 rather than start + 1
+                  _subsets(cur, start=i+1)
+                  cur.pop()
+
+              subs = []
+              cur = []
+              if not nums:
+                  return []
+
+              _subsets(cur, 0)
+              return subs
+          ```
+      * Iterative, Time: O(n*2^n), Space:(2^n)
+        * Time: O(n*2^n)
+          * total:1 + 2 + 2^2 + 2^3 ...2^(n-1) = O(2^n) round
+            * in each round needs O(n) to copy list
+        * Space: O(2^n)
+          * Total (2^n) subsets (only two status for each character)
+        * example: [a, b, c]
+          * s1: [[]]
+          * s2: [[], [a]] (with a, without a)
+          * s3: [[], [a], [b], [a, b]] (with b, without b)
+          * s4: [[], [a], [b], [a, b], [c], [a, c], [b, c], [a, b, c]]
+        * Python Solution
+          ```python
+          def subsets(self, nums: List[int]) -> List[List[int]]:
+              subs = [[]]
+
+              for num in nums:
+                  subs_len = len(subs)
+                  for i in range(subs_len):
+                      # copy without num
+                      subs.append(subs[i].copy())
+                      # with num
+                      subs[i].append(num)
+
+              return subs
+          ```
+      * Iterative, **bit manipulation**, Time: O(n*2^n), Space:(2^n)
+        * Time: O(n*2^n)
+          * Total (2^n) round
+            * For each round need to iterater all nums which takes O(n) time
+              * You can think that you need to populate 2^n sets
+        * Space: O(2^n)
+          * Total (2^n) subsets (only two status for each character)
+        * example:
+          * [a, b, c]
+            * set 000: []]
+            * set 001: [a]
+            * set 010: [b]
+            * set 011: [a, b]
+            * set 100: [c]
+            * ...
+            * set 111  [a, b, c]
+
+        * Python Solution
+            ```python
+            def subsets_iter_bit(nums: List[int]) -> List[List[int]]:
+                subs = []
+                subs_len = 2 ** len(nums)
+
+                for sub_idx in range(subs_len):
+                    new_sub = []
+
+                    for num_idx in range(len(nums)):
+                        if sub_idx & (1 << num_idx):
+                            new_sub.append(nums[num_idx])
+
+                    subs.append(new_sub)
+
+                return subs
+            ```
     * 090: Subsets II (M)
   * Combinations
     * 077: Combinations (M)
+      * Recursive Time: O(k * n!/(n!*(n-k))!), Space: O(n!/(n!*(n-k)!)
+        * Time: O(k* n!/(n!*(n-k)!)
+          * k is the time to pupulate each combinations
+        * Space: O(n!/(n!*(n-k)!)
+          * Total O(n!/(n!*(n-k)!) combintations
+        * Python Solution
+        ```python
+        def combination_rec(n: int, k: int) -> List[List[int]]:
+        """
+        DFS Traverse
+        Time: O(k* n!/(n!*(n-k)!))
+        Space: O(n!/(n!*(n-k)!))
+        """
+          def _combination(cur: list, start):
+              if len(cur) == k:
+                  comb.append(cur[:])
+                  return
+
+              # skip the cases that can not satisfy k == len(cur) in the future
+              if k - len(cur) > n - start + 1:  # included start
+                  return
+
+              # from start to n
+              for i in range(start, n+1):
+                  cur.append(i)
+                  _combination(cur=cur, start=i+1)
+                  cur.pop()
+
+          comb = []
+          cur = []
+          if k > n:
+              return comb
+          _combination(cur=cur, start=1)
+          return comb
+        ```
+      * Iterative
+        * Python Solution
     * 039: Combination Sum (M)
     * 040: Combination Sum II (M)
-    * 216:	Combination Sum III (M)
-    * 377:	Combination Sum IV (M)
+    * 216: Combination Sum III (M)
+    * 377: Combination Sum IV (M)
   * Permutation
     * 046: Permutations (M)
-      * Time: O(n!), Space: O(n!), Top Down Recursive
+      * Recursive, Time: O(n!), Space: O(n!),
+        * Time: O(n!)
+          * Total: n * n-1 * n-2..  * 2 * 1  -> n!
+        * Space: O(n!)
+          * n! permutations
         * Python Solution
           ```python
-          def permute(self, nums: List[int]) -> List[List[int]]:
-            def _permute(nums, first):
-                if first == len(nums):
-                    output.append(nums.copy())
+          def permute_rec(nums: List[int]) -> List[List[int]]:
+            perms = []
 
-                for i in range(first, len(nums)):
-                    nums[first], nums[i] = nums[i], nums[first]
-                    _permute(nums, first+1)
-                    nums[first], nums[i] = nums[i], nums[first]
+            def _permute(start):
+                if start == len(nums)-1:
+                    perms.append(nums[:])
+                    return
 
-            output = list()
-            _permute(nums, 0)
-            return output
-          ```
-      * Time: O(n!), Space: O(n!), Bottom up Iterative
-        * example:
-          * {a,b} insert c
-            * {c, a, b}, {a, c, b}, {a, b, c}
-        * Python Solution
-          ```python
-          def permute(self, nums: List[int]) -> List[List[int]]:
-            perms = [[nums[0]]]
-            for i in range(1, len(nums)):
-                new = nums[i]
-                new_perms = []
-                for perm in perms:
-                    # total n + 1 positions for each
-                    for b in range(0, len(perm)+1):
-                        new_perms.append(perm[:b] + [new] + perm[b:])
+                for i in range(start, len(nums)):
+                    nums[start], nums[i] = nums[i], nums[start]
+                    _permute(start=start+1)
+                    nums[start], nums[i] = nums[i], nums[start]
 
-                perms = new_perms
+            if not nums:
+                return perms
 
+            _permute(start=0)
             return perms
           ```
+      * Iterative, Time: O(n!), Space: O(n!)
+        * Time: O(n!)
+          * Total: 1 * 2 * 3 * ... (n-1) * n operation -> n!
+        * Space: O(n!)
+          * n! permutations
+        * example: [a, b, c]
+          * s1: [a]
+          * s2: [a, b], [b, a]
+          * s3: [c, a, b], [a, c, b], [a, b, c], [c, b, a], [b, c, a], [b, a, c]
+        * Python Solution
+            ```python
+            def permute_iter(self, nums: List[int]) -> List[List[int]]:
+                if not nums:
+                    return [[]]
+
+                perms = [[nums[0]]]
+
+                for i in range(1, len(nums)):
+                    new_perms = []
+                    for perm in perms:
+                        # n + 1 position for each perm
+                        for b in range(len(perm)+1):
+                            new_perms.append(perm[:b]+[nums[i]]+perm[b:])
+
+                    perms = new_perms
+
+                return perms
+            ```
     * 047: Permutations II (M)
     * 031: Next Permutation (M)
     * 060: Permutation Sequence (M)
