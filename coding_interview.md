@@ -147,7 +147,7 @@ Table of Content
     * 01: Two Sum (E)
       * Time: O(n), Space: O(n)
         * Use hash table
-      * Find all available 2 sums:
+      * Find all available 2 sums: O(nlog(n))
         * O(nlogn)
           * Sorting
           * Left pointer and right pointer to find sum of left + right == target
@@ -170,10 +170,10 @@ Table of Content
       * Python Solution
           ```python
           def threeSum(self, nums: List[int]) -> List[List[int]]:
-
             res = list()
             nums.sort()
 
+            # from 0 to num-3
             for i in range(0, len(nums)-2):
 
                 # skip duplicate
@@ -183,7 +183,6 @@ Table of Content
                 l, r = i+1, len(nums)-1
 
                 while l < r:
-
                     s = nums[i] + nums[l] + nums[r]
 
                     if s < 0:
@@ -192,9 +191,8 @@ Table of Content
                     elif s > 0:
                         r -= 1
 
-                    else:
-                        res.append([nums[i],nums[l],nums[r]])
-
+                    else:  # s == 0
+                        res.append([nums[i], nums[l], nums[r]])
                         # skip duplicate
                         while l < r and nums[l] == nums[l+1]:
                             l += 1
@@ -209,18 +207,17 @@ Table of Content
     * 18: 4Sum (M)
   * Other
 ### String
-   * Edit Distance
+   * **Edit Distance**
      * 161: One Edit Distance (M)
        * Time O(1), Space (1):
          * Merge the insert and remove cases (find the short one)
          * Use short and long string pointers to traverse and compare
      * 072: Edit Distance (H)
-   * SubString
+   * **SubString**
      * 028: Implement **strStr** (E)
        * Find Sub-String
-       * Brute Force
-         * Time: O(mn), Space(1)
-       * **KMP (substring match)** ***
+       * Brute Force, Time: O(mn), Space(1)
+       * **KMP (substring match)**,  Time: O(m+n), Space: O(n)
          * Time: O(m+n), Space: O(n),
            * where m is the length of txt stringm n is the length of the pattern string.
          * Reference:
@@ -309,6 +306,7 @@ Table of Content
             l = 0
             r = len(s)-1
             while l < r:
+
                 while l < r and not s[l].isalnum():
                     l += 1
                 while l < r and not s[r].isalnum():
@@ -347,7 +345,7 @@ Table of Content
      * 005: Longest Palindromic Substring (M)
        * Ref:
          * https://leetcode.com/problems/longest-palindromic-substring/solution/
-       * Time: O(n^2), Space: O(n^2)
+       * Dynamic Programming, Time: O(n^2), Space: O(n^2)
          * Rule1: (single character)
            * P(i,i)=true
          * Rule2: (two characters)
@@ -404,8 +402,8 @@ Table of Content
 
               return s[start:end+1]
             ```
-       * Time: O(n^2), Space: O(1)
-         * Expand the center, there are total 2n-1 center
+       * Expand Center Time: O(n^2), Space: O(1)
+         * **Expand the center**, there are total 2n-1 center
            * odd case:
              * aba -> the center is b
            * even case
@@ -417,19 +415,21 @@ Table of Content
                   left -= 1
                   right += 1
 
+              # out of boundary or s[left] != s[right]
+              # so return left+1, right-1
               return left+1, right-1
 
           def longestPalindrome(self, s: str) -> str:
               l, r = 0, 0
               # total 2n-1 center
               for center in range(len(s)):
-                  # odd case, like aba
-                  l1, r1 = expand_center(s, center, center)
+                  # odd case, like aba, the center is b
+                  l1, r1 = expand_center(s=s, left=center, right=center)
                   if (r1 - l1) > (r - l):
                       l, r = l1, r1
 
-                  # even case, like abba
-                  l2, r2 = expand_center(s, center, center+1)
+                  # even case, like abba, the center is between 2b
+                  l2, r2 = expand_center(s=s, left=center, right=center+1)
                   if (r2 - l2) > (r - l):
                       l, r = l2, r2
 
@@ -441,97 +441,101 @@ Table of Content
        * Python Solution
          ```python
          BRACKET_MAP = {'(': ')', '[': ']', '{': '}'}
-
-         def ia_valid_parentheses(self, s: str) -> bool:
+         def is_valid_parentheses(self, s: str) -> bool:
              if not s:
                  return True
 
              ret = True
              stack = list()
-
              for c in s:
                  if c in BRACKET_MAP:
                      stack.append(c)
                  else:
+                     # can not find the left bracket
                      if not stack or c != BRACKET_MAP[stack.pop()]:
                          return False
 
+             # if len(stack) !=0 means that can not find the right bracket
              return len(stack) == 0
          ```
      * 022: Generate Parentheses (M)
      * 241: Generate Parentheses (M)
      * 032:	Longest Valid Parentheses (H)
      * 301: Remove Invalid Parentheses
-   * Subsequence
+   * **Subsequence**
      * Longest Common Subsequence (LCS)
        * Ref:
          * https://www.youtube.com/watch?v=NnD96abizww
-       * Python Solution
-         ```python
-          @staticmethod
-          def traverse_lcs_memo(s1, s1_idx, s2, s2_idx, memo):
-              """ traverse the memo array to find lcs
-              """
-              lcs_len = memo[s1_idx][s2_idx]
-              lcs = [None] * lcs_len
-              i, j = s1_idx, s2_idx
+       * Dynamic Programming: Time: O(n^2), Space: O(n^2)
+         * Python Solution
+           ```python
+            @staticmethod
+            def traverse_lcs_memo(s1, s1_idx, s2, s2_idx, memo):
+                """ traverse the memo array to find lcs
+                """
+                lcs_len = memo[s1_idx][s2_idx]
+                lcs = [None] * lcs_len
+                i, j = s1_idx, s2_idx
 
-              while lcs_len:
-                  if s1[i] == s2[j]:
-                      lcs_len -= 1
-                      lcs[lcs_len] = s1[i]
-                      i -= 1
-                      j -= 1
-                  else:
-                      if memo[i][j] == memo[i-1][j]:
-                          i -= 1
-                      else:  # memo[i][j] == memo[i][j-1]
-                          j -= 1
+                while lcs_len:
+                    if s1[i] == s2[j]:
+                        lcs_len -= 1
+                        lcs[lcs_len] = s1[i]
+                        i -= 1
+                        j -= 1
+                    else:
+                        if memo[i][j] == memo[i-1][j]:
+                            i -= 1
+                        else:  # memo[i][j] == memo[i][j-1]
+                            j -= 1
 
-              return "".join(lcs)
+                return "".join(lcs)
 
-          @staticmethod
-          def lcs(s1, s2):
-              """
-              Longest common sequence
-              Time: O(n^2), Space: O(n^2)
-              Ref: https://www.youtube.com/watch?v=NnD96abizww
-              """
-              if not s1 or not s2:
-                  return ""
+            @staticmethod
+            def lcs(s1, s2):
+                """
+                Longest common sequence
+                Time: O(n^2), Space: O(n^2)
+                Ref: https://www.youtube.com/watch?v=NnD96abizww
+                """
+                if not s1 or not s2:
+                    return ""
 
-              l1, l2 = len(s1), len(s2)
+                l1, l2 = len(s1), len(s2)
 
-              memo = [[0 for _ in range(l2)] for _ in range(l1)]
+                memo = [[0 for _ in range(l2)] for _ in range(l1)]
 
-              if s1[0] == s2[0]:
-                  memo[0][0] = 1
+                if s1[0] == s2[0]:
+                    memo[0][0] = 1
 
-              # init first row
-              for j in range(1, l2):
-                  if memo[0][j-1] or s2[j] == s1[0]:
-                      memo[0][j] = 1
+                # init first row
+                for j in range(1, l2):
+                    if memo[0][j-1] or s2[j] == s1[0]:
+                        memo[0][j] = 1
 
-              # init first column
-              for i in range(1, l1):
-                  if memo[i-1][0] or s1[i] == s2[0]:
-                      memo[i][0] = 1
+                # init first column
+                for i in range(1, l1):
+                    if memo[i-1][0] or s1[i] == s2[0]:
+                        memo[i][0] = 1
 
-              # complete the memo
-              for i in range(1, l1):
-                  for j in range(1, l2):
-                      if s1[i] == s2[j]:
-                          memo[i][j] = memo[i-1][j-1] + 1
-                      else:
-                          memo[i][j] = max(memo[i-1][j], memo[i][j-1])
+                # complete the memo
+                for i in range(1, l1):
+                    for j in range(1, l2):
+                        if s1[i] == s2[j]:
+                            memo[i][j] = memo[i-1][j-1] + 1
+                        else:
+                            memo[i][j] = max(memo[i-1][j], memo[i][j-1])
 
-              return StrUtils.traverse_lcs_memo(s1, l1-1,
-                                                s2, l2-1,
-                                                memo)
-         ```
+                return StrUtils.traverse_lcs_memo(s1, l1-1,
+                                                  s2, l2-1,
+                                                  memo)
+           ```
    * **Reorder**
      * 344: Reverse String (E)
      * 541: Reverse String II (E)
+       * You need to **reverse the first k characters for every 2k characters** counting from the start of the string.
+         * input:  s = "abcdefg", k = 2
+         * output: "bacdfeg"
        * Python Solution
         ```python
           def reverseStr(self, s: str, k: int) -> str:
@@ -555,27 +559,28 @@ Table of Content
          * Python solution
           ```python
           def reverseWords(self, s: str) -> str:
-            end = len(s) - 1
+            w_end = len(s) - 1
             left_boundary = -1
             output = list()
 
-            while end > left_boundary:
-                while end-1 > left_boundary and s[end].isspace():
-                    end -= 1
+            while w_end > left_boundary:
+                while w_end-1 > left_boundary and s[w_end].isspace():
+                    w_end -= 1
 
                 # can not find the word
-                if s[end].isspace():
+                if s[w_end].isspace():
                     break
 
-                start = end
-                while start-1 > left_boundary and not s[start-1].isspace():
-                    start -= 1
+                w_start = w_end
+                while w_start-1 > left_boundary and not s[w_start-1].isspace():
+                    w_start -= 1
 
                 if output:
                     output.append(" ")
-                output.append(s[start:end+1])
 
-                end = start - 1
+                output.append(s[start:w_end+1])
+
+                w_end = start - 1
 
             return "".join(output)
           ```
@@ -612,7 +617,6 @@ Table of Content
        * Python Solution
        ```python
         def reverse_list(l, start, end):
-
             while start < end:
                 l[start], l[end] = l[end], l[start]
                 start += 1
@@ -666,9 +670,9 @@ Table of Content
 
          return "".join(l)
        ```
-   * Isomorphism
+   * **Isomorphism** and **Pattern**
      * 205: **Isomorphic** Strings (E)
-        * example:
+        * Example:
           * aabbaa,  112233 -> False
           * aabbaa,  112211 -> True
         * Use hash Table to store **last seen index**
@@ -684,8 +688,7 @@ Table of Content
                 if d1[s[i]] != d2[t[i]]:
                     return False
 
-                d1[s[i]] = i
-                d2[t[i]] = i
+                d1[s[i]] = d2[t[i]] = i
 
             return True
           ```
@@ -714,6 +717,57 @@ Table of Content
 
           return True
          ```
+   * **Anagram** (combinations)
+     * 242: Valid Anagram (E)
+       * Python Solution
+        ```python
+        def isAnagram(self, s: str, t: str) -> bool:
+          if len(s) != len(t):
+              return False
+
+          d = collections.defaultdict(int)
+
+          for c in s:
+              d[c] += 1
+
+          for c in t:
+              if d[c] == 0:
+                  return False
+
+              d[c] -= 1
+
+          return True
+       ```
+     * 049: Group Anagrams (M)
+       * Categorize by sorted string, Time: O(n*klog(k)) Space: O(nk)
+         * n is the number of strings, k is the maximum length of the strings
+         * Python Solution
+           ```python
+          def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
+            d = collections.defaultdict(list)
+            for s in strs:
+              d[tuple(sorted(s))].append(s)
+
+            return d.values()
+           ```
+       * Categorize by Character Count, Time: O(nk), Space: O(nk)
+         * transform each string \text{s}s into a character count,
+         * Python Solution
+            ```python
+            def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
+              d = collections.defaultdict(list)
+              ord_a = ord('a')
+              for s in strs:
+                  # generate character count signature
+                  count_arr = [0] * 26
+                  for c in s:
+                      count_arr[ord(c)-ord_a] += 1
+
+                  # use signature as key
+                  d[tuple(count_arr)].append(s)
+
+              return d.values()
+            ```
    * Other
      * 387: First Unique Character in a String (E)
        * Time: O(n), Space: O(c)
@@ -723,35 +777,38 @@ Table of Content
        * Python Solution
         ```python
         def lengthOfLastWord(self, s: str) -> int:
-          count = 0
+          w_count = 0
           find = False
           # traverse from end to start
           for i in range(len(s)-1, -1, -1):
               if s[i] != ' ':
-                  count += 1
+                  w_count += 1
                   find = True
               else:
                   # we have found a word before
                   if find:
                       break
 
-          return count
+          return w_count
         ```
      * 014: Longest Common Prefix (E)
-       * Use **vertical scanning**
+       * Use **vertical scanning**, Time: O(mn)
          * Time: O(mn)
-           * Where m is the minimum length of str in strs and n is the len(strs).
+           * Where m is the minimum length of str in strs and n is the number of strings.
          * Python Solution
              ```python
              def longest_common_prefix(self, strs: List[str]) -> str:
                if not strs:
                    return ""
 
+              # set string 0 as vertical prefix
                prefix = strs[0]
+
                # Vertical Scanning
                for i in range(0, len(prefix)):
                    c = prefix[i]
                    for j in range(1, len(strs)):
+                       # break if out of boundary or non-equal
                        if i == len(strs[j]) or strs[j][i] != c:
                            # backward one character
                            prefix = prefix[:i]
@@ -774,10 +831,9 @@ Table of Content
           for i in range(len(s)-1):
               if s[i] == s[i+1] == '+':
                   output.append(f"{s[0:i]}--{s[i+2:]}")
-
           return output
         ```
-     * 294. Flip Game II (M)
+     * 294: Flip Game II (M)
        * backtracking: Time: O(n!!), Space: O(n*2)
          * Double factorial: (n-1) * (n-3) * (n-5) * ... 1=
           * python solution
@@ -785,16 +841,18 @@ Table of Content
             def canWin(self, s: str) -> bool:
               # from 0 to len(s)-2
               for i in range(0, len(s)-1):
+
+                  # the 1st flip
                   if s[i] == s[i+1] == '+':
                       first_flip_s = f"{s[0:i]}--{s[i+2:]}"
 
                       # the 2nd flip
                       if not self.canWin(first_flip_s):
-                          # first person wins the game
+                          # 1st person wins the game
                           return True
 
               # can not make any flips
-              # first person loses the game
+              # 1st person loses the game
               return False
             ```
        * backtracking with memo
@@ -830,10 +888,11 @@ Table of Content
               return _canWin(self, s)
             ```
 ### Array
-  * Check Duplicate
+  * **Check Duplicate**
     * 217: Contains Duplicate (E)
       * Use hash Table
     * 219: Contains Duplicate II (E)
+      * find out whether there are two distinct indices i and j in the array such that nums[i] = nums[j] and the absolute difference between i and j is at most k.
       * Use hash Table to store index.
       * Python Solution
       ```python
@@ -848,49 +907,80 @@ Table of Content
 
         return False
       ```
-  * Remove Duplicate
-    * 27: Remove elements (E)
+  * **Remove Duplicate**
+    * 027: Remove elements (E)
       * Like partition step of quick sort (keep the border)
-      * Copy the wanted elements to the front of the array
-    * 26: Remove **Duplicates** from **Sorted Array** (E)
-    * 80: Remove **Duplicates** from **Sorted Array** II (M)
-      * Need a counter
-  * Container
-    * 11: Container With Most Water (M)
-      * Greedy, Time O(n)
-        * Hot to calculate the area:
-          * min(left_border, right_border) * width
-        * [2 pointers approach](https://leetcode.com/problems/container-with-most-water/solution/)
-          * Move the index with shorter height to find the bigger area.
-        * Python Solution
+      * Copy the wanted elements to the position of the current border
+      * Python Solution
         ```python
-        def maxArea(self, height: List[int]) -> int:
-          start, end = 0, len(height)-1
-          max_area = 0
+        def removeElement(self, nums: List[int], val: int) -> int:
+          border = 0
+          for num in nums:
+              if num != val:
+                  nums[border] = num
+                  border += 1
 
-          while start < end:
-              h = min(height[start], height[end])
-              w = end - start
-              cur_area = h*w
-              max_area = max(max_area, cur_area)
-
-              # move the smaller one
-              if height[start] <= height[end]:
-                  start += 1
-              else:
-                  end -= 1
-
-          return max_area
+          return border
         ```
-    * 42: Trapping Rain Water (H) *
-      * [Solution](https://leetcode.com/problems/trapping-rain-water/solution/)
+    * 026: Remove **Duplicates** from **Sorted Array** (E)
+      * Python Solution
+        ```python
+        def removeDuplicates(self, nums: List[int]) -> int:
+          i = 0
+          for j in range(1, len(nums)):
+              if nums[j] != nums[i]:
+                  i += 1
+                  nums[i] = nums[j]
+          return i + 1
+        ```
+    * 080: Remove **Duplicates** from **Sorted Array** II (M) *
+      * Python Solution
+      ```python
+      def removeDuplicates(self, nums: List[int]) -> int:
+        i = 2
+        for j in range(3, len(nums)):
+            if nums[j] > nums[i-2]:
+                nums[i] = nums[j]
+                i += 1
+        return i
+      ```
+  * **Container**
+    * 011: Container With Most Water (M)
+      * Greedy, Time O(n)
+        * How to calculate the area:
+          * min(left_border, right_border) * width
+        * 2 pointers approach, Time: O(n), Space: O(1)
+          * Move the index with shorter height to find the bigger area.
+          * Python Solution
+            ```python
+            def maxArea(self, height: List[int]) -> int:
+              start, end = 0, len(height)-1
+              max_area = 0
+
+              while start < end:
+                  h = min(height[start], height[end])
+                  w = end - start
+                  cur_area = h*w
+                  max_area = max(max_area, cur_area)
+
+                  # move the smaller one
+                  if height[start] <= height[end]:
+                      start += 1
+                  else:
+                      end -= 1
+
+              return max_area
+            ```
+    * 042: Trapping Rain Water (H) *
+      * Ref:
+        * [Solution](https://leetcode.com/problems/trapping-rain-water/solution/)
       * How to calculate the area ?
-        * Sum water amount of each bin (width=1)
+        * Sum water amount of **each bin** (width=1)
           * Find left border
           * Find right border
           * Water area in the ith bin would be:
             * **min(left_border, right_border) - height of ith bin**
-      * Dynamic Programming, Time: O(n), Space: O(n):
+      * Dynamic Programming, Time: O(n), Space: O(n)
         * Keep two arrays
           * left_max
             * The left_max[i] is the **left border** in ith bin.
@@ -899,24 +989,24 @@ Table of Content
           * Python Solution
             ```python
             def trap(self, height: List[int]) -> int:
-              area = 0
               if not height:
                   return 0
 
-              length = len(height)
+              area = 0
+              l = len(height)
 
-              left_max = [None] * length
-              right_max = [None] * length
+              left_max = [None] * l
+              right_max = [None] * l
 
               left_max[0] = height[0]
-              right_max[length-1] = height[length-1]
+              right_max[l-1] = height[l-1]
 
               # calculate left border array
-              for i in range(1, length):
+              for i in range(1, l):
                   left_max[i] = max(height[i], left_max[i-1])
 
               # calculate right border array
-              for i in range(length-2, -1, -1):
+              for i in range(l-2, -1, -1):
                   right_max[i] = max(height[i], right_max[i+1])
 
               # sum the area for each bin
@@ -940,7 +1030,7 @@ Table of Content
               left, right = 0, len(height)-1
               max_left = max_right = 0
 
-              while left <= right:
+              while left < right:
                   # determine the border
                   # area depends on left border
                   if height[left] <= height[right]:
@@ -960,8 +1050,8 @@ Table of Content
 
               return area
             ```
-  * Jump Game:
-    * 55: Jump Game (M)
+  * **Jump Game**:
+    * 055: Jump Game (M)
       * [Solution](https://leetcode.com/problems/jump-game/solution/)
       * Dynamic Programming
         * We call a position in the array a **"good index" if starting at that position, we can reach the last index.** Otherwise, that index is called a "bad index".
@@ -1010,7 +1100,6 @@ Table of Content
               # start from length-2 to 0
               for start in range(length-2, -1, -1):
                   max_jump = min(start+nums[start], length-1)
-
                   # jump from max_jump to start
                   for jump in range(max_jump, start, -1):
                       # find the first good index
@@ -1036,32 +1125,30 @@ Table of Content
 
             return left_most_good_idx == 0
           ```
-    * 45: Jump Game II (H) *
+    * 045: Jump Game II (H) *
       * [Greedy](https://leetcode.com/problems/jump-game-ii/discuss/18014/Concise-O(n)-one-loop-JAVA-solution-based-on-Greedy)
         * Find the minimum jump
         * Greedy
           * Time: O(n), Space: O(1)
-          *  **cur == cur_border**
+          *  **cur == cur_border**, like BFS solution
              *  means you visited all the items on the current level
              *  Incrementing jumps+=1 is like incrementing the level you are on.
           *  And **cur_end = cur_farthest** is like getting the queue size (level size) for the next level you are traversing.
         *  Python Solution
             ```python
             def jump(self, nums: List[int]) -> int:
-
-              jump = cur_border = cur_farthest = 0
-
+              jump_cnt = cur_border = cur_farthest = 0
               for cur in range(0, len(nums)-1):
                   cur_farthest = max(cur_farthest, cur+nums[cur])
                   # the boundary need to jump
                   if cur == cur_border:
-                      jump +=1
+                      jump_cnt +=1
                       # determine the next border
                       cur_end = cur_farthest
 
-              return jump
+              return jump_cnt
             ```
-  * H-Index
+  * **H-Index**
     * 274: H-Index (M)
       * Use Hash Table, Time O(n), Space O(n)
         * Concept
@@ -1091,7 +1178,7 @@ Table of Content
         * Concept:
           * Refer 275: H-Index II
     * 275: H-Index II
-      * linear search: O(n)
+      * Linear search: O(n)
         * Concept
           * Sort the citations array in **ascending order** (draw it).
           * c = citations[i]. We would know that the number of articles whose citation number is higher than c would be n - i - 1.
@@ -1103,13 +1190,13 @@ Table of Content
             max_cita = len(citations)
 
             for idx, cita in enumerate(citations):
-              if cita >= max_cita-idx:
-                  h_index = max_cita-idx
+              if cita >= (max_cita-idx):
+                  h_index = (max_cita-idx)
                 break
 
             return max_cita_index
           ```
-      * Binary Search: O(log(n))
+      * **Binary Search**: O(log(n))
         * Ref:
           * https://leetcode.com/problems/h-index-ii/discuss/71063/Standard-binary-search
           * https://leetcode.com/problems/h-index-ii/solution/
@@ -1136,11 +1223,11 @@ Table of Content
 
             while left <= right:
                 mid = (left + right) // 2
-                if citations[mid] == max_cita - mid:
+                if citations[mid] == (max_cita - mid):
                     return max_cita - mid
 
                 # search right section
-                elif citations[mid] < max_cita - mid:
+                elif citations[mid] < (max_cita - mid):
                     left = mid + 1
 
                 # search left section
@@ -1150,20 +1237,18 @@ Table of Content
             #return max_cita - left
             return max_cita - (right+1)
           ```
-  * Best Time to Buy and Sell Stock
+  * **Best Time to Buy and Sell Stock**
     * [General solution](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/discuss/108870/Most-consistent-ways-of-dealing-with-the-series-of-stock-problems)
-    * 121: Best Time to Buy and Sell Stock (E)
+    * 121: Best Time to Buy and Sell Stock (E), Time:O(n), Space:O(1)
       * Allow **1 transaction only**.
       * For each round, keep the current minimum buy price and update best sell prcie.
       * Python Solution:
         ```python
         def maxProfit(self, prices: List[int]) -> int:
+          if not prices:
+              return  0
 
           max_profit = 0
-
-          if not prices:
-              return  max_profit
-
           min_price = prices[0]
 
           for i in range(1, len(prices)):
@@ -1173,7 +1258,7 @@ Table of Content
 
           return max_profit
         ```
-    * 122: Best Time to Buy and Sell Stock II (E)
+    * 122: Best Time to Buy and Sell Stock II (E), Time:O(n), Space:O(1)
       * Multiple transcation allowed.
       * [**Peak Valley** Approach](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/solution/)
         * Python Solution1
@@ -1199,7 +1284,9 @@ Table of Content
               if prices[i] > price[i-1]:
                   max_profit += prices[i] - price[i-1]
           ```
-    * 714: [Best Time to Buy and Sell Stock with Transaction Fee](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/solution/) (M) **
+    * 714: Best Time to Buy and Sell Stock with Transaction Fee (M), Time:O(n), Space:O(1)
+      * Ref:
+        * [solution](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/solution/)
       * Cash(i):
         * The cash in hand, if you are **not holding the stock** at the end of day(i):
           * case1:
@@ -1232,7 +1319,7 @@ Table of Content
 
             return cash
           ```
-  * Shortest Word Distance
+  * **Shortest Word Distance**
     * 243: Shortest Word Distance (E) *
        *  Calculate the distance and update the shortest distance in each round.
     * 245: Shortest Word Distance III (M) *
@@ -1281,23 +1368,23 @@ Table of Content
                   dist = min(dist, index1-index2)
                   j += 1
             ```
-  * Interval
+  * **Interval**
     * 252: Meeting Rooms (E)
-      * Check if one person can attend all meetings.
-      * How to check overlap
+      * Check if one person **can attend all meetings**.
+      * How to check overlaps
         * Python Solution
           ```python
-              min(interval1.end, interval2.end) \
-              > max(interval1.start, interval2.start)
+              min(interval1.end, interval2.end) > max(interval1.start, interval2.start)
           ```
+      * Brute Force, Time:O(n^2)
+      * Check after sorting, Time:O(nlog(n))
         * For **sorted intervals**
-          * Check overlap between interval[i] and interval[i+1] would be
+          * Check the overlap between interval[i] and interval[i+1] would be
             * ```python
               interval[i].end > interval[i+1],start
               ```
-            * If interval 3 and interval1 have overlap, then interval2 and interval1 must have overlap as well, since interval2.start < interval3.start.
+            * If there is an overlap between interval 3 and interval1, then there is an overlap between interval2 and interval1 as well, since interval2.start < interval3.start.
         * Algo:
-          * Time: O(nlog(n))
           * Sort by start time of intervals
           * Check if interval[i] and intervalp[i+1] have overlap.
       * Python Solution
@@ -1313,28 +1400,33 @@ Table of Content
         ```
     * 253: Meeting Rooms II (M)
       * Find the minimum requirement of the meeting rooms.
-      * [Use Min Heap to store end time of intervals]((https://leetcode.com/problems/meeting-rooms-ii/solution/))
-        * Time: O(nlog(n)), Space: O(n)
+      * Brute Force, Time: O(n^2), Space: O(1)
+      * Check after sorting, Time: O(nlog(n)), Space: O(n)
+        * [Use Min Heap to store end time of intervals]((https://leetcode.com/problems/meeting-rooms-ii/solution/))
         * Sort the intervals by start time
         * For every meeting room check if the minimum element of the heap is free or not.
           * If the room is free, then we extract the topmost element and add it back with the ending time of the current meeting we are processing.
           * If not, then we allocate a new room and add it to the heap.
         * Python Solution
           ```python
-          start, end = 0, 1
-          intervals.sort(key=lambda interval:interval[start])
-          heap = list()
+          def minMeetingRooms(self, intervals: List[List[int]]) -> int:
+            if not intervals:
+                return 0
 
-          for i in intervals:
-              # heap[0] stores the minimun end time
-              if not heap or i[start] < heap[0]:
-                  # need a new room
-                  heapq.heappush(heap, i[end])
-              else:
-                  # pop min end time and push a new one
-                  heapq.heapreplace(heap, i[end])
+            start, end = 0, 1
+            intervals.sort(key=lambda interval: interval[start])
+            heap = list()
+            heapq.heappush(heap, intervals[0][end])
 
-          return len(heap)
+            for i in range(1, len(intervals)):
+                # heap[0] is current minimum end time
+                if heap[0] > intervals[i][start]:
+                    heapq.heappush(heap, intervals[i][end])
+                else:
+                    heapq.heapreplace(heap, intervals[i][end])
+
+            return len(heap)
+          ```
     * 056: Merge Intervals (M)
       * Time: O(nlogn), Space: O(1)
         * Sort the intervals by start time,
@@ -1359,13 +1451,13 @@ Table of Content
           ```
     * 057: Insert Interval (H)
     * 352: Data Stream as Disjoint Intervals (H)
-  * Counter
+  * **Counter**
     * 053: Maximum Subarray (E)
       * [**Kadane's Algorithm**](https://leetcode.com/problems/maximum-subarray/discuss/20211/Accepted-O(n)-solution-in-java) *
        * Python Solution
           ```python
           def max_sub_array(self, nums: List[int]) -> int:
-              max_sum_so_far = max_sum = nums[0]
+              max_sum = max_sum_so_far = nums[0]
 
               for i in range(1, len(nums)):
                   max_sum_so_far = max(nums[i], max_sum_so_far+nums[i])
@@ -1397,41 +1489,39 @@ Table of Content
             return g_max
           ```
     * 325: Maximum Size Subarray Sum **Equals k** (E)
+      * Find the maximum length of a subarray that sums to k
       * Time: O(n), Space: O(n)
         * [Concept](https://leetcode.com/problems/maximum-size-subarray-sum-equals-k/discuss/77784/O(n)-super-clean-9-line-Java-solution-with-HashMap)
-          * Use hash table to keep acc value.
-          * Use incremental val to find the max size of subarray.
+          * Use hash table
+            * key: accumulation value
+            * val: index
         * Python Solution
           ```python
           def maxSubArrayLen(self, nums: List[int], k: int) -> int:
-            acc = max_len = 0
+            max_len = 0
+            acc = 0
             d = dict()
+            d[0] = -1 # init value for acc == k
 
-            for i, v in enumerate(nums):
-                acc += v
+            for idx, val in enumerate(nums):
+                acc += val
 
-                if acc == k:
-                    max_len = i + 1
-
-                else:
-                    val_of_start = acc - k
-                    if val_of_start in d:
-                        # incrmental from d[val_of_start]) to i is k
-                        max_len = max(max_len, i-d[val_of_start])
+                val_of_start_idx = acc - k
+                if val_of_start_idx in d:
+                    max_len = max(max_len, idx-d[val_of_start_idx])
 
                 if acc not in d:
-                    d[acc] = i
+                    d[acc] = idx
 
             return max_len
           ```
-    * 560: Subarray Sum **Equals K**
+    * 560: Subarray Sum **Equals K**, ***
       * [Solution](https://leetcode.com/problems/subarray-sum-equals-k/solution/)
       * Time: O(n^2)m, Space: O(1)
         * python solution
           ```python
           def subarraySum(self, nums: List[int], k: int) -> int:
             cnt = 0
-
             for start in range(0, len(nums)):
               acc = 0
               for end in range(start, len(nums)):
@@ -1449,29 +1539,24 @@ Table of Content
           def subarraySum(self, nums: List[int], k: int) -> int:
             acc = cnt = 0
             d = collections.defaultdict(int)
+            d[0] += 1 # init value for acc == k
 
-            for i, v in enumerate(nums):
-                acc += v
-
-                if acc == k:
-                    cnt += 1
-
-                val_of_start = acc - k
-                # incrmental from d[start_val]) to current index is k
-                if val_of_start in d:
-                    cnt += d[val_of_start]
-
+            for idx, val in enumerate(nums):
+                acc += val
+                val_of_start_idx = acc - k
+                if val_of_start_idx in d:
+                    cnt += d[val_of_start_idx]
                 d[acc] += 1
 
             return cnt
           ```
     * 238: **Product** of Array **Except Self** (M)
-      * Allow to use Division
+      * Allow to use Division, Time:O(n)
         * We can simply take the product of all the elements in the given array and then, for each of the elements xx of the array, we can simply find product of array except self value by dividing the product by xx.
         * Special cases
           * exactly 1 zero
           * more than 1 zero
-        * Python Solution
+        * Python Solution,
           ```python
           def product_except_self(self, nums: List[int]) -> List[int]:
               zero_cnt = 0
@@ -1520,6 +1605,12 @@ Table of Content
               return output
             ```
     * 228: **Summary** Ranges (M)
+      * Given a sorted integer array without duplicates, return the summary of its ranges.
+        * Input:
+          * [0,1,2,4,5,7]
+        * Output:
+          * ["0->2","4->5","7"]
+
       * Python Solution
       ```python
       def summaryRanges(self, nums: List[int]) -> List[str]:
@@ -1530,7 +1621,6 @@ Table of Content
 
         cur_start = cur_end = 0
         while cur_start < len(nums):
-
             # find the proper position of the end pointer
             while (cur_end + 1) < len(nums) and nums[cur_end] + 1 == nums[cur_end + 1]:
                 cur_end += 1
@@ -1547,7 +1637,10 @@ Table of Content
         return output
       ```
     * 163: **Missing** Ranges (M)
-      * Need to know how to handle the boundary.
+      * Example:
+        * Input: nums = [0, 1, 3, 50, 75], lower = 0 and upper = 99
+        * Output: ["2", "4->49", "51->74", "76->99"]
+      * Need to know how to handle the boundary properly.
       * Python Solution
       ```python
           def format_result(left_boundary, right_boundary, output):
@@ -1582,15 +1675,75 @@ Table of Content
     * 295: Find Median from Data Stream (H)
   * Reorder and Sort
     * 189: Rotate Array (E)
-      * Space Complexity **O(1)**
+      * Space: **O(1)**
         * Use **three reverse** operations can solve this problem.
+        * Python Solution
+          ```python
+          def rotate(self, nums: List[int], k: int) -> None:
+          """
+          Do not return anything, modify nums in-place instead.
+          """
+          if not nums or not k:
+              return
+
+          length = len(nums)
+
+          k = k % length
+
+          if k == 0:
+              return
+
+          reverse(nums, 0, length-1)
+          reverse(nums, 0, k-1)
+          reverse(nums, k, length-1)
+          ```
     * 088: Merge Sorted Array (E)
       * You may **assume that nums1 has enough space** (size that is greater or equal to m + n) to hold additional elements from nums2.
       * Space O(1):
         * Fill the arrary **from the end to the start**
+        * Python Solution:
+        ```python
+        def merge(self, nums1: List[int], m: int, nums2: List[int], n: int) -> None:
+          """
+          Do not return anything, modify nums1 in-place instead.
+          """
+          merge_runner = len(nums1) - 1
+          runner1 = m - 1
+          runner2 = n - 1
+
+          while runner1 >= 0 and runner2 >= 0:
+              if nums1[runner1] >= nums2[runner2]:
+                  nums1[merge_runner] = nums1[runner1]
+                  runner1 -= 1
+              else:
+                  nums1[merge_runner] = nums2[runner2]
+                  runner2 -= 1
+              merge_runner -= 1
+
+          while runner2 >= 0:
+              nums1[merge_runner] = nums2[runner2]
+              runner2 -= 1
+              merge_runner -=1
+        ```
     * 283: Move Zeroes (E)
       * Like the partition step of quick sort
         * **keep the border pointing to next available position.**
+        * Python Solution
+        ```python
+        def moveZeroes(self, nums: List[int]) -> None:
+          """
+          Do not return anything, modify nums in-place instead.
+          """
+          if len(nums) <= 1:
+              return
+
+          border = 0
+          for i in range(0, len(nums)):
+              if nums[i] == 0:
+                  continue
+              nums[border], nums[i] = nums[i], nums[border]
+              border += 1
+         ```
     * 280: Wiggle Sort (M) *
       * Definition
         * **nums[0] <= nums[1] >= nums[2] <= nums[3]...**
@@ -1696,11 +1849,15 @@ Table of Content
               for i in range(length):
                   if nums[i] != i+1:
                       return i+1
-               not found from 0 to length-1, so the first missing is in length-th
+              # not found from 0 to length-1, so the first missing is in length-th
               return length+1
             ```
     * 299: Bulls and Cows (M)
       * Time O(n), Space O(n) and **one pass**
+        * Bull:
+          * Two characters are the same and having the same index.
+        * Cow
+          * * Two characters are the same but do not have the same index.
         * Use **hash Table** to count cows.
         * Python solution
           ```python
@@ -1729,8 +1886,8 @@ Table of Content
               * [Proof](https://leetcode.com/problems/gas-station/discuss/287303/Proof%3A-if-the-sum-of-gas-greater-sum-of-cost-there-will-always-be-a-solution)
           * Python Solution
             ```python
-            start = 0
             not_found = -1
+            start = 0
             total_tank = 0
             cur_tank = 0
 
@@ -1759,7 +1916,7 @@ Table of Content
             cols = len(board[0])
 
             # copy board for reference
-            r_board = [[board[row][col] for col in range(cols)] for row in range(rows)]
+            copy_board = [[board[row][col] for col in range(cols)] for row in range(rows)]
 
             for row in range(rows):
                 for col in range(cols):
@@ -1768,11 +1925,11 @@ Table of Content
                     for n in neighbors:
                         r, c = row + n[0], col + n[1]
                         if 0 <= r < rows and 0 <= c < cols \
-                          and r_board[r][c] == 1:
+                          and copy_board[r][c] == 1:
                             live_neighbors += 1
 
                     # change status
-                    if r_board[row][col] == 1:
+                    if copy_board[row][col] == 1:
                         if live_neighbors < 2 or live_neighbors > 3:
                             board[row][col] = 0
 
@@ -2249,9 +2406,40 @@ Table of Content
   * 23	Merge k Sorted Lists
   * 147	Insertion Sort List
 ### Stack and Queue
-  * 155. Min Stack (E)
+  * 155: Min Stack (E)
     * Space (n)
       * Use extra space to keep minimum
+      * Python Solution
+      ```python
+      class MinStack:
+        def __init__(self):
+            """
+            initialize your data structure here.
+            """
+            self.stack = list()
+            self.mins = list()
+
+        def push(self, x: int) -> None:
+            self.stack.append(x)
+            if not self.mins:
+                self.mins.append(x)
+            else:
+                self.mins.append(min(self.mins[-1], x))
+
+
+        def pop(self) -> None:
+            if not self.stack:
+                return
+
+            self.stack.pop()
+            self.mins.pop()
+
+        def top(self) -> int:
+            return self.stack[-1]
+
+        def getMin(self) -> int:
+            return self.mins[-1]
+      ```
 ### Cache
   * LRU
   * LFU
@@ -2259,12 +2447,100 @@ Table of Content
 ### Binary Search Tree
   * 144: Binary Tree **Preorder** Traversal (M)
     * Use **one stack** for iterative method
-  * 94: Binary Tree **Inorder** Traversal (M)
+    * Python Solution
+      ```python
+      def preorderTraversal(self, root: TreeNode) -> List[int]:
+          if not root:
+              return []
+
+          visits = list()
+          stack = list()
+          stack.append(root)
+
+          while stack:
+              node = stack.pop()
+              visits.append(node.val)
+
+              if node.right:
+                  stack.append(node.right)
+
+              if node.left:
+                  stack.append(node.left)
+
+          return visits
+      ```
+  * 094: Binary Tree **Inorder** Traversal (M)
     * Use **one stack** for iterative method
+    * Python Solution
+      ```python
+      def inorderTraversal(self, root: TreeNode) -> List[int]:
+        visits = list()
+        stack = list()
+        current = root
+
+        while current or stack:
+            if current:
+                stack.append(current)
+                current = current.left
+            else:
+                current = stack.pop()
+                visits.append(current.val)
+                current = current.right
+
+        return visits
+      ```
   * 145: Binary Tree **Postorder** Traversal (H)
     * Use **two stacks** for iterative method
+    * Python Solution
+      ```python
+      def postorderTraversal(self, root: TreeNode) -> List[int]:
+        if not root:
+            return []
+
+        stack = list()
+        visits = list()
+        stack.append(root)
+
+        while stack:
+            current = stack.pop()
+            visits.append(current.val)
+            if current.left:
+                stack.append(current.left)
+            if current.right:
+                stack.append(current.right)
+
+        visits.reverse()
+        return visits
+
+      ```
   * 102: Binary **Tree Level** Order Traversal (M) *
     * Use **the length of the queue** for each round
+    * Python Solution
+      ```python
+      def levelOrder(self, root: TreeNode) -> List[List[int]]:
+        if not root:
+            return
+
+        visits = list()
+        q = deque()
+        q.append(root)
+
+        while q:
+            q_len = len(q)
+
+            level_visits = []
+            for _ in range(q_len):
+                node = q.popleft()
+                level_visits.append(node.val)
+                if node.left:
+                    q.append(node.left)
+                if node.right:
+                    q.append(node.right)
+
+            visits.append(level_visits)
+
+        return visits
+      ```
   * 173: Binary Search Tree Iterator (M) *
     * Python Solution
       ```python
@@ -2445,6 +2721,31 @@ Table of Content
         ```
       * Iterative
         * Python Solution
+        ```python
+        def combin_iter_v2(n: int, k: int) -> List[List[int]]:
+          """
+          Ref: https://leetcode.com/problems/combinations/discuss/27029/AC-Python-backtracking-iterative-solution-60-ms
+          Time: O(k* n!/(n!*(n-k)!))
+          Space: O(n!/(n!*(n-k)!))   (extra space: O(k))
+          """
+          comb, cur = [], []
+          start = 1
+          while True:
+              l = len(cur)
+
+              if l == k:
+                  comb.append(cur[:])
+              # k - l > n - start + 1 means that l will not satisfy k in the future
+              # in fact, (k - l) > (n - start + 1)  can cover start > n when (l-k) = -1
+              if l == k or (k - l) > (n - start + 1) or start > n:
+                  if not cur:
+                      break
+                  start = cur.pop() + 1
+              else:
+                  cur.append(start)
+                  start += 1
+          return comb
+        ```
     * 039: Combination Sum (M)
     * 040: Combination Sum II (M)
     * 216: Combination Sum III (M)
