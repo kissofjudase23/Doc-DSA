@@ -344,7 +344,9 @@ Table of Contents
   | Insertion Sort | O(n)       | O(n^2)     | O(n^2)     | O(1)             | Stable          |
   | Selection Sort | O(n^2)     | O(n^2)     | O(n^2)     | O(1)             | Unstable        |
   | Bubble Sort    | O(n)       | O(n^2)     | O(n^2)     | O(1)             | Stable          |
-  | Radix Sort     | O(d*(n+r)) | O(d*(n+r)) | O(d*(n+r)) | O(r*n)           | Stable          |
+  | Counting Sort  | O(n+k)     | O(n+k)     | O(n+k)     | O(n+k)           | Stable          |
+  | Bucket Sort    | O(n)       | O(n^2)     | O(n^2)     | O(1)             | Stable          |
+  | Radix Sort     | O(d*(n+k)) | O(d*(n+k)) | O(d*(n+k)) | O(n+k)           | Stable          |
 
 #### [Implementation](https://github.com/kissofjudase23/Library-python-common-modules/blob/master/common/algo/search.py)
 #### Quick Sort
@@ -396,14 +398,17 @@ Table of Contents
 #### Insertion Sort
   * Best Case: ascending sequence, [1, 2, 3]
   * Worst Case: descending sequence, [3, 2, 1]
+
 #### Selection Sort
   * Unstable: [5, 5*, 3]
+
 #### Bubble Sort
   * Best Case:
     * ascending sequence, [1, 2, 3]
     * (n-1) comparison in round1, and no swap happened.
   * Worst Case:
     * descending sequence, [3, 2, 1]
+
 #### [Heap Sort](https://www.geeksforgeeks.org/iterative-heap-sort/)
   * Build the Max Heap first
   * Iteratve n-1 round, for i in range(n-1, 0, -1)
