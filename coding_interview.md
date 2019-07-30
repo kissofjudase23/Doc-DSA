@@ -768,6 +768,26 @@ Table of Content
 
               return d.values()
             ```
+     * 249: Group Shifted Strings (M)
+       * Example:
+         * [a, b] and [z, a]
+           * ord(a) = 97
+           * ord(b) = 98
+           * ord(z) = 122
+         * (ord(b) - ord(a)) ≡ 1 (mod 26)
+         * (ord(a) - ord(z)) ≡ -25 ≡ 1 (mod 26)
+         * -1 is **congruent** to -25 (modulo 26)
+       * Python Solution
+         ```python
+         def groupStrings(self, strings: List[str]) -> List[List[str]]:
+          d = collections.defaultdict(list)
+
+          for s in strings:
+              k = tuple( (ord(c) - ord(s[0]))%26  for c in s)
+              d[k].append(s)
+
+          return d.values()
+         ```
    * Other
      * 387: First Unique Character in a String (E)
        * Time: O(n), Space: O(c)
@@ -1488,7 +1508,7 @@ Table of Content
 
             return g_max
           ```
-    * 325: Maximum Size Subarray Sum **Equals k** (E)
+    * 325: Maximum Size Subarray Sum **Equals k** (M)
       * Find the maximum length of a subarray that sums to k
       * Time: O(n), Space: O(n)
         * [Concept](https://leetcode.com/problems/maximum-size-subarray-sum-equals-k/discuss/77784/O(n)-super-clean-9-line-Java-solution-with-HashMap)
@@ -1515,7 +1535,7 @@ Table of Content
 
             return max_len
           ```
-    * 560: Subarray Sum **Equals K**, ***
+    * 560: Subarray Sum **Equals K**, (M) ***
       * [Solution](https://leetcode.com/problems/subarray-sum-equals-k/solution/)
       * Time: O(n^2)m, Space: O(1)
         * python solution
@@ -1992,10 +2012,32 @@ Table of Content
     * **dummy.next** alwasy point to the head node, it very useful if the head node in the list will be changed.
   * **Use reverse instead of stack for space complexity** reduction.
     * However, reverse will change the data of the input, use it carefully.
-
 * **Circle**
   * 141: Linked List **Cycle** (E)
     * Using the **"Runner"** Techinique
+    * Python Solution
+      ```python
+      def hasCycle(self, head):
+        """
+        :type head: ListNode
+        :rtype: bool
+        """
+        if not head:
+            return False
+
+        slow = fast = head
+        is_found = False
+
+        while fast and fast.next:
+            fast = fast.next.next
+            slow = slow.next
+
+            if fast is slow:
+                is_found = True
+                break
+
+        return is_found
+      ```
   * 142: Linked List Cycle II (M) *
     * Given a linked list, return the node **where the cycle begins**. If there is no cycle, return null.
     * Using the **"Runner"** Techinique
@@ -2022,27 +2064,28 @@ Table of Content
           while target and slow:
               if target is slow:
                   break
-
               target = target.next
               slow = slow.next
 
           return target
         ```
-
 * **Remove**
    * 237: Delete Node in a Linked List (E)
    * 019: Remove Nth Node From End of List (M)
      * Python Solution
         ```python
         def removeNthFromEnd(self, head, n):
+          #
           slow = dummy = ListNode(0)
           fast = dummy.next = head
+
           for _ in range(n):
               fast = fast.next
 
           while fast:
               slow, fast = slow.next, fast.next
 
+          # delete the node
           slow.next = slow.next.next
 
           return dummy.next
@@ -2051,16 +2094,16 @@ Table of Content
      * Python Solution
         ```python
         def removeElements(self, head: ListNode, val: int) -> ListNode:
-          cur = dummy = ListNode(0)
-          dummy.next = head
+        cur =dummy = ListNode(0)
+        dummy.next = head
 
-          while cur and cur.next:
-              if cur.next.val == val:
-                  cur.next = cur.next.next
-              else:
-                  cur = cur.next
+        while cur and cur.next:
+            if cur.next.val == val:
+                cur.next = cur.next.next
+            else:
+                cur = cur.next
 
-          return dummy.next
+        return dummy.next
         ```
    * 083: Remove Duplicates from Sorted List (M)
      * Python Solution
@@ -2109,8 +2152,22 @@ Table of Content
        ```
 
 * **Reorder**
-  * 206: Reverse Linked List (E)
-  * 092: Reverse Linked List II (M) *
+  * 206: **Reverse** Linked List (E)
+    * Pythobn Solution
+     ```python
+     def reverseList(self, head: ListNode) -> ListNode:
+
+        prev = None
+        cur = head
+
+        while cur:
+            nxt = cur.next
+            cur.next = prev
+            prev, cur = cur, nxt
+
+        return prev
+     ```
+  * 092: **Reverse** Linked List II (M) *
     * From **position m to n**. Do it in **one-pass**.
     * Using **"dummy node"**.
     * Python Solution
@@ -2136,33 +2193,42 @@ Table of Content
 
           return dummy.next
       ```
-  * 025: Reverse Nodes in k-Group (H) *
+  * 025: **Reverse** Nodes in **k-Group** (H) *
     * Enhancement of 92.
     * Python Solution
       ```python
-      if k > length or k == 1:
-          return head
+      def reverseKGroup(self, head: ListNode, k: int) -> ListNode:
 
-      # total group number
-      group_cnt = length // k
+        # calculate length
+        length = 0
+        cur = head
+        while cur:
+            length += 1
+            cur = cur.next
 
-      # prepare dummy node
-      prev = prev_end = dummy = ListNode(0)
-      cur = dummy.next = head
+        if k > length or k == 1:
+            return head
 
-      for _ in range(group_cnt):
-          # reverse for each group
-          for _ in range(k):
-              cur.next, prev, cur = prev, cur, cur.next
+        # total group number
+        group_cnt = length // k
 
-          next_prev_end = prev_end.next
-          prev_end.next = prev
-          next_prev_end.next = cur
-          prev = prev_end = next_prev_end
+        prev = prev_end = dummy = ListNode(0)
+        cur = dummy.next = head
+        for _ in range(group_cnt):
 
-      return dummy.next
+            for _ in range(k):
+                nxt = cur.next
+                cur.next = prev
+                prev, cur = cur, nxt
+
+            prev_end_next = prev_end.next
+            prev_end.next = prev
+            prev_end_next.next = cur
+            prev = prev_end = prev_end_next
+
+        return dummy.next
       ```
-  * 024: Swap Nodes in Pair (M) *
+  * 024: **Swap** Nodes in **Pair** (M) *
     * Using the **"dymmy node"** Techinique.
     * Use 3 pointers, prev ,current and next.
       ```python solution
@@ -2181,7 +2247,7 @@ Table of Content
 
       return dummy.next
       ```
-  * 328: Odd Even Linked List (M)
+  * 328: **Odd Even** Linked List (M)
     * Create **two linked lists** and **merge** them.
     * Python Solution
       ```python
@@ -2206,45 +2272,48 @@ Table of Content
 
       return dummy1.next
       ```
-  * 143: Reorder List(M) *
+  * 143: **Reorder** List(M) *
     * Given a singly linked list L: L0→L1→…→Ln-1→Ln, reorder it to: L0→Ln→L1→Ln-1→L2→Ln-2→…
-    * Space O(1): *
+    * Space O(1):
         1. Using the **"Runner"** Techinique to seprate first half and second half of the linked list.
         2. **Reverse the second half** of the linked list.
         3. Combine the first half and second half by iterative through out the second half linked list.
       * Python Solution
-      ```python
-      if not head or not head.next:
-          return
+        ```python
+        def reorderList(self, head: ListNode) -> None:
+          """
+          Do not return anything, modify head in-place instead.
+          """
 
-      # Ensure the 1st part has the same or one more node
-      slow, fast = head, head.next
-      while fast and fast.next:
-          fast = fast.next.next
-          slow = slow.next
+          if not head or not head.next:
+              return
 
-      # The end of the 1st part
-      reverse_runner = slow.next
-      slow.next = None
+          # Ensure the 1st part has the same or one more node
+          slow = fast = head
+          while fast and fast.next:
+              fast = fast.next.next
+              slow = slow.next
 
-      # reverse the 2nd half part
-      prev = None
-      while reverse_runner:
-          nxt = reverse_runner.next
-          reverse_runner.next = prev
-          prev, reverse_runner = reverse_runner, nxt
+          cur = slow.next
+          prev = None
+          slow.next = None
+          # reverse the second list
+          while cur:
+              nxt = cur.next
+              cur.next = prev
+              prev, cur = cur, nxt
 
-      # merge to two lists
-      first_runner = head
-      second_runner = prev
-      while second_runner:
-          second_next = second_runner.next
-          second_runner.next = first_runner.next
-          first_runner.next = second_runner
-          # update
-          first_runner = second_runner.next
-          second_runner = second_next
-      ```
+          first = head
+          second = prev
+
+          while second:
+              second_nxt = second.next
+              second.next = first.next
+              first.next = second
+
+              first = second.next
+              second = second_nxt
+        ```
     * Space: O(n):
       * Use a stack to store last half of the linked list.
   * 148: Sort list **
@@ -2255,7 +2324,6 @@ Table of Content
           * Having to handle **linking issue** between two sorted lists **after merging**.
         * Python Solution
         ```python
-
         def split_list(self, head, n):
             first_runner = head
             second_head = None
@@ -2271,7 +2339,6 @@ Table of Content
             second_head = first_runner.next
             first_runner.next = None
             return second_head
-
 
         def merge_two_lists(self, l1, l2, tail):
             runner1 , runner2 = l1, l2
@@ -2301,17 +2368,16 @@ Table of Content
             # new tail
             return merge_runner
 
-
         # use merge sort
         def sortList(self, head: ListNode) -> ListNode:
             if not head or not head.next:
                 return head
 
             length = 0
-            runner = head
-            while runner:
+            cur = head
+            while cur:
                 length += 1
-                runner = runner.next
+                cur = cur.next
 
             window_size = 1
             dummy = ListNode(0)
@@ -2319,6 +2385,7 @@ Table of Content
             while window_size < length:
                 tail = dummy
                 left = head
+
                 while left:
                     # left, right, next_left
                     right = self.split_list(left, window_size)
@@ -2330,7 +2397,7 @@ Table of Content
 
             return dummy.next
         ```
-  * 061: Rotate list
+  * 061: **Rotate** list
     * The rotate length k may be greater than the length of linked list
     * Split out rotate list and merge again, Time O(n), Space O(1)
       * Python Solution
@@ -2372,6 +2439,7 @@ Table of Content
           carry = 0
 
           while l1_runner or l2_runner or carry:
+
               val = carry
 
               if l1_runner:
@@ -2383,17 +2451,17 @@ Table of Content
                   l2_runner = l2_runner.next
 
               cur.next = ListNode(val % 10)
-              cur = cur.next
               carry = val // 10
+              cur = cur.next
 
           return dummy.next
         ```
-  * 160	Intersection of Two Linked Lists (E)
+  * 160: Intersection of Two Linked Lists (E)
     * Use **difference** of length
   * 021: Merge Two Sorted Lists (E)
     * The concept is like merge step in the **merge sort**.
   * 234: **Palindrome** Linked List(M)
-    * Space Complexity O(1) *:
+    * Space Complexity O(1):
       * Reverse first half of the linked list, but it is not a pratical solution since we should not modify the constant function of the input.
     * Space Complexity O(n):
       * Use a stack
@@ -2442,6 +2510,100 @@ Table of Content
       ```
 ### Cache
   * LRU
+    * Use ordered dict
+    * Use dict and doubly linked list
+      * Put
+        * insert_head
+        * pop_tail
+        * move_to_head
+      * Get
+        * move_to_head
+      * For Doubly linked list
+        * Use dummy nodes for head and tail
+      * Python Solution
+        ```python
+        class DLinkedNode(object):
+          def __init__(self):
+              self.key = None   # key is necessary for key pop operation
+              self.val = None
+              self.prev = None
+              self.next = None
+
+
+        class DLinkedList(object):
+            def __init__(self):
+                self.head = DLinkedNode()
+                self.tail = DLinkedNode()
+
+                self.head.next = self.tail
+                self.tail.prev = self.head
+
+            def insert_to_head(self, node):
+                node.prev = self.head
+                node.next = self.head.next
+
+                self.head.next.prev = node
+                self.head.next = node
+
+            def remove_node(self, node):
+                node.prev.next = node.next
+                node.next.prev = node.prev
+
+            def pop_tail(self):
+                """ O(1)
+                """
+                pop = self.tail.prev
+                if pop is self.head:
+                    return None
+
+                self.remove_node(pop)
+                return pop
+
+            def move_to_head(self, node):
+                """ O(1)
+                """
+                self.remove_node(node)
+                self.insert_to_head(node)
+
+
+        class LRUCache(object):
+            def __init__(self, capacity: int):
+                self.d_ll = DLinkedList()
+                self.d = dict()
+                self.len = 0
+                self.cap = capacity
+
+            def get(self, key: int) -> int:
+                """ O(1)
+                """
+                if key not in self.d:
+                    return -1
+
+                node = self.d[key]
+                self.d_ll.move_to_head(node)
+                return node.val
+
+            def put(self, key: int, value: int) -> None:
+                """ O(1)
+                """
+                if key not in self.d:
+                    new_node = DLinkedNode()
+                    new_node.key = key
+                    new_node.val = value
+                    self.d[key] = new_node
+                    self.d_ll.insert_to_head(new_node)
+
+                    if self.len + 1 > self.cap:
+                        pop_node = self.d_ll.pop_tail()
+                        self.d.pop(pop_node.key)
+                    else:
+                        self.len += 1
+
+                else:
+                    node = self.d[key]
+                    node.val = value
+                    self.d_ll.move_to_head(node)
+        ```
   * LFU
 ### Tree
 ### Binary Search Tree
@@ -2582,7 +2744,7 @@ Table of Content
 ### Backtracking
   * Ref
     * [General Approach](https://leetcode.com/problems/permutations/discuss/18239/A-general-approach-to-backtracking-questions-in-Java-(Subsets-Permutations-Combination-Sum-Palindrome-Partioning))
-  * Subset
+  * **Subset**
     * 078: Subsets (M)
       * Ref:
         * [C++ Recursive/Iterative/Bit-Manipulation](https://leetcode.com/problems/subsets/discuss/27278/C%2B%2B-RecursiveIterativeBit-Manipulation)
@@ -2656,33 +2818,30 @@ Table of Content
           * Total (2^n) subsets (only two status for each character)
         * example:
           * [a, b, c]
-            * set 000: []]
+            * set 000: []
             * set 001: [a]
             * set 010: [b]
             * set 011: [a, b]
             * set 100: [c]
-            * ...
+            * set 101: [a, c]
+            * set 110: [b, c]
             * set 111  [a, b, c]
-
         * Python Solution
             ```python
             def subsets_iter_bit(nums: List[int]) -> List[List[int]]:
                 subs = []
-                subs_len = 2 ** len(nums)
-
+                subs_len = 2 ** len(nums
                 for sub_idx in range(subs_len):
                     new_sub = []
-
                     for num_idx in range(len(nums)):
                         if sub_idx & (1 << num_idx):
                             new_sub.append(nums[num_idx])
-
                     subs.append(new_sub)
 
                 return subs
             ```
     * 090: Subsets II (M)
-  * Combinations
+  * **Combinations**
     * 077: Combinations (M)
       * Recursive Time: O(k * n!/(n!*(n-k))!), Space: O(n!/(n!*(n-k)!)
         * Time: O(k* n!/(n!*(n-k)!)
@@ -2750,7 +2909,7 @@ Table of Content
     * 040: Combination Sum II (M)
     * 216: Combination Sum III (M)
     * 377: Combination Sum IV (M)
-  * Permutation
+  * **Permutation**
     * 046: Permutations (M)
       * Recursive, Time: O(n!), Space: O(n!),
         * Time: O(n!)
@@ -2809,6 +2968,17 @@ Table of Content
     * 047: Permutations II (M)
     * 031: Next Permutation (M)
     * 060: Permutation Sequence (M)
-  * 291	Word Pattern II
+  * 291: Word Pattern II
 ### Topological Sort
 ### Bit Mamipulation
+### Error List, 0rz
+  * String
+    * 275: H-Index II (M)
+      * Binary search solution
+    * 045: Jump Game II (H)
+    * 325: Maximum Size Subarray Sum **Equals k** (M)
+    * 560: Subarray Sum **Equals K** (M)
+    * 249: Group Shifted Strings (M)
+
+
+
