@@ -378,12 +378,9 @@ Table of Contents
         * partition:
           * pivot: 3
           * [2, 1, 3 ,4*, 4]
-  * Recursive
-    * https://www.geeksforgeeks.org/python-program-for-quicksort/
-    * https://www.youtube.com/watch?v=CB_NCoxzQnk
 
-  * Iterative
-    * https://www.techiedelight.com/iterative-implementation-of-quicksort/
+  * Related topic:
+    * [Quick Search ith element in an array](https://leetcode.com/problems/kth-largest-element-in-an-array/solution/)
 
 #### Merge Sort
   * Ref
