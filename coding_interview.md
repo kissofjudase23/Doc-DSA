@@ -909,6 +909,7 @@ Table of Content
 
               return _canWin(self, s)
             ```
+     * 087: Scramble String (H)
 ### Array
   * **Check Duplicate**
     * 217: Contains Duplicate (E)
@@ -1695,7 +1696,7 @@ Table of Content
       ```
     * 239: Sliding Window Maximum (H)
     * 295: Find Median from Data Stream (H)
-  * Reorder and Sort
+  * **Reorder** and **Sort**
     * 189: Rotate Array (E)
       * Space: **O(1)**
         * Use **three reverse** operations can solve this problem.
@@ -1787,6 +1788,119 @@ Table of Content
 
               less = not less
           ```
+    * 075: Sort Colors (M)
+      * quick sort, time:O(nlog(n)), space:O(log(n))
+      * **Counting sort**, time:O(n+k), space:O(k)
+        * Python Solution:
+        ```python
+        def sortColors(self, nums: List[int]) -> None:
+          """
+          Do not return anything, modify nums in-place instead.
+          """
+          if not nums:
+              return
+
+          color_num = 3
+          cnt_array = [0] * color_num
+
+          for num in nums:
+              cnt_array[num] += 1
+
+          p = 0
+          for color, cnt in enumerate(cnt_array):
+              for _ in range(cnt):
+                  nums[p] = color
+                  p += 1
+        ```
+      * **Dutch National Flag Problem**, time:O(n), O(1)
+        * Like 2 boundary quick sort
+          * p0: boundary for 0
+          * p2: boundary for 2
+          * p1: runner
+
+        * Python Solution
+          ```python
+          def sortColors(self, nums: List[int]) -> None:
+          """
+          Do not return anything, modify nums in-place instead.
+          """
+          if not nums:
+              return
+
+          p0 = p1= 0
+          p2 = len(nums) - 1
+
+          while p1 <= p2:
+              if nums[p1] == 2:
+                  nums[p1], nums[p2] = nums[p2], nums[p1]
+                  p2 -= 1
+              elif nums[p1] == 0:
+                  nums[p1], nums[p0] = nums[p0], nums[p1]
+                  p0 += 1  # p1 only surrpot 1 forward
+                  p1 += 1
+              else:  # nums[p1] == 1
+                  p1 += 1
+          ```
+  * **Kth** element
+    * 215: **Kth Largest** Element in an Array (M)
+      * Sort, Time: O(nlog(n)), Space:O(log(n))
+      * minimun heap, Time: O(nlog(k)), Space: O(1)
+        * keep the k element in the minimum heap
+        * Time Complexity: O(nlog(l))
+          * **heappush**
+            * Append to the tail of list, and make bubble up comparison cost log(k)
+          * **heapreplace**
+            * Replace the min, and make bubble down operation, cost log(k)
+        * Python Solution
+        ```python
+        def findKthLargest(self, nums: List[int], k: int) -> int:
+          heap = []
+          for num in nums:
+              if len(heap) < k:
+                  heapq.heappush(heap, num)
+
+              elif num > heap[0]:
+                  heapq.heapreplace(heap, num)
+          return heap[0]
+        ```
+      * Quick select, Time: O(n), Space:O(1)
+        * Python Solution:
+        ```python
+        class Solution:
+          def partition(self, nums, start, end):
+              # to avoid worst case
+              pivot_ran = random.randint(start, end)
+              nums[pivot_ran], nums[end] = nums[end], nums[pivot_ran]
+
+              pivot = end
+              border = start
+              border_val = nums[pivot]
+              for cur in range(start, end):
+                  if nums[cur] <= border_val:
+                      nums[border], nums[cur] = nums[cur], nums[border]
+                      border += 1
+
+              nums[border], nums[pivot] = nums[pivot], nums[border]
+              return border
+
+          def quick_select(self, nums, start, end, k_smallest):
+              while start <= end:
+                pivot = self.partition(nums, start, end)
+                if k_smallest == pivot:
+                    return nums[pivot]
+                elif k_smallest < pivot:
+                    end = pivot - 1
+                else:
+                    start = pivot + 1
+
+          def findKthLargest(self, nums: List[int], k: int) -> int:
+              if k > len(nums):
+                  return None
+
+              # k_smallest is len(nums)-k
+              return self.quick_select(nums, 0, len(nums)-1, len(nums)-k)
+        ```
+    * 347: Top K Frequent Elements (M)
   * Other:
     * 277: [Find the Celebrity](https://pandaforme.github.io/2016/12/09/Celebrity-Problem/) (M) *
       1. Find the **celebrity candidate**
@@ -2346,9 +2460,31 @@ Table of Content
 
             return new_head
           ```
-* **Sorting**
-  * 021: Merge Two Sorted Lists (E)
+* **Sorting and Merge**
+  * 021: Merge Two **Sorted** Lists (E)
     * The concept is like merge step in the **merge sort**.
+    * Time: O(n), Space: O(c)
+    * Python Solution
+      ```python
+      def mergeTwoLists(self, l1: ListNode, l2: ListNode) -> ListNode:
+        cur = dummy = ListNode(0)
+        while l1 and l2:
+            if l1.val <= l2.val:
+                cur.next = l1
+                l1 = l1.next
+            else:
+                cur.next = l2
+                l2 = l2.next
+            cur = cur.next
+
+        if l1:
+            cur.next = l1
+
+        if l2:
+            cur.next = l2
+
+        return dummy.next
+      ```
   * 148: Sort list (M)
     * Time: O(nlog(n), Space:O(1)
       * Use the **merge sort** (iterative version)
@@ -2386,6 +2522,7 @@ Table of Content
                     runner2 = runner2.next
                 merge_runner = merge_runner.next
 
+            # we need to return tail
             while runner1:
                 merge_runner.next = runner1
                 runner1 = runner1.next
@@ -2430,7 +2567,7 @@ Table of Content
 
             return dummy.next
         ```
-  * 023: Merge k Sorted Lists (H)
+  * 023: Merge k **Sorted** Lists (H)
     * Assume total n nodes, k lists
     * Brute Force: Time:O(nlog(n)), Space:O(n)
       * Copy and sort all the values
@@ -2476,7 +2613,45 @@ Table of Content
               return dummy.next
         ```
     * **Divide and Conquer**, Time:O(nlog(k)), Space:O(1)
+      * Time complexity: O(nlog(k))
+        * Total log(k) round:
+          * each round need to traverse every nodes
+      * Space complexity: O(1)
+      * Python Solution
+        ```python
+        def merge2Lists(self, l1, l2):
+          cur = dummy = ListNode(0)
+          while l1 and l2:
+              if l1.val < l2.val:
+                  cur.next = l1
+                  l1 = l1.next
+              else:
+                  cur.next = l2
+                  l2 = l2.next
+              cur = cur.next
 
+          if l1:
+              cur.next = l1
+
+          if l2:
+              cur.next = l2
+
+          return dummy.next
+
+        def mergeKLists(self, lists: List[ListNode]) -> ListNode:
+            if not lists:
+                return None
+            # bottom up merge lists
+            interval = 1
+            while interval < len(lists):
+                left = 0
+                while left + interval < len(lists):
+                    lists[left] = self.merge2Lists(lists[left], lists[left+interval])
+                    left += (2 * interval)
+                interval *= 2
+
+            return lists[0]
+        ```
 * Other
   * 002: Add Two Numbers (M)
     * Time complexity O(n) and one pass
@@ -2518,7 +2693,7 @@ Table of Content
     2. Start traversing linked list from leftmost node and add 1 to it. If there is a carry, move to the next node. Keep moving to the next node while there is a carry.
     3. **Reverse** modified linked list and return head.
 * TODO
-  * 86	Partition List
+  * 086	Partition List
   * 147	Insertion Sort List
 ### Stack and Queue
   * 155: Min Stack (E)
@@ -2555,6 +2730,9 @@ Table of Content
         def getMin(self) -> int:
             return self.mins[-1]
       ```
+  * Priority Queue
+
+
 ### Cache
   * 146: LRU Cache (M)
     * Use ordered dict
