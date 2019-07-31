@@ -717,7 +717,8 @@ Table of Content
 
           return True
          ```
-   * **Anagram** (combinations)
+   * **Anagram**
+     * The key is how to calculate signatures.
      * 242: Valid Anagram (E)
        * Python Solution
         ```python
@@ -739,19 +740,18 @@ Table of Content
           return True
        ```
      * 049: Group Anagrams (M)
+       * n is the number of strings, k is the maximum length of the strings
        * Categorize by sorted string, Time: O(n*klog(k)) Space: O(nk)
-         * n is the number of strings, k is the maximum length of the strings
          * Python Solution
-           ```python
-          def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
-            d = collections.defaultdict(list)
-            for s in strs:
-              d[tuple(sorted(s))].append(s)
-
+            ```python
+            def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
+              d = collections.defaultdict(list)
+              for s in strs:
+                d[tuple(sorted(s))].append(s)
             return d.values()
-           ```
+            ```
        * Categorize by Character Count, Time: O(nk), Space: O(nk)
-         * transform each string \text{s}s into a character count,
+         * Transform each strings into a character count.
          * Python Solution
             ```python
             def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
@@ -769,6 +769,9 @@ Table of Content
               return d.values()
             ```
      * 249: Group Shifted Strings (M)
+       * Time: O(nk)
+         * n is the number of strings
+         * k is the length of the string
        * Example:
          * [a, b] and [z, a]
            * ord(a) = 97
@@ -781,7 +784,6 @@ Table of Content
          ```python
          def groupStrings(self, strings: List[str]) -> List[List[str]]:
           d = collections.defaultdict(list)
-
           for s in strings:
               k = tuple( (ord(c) - ord(s[0]))%26  for c in s)
               d[k].append(s)
@@ -2150,7 +2152,6 @@ Table of Content
 
           return dummy.next
        ```
-
 * **Reorder**
   * 206: **Reverse** Linked List (E)
     * Pythobn Solution
@@ -2316,7 +2317,39 @@ Table of Content
         ```
     * Space: O(n):
       * Use a stack to store last half of the linked list.
-  * 148: Sort list **
+  * 061: **Rotate** list
+    * The rotate length k may be greater than the length of linked list
+    * Split out rotate list and merge again, Time O(n), Space O(1)
+      * Python Solution
+          ```python
+          def rotateRight(self, head: ListNode, k: int) -> ListNode:
+            if not head or not head.next:
+                return head
+
+            length = 1
+            old_tail = head
+            while old_tail.next:
+                length += 1
+                old_tail = old_tail.next
+
+            k = k % length
+            if k == 0:
+                return head
+
+            new_tail = head
+            for _ in range(length-k-1):
+                new_tail = new_tail.next
+
+            new_head = new_tail.next
+            old_tail.next = head
+            new_tail.next = None
+
+            return new_head
+          ```
+* **Sorting**
+  * 021: Merge Two Sorted Lists (E)
+    * The concept is like merge step in the **merge sort**.
+  * 148: Sort list (M)
     * Time: O(nlog(n), Space:O(1)
       * Use the **merge sort** (iterative version)
         * **Split** the linked with window size 1,2,4,8, etc.
@@ -2397,35 +2430,52 @@ Table of Content
 
             return dummy.next
         ```
-  * 061: **Rotate** list
-    * The rotate length k may be greater than the length of linked list
-    * Split out rotate list and merge again, Time O(n), Space O(1)
+  * 023: Merge k Sorted Lists (H)
+    * Assume total n nodes, k lists
+    * Brute Force: Time:O(nlog(n)), Space:O(n)
+      * Copy and sort all the values
+    * Merge lists one by one: Time:O(kn), Space:O(1)
+      * Convert merge k lists problem to merge 2 lists k-1) times.
+      * Time Complexity:
+        * Assume node for each list is n/k
+        * total cost would be (1n+2n+3n+...kn)/k = O(kn)
+    * **Priority Queue** (min heap), Time:O(nlog(k)), Space:O(k)
+      * Time complexity: O(nlog(k))
+        * Total n operations (n nodes),
+          * O(log(k)): put to priority queue
+          * O(log(k)): get min from priority queue
+      * Space complexity: O(k)
+        * quque size
       * Python Solution
-          ```python
-          def rotateRight(self, head: ListNode, k: int) -> ListNode:
-            if not head or not head.next:
-                return head
+        ```python
+        from queue import PriorityQueue
 
-            length = 1
-            old_tail = head
-            while old_tail.next:
-                length += 1
-                old_tail = old_tail.next
+        class Event(object):
+            def __init__(self, node):
+                self.node = node
 
-            k = k % length
-            if k == 0:
-                return head
+            def __lt__(self, other):
+                return self.node.val < other.node.val
 
-            new_tail = head
-            for _ in range(length-k-1):
-                new_tail = new_tail.next
+          def mergeKLists(lists: List[ListNode]) -> ListNode:
+              cur = dummy = ListNode(0)
+              q = PriorityQueue()
 
-            new_head = new_tail.next
-            old_tail.next = head
-            new_tail.next = None
+              for head in lists:
+                  if head:
+                      q.put(Event(head))
 
-            return new_head
-          ```
+              # can not use while q here !
+              while not q.empty():
+                  node = q.get().node
+                  cur.next = node
+                  cur = cur.next
+                  if node.next:
+                      q.put(Event(node.next))
+
+              return dummy.next
+        ```
+    * **Divide and Conquer**, Time:O(nlog(k)), Space:O(1)
 
 * Other
   * 002: Add Two Numbers (M)
@@ -2458,8 +2508,6 @@ Table of Content
         ```
   * 160: Intersection of Two Linked Lists (E)
     * Use **difference** of length
-  * 021: Merge Two Sorted Lists (E)
-    * The concept is like merge step in the **merge sort**.
   * 234: **Palindrome** Linked List(M)
     * Space Complexity O(1):
       * Reverse first half of the linked list, but it is not a pratical solution since we should not modify the constant function of the input.
@@ -2471,7 +2519,6 @@ Table of Content
     3. **Reverse** modified linked list and return head.
 * TODO
   * 86	Partition List
-  * 23	Merge k Sorted Lists
   * 147	Insertion Sort List
 ### Stack and Queue
   * 155: Min Stack (E)
@@ -2509,7 +2556,7 @@ Table of Content
             return self.mins[-1]
       ```
 ### Cache
-  * LRU
+  * 146: LRU Cache (M)
     * Use ordered dict
     * Use dict and doubly linked list
       * Put
@@ -2740,6 +2787,15 @@ Table of Content
         * Use **stack** for traversal, and **use continue instead of return false when not found**.
   * 212: Word Search II (H)
 ### BFS & DFS
+  * 200: Number of Islands (M) *
+  * 339: Nested List Weight Sum (E)
+  * 364: Nested List Weight Sum II (M)
+  * 127: Word Ladder (E) *
+  * 126: Word Ladder II (H)
+  * 286: Walls and Gates	(M)
+  * 130: Surrounded Regions (M)
+  * 051: N-Queens (H)
+  * 052: N-Queens II (H)
 ### Dynamic Programming
 ### Backtracking
   * Ref
@@ -2971,14 +3027,26 @@ Table of Content
   * 291: Word Pattern II
 ### Topological Sort
 ### Bit Mamipulation
-### Error List, 0rz
+### Error Prone List
   * String
+    * 028: Implement **strStr** (E) (KMP algorithm)
+    * 249: Group Shifted Strings (M)
+    * 049: Group Anagrams (M)
+  * Array
     * 275: H-Index II (M)
       * Binary search solution
     * 045: Jump Game II (H)
     * 325: Maximum Size Subarray Sum **Equals k** (M)
     * 560: Subarray Sum **Equals K** (M)
-    * 249: Group Shifted Strings (M)
+  * LinkedList
+    * 148: Sort list (M)
+    * 023: Merge k Sorted Lists (H)
+  * Cache
+    * 146: LRU Cache (M)
+  * BackTracking
+    * 077: Combinations (M)
+-
+
 
 
 
