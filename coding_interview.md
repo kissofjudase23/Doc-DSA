@@ -1,26 +1,29 @@
 Table of Content
-- [FAQ](#FAQ)
-- [Walking through a Problem](#Walking-through-a-Problem)
-- [Optimize & Solve Technique](#Optimize--Solve-Technique)
-- [Codeforces](#Codeforces)
-- [Interviewbit](#Interviewbit)
-- [Cracking the coding interview](#Cracking-the-coding-interview)
-- [Leetcode](#Leetcode)
-  - [Classification](#Classification)
-  - [Math](#Math)
-  - [String](#String)
-  - [Array](#Array)
-  - [Matrix](#Matrix)
-  - [Linked List](#Linked-List)
-  - [Stack and Queue](#Stack-and-Queue)
-  - [Cache](#Cache)
-  - [Tree](#Tree)
-  - [Binary Search Tree](#Binary-Search-Tree)
-  - [Trie (Prefix Tree)](#Trie-Prefix-Tree)
-  - [BFS & DFS](#BFS--DFS)
-  - [Dynamic Programming](#Dynamic-Programming)
-  - [Topological Sort](#Topological-Sort)
-  - [Bit Mamipulation](#Bit-Mamipulation)
+- [FAQ](#faq)
+- [Walking through a Problem](#walking-through-a-problem)
+- [Optimize & Solve Technique](#optimize--solve-technique)
+- [Codeforces](#codeforces)
+- [Interviewbit](#interviewbit)
+- [Cracking the coding interview](#cracking-the-coding-interview)
+- [Leetcode](#leetcode)
+  - [Classification](#classification)
+  - [Math](#math)
+  - [String](#string)
+  - [Array](#array)
+  - [Matrix](#matrix)
+  - [Linked List](#linked-list)
+  - [Stack and Queue](#stack-and-queue)
+  - [Priority Queue (heap)](#priority-queue-heap)
+  - [Cache](#cache)
+  - [Tree](#tree)
+  - [Binary Search Tree](#binary-search-tree)
+  - [Trie (Prefix Tree)](#trie-prefix-tree)
+  - [BFS & DFS](#bfs--dfs)
+  - [Dynamic Programming](#dynamic-programming)
+  - [Backtracking](#backtracking)
+  - [Topological Sort](#topological-sort)
+  - [Bit Mamipulation](#bit-mamipulation)
+  - [Error Prone List](#error-prone-list)
 
 ## FAQ
   * [What is tail recursion?](https://stackoverflow.com/questions/33923/what-is-tail-recursion)
@@ -1836,71 +1839,11 @@ Table of Content
                   p2 -= 1
               elif nums[p1] == 0:
                   nums[p1], nums[p0] = nums[p0], nums[p1]
-                  p0 += 1  # p1 only surrpot 1 forward
-                  p1 += 1
+                  p0 += 1
+                  p1 += 1 # p0 only forwards, p1 does not need to check again.
               else:  # nums[p1] == 1
                   p1 += 1
           ```
-  * **Kth** element
-    * 215: **Kth Largest** Element in an Array (M)
-      * Sort, Time: O(nlog(n)), Space:O(log(n))
-      * minimun heap, Time: O(nlog(k)), Space: O(1)
-        * keep the k element in the minimum heap
-        * Time Complexity: O(nlog(l))
-          * **heappush**
-            * Append to the tail of list, and make bubble up comparison cost log(k)
-          * **heapreplace**
-            * Replace the min, and make bubble down operation, cost log(k)
-        * Python Solution
-        ```python
-        def findKthLargest(self, nums: List[int], k: int) -> int:
-          heap = []
-          for num in nums:
-              if len(heap) < k:
-                  heapq.heappush(heap, num)
-
-              elif num > heap[0]:
-                  heapq.heapreplace(heap, num)
-          return heap[0]
-        ```
-      * Quick select, Time: O(n), Space:O(1)
-        * Python Solution:
-        ```python
-        class Solution:
-          def partition(self, nums, start, end):
-              # to avoid worst case
-              pivot_ran = random.randint(start, end)
-              nums[pivot_ran], nums[end] = nums[end], nums[pivot_ran]
-
-              pivot = end
-              border = start
-              border_val = nums[pivot]
-              for cur in range(start, end):
-                  if nums[cur] <= border_val:
-                      nums[border], nums[cur] = nums[cur], nums[border]
-                      border += 1
-
-              nums[border], nums[pivot] = nums[pivot], nums[border]
-              return border
-
-          def quick_select(self, nums, start, end, k_smallest):
-              while start <= end:
-                pivot = self.partition(nums, start, end)
-                if k_smallest == pivot:
-                    return nums[pivot]
-                elif k_smallest < pivot:
-                    end = pivot - 1
-                else:
-                    start = pivot + 1
-
-          def findKthLargest(self, nums: List[int], k: int) -> int:
-              if k > len(nums):
-                  return None
-
-              # k_smallest is len(nums)-k
-              return self.quick_select(nums, 0, len(nums)-1, len(nums)-k)
-        ```
-    * 347: Top K Frequent Elements (M)
   * Other:
     * 277: [Find the Celebrity](https://pandaforme.github.io/2016/12/09/Celebrity-Problem/) (M) *
       1. Find the **celebrity candidate**
@@ -2569,14 +2512,14 @@ Table of Content
         ```
   * 023: Merge k **Sorted** Lists (H)
     * Assume total n nodes, k lists
-    * Brute Force: Time:O(nlog(n)), Space:O(n)
-      * Copy and sort all the values
-    * Merge lists one by one: Time:O(kn), Space:O(1)
+    * Brute Force: Time:O(nlog(n)), Space:O(1)
+      * Push and Sort all the nodes
+    * **Insertion Sort**, Time:O(nk), Space:O(1)
       * Convert merge k lists problem to merge 2 lists k-1) times.
       * Time Complexity:
         * Assume node for each list is n/k
         * total cost would be (1n+2n+3n+...kn)/k = O(kn)
-    * **Priority Queue** (min heap), Time:O(nlog(k)), Space:O(k)
+    * **Priority Queue**, (min heap), Time:O(nlog(k)), Space:O(k)
       * Time complexity: O(nlog(k))
         * Total n operations (n nodes),
           * O(log(k)): put to priority queue
@@ -2612,7 +2555,7 @@ Table of Content
 
               return dummy.next
         ```
-    * **Divide and Conquer**, Time:O(nlog(k)), Space:O(1)
+    * **Merge Sort Iterative**, Time:O(nlog(k)), Space:O(1)
       * Time complexity: O(nlog(k))
         * Total log(k) round:
           * each round need to traverse every nodes
@@ -2730,9 +2673,150 @@ Table of Content
         def getMin(self) -> int:
             return self.mins[-1]
       ```
-  * Priority Queue
+### Priority Queue (heap)
+  * 703. Kth Largest Element in a Stream (E)
+    * Use heapq, Time: O(log(k)), Space: O(k)
+      * Time: O(log(k))
+        * __init__: O(nlog(k))
+          * n items for heap push
+        * add:
+          * heapreplace and heappush take O(log(k))
+      * Space: O(k)
+        * Capacity of heap size
+      * Python Solution:
+        ```python
+        class KthLargest:
+          def __init__(self, k: int, nums: List[int]):
+              # You may assume that nums' length ≥ k-1 and k ≥ 1.
+              self.heap = list()
+              self.cap = k
+              for num in nums:
+                  self._add(num)
+
+          def _add(self, val):
+              if len(self.heap) < self.cap:
+                  heapq.heappush(self.heap, val)
+              else:
+                  if val > self.heap[0]:
+                      heapq.heapreplace(self.heap, val)
+
+          def add(self, val: int) -> int:
+              self._add(val)
+              return self.heap[0]
+        ```
 
 
+    * Python Solution
+  * 023: Merge k Sorted Lists (H)
+  * 253: Meeting Rooms II (M)
+  * 215: **Kth Largest** Element in an Array (M)
+    * Find the kth largest element in an unsorted array.
+    * Sort, Time: O(nlog(n)), Space:O(log(n))
+    * minimun heap, Time: O(nlog(k)), Space: O(1)
+      * keep the k element in the minimum heap
+      * Time Complexity: O(nlog(l))
+        * **heappush**
+          * Append to the tail of list, and make bubble up comparison cost log(k)
+        * **heapreplace**
+          * Replace the min, and make bubble down operation, cost log(k)
+      * Python Solution
+      ```python
+      def findKthLargest(self, nums: List[int], k: int) -> int:
+        heap = []
+        for num in nums:
+            if len(heap) < k:
+                heapq.heappush(heap, num)
+
+            elif num > heap[0]:
+                heapq.heapreplace(heap, num)
+        return heap[0]
+      ```
+    * Quick select, Time: O(n), Space:O(1)
+      * Python Solution:
+      ```python
+      class Solution:
+        def partition(self, nums, start, end):
+            # to avoid worst case
+            pivot_ran = random.randint(start, end)
+            nums[pivot_ran], nums[end] = nums[end], nums[pivot_ran]
+
+            pivot = end
+            border = start
+            border_val = nums[pivot]
+            for cur in range(start, end):
+                if nums[cur] <= border_val:
+                    nums[border], nums[cur] = nums[cur], nums[border]
+                    border += 1
+
+            nums[border], nums[pivot] = nums[pivot], nums[border]
+            return border
+
+        def quick_select(self, nums, start, end, k_smallest):
+            while start <= end:
+              pivot = self.partition(nums, start, end)
+              if k_smallest == pivot:
+                  return nums[pivot]
+              elif k_smallest < pivot:
+                  end = pivot - 1
+              else:
+                  start = pivot + 1
+
+        def findKthLargest(self, nums: List[int], k: int) -> int:
+            if k > len(nums):
+                return None
+
+            # k_smallest is len(nums)-k
+            return self.quick_select(nums, 0, len(nums)-1, len(nums)-k)
+      ```
+  * 347: **Top K Frequent** Elements (M)
+    * Given a non-empty array of integers, return the **k most frequent elements**.
+    * If k == 1, Time:O(n), Space:O(n)
+      * Use dictionary and keep the max key
+    * If k > 1, Time:O(nlog(k)), Space:O(n)
+      * Time O(nlog(k))
+        * build hash map :O(n)
+        * build heap :O(nlog(k))
+      * Space: O(n)
+        * O(n) for hash table
+        * O(k) for heap
+      * Python Implementation 1:
+      ```python
+      class Event(object):
+        def __init__(self, key, count):
+            self.key = key
+            self.count = count
+
+        def __lt__(self, other):
+            return self.count < other.count
+
+        def __repr__(self):
+            return str(self.key)
+
+      def topKFrequent(nums: List[int], k: int) -> List[int]:
+          d = collections.Counter(nums)
+          heap = list()
+
+          for key, cnt in d.items():
+              if len(heap) < k:
+                  heapq.heappush(heap, Event(key, cnt))
+              else:
+                  e = Event(key, cnt)
+                  if heap[0] < e:
+                      heapq.heapreplace(heap, e)
+
+          return return [e.key for e in heap]
+      ```
+      * Python Implementation 2
+        ```python
+        def topKFrequent(self, nums: List[int], k: int) -> List[int]:
+          counter = collections.Counter(nums)
+          return heapq.nlargest(k, counter.keys(), key=counter.get)
+        ```
+  * 332: Reconstruct Itinerary	(M)
+  * 341: Flatten Nested List Iterator (M)
+  * 218: The Skyline Problem (H)
+  * 313: Super Ugly Numbe (M)
+  * 373: Find K Pairs with Smallest Sums (M)
 ### Cache
   * 146: LRU Cache (M)
     * Use ordered dict
@@ -2901,33 +2985,34 @@ Table of Content
 
       ```
   * 102: Binary **Tree Level** Order Traversal (M) *
-    * Use **the length of the queue** for each round
-    * Python Solution
-      ```python
-      def levelOrder(self, root: TreeNode) -> List[List[int]]:
-        if not root:
-            return
+    * BFS
+      * Use **the length of the queue** for each round
+      * Python Solution
+        ```python
+        def levelOrder(self, root: TreeNode) -> List[List[int]]:
+          if not root:
+              return
 
-        visits = list()
-        q = deque()
-        q.append(root)
+          visits = list()
+          q = deque()
+          q.append(root)
 
-        while q:
-            q_len = len(q)
+          while q:
+              q_len = len(q)
 
-            level_visits = []
-            for _ in range(q_len):
-                node = q.popleft()
-                level_visits.append(node.val)
-                if node.left:
-                    q.append(node.left)
-                if node.right:
-                    q.append(node.right)
+              level_visits = []
+              for _ in range(q_len):
+                  node = q.popleft()
+                  level_visits.append(node.val)
+                  if node.left:
+                      q.append(node.left)
+                  if node.right:
+                      q.append(node.right)
 
-            visits.append(level_visits)
+              visits.append(level_visits)
 
-        return visits
-      ```
+          return visits
+        ```
   * 173: Binary Search Tree Iterator (M) *
     * Python Solution
       ```python
@@ -2965,19 +3050,430 @@ Table of Content
         * Use **stack** for traversal, and **use continue instead of return false when not found**.
   * 212: Word Search II (H)
 ### BFS & DFS
-  * 200: Number of Islands (M) *
-  * 339: Nested List Weight Sum (E)
-  * 364: Nested List Weight Sum II (M)
-  * 127: Word Ladder (E) *
-  * 126: Word Ladder II (H)
-  * 286: Walls and Gates	(M)
+  * 200: Number of Islands (M)
+    * Time: O(m*n), Space: O(m*n)
+    * BFS:
+      * Set visits to True before append to the queue to **reduce unnecessary iterations.**
+      * Python Solution
+        ```python
+        class NumberOfIsland(object):
+
+          LAND, WATER = '1', '0'
+          NEIGHBORS = ((1, 0), (0, -1), (-1, 0), (0, 1))
+
+          @classmethod
+          def bfs(cls, grid: List[List[str]]) -> int:
+              """
+              Time: O(m*n)
+              Space: O(m*n)
+              """
+              def _bfs(r, c):
+                if grid[r][c] == cls.WATER or visits[r][c]:
+                  return 0
+
+                visits[r][c] = True
+                q = collections.deque()
+                q.append((r, c))
+                while q:
+                    r, c = q.popleft()
+                    for neigbor in cls.NEIGHBORS:
+                        nr, nc = r+neigbor[0], c+neigbor[1]
+
+                        if nr < 0 or nr >= row or nc < 0 or nc >= col:
+                            continue
+
+                        if grid[nr][nc] == cls.WATER or visits[nr][nc]:
+                            continue
+
+                        visits[nr][nc] = True
+                        q.append((nr, nc))
+
+                return 1
+
+              if not grid or not grid[0]:
+                  return 0
+
+              row, col = len(grid), len(grid[0])
+              area_cnt = 0
+              visits = [[False for _ in range(col)] for _ in range(row)]
+              for r in range(row):
+                  for c in range(col):
+                      area_cnt += _bfs(r, c)
+              return area_cnt
+        ```
+    * DFS Recursive
+      * Implementation is just like BFS, but use stack instead
+      * Set visits to True before append to the queue to reduce unnecessary iterations.
+    * DFS
+      * Recursive
+      * Python Solution
+        ```python
+        class NumberOfIsland(object):
+          LAND, WATER = '1', '0'
+          NEIGHBORS = ((1, 0), (0, -1), (-1, 0), (0, 1))
+
+          @classmethod
+          def dfs(cls, grid: List[List[str]]) -> int:
+              """
+              Time: O(m*n)
+              Space: O(m*n)
+              """
+            def _dfs(r, c):
+              # check if outouf boundary
+              if r < 0 or r >= row or c < 0 or c >= col:
+                  return 0
+
+              if grid[r][c] == cls.WATER or visits[r][c]:
+                  return 0
+
+              visits[r][c] = True
+
+              for neigbor in cls.NEIGHBORS:
+                  _dfs(r+neigbor[0], c+neigbor[1])
+              return 1
+
+              if not grid or not grid[0]:
+                    return 0
+              row, col = len(grid), len(grid[0])
+              area_cnt = 0
+              visits = [[False for _ in range(col)] for _ in range(row)]
+              for r in range(row):
+                  for c in range(col):
+                      area_cnt += _dfs(r, c)
+
+              return area_cnt
+        ```
+    * Union Find (Disjoint Set)
+  * 339: **Nested List** Weight Sum (E)
+    * The weight is defined from top down.
+    * n: total number of nested elements
+    * d: maximum level of nesting in the input
+    * BFS, Time: O(n), Space: O(n)
+      * Python Solution:
+        ```python
+        def depthSum(self, nestedList: List[NestedInteger]) -> int:
+          if not nestedList:
+              return 0
+
+          q = collections.deque()
+          for n in nestedList:
+              q.append(n)
+
+          depth_sum = 0
+          depth_level = 1
+          while q:
+              q_len = len(q)
+              for _ in range(q_len):
+                  item = q.popleft()
+                  # integer
+                  if item.isInteger():
+                      depth_sum += (depth_level * item.getInteger())
+                  # nested list
+                  else:
+                      # unpack ths list for next level
+                      for n in item:
+                          q.append(n_)
+              depth_level += 1
+
+          return depth_sum
+        ```
+    * DFS Recursice, Time: O(n), Space: O(n)
+      * Python Solution
+        ```python
+        def depthSum(self, nestedList: List[NestedInteger]) -> int:
+          def _dfs(nlist, depth):
+              sum_depth = 0
+              for n in nlist:
+                  if n.isInteger():
+                      sum_depth += (n.getInteger() * depth)
+                  else:
+                      sum_depth += _dfs(n.getList(), depth+1)
+
+              return sum_depth
+
+          return _dfs(nlist=nestedList, depth=1)
+        ```
+    * DFS Iteraitve, Time: O(n), Space: O(d)
+      * Python Solution
+        ```python
+        def depthSum(self, nestedList: List[NestedInteger]) -> int:
+          if not nestedList:
+              return 0
+
+          sum_depth = 0
+          stack = list()
+          for n in nestedList:
+              stack.append((n, 1))
+
+          while stack:
+              item, d = stack.pop()
+              if item.isInteger():
+                  sum_depth += d * item.getInteger()
+              else:
+                  for n in item.getList():
+                      stack.append((n, d+1))
+
+          return sum_depth
+        ```
+  * 364: **Nested List** Weight Sum II (M)
+    * The weight is defined from bottom up.
+    * n: total number of nested elements
+    * d: maximum level of nesting in the input
+    * BFS, Time: O(n), Space: O(n)
+      * Without depth variable
+      * For example:
+        * [1, [2, [3]]]
+          * The result is 1 * 3 + 2 * 2 + 3 * 1 = 10
+          * iter1:
+            * acc = 1
+            * depth_sum = 1
+          * iter2:
+            * acc = 1 + 2
+            * depth sum = 1 + 1 + 2
+          * iter3:
+            * acc = 1 + 2 + 3
+            * depth sum = 1 + 2 + 3
+          *
+      * Python Solution
+      ```python
+        def depthSumInverse(self, nestedList: List[NestedInteger]) -> int:
+          if not nestedList:
+              return 0
+
+          q = collections.deque()
+          depth_sum = 0
+          acc = 0
+
+          for n in nestedList:
+              q.append(n)
+
+          while q:
+              q_len = len(q)
+              for _ in range(q_len):
+                  item = q.popleft()
+                  if item.isInteger():
+                      acc += item.getInteger()
+                  else:
+                      for n in item.getList():
+                          q.append(n)
+              depth_sum += acc
+
+          return  depth_sum
+      ```
+    * DFS recursive, Time: O(n), Space: O(d)
+      * Use hash table to store acc val for each level
+      * Post process to get the result
+      * Python Solution
+        ```python
+        def depthSumInverse(self, nestedList: List[NestedInteger]) -> int:
+
+          def _dfs(nestedList, depth):
+              for n in nestedList:
+                  if n.isInteger():
+                      d[depth] += n.getInteger()
+                  else:
+                      _dfs(n.getList(), depth+1)
+
+        if not nestedList:
+            return 0
+
+        d = collections.defaultdict(int)
+
+        _dfs(nestedList, 1)
+
+        # post process to calculate sum_depth
+        sum_depth = 0
+        max_depth = 1
+        for depth in d.keys():
+            max_depth = max(max_depth, depth)
+
+        for depth, val in d.items():
+            sum_depth += (val *(max_depth-depth+1))
+
+        return sum_depth
+
+        ```
+  * 286: Walls and Gates (M)
+    * r: number of rows
+    * c: number of columns
+    * BFS, search from **EMPTY**, Time: O(**(rc)^2**), Space: O(rc))
+      * This approach can not reuse the calculation info.
+      * Time: O(**(rc)^2**)
+      * Space: O(rc))
+      * Python Solution:
+        ```python
+        def wallsAndGates(self, rooms: List[List[int]]) -> None:
+            """
+            Do not return anything, modify rooms in-place instead.
+            """
+            if not rooms:
+                return
+
+            row = len(rooms)
+            col = len(rooms[0])
+
+            WALL, GATE, EMPTY = -1, 0, 2147483647
+            NEIGHBORS = ((1, 0), (0, -1), (-1, 0), (0, 1))
+
+            def _bfs(r, c):
+
+                visits = [[False for _ in range(col)] for _ in range(row)]
+
+                # row, col, distance
+                q = collections.deque()
+                visits[r][c] = True
+                q.append((r, c))
+                distance = 0
+
+                while q:
+                    q_len = len(q)
+                    for _ in range(q_len):
+
+                        r, c = q.popleft()
+
+                        for neigbor in NEIGHBORS:
+
+                            nr, nc = r+neigbor[0], c+neigbor[1]
+
+                            if nr < 0 or nr >= row or nc < 0 or nc >= col:
+                                continue
+
+                            if rooms[nr][nc] == WALL or visits[nr][nc]:
+                                continue
+
+                            if rooms[nr][nc] == GATE:
+                                return distance + 1
+
+                            visits[nr][nc] = True
+                            q.append((nr, nc))
+
+                    distance += 1
+
+                return EMPTY
+
+            for r in range(row):
+                for c in range(col):
+                    if rooms[r][c] == EMPTY:
+                        rooms[r][c] = _bfs(r, c)
+        ```
+    * BFS, search from **GATE**, Time: O((rc)), Space: O(rc))
+      * This approach **can avoid recalculation**.
+      * Time: O((rc))
+      * Space: O(rc))
+      * Python Solution:
+        ```python
+        def wallsAndGates(rooms: List[List[int]]) -> None:
+            """
+            Do not return anything, modify rooms in-place instead.
+            """
+            if not rooms:
+                return
+
+            row = len(rooms)
+            col = len(rooms[0])
+
+            WALL, GATE, EMPTY = -1, 0, 2147483647
+            NEIGHBORS = ((1, 0), (0, -1), (-1, 0), (0, 1))
+
+            q = collections.deque()
+            for r in range(row):
+                for c in range(col):
+                    # search from the gate
+                    if rooms[r][c] == GATE:
+                        q.append((r, c))
+
+            while q:
+                q_len = len(q)
+                for _ in range(q_len):
+                    r, c = q.popleft()
+                    for neigbor in NEIGHBORS:
+
+                        nr, nc = r+neigbor[0], c+neigbor[1]
+
+                        if nr < 0 or nr >= row or nc < 0 or nc >= col:
+                            continue
+
+                        if rooms[nr][nc] != EMPTY:
+                            continue
+
+                        rooms[nr][nc] = rooms[r][c] + 1
+
+                        q.append((nr, nc))
+        ```
+    * DFS
   * 130: Surrounded Regions (M)
+  * 127: **Word Ladder** (M)
+      * Assume length of words is k and number of words is n
+      * BFS, Time:O(nk), Space:O(n*k^2)
+        * Time: O(n*d)
+          * Build transformation dict cost: O(n*d)
+          * Find the target word in the transformation dict cost: O(n*d)
+        * Space: O(n*k^2)
+          * Transformatino dict cost: O(n*k^2)
+            * Total d transformation for n words, each word cost nd
+          * Max queue size: O(n*k)
+        * Python Solution
+          ```python
+          def ladderLength(self, beginWord, endWord, wordList):
+            if not wordList:
+                return 0
+
+            if beginWord ==  endWord:
+                return 1
+
+            '''
+            generate word dictionary,
+            hit -> *it, h*t, hi*
+            '''
+            w_combo_d = collections.defaultdict(list)
+            for w in wordList:
+                for i in range(len(w)):
+                    w_combo_d[f'{w[:i]}*{w[i+1:]}'].append(w)
+
+            q = collections.deque()
+            q.append(beginWord)
+            visited = {beginWord: True}
+            level = 2
+
+            '''
+            BFS to find the shorted transformation
+            '''
+            while q:
+                # for each level
+                q_len = len(q)
+                for _ in range(q_len):
+                    w = q.popleft()
+                    for i in range(len(w)):
+
+                        word_key = f'{w[:i]}*{w[i+1:]}'
+
+                        if word_key not in w_combo_d:
+                            continue
+
+                        for next_transform_w in w_combo_d[word_key]:
+                            if next_transform_w in visited:
+                                continue
+
+                            visited[next_transform_w] = True
+
+                            if endWord == next_transform_w:
+                                return level
+
+                            q.append(next_transform_w)
+
+                        w_combo_d.pop(word_key)
+
+                level += 1
+
+            return 0
+          ```
+      * Bidirectional BFS
+  * 126: **Word Ladder** II (H)
   * 051: N-Queens (H)
   * 052: N-Queens II (H)
 ### Dynamic Programming
 ### Backtracking
-  * Ref
-    * [General Approach](https://leetcode.com/problems/permutations/discuss/18239/A-general-approach-to-backtracking-questions-in-Java-(Subsets-Permutations-Combination-Sum-Palindrome-Partioning))
+  * 294: Flip Game II (M)
   * **Subset**
     * 078: Subsets (M)
       * Ref:
@@ -3223,7 +3719,13 @@ Table of Content
     * 146: LRU Cache (M)
   * BackTracking
     * 077: Combinations (M)
+  * BFS & DFS
+    * 200: Number of Islands (M)
+      * For BFS / DFS iterations, set visits to True before append to the queue to **reduce unnecessary queue/stack push/pop operations.**
 -
+
+
+
 
 
 
