@@ -3402,6 +3402,66 @@ Table of Content
         ```
     * DFS
   * 130: Surrounded Regions (M)
+    * BFS: Time:O(rc), Space:O(rc)
+      * Try to Group region
+      * Python Solution
+        ```python
+        NEIGHBORS = ((1, 0), (0, -1), (-1, 0), (0, 1))
+        START, END = 'O', 'X'
+
+        class Solution:
+            def solve(self, board: List[List[str]]) -> None:
+                def _flip_surround_region(r, c):
+                    q = collections.deque([(r, c)])
+                    flip_regions = [(r, c)]
+                    visits[r][c] = True
+                    should_flip = True
+
+                    while q:
+                        r, c = q.popleft()
+
+                        for neighbor in NEIGHBORS:
+
+                            nr, nc = r + neighbor[0], c + neighbor[1]
+
+                            # check boundary
+                            if nr < 0 or nr >= row or nc < 0 or nc >= col:
+                                # do not break here since we try to extend the max regino as possible
+                                should_flip = False
+                                continue
+
+                            # correct border
+                            if board[nr][nc] == END or visits[nr][nc]:
+                                continue
+
+                            # group region
+                            if board[nr][nc] == START:
+                                visits[nr][nc] = True
+                                flip_regions.append((nr, nc))
+                                q.append((nr, nc))
+
+                    if not should_flip:
+                        return
+
+                    while flip_regions:
+                        r, c = flip_regions.pop()
+                        board[r][c] = END
+
+                """
+                Do not return anything, modify board in-place instead.
+                """
+                if not board:
+                    return
+
+                row = len(board)
+                col = len(board[0])
+                visits = [[False for _ in range(col)] for _ in range(row)]
+
+                for r in range(row):
+                    for c in range(col):
+                        if board[r][c] == START and not visits[r][c]:
+                            _flip_surround_region(r, c)
+        ```
   * 127: **Word Ladder** (M)
       * Assume length of words is k and number of words is n
       * BFS, Time:O(nk), Space:O(n*k^2)
@@ -3439,7 +3499,6 @@ Table of Content
             BFS to find the shorted transformation
             '''
             while q:
-                # for each level
                 q_len = len(q)
                 for _ in range(q_len):
                     w = q.popleft()
