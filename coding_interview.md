@@ -11,18 +11,20 @@ Table of Content
   - [String](#string)
   - [Array](#array)
   - [Matrix](#matrix)
+  - [Binary Search](#binary-search)
   - [Linked List](#linked-list)
   - [Stack and Queue](#stack-and-queue)
-  - [Priority Queue (heap)](#priority-queue-heap)
+  - [Heap (Priority Queue)](#heap-priority-queue)
   - [Cache](#cache)
   - [Tree](#tree)
-  - [Binary Search Tree](#binary-search-tree)
   - [Trie (Prefix Tree)](#trie-prefix-tree)
   - [BFS & DFS](#bfs--dfs)
   - [Dynamic Programming](#dynamic-programming)
   - [Backtracking](#backtracking)
   - [Topological Sort](#topological-sort)
-  - [Bit Mamipulation](#bit-mamipulation)
+  - [Bit Manipulation](#bit-manipulation)
+  - [Union Field](#union-field)
+  - [Graph](#graph)
   - [Error Prone List](#error-prone-list)
 
 ## FAQ
@@ -762,6 +764,7 @@ Table of Content
               ord_a = ord('a')
               for s in strs:
                   # generate character count signature
+                  # we can nullify the array to reuse
                   count_arr = [0] * 26
                   for c in s:
                       count_arr[ord(c)-ord_a] += 1
@@ -788,7 +791,10 @@ Table of Content
          def groupStrings(self, strings: List[str]) -> List[List[str]]:
           d = collections.defaultdict(list)
           for s in strings:
+              # generate signature
               k = tuple( (ord(c) - ord(s[0]))%26  for c in s)
+
+              # use signature as key
               d[k].append(s)
 
           return d.values()
@@ -860,7 +866,7 @@ Table of Content
         ```
      * 294: Flip Game II (M)
        * backtracking: Time: O(n!!), Space: O(n*2)
-         * Double factorial: (n-1) * (n-3) * (n-5) * ... 1=
+         * **Double factorial**: (n-1) * (n-3) * (n-5) * ... 1=
           * python solution
             ```python
             def canWin(self, s: str) -> bool:
@@ -1203,7 +1209,7 @@ Table of Content
       * Use Sort, Time: O(nlog(n)), Space: O(1)
         * Concept:
           * Refer 275: H-Index II
-    * 275: H-Index II
+    * 275: H-Index II (M)
       * Linear search: O(n)
         * Concept
           * Sort the citations array in **ascending order** (draw it).
@@ -1220,7 +1226,7 @@ Table of Content
                   h_index = (max_cita-idx)
                 break
 
-            return max_cita_index
+            return 0
           ```
       * **Binary Search**: O(log(n))
         * Ref:
@@ -1239,7 +1245,6 @@ Table of Content
             * Old range can not satisfied the requirement.
           * For the case, (**new_right, left**, right)
             * Old range can satisfied the requirement.
-
         * Python Solution
           ```python
           def hIndex(self, citations: List[int]) -> int:
@@ -2063,6 +2068,8 @@ Table of Content
       * Infinite array
         * [Solution](https://leetcode.com/problems/game-of-life/discuss/73217/Infinite-board-solution/201780)
 ### Matrix
+### Binary Search
+  * 275: H-Index II (M) (Array)
 ### Linked List
 * **Techiniques**:
   * The **"Runner"**
@@ -2673,7 +2680,7 @@ Table of Content
         def getMin(self) -> int:
             return self.mins[-1]
       ```
-### Priority Queue (heap)
+### Heap (Priority Queue)
   * 703. Kth Largest Element in a Stream (E)
     * Use heapq, Time: O(log(k)), Space: O(k)
       * Time: O(log(k))
@@ -2915,7 +2922,6 @@ Table of Content
         ```
   * LFU
 ### Tree
-### Binary Search Tree
   * 144: Binary Tree **Preorder** Traversal (M)
     * Use **one stack** for iterative method
     * Python Solution
@@ -3759,10 +3765,173 @@ Table of Content
     * 060: Permutation Sequence (M)
   * 291: Word Pattern II
 ### Topological Sort
-### Bit Mamipulation
+  * Ref:
+    * https://www.youtube.com/watch?v=ddTC4Zovtbc
+    * https://leetcode.com/problems/course-schedule-ii/solution/
+  * 207: Course Schedule (M)
+    * [Node Indegree + BFS], Time: O(V+E), Space: O(V+E)
+      * Time: O(V+E)
+        * Build Outdegree List Graph and Indegree Array
+          * O(E)
+        * Traverse the Nodes and Edges: O(V+E)
+          * Traverse the Nodes
+              * Each node would be traverse at most once.
+              * Operation for push node to queue and pop node from queue.
+          * Traverse the edges.
+            * Each edge would be traversed at most once.
+            * Operation for **removing outdegree of the node**.
+      * Space:O(V+E)
+        * Graph of adjency list
+          * O(V+E)
+        * Indegree Array
+          * O(V)
+        * BFS Queue
+          * O(V)
+      * Algorithm
+        * Definition:
+          * **Indegree of the Course:**
+            * How many prequisites courses of it.
+          * **Outdegree of Course**
+            * How many courses' prequisite is this course.
+        * The algorithm
+          * We first process all the nodes/course with **0 in-degree** implying no prerequisite courses required. **If we remove all these courses from the graph, along with their outgoing edges**, we can find out the courses/nodes that should be processed next. These would again be the nodes with 0 in-degree. We can continuously do this until all the courses have been accounted for.
+        * Data Structures
+          * **A graph of adjency list with indegree**
+            * If course u is a prerequisite of course v, then the adjacency list of u will contain v.
+          * **A degree array**
+            * Calculate how many prerequisite courses for each.
+      * Python Solution:
+        ```python
+        def canFinish(self, numCourses: int, prerequisites: List[List[int]]) -> bool:
+            """
+            graph of adjency list:
+            If course u is a prerequisite of course v,
+            then the adjacency list of u will contain v.
+            """
+            # outdegree Adjacency list, the list stores nodes of outdegree
+            g_adj = [[] for _ in range(numCourses)]
+
+            # indegree array
+            a_indegree = [0 for _ in range(numCourses)]
+
+            for course, preq_course in prerequisites:
+                g_adj[preq_course].append(course)
+                a_indegree[course] += 1
+
+            q = collections.deque()
+            for course, indegree in enumerate(a_indegree):
+                # indegree == 0 means no prequisites
+                if indegree == 0:
+                    q.append(course)
+
+            unsheduled_cnt = numCourses
+            while q:
+                cur = q.popleft()
+                unsheduled_cnt -= 1
+                for nxt in g_adj[cur]:
+                    a_indegree[nxt] -= 1
+                    # indegree == 0 means no prequisites
+                    if a_indegree[nxt] == 0:
+                        q.append(nxt)
+
+            return unsheduled_cnt == 0
+        ```
+    * [DFS]:
+      * Algorithm:
+        * For each of the nodes in our graph, we will run a depth first search in case that node was not already visited in some other node's DFS traversal.
+        * Suppose we are executing the depth first search for a node N. We will recursively traverse all of the neighbors of node N which have not been processed before.
+        * Once the processing of all the neighbors is done, we will add the node N to the stack. We are making use of a stack to simulate the ordering we need. When we add the node N to the stack, all the nodes that require the node N as a prerequisites (among others) will already be in the stack.
+      * Python Solution
+        ```python
+        class Status(object):
+          WHITE = 1  # default
+          GRAY =  2  # processing
+          BLACK = 3  # done
+
+        class Solution:
+            def findOrder(self, numCourses: int, prerequisites: List[List[int]]) -> List[int]:
+                is_cyclic = False
+                scheduled_course = []
+
+                def dfs(course):
+                    # !!! don't forget use nonlocal
+                    nonlocal is_cyclic
+
+                    if is_cyclic:
+                        return
+
+                    visits[course] = Status.GRAY
+
+                    for next_course in g_adj[course]:
+                        if visits[next_course] == Status.WHITE:
+                            dfs(next_course)
+
+                        # graph cucle found
+                        elif visits[next_course] == Status.GRAY:
+                            is_cyclic = True
+                            return
+                    # done
+                    visits[course] = Status.BLACK
+                    scheduled_course.append(course)
+
+                # Adjacency list of outdegree
+                g_adj = [[] for _ in range(numCourses)]
+                visits = [Status.WHITE for _ in range(numCourses)]
+
+                for course, preq in prerequisites:
+                    g_adj[preq].append(course)
+
+                for course in range(numCourses):
+                    if visits[course] == Status.WHITE:
+                        dfs(course)
+
+                return scheduled_course[::-1] if not is_cyclic else []
+        ```
+  * 210: Course Schedule II (M)
+    * Same Concept as 207, the only difference is to keep the scheduled courses list.
+    * Python Solution
+      ```python
+      def findOrder(self, numCourses: int, prerequisites: List[List[int]]) -> List[int]:
+
+          # graph Adjacency list, the list stores nodes of outdegree
+          g_adj = [[] for _ in range(numCourses)]
+
+          # indegree array
+          a_indegree = [0 for _ in range(numCourses)]
+
+          for course, preq_course in prerequisites:
+              g_adj[preq_course].append(course)
+              a_indegree[course] += 1
+
+          q = collections.deque()
+          for course, indegree in enumerate(a_indegree):
+              # indegree == 0 means no prequisites
+              if indegree == 0:
+                  q.append(course)
+
+          scheduled_course = list()
+          while q:
+              cur = q.popleft()
+              scheduled_course.append(cur)
+
+              for nxt in g_adj[cur]:
+                  a_indegree[nxt] -= 1
+                  if a_indegree[nxt] == 0:
+                      q.append(nxt)
+
+          if len(scheduled_course) == numCourses:
+              return scheduled_course
+          else:
+              return []
+      ```
+  * 269: Alien Dictionary (H)
+### Bit Manipulation
+### Union Field
+### Graph
+
 ### Error Prone List
   * String
-    * 028: Implement **strStr** (E) (KMP algorithm)
+    * 028: Implement **strStr** (E) (**KMP** algorithm)
     * 249: Group Shifted Strings (M)
     * 049: Group Anagrams (M)
   * Array
@@ -3781,7 +3950,12 @@ Table of Content
   * BFS & DFS
     * 200: Number of Islands (M)
       * For BFS / DFS iterations, set visits to True before append to the queue to **reduce unnecessary queue/stack push/pop operations.**
--
+    * 286: Walls and Gates (M)
+      * Start From Gates
+    * 127: **Word Ladder**
+  * Topological Sort
+    * 207: Course Schedule (M)
+
 
 
 
