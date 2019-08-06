@@ -1,46 +1,34 @@
 Table of Contents
-- [Complexity](#Complexity)
-- [Data Structures](#Data-Structures)
-  - [Linked List](#Linked-List)
-  - [Stack](#Stack)
-  - [Queue](#Queue)
-  - [Hash Table](#Hash-Table)
-  - [Cache](#Cache)
-    - [LRU Cache](#LRU-Cache)
-    - [LFU Cache](#LFU-Cache)
-  - [Tree](#Tree)
-    - [Time complexity](#Time-complexity)
-    - [Binary Tree](#Binary-Tree)
-    - [Binary Heaps (Min-Heaps and Max-Heaps)](#Binary-Heaps-Min-Heaps-and-Max-Heaps)
-    - [Tries (Prefix Trees)](#Tries-Prefix-Trees)
-    - [AVL Tree](#AVL-Tree)
-    - [Red-Black Tree](#Red-Black-Tree)
-    - [B Tree](#B-Tree)
-  - [Graph](#Graph)
-    - [Represent](#Represent)
-    - [Search](#Search)
-- [Algorithms](#Algorithms)
-  - [Search](#Search-1)
-    - [Time Complexity](#Time-Complexity)
-    - [Implementation](#Implementation)
-  - [Sort](#Sort)
-    - [Time Complexity](#Time-Complexity-1)
-    - [Implementation](#Implementation-1)
-    - [Quick Sort](#Quick-Sort)
-    - [Merge Sort](#Merge-Sort)
-    - [Insertion Sort](#Insertion-Sort)
-    - [Selection Sort](#Selection-Sort)
-    - [Bubble Sort](#Bubble-Sort)
-    - [Heap Sort](#Heap-Sort)
-  - [Backtracking](#Backtracking)
-  - [Dynamic Programming](#Dynamic-Programming)
-    - [Recursion and Dynamic Programming](#Recursion-and-Dynamic-Programming)
-    - [Dynamic Programming & Memorization](#Dynamic-Programming--Memorization)
-  - [Topological Sort](#Topological-Sort)
+- [Complexity](#complexity)
+- [Data Structures](#data-structures)
+  - [Linked List](#linked-list)
+  - [Stack](#stack)
+  - [Queue](#queue)
+  - [Hash Table](#hash-table)
+  - [Cache](#cache)
+    - [LRU Cache](#lru-cache)
+    - [LFU Cache](#lfu-cache)
+  - [Tree](#tree)
+    - [Time complexity](#time-complexity)
+    - [Binary Tree](#binary-tree)
+    - [Binary Heaps (Min-Heaps and Max-Heaps)](#binary-heaps-min-heaps-and-max-heaps)
+    - [Tries (Prefix Trees)](#tries-prefix-trees)
+    - [AVL Tree](#avl-tree)
+    - [Red-Black Tree](#red-black-tree)
+    - [B Tree](#b-tree)
+  - [Graph](#graph)
+- [Algorithms](#algorithms)
+  - [Search](#search)
+  - [Sort](#sort)
+  - [Dynamic Programming](#dynamic-programming)
+    - [Recursion and Dynamic Programming](#recursion-and-dynamic-programming)
+    - [Dynamic Programming & Memorization](#dynamic-programming--memorization)
 
 
 ## Complexity
   * [bigocheatsheet](http://bigocheatsheet.com/)
+  * [What is a plain English explanation of “Big O” notation?](https://stackoverflow.com/questions/487258/what-is-a-plain-english-explanation-of-big-o-notation)
+
 
 ## [Data Structures](https://github.com/kissofjudase23/Library-python-common-modules/tree/master/common/ds)
 
@@ -272,7 +260,7 @@ Table of Contents
   * Bubble down this element, swapping it with one of its children until the min-heap property is )restored.
 
 #### Tries (Prefix Trees)
-* Ref:
+* Reference:
   * https://leetcode.com/articles/implement-trie-prefix-tree/
   * https://www.youtube.com/watch?v=AXjmTQ8LEoI
   * https://www.youtube.com/watch?v=zIjfhVPRZCg
@@ -313,107 +301,134 @@ Table of Contents
 * Balanced Tree
 
 ### Graph
-#### Represent
-  * Adjacency List
-  * Adjacency Matrices
-#### Search
-  * Depth-First Search (DFS)
-  * Breadth-First Search (BFS)
+* Representation
+  * Complexity
+
+    |                  | Storage        | Add Vertex     | Add Edge       | Remove Vertex  | Remove Edge |
+    |------------------|----------------|----------------|----------------|----------------|-------------|
+    | Adjacency List   | O(\|V\|+\|E\|) | O(1)           | O(1)           | O(\|V\|+\|E\|) | O(\|E\|)    |
+    | Incidence List   | O(\|V\|+\|E\|) | O(1)           | O(1)           | O(\|E\|)       | O(\|E\|)    |
+    | Adjacency Matrix | O(\|V\|^2)     | O(\|V\|^2)     | O(1)           | O(\|V\|^2)     | O(1)        |
+    | Incidence Matrix | O(\|V\|*\|E\|) | O(\|V\|*\|E\|) | O(\|V\|*\|E\|) | O(\|V\|*\|E\|) | O(\|E\|)    |
+* Algorithm:
+  * Traverse
+    * BFS
+      * Need Queue Support
+    * DFS
+      * Need Stack Support
+
+  * Topological Sort
+
+    |                  | Average Time   | Worst Time     | Space          |
+    |------------------|----------------|----------------|----------------|
+    | Topological sort | O(\|V\|+\|E\|) | O(\|V\|+\|E\|) | O(\|V\|+\|E\|) |
+
+  * Minimum Spanning Tree (Greedy)
+
+    |                     | Average Time     | Worst Time | Space          |
+    |---------------------|------------------|------------|----------------|
+    | Kruskal's algorithm | O(\|E\|log\|V\|) |            |                |
+    | Prim's algorithm    | O(\|E\|log\|V\|) | O(\|V\|^2) | O(\|V\|+\|E\|) |
+    | Sollin's algorithm  |                  |            |                |
+
+  * Shortest Path:
+
+    |                               | Average Time     | Worst Time    | Space Complexity |
+    |-------------------------------|------------------|---------------|------------------|
+    | Dijkstra's algorithm (Greedy) | O(\|E\|log\|V\|) | O(\|V\|^2)    | O(\|V\|+\|E\|)   |
+    | A* search algorithm           | O(\|E\|)         | O(b^d)        | O(b^d)           |
+    | Bellman–Ford algorithm (DP)   | O(\|E\|\|V\|)    | O(\|E\|\|V\|) | O(\|E\|)         |
+    | Floyd-Warshall algorithm (DP) | O(\|V\|^3)       | O(\|V\|^3)    | O(\|V\|^2)       |
 
 
 ## Algorithms
 ### Search
-#### Time Complexity
+  * Time Complexity
 
-  |                  | Average     | Worst      | Space Worst |
-  |------------------|-------------|------------|-------------|
-  | Binary Search (I)| O(long(n))  | O(long(n)) | O(1)        |
-  | Binary Search (R)| O(long(n))  | O(long(n)) | O(long(n))  |
+    |                  | Average     | Worst      | Space Worst |
+    |------------------|-------------|------------|-------------|
+    | Binary Search    | O(long(n))  | O(long(n)) | O(1)        |
 
-
-#### [Implementation](https://github.com/kissofjudase23/Library-python-common-modules/blob/master/common/algo/search.py)
+  * [Implementation](https://github.com/kissofjudase23/Library-python-common-modules/blob/master/common/algo/search.py)
 
 ### Sort
-#### Time Complexity
+  * Time Complexity
 
-  |                | Best       | Average    | Worst      | Space Complexity | Stable/Unstable |
-  |----------------|------------|------------|------------|------------------|-----------------|
-  | Quick Sort     | O(nlog(n)  | O(nlog(n)  | O(n^2)     | O(log(n))        | Unstable        |
-  | Merge Sort     | O(nlog(n)  | O(nlog(n)  | O(nlog(n)  | O(n)             | Stable          |
-  | Heap Sort      | O(nlog(n)  | O(nlog(n)  | O(nlog(n)  | O(1)             | Unstable        |
-  | Insertion Sort | O(n)       | O(n^2)     | O(n^2)     | O(1)             | Stable          |
-  | Selection Sort | O(n^2)     | O(n^2)     | O(n^2)     | O(1)             | Unstable        |
-  | Bubble Sort    | O(n)       | O(n^2)     | O(n^2)     | O(1)             | Stable          |
-  | Counting Sort  | O(n+k)     | O(n+k)     | O(n+k)     | O(n+k)           | Stable          |
-  | Bucket Sort    | O(n)       | O(n^2)     | O(n^2)     | O(1)             | Stable          |
-  | Radix Sort     | O(d*(n+k)) | O(d*(n+k)) | O(d*(n+k)) | O(n+k)           | Stable          |
+    |                | Best       | Average    | Worst      | Space Complexity | Stable/Unstable |
+    |----------------|------------|------------|------------|------------------|-----------------|
+    | Quick Sort     | O(nlog(n)  | O(nlog(n)  | O(n^2)     | O(log(n))        | Unstable        |
+    | Merge Sort     | O(nlog(n)  | O(nlog(n)  | O(nlog(n)  | O(n)             | Stable          |
+    | Heap Sort      | O(nlog(n)  | O(nlog(n)  | O(nlog(n)  | O(1)             | Unstable        |
+    | Insertion Sort | O(n)       | O(n^2)     | O(n^2)     | O(1)             | Stable          |
+    | Selection Sort | O(n^2)     | O(n^2)     | O(n^2)     | O(1)             | Unstable        |
+    | Bubble Sort    | O(n)       | O(n^2)     | O(n^2)     | O(1)             | Stable          |
+    | Counting Sort  | O(n+k)     | O(n+k)     | O(n+k)     | O(n+k)           | Stable          |
+    | Bucket Sort    | O(n)       | O(n+k)     | O(n^2)     | O(1)             | Stable          |
+    | Radix Sort     | O(d*(n+k)) | O(d*(n+k)) | O(d*(n+k)) | O(n+k)           | Stable          |
 
-#### [Implementation](https://github.com/kissofjudase23/Library-python-common-modules/blob/master/common/algo/search.py)
-#### Quick Sort
-  * FAQ
-    * [Why does QuickSort use O(log(n)) extra space?](https://stackoverflow.com/questions/12573330/why-does-quicksort-use-ologn-extra-space)
-      * To get rid of the recursive call you would have to use **a stack** in your code, and it would still occupy **log(n)** space.
-    * [Quick sort implement by queue?](https://stackoverflow.com/questions/39666714/quick-sort-implement-by-queue)
-      * Queue method requires O(n) space for sorting an array of size n.
-  * Worst Case:
-    * [1, 2, 3, 4, 5]
-      * round1:
-        * pivot: 5
-        * left partition [1, 2, 3, 4]
-        * right partition []
-      * round2:
-        * pivot: 4
-        * left partition [1, 2, 3]
-        * right partition []
-      * ...
-    * Solution:
-      * Use median of three to pick pivot
+  * [Implementation](https://github.com/kissofjudase23/Library-python-common-modules/blob/master/common/algo/sort.py)
 
-    * T(n) = T(n-1) + cn
+  * Quick Sort
+    * FAQ
+      * [Why does QuickSort use O(log(n)) extra space?](https://stackoverflow.com/questions/12573330/why-does-quicksort-use-ologn-extra-space)
+        * To get rid of the recursive call you would have to use **a stack** in your code, and it would still occupy **log(n)** space.
+      * [Quick sort implement by queue?](https://stackoverflow.com/questions/39666714/quick-sort-implement-by-queue)
+        * Queue method requires O(n) space for sorting an array of size n.
+    * Worst Case:
+      * [1, 2, 3, 4, 5]
+        * round1:
+          * pivot: 5
+          * left partition [1, 2, 3, 4]
+          * right partition []
+        * round2:
+          * pivot: 4
+          * left partition [1, 2, 3]
+          * right partition []
+        * ...
+      * Solution:
+        * Use median of three to pick pivot
+    * Unstable:
+      * [quicksort algorithm stability](https://stackoverflow.com/questions/13498213/quicksort-algorithm-stability)
+      * [4, 2, 1 ,4*, 3]
+        * round1:
+          * partition:
+            * pivot: 3
+            * [2, 1, 3 ,4*, 4]
+    * Related topic:
+      * [Quick Search ith element in an array](https://leetcode.com/problems/kth-largest-element-in-an-array/solution/)
 
-  * Unstable Case:
-    * [quicksort algorithm stability](https://stackoverflow.com/questions/13498213/quicksort-algorithm-stability)
-    * [4, 2, 1 ,4*, 3]
-      * round1:
-        * partition:
-          * pivot: 3
-          * [2, 1, 3 ,4*, 4]
-
-  * Related topic:
-    * [Quick Search ith element in an array](https://leetcode.com/problems/kth-largest-element-in-an-array/solution/)
-
-#### Merge Sort
+* Merge Sort
   * Ref
     * https://www.geeksforgeeks.org/merge-sort/
     * https://www.youtube.com/watch?v=6pV2IF0fgKY
-
   * Recursive:
-    * ![flow](https://www.darkwiki.in/wp-content/uploads/2017/12/merge-sort-working-in-hindi-with-example-1.png)
+    * Top-Down
   * Iterative:
-    * ![flow](https://images.slideplayer.com/25/7830874/slides/slide_19.jpg)
+    * Bottom Up
 
-#### Insertion Sort
+* Insertion Sort
   * Best Case: ascending sequence, [1, 2, 3]
   * Worst Case: descending sequence, [3, 2, 1]
 
-#### Selection Sort
+* Selection Sort
   * Unstable: [5, 5*, 3]
 
-#### Bubble Sort
+* Bubble Sort
   * Best Case:
     * ascending sequence, [1, 2, 3]
     * (n-1) comparison in round1, and no swap happened.
   * Worst Case:
     * descending sequence, [3, 2, 1]
 
-#### [Heap Sort](https://www.geeksforgeeks.org/iterative-heap-sort/)
+* Heap Sort
   * Build the Max Heap first
+    * It takes O(n)
   * Iteratve n-1 round, for i in range(n-1, 0, -1)
     * Swap the current max(0th index) to the ith index
     * heapify from 0 to i-1
 
-### Backtracking
-
+* Radix Sort:
+  * The subsort for radix sort should be stable sort (like counting sort or bucket sort)
 
 ### Dynamic Programming
 #### Recursion and Dynamic Programming
@@ -433,7 +448,6 @@ Table of Contents
   * Dynamic Programming is mostly just a matter of taking a **recursive algorithm** and **finding the overlapping subproblems**. You then cache those results for future recursive calls.
   * Example:
     * resursive: O(n^2), O(n)
-
       ```python
       def fib(i):
         if i == 0 or i == 1:
@@ -442,7 +456,6 @@ Table of Contents
         return fib(i-1) + fib(i-2)
       ```
     * Iterative: O(n), O(1)
-
       ```python
       def fib(i):
          if i == 0 or i == 1:
@@ -452,11 +465,10 @@ Table of Contents
           for _ in range(2, i+1):
             a, b = b, a + b
 
-          return a
+          return b
 
       ```
     * **Top-Down** Dynamic Programming (or Memoization): O(n), O(n)
-
       ```python
       def fib(i):
 
@@ -475,7 +487,6 @@ Table of Contents
 
       ```
     * **Bottom-Up** Dynamic Programming: O(n), O(n)
-
       ```python
       def fib(i):
 
@@ -492,7 +503,5 @@ Table of Contents
         return memo[i]
       ```
 
-
-### Topological Sort
 
 
