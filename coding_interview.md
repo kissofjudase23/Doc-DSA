@@ -25,7 +25,7 @@ Table of Content
   - [Bit Manipulation](#bit-manipulation)
   - [Union Field](#union-field)
   - [Graph](#graph)
-  - [Error Prone List](#error-prone-list)
+  - [Error List](#error-prone-list)
 
 ## FAQ
   * [What is tail recursion?](https://stackoverflow.com/questions/33923/what-is-tail-recursion)
@@ -121,8 +121,8 @@ Table of Content
 ### [Classification](https://cspiration.com/leetcodeClassification#103)
 ### Math
   * Reorder
-    * 7: Reverse Integer
-      * Notice the boundary
+    * 007: Reverse Integer
+      * Notice the boundary and negative value
       ```python
       def reverse(self, x: int) -> int:
         is_positive = True if x >=0 else False
@@ -138,7 +138,8 @@ Table of Content
             # boundary = 214748364
             # boundary * 10 = 2147483640
             # 2**31 = 2147483648 = 2147483640 + 8 = boundary * 10 + 8
-            if reverse > boundary or reverse == boundary and pop > 7 :
+            if reverse > boundary \
+              or reverse == boundary and pop > 7 :
                 return 0
 
             reverse = reverse * 10 + pop
@@ -149,82 +150,176 @@ Table of Content
         return reverse
       ```
   * Sum
-    * 01: Two Sum (E)
-      * Time: O(n), Space: O(n)
-        * Use hash table
+    * 001: Two Sum (E)
+      * Approach1: Use hash table, Time: O(n), Space: O(n)
+        * Python Solution
+          ```python
+          def twoSum(self, nums: List[int], target: int) -> List[int]:
+            """
+            Assume exactly one solution
+            """
+            res = None
+            d = dict()
+            for idx, num in enumerate(nums):
+                diff = target - num
+                if diff in d:
+                    res = [idx, d[diff]]
+                    break
+
+                d[num] = idx
+
+            return res
+          ```
       * Find all available 2 sums: O(nlog(n))
         * O(nlogn)
           * Sorting
           * Left pointer and right pointer to find sum of left + right == target
-    * 15: 3Sum (M)
-      * Time **O(n^2)**
-        1. **Sort** first
-        2. For each target (from 0 to n-3)
-             * Find left and right pair that num[target] + num[left] + num[right] = 0
-             * Target = -num[target] = num[left] + num[right]
-      * Why does the algorithm work?
-          * Assume that we find a correct target for num[left] + num[right]
-            * case1: x
-              * nums[left+1] + nums[right+1] > Target
-            * case2: x
-              * nums[left-1] + nums[right-1] < Target.
-            * case3: ✓
-              * nums[left+1] + nums[right-1] may be possible.
-            * case4: x
-              * nums[left-1] + nums[r+1] has been traverse before.
-      * Python Solution
-          ```python
-          def threeSum(self, nums: List[int]) -> List[List[int]]:
-            res = list()
-            nums.sort()
+    * 015: 3Sum (M)
+      * Approach1: Sort and find, Time: **O(n^2)**, Space:O(sorting)
+        * Time: O(n^2)
+          * **Sort**
+            * O(nlog(n))
+          * For each target (from 0 to n-3): O(n^2)
+               * Find left and right pair that num[target] + num[left] + num[right] = 0
+               * Target = -num[target] = num[left] + num[right]
+        * Why does the algorithm work?
+            * Assume that we find a correct target for num[left] + num[right]
+              * case1: x
+                * nums[left+1] + nums[right+1] > Target
+              * case2: x
+                * nums[left-1] + nums[right-1] < Target.
+              * case3: ✓
+                * nums[left+1] + nums[right-1] may be possible.
+              * case4: x
+                * nums[left-1] + nums[r+1] has been traverse before.
+        * Python Solution
+            ```python
+            def threeSum(self, nums: List[int]) -> List[List[int]]:
+              res = list()
+              nums.sort()
 
-            # from 0 to num-3
-            for i in range(0, len(nums)-2):
+              # from 0 to num-3
+              for i in range(0, len(nums)-2):
+                  # skip duplicate
+                  if i > 0 and nums[i] == nums[i-1]:
+                      continue
 
-                # skip duplicate
-                if i > 0 and nums[i] == nums[i-1]:
-                    continue
+                  l, r = i+1, len(nums)-1
+                  while l < r:
+                      s = nums[i] + nums[l] + nums[r]
+                      if s < 0:
+                          l += 1
 
-                l, r = i+1, len(nums)-1
+                      elif s > 0:
+                          r -= 1
 
-                while l < r:
-                    s = nums[i] + nums[l] + nums[r]
+                      else:  # s == 0
+                          res.append([nums[i], nums[l], nums[r]])
+                          # skip duplicate
+                          while l < r and nums[l] == nums[l+1]:
+                              l += 1
+                          while l < r and nums[r] == nums[r-1]:
+                              r -= 1
 
-                    if s < 0:
-                        l += 1
-
-                    elif s > 0:
-                        r -= 1
-
-                    else:  # s == 0
-                        res.append([nums[i], nums[l], nums[r]])
-                        # skip duplicate
-                        while l < r and nums[l] == nums[l+1]:
-                            l += 1
-                        while l < r and nums[r] == nums[r-1]:
-                            r -= 1
-
-                        l+=1
-                        r-=1
-
-              return res
-          ```
-    * 18: 4Sum (M)
+                          l+=1
+                          r-=1
+                return res
+            ```
+    * 018: 4Sum (M)
   * Other
 ### String
-   * **Edit Distance**
-     * 161: One Edit Distance (M)
-       * Time O(1), Space (1):
+  * **Edit Distance**
+    * 161: One Edit Distance (M)
+       * Notice the **zero edit distance cases**.
+       * Approach1: Time O(n+m), Space (1):
          * Merge the insert and remove cases (find the short one)
          * Use short and long string pointers to traverse and compare
-     * 072: Edit Distance (H)
-   * **SubString**
+         * Python Solution
+         ```python
+        def isOneEditDistance(self, s: str, t: str) -> bool:
+          """
+          case1: Insert a character into s to get t
+          case2: Delete a character from s to get t
+          case3: Replace a character of s to get t
+          """
+          diff = len(s) - len(t)
+          if abs(diff) >= 2:
+              return False
+
+          # find the short and long strings
+          # case2 can be merged to case1
+          same_len = False
+          if diff < 0:
+              short, long = s, t
+          elif diff == 0:
+              short, long = s, t
+              same_len = True
+          else:
+              short, long = t, s
+
+          # traverse the short one
+          i = j = 0
+          edit_cnt = 0
+          while i < len(short):
+              if short[i] == long[j]:
+                  i += 1
+                  j += 1
+              else:
+                  if edit_cnt:
+                      return False
+                  edit_cnt += 1
+
+                  # This is case3
+                  if same_len:
+                      i += 1
+                      j += 1
+                  # This is case 1 and case2
+                  else:
+                      j += 1
+
+          # zero edit distance case
+          if same_len and not edit_cnt:
+              return False
+
+          # exactly one edit distance
+          return True
+        ```
+    * 072: Edit Distance (H)
+  * **SubString**
      * 028: Implement **strStr** (E)
        * Find Sub-String
-       * Brute Force, Time: O(mn), Space(1)
-       * **KMP (substring match)**,  Time: O(m+n), Space: O(n)
-         * Time: O(m+n), Space: O(n),
-           * where m is the length of txt stringm n is the length of the pattern string.
+       * m is the length of txt and
+       * n is the length of the pattern string.
+       * Approach1: Brute Force, Time: O(mn), Space(1)
+         * Python Solution
+         ```python
+         def strStr(self, haystack: str, needle: str) -> int:
+            txt = haystack
+            pattern = needle
+            res = not_found = -1
+
+            if txt == "" and pattern == "":
+                return 0
+
+            if txt and not pattern:
+                return 0
+
+            for i in range(len(txt)-len(pattern)+1):
+                t = i
+                p = 0
+                while p < len(needle):
+                    if txt[t] != pattern[p]:
+                        break
+                    t += 1
+                    p += 1
+
+                if p == len(pattern):
+                    res = t - p
+                    break
+
+            return res
+         ```
+       * Approach2: **KMP (substring match)**, Time: O(m+n), Space: O(n)
          * Reference:
            * [Concept](https://www.youtube.com/watch?v=GTJr8OvyEVQ)
              * **Reuse the longest common prefix suffix for next pattern searching**.
@@ -245,56 +340,60 @@ Table of Content
                * Seach from LPS array and find the proper start position of pattern comparison pointer (in this example, index 3).
          * Python Solution
            ```python
-           def get_lps(pattern):
+           def get_lps(self, pattern):
+            lps = [None] * len(pattern)
+            lps[0] = 0
+            p = 0  # prefix pointer
+            s = 1  # suffix pointer
 
-               # init lps array
-               lps = [None] * len(pattern)
-               lps[0] = 0
+            while s < len(pattern):
+                if pattern[s] == pattern[p]:
+                    p += 1
+                    lps[s] = p  # set index+1 of p to s
+                    s += 1
+                else:
+                    if p:
+                        # reuse the prefix string that has been scanned.
+                        # The length of the longest common prefix suffix
+                        # are put in lps[p-1]
+                        p = lps[p-1]
+                    else:
+                        # do not match anything
+                        lps[s] = 0
+                        s += 1
 
-               p = 0  # prefix pointer
-               s = 1  # suffix pointer
+           def strStr(self, haystack: str, needle: str) -> int:
+            txt = haystack
+            pattern = needle
+            res = not_found = -1
 
-               while s < len(pattern):
-                   if pattern[s] == pattern[p]:
-                       p += 1
-                       lps[s] = p  # update suffix length
-                       s += 1
-                   else:
-                       if p > 0:
-                           # reuse the prefix string that has been scanned.
-                           # The length of the longest common prefix suffix
-                           # are put in lps[p-1]
-                           p = lps[p-1]
-                       else:  # p = 0
-                           # do not match anything
-                           lps[s] = 0
-                           s += 1
-               return lps
+            if txt == "" and pattern == "":
+                return 0
 
-           def is_substring(txt: str, pattern: str) -> int:
-               if not pattern or len(pattern) == 0:
-                   return 0
+            if txt and not pattern:
+                return 0
 
-               res = not_found = -1
-               lps = get_lps(pattern)
-               i = j = 0
-               while i < len(txt):
-                   if txt[i] == pattern[j]:
-                       i += 1
-                       j += 1
-                       if j == len(pattern):
-                           res =  i - j
-                           break
-                   else:
-                       if j > 0:
-                           # reuse the prefix string that has been scanned.
-                           # The length of the longest common prefix suffix
-                           # are put in lps[p-1]
-                           j = lps[j-1]
-                       else: # j = 0
-                           # do not match anything
-                           i += 1
-               return res
+            lps = self.get_lps(pattern)
+            t = p = 0
+
+            while t < len(txt):
+                if txt[t] == pattern[p]:
+                    t += 1
+                    p += 1
+                    if p == len(pattern):
+                        res = t - p
+                        break
+                else:
+                    if p:
+                        # reuse the prefix string that has been scanned.
+                        # The length of the longest common prefix suffix
+                        # are put in lps[p-1]
+                        p = lps[p-1]
+                    else:
+                        # do not match anything
+                        t += 1
+
+            return res
            ```
      * 003:	Longest Substring Without Repeating Characters (M)
      * 395: Longest Substring with At Least K Repeating Characters (M)
@@ -302,176 +401,219 @@ Table of Content
      * 076: Minimum Window Substring (H)
      * 340: Longest Substring with At Most K Distinct Characters (H)
      * 159: Longest Substring with At Most Two Distinct Characters (H)
-   * **Palindrome**
+  * **Palindrome**
+     * 009: Palindrome Number (E)
      * 125:	Valid Palindrome (E)
-       * Time O(n), Space O(1)
-       * Python Solution
-        ```python
-        def isPalindrome(self, s: str) -> bool:
-            l = 0
-            r = len(s)-1
-            while l < r:
+       * Approach1: Time O(n), Space O(1)
+         * Python Solution
+          ```python
+          def isPalindrome(self, s: str) -> bool:
+              l = 0
+              r = len(s)-1
+              while l < r:
+                  while l < r and not s[l].isalnum():
+                      l += 1
+                  while l < r and not s[r].isalnum():
+                      r -= 1
 
-                while l < r and not s[l].isalnum():
-                    l += 1
-                while l < r and not s[r].isalnum():
-                    r -= 1
+                  if l >= r:
+                      break
 
-                if l >= r:
-                    break
+                  if s[l].lower() != s[r].lower():
+                      return False
 
-                if s[l].lower() != s[r].lower():
-                    return False
-
-                l += 1
-                r -= 1
-
-            return True
+                  l += 1
+                  r -= 1
+              return True
           ```
      * 266:	Palindrome Permutation (E)
-       * Time O(n), Space O(c)
-       * Python Solution
-          ```python
-          def canPermutePalindrome(self, s: str) -> bool:
-            d = collections.defaultdict(int)
-            odd = 0
+       * Approach1: Time O(n), Space O(c)
+         * Python Solution
+            ```python
+            def canPermutePalindrome(self, s: str) -> bool:
+              d = collections.defaultdict(int)
+              odd_cnt = 0
+              for c in s:
+                  d[c] += 1
+                  if d[c] % 2 == 1:
+                      odd_cnt += 1
+                  else:
+                      odd_cnt -= 1
 
-            for c in s:
-                d[c] += 1
-                # odd
-                if d[c] % 2 == 1:
-                    odd += 1
-                # even
-                else:
-                    odd -= 1
-
-            return odd <= 1
-          ```
-     * 005: Longest Palindromic Substring (M)
+              return odd_cnt <= 1
+            ```
+     * 005: **Longest** Palindromic Substring (M)
        * Ref:
          * https://leetcode.com/problems/longest-palindromic-substring/solution/
-       * Dynamic Programming, Time: O(n^2), Space: O(n^2)
-         * Rule1: (single character)
-           * P(i,i)=true
-         * Rule2: (two characters)
-           * P(i,i+1)=(S(i)==S(i+1))
-         * Rule3:
-           * P(i,j)=(P(i+1,j-1) and S(i)==S(j))
+       * Approach1: Brute Force: O(n^3), Space: O(1)
+         * Time: O(n^3):
+           * List all Combination of substrings: O(n^2)
+           * Verify each substring: O(n)
+         * Python Solution:
+            ```python
+            def longestPalindrome(self, s: str) -> str:
+              """
+              (0, 0), (0, 1), (0, 2), (0, 3)
+                      (1, 1), (1, 2), (1, 3)
+                              (2, 2), (2, 3)
+                                      (3, 3)
+              """
+              def is_palindrom(left, right):
+                  while left < right:
+                      if s[left] != s[right]:
+                          return False
+
+                      left += 1
+                      right -= 1
+
+                  return True
+
+              l = r = 0
+              # total combinations
+              for left in range(len(s)):
+                  for right in range(left, len(s)):
+                      if (right-left) > (r-l) and is_palindrom(left, right):
+                          l, r = left , right
+
+              return s[l:r+1]
+            ```
+       * Approach2: DP, Time: O(n^2), Space: O(n^2)
+         * The concept is like brute force, but reuse previous palindrom comparison results
+          * memo[i][j]:
+           * means s[i:j+1] is a palindrom or not
+         * Rules:
+           * case1: For i == j:
+             * memo(i,i) = true
+           * case2: For i+1 == j
+             * memo(i,i+1) = (s(i) == s(i+1))
+           * case3: For j > i + 1
+             * memo(i,j) =  memo(i+1, j-1) and (s(i) == s(i+1))
+               * memo(i+1, j-1) is substring result
+               * eg, abcdcba -> bcdcb
          * Python Solution
             ```python
             def longestPalindrome(self, s: str) -> str:
               if not s:
                   return ""
 
-              l = len(s)
-              # memo[i][j], s[i:j+1] is a palindrom or not
-              memo = [[False for _ in range(l)] for _ in range(l)]
-              max_length = start = end = 0
+              l = r = 0
+              n = len(s)
 
-              for i in range(0, l):
-                  # case1: single character
-                  # [0,0], [1,1], ...
+              memo = [[False for _ in range(n)] for _ in range(n)]
+
+              # init case1 and case2:
+              for i in range(n):
+                  # case1
                   memo[i][i] = True
 
-                  if i+1 == l:
-                    break
+                  if i + 1 == n:
+                      break
 
-                  # case2: two characters
-                  # [0, 1], [1, 2], ...
+                  # case2
                   if s[i] == s[i+1]:
                       memo[i][i+1] = True
-                      # i-j + 1 = 2 in this case
-                      if 2 > max_length:
-                          max_length = 2
-                          start, end = i, i+1
-                  else:
-                      memo[i][i+1] = False
+                      if 2 > r-l:
+                          l, r = i, i + 1
 
-              # (5,5)       -> skip the length <= 2
-              # (4,4) (4,5) -> skip the length <= 2
-              # (3,3) (3,4) -> skip, (3,5) start
-              # (2,2) (2,3) -> skip, (2,4), (2,5) start
-              # ....
-              # from l-3 to 0
-              for i in range(l-3, -1, -1):
-                  # from i+2 to l-1, skip case1 and case2
-                  for j in range(i+2, l):
+              """
+              (0, 0), (0, 1), (0, 2), (0, 3)
+                      (1, 1), (1, 2), (1, 3)
+                              (2, 2), (2, 3)
+                                      (3, 3)
+              """
+              # from n-3 to 0, skip length <=2 (case1 and case2)
+              for left in range(n-3, -1, -1):
+                  for right in range(left+2, n):
                       # case3
-                      if s[i] == s[j] and memo[i+1][j-1]:
-                          memo[i][j] = True
-                          if (j - i + 1) > max_length:
-                              max_length = j - i + 1
-                              start, end = i, j
-                      else:
-                          memo[i][j] = False
-
-              return s[start:end+1]
-            ```
-       * Expand Center Time: O(n^2), Space: O(1)
-         * **Expand the center**, there are total 2n-1 center
-           * odd case:
-             * aba -> the center is b
-           * even case
-             * abba -> the center is between bb
-         * Python Solution
-          ```python
-          def expand_center(s, left, right):
-              while left > -1 and right < len(s) and s[left] == s[right]:
-                  left -= 1
-                  right += 1
-
-              # out of boundary or s[left] != s[right]
-              # so return left+1, right-1
-              return left+1, right-1
-
-          def longestPalindrome(self, s: str) -> str:
-              l, r = 0, 0
-              # total 2n-1 center
-              for center in range(len(s)):
-                  # odd case, like aba, the center is b
-                  l1, r1 = expand_center(s=s, left=center, right=center)
-                  if (r1 - l1) > (r - l):
-                      l, r = l1, r1
-
-                  # even case, like abba, the center is between 2b
-                  l2, r2 = expand_center(s=s, left=center, right=center+1)
-                  if (r2 - l2) > (r - l):
-                      l, r = l2, r2
+                      if s[left] == s[right] and memo[left+1][right-1]:
+                          memo[left][right] = True
+                          if right-left > r-l:
+                              l, r = left, right
 
               return s[l:r+1]
             ```
-       * Time: O(n), Space: O(n^2), Manacher's Algorithm
-   * **Parentheses**
+       * Approach3: Expand Center, Time: O(n^2), Space: O(1)
+         * **Expand the center**, there are total 2n-1 center
+           * odd case:
+             * a**b**a -> the center is b
+           * even case
+             * a**bb**a -> the center is between bb
+         * Python Solution
+          ```python
+          def longestPalindrome(self, s: str) -> str:
+
+            def expand_center(left, right):
+                while left > -1 and right < len(s):
+                    if s[left] != s[right]:
+                        break
+
+                    left -= 1
+                    right += 1
+
+                # out of boundary or s[left] != s[right]
+                return left+1, right-1
+
+            if not s:
+                return ""
+
+            l = r = 0
+            n = len(s)
+
+            for center in range(n):
+                l1, r1 = expand_center(left=center, right=center)
+                if (r1 - l1) > (r - l):
+                    l, r = l1, r1
+
+                l2, r2 = expand_center(left=center, right=center+1)
+                if (r2 - l2) > (r - l):
+                    l, r = l2, r2
+
+            return s[l:r+1]
+            ```
+       * Approach4: Manacher's Algorithm, Time: O(n), Space: O(n^2)
+     * 336:	Palindrome **Pairs** (H)
+     * 214:	**Shortest** Palindrome (H)
+     * 131:	Palindrome Partitioning (M)
+     * 132:	Palindrome Partitioning II (H)
+  * **Parentheses**
      * 020: Valid Parentheses (E)
-       * Python Solution
-         ```python
-         BRACKET_MAP = {'(': ')', '[': ']', '{': '}'}
-         def is_valid_parentheses(self, s: str) -> bool:
-             if not s:
-                 return True
+       * Valid Cases:
+         * [] () {}
+         * { [ () ] }
+       * Invalid Cases:
+         * { [ () ]
+         * ))
+         * ((
+       * Approach1: Use stack, Time:O(n), Space:O(n)
+         * Python Solution
+           ```python
+           BRACKET_MAP = {'(': ')', '[': ']', '{': '}'}
+           def is_valid_parentheses(self, s: str) -> bool:
+               if not s:
+                   return True
 
-             ret = True
-             stack = list()
-             for c in s:
-                 if c in BRACKET_MAP:
-                     stack.append(c)
-                 else:
-                     # can not find the left bracket
-                     if not stack or c != BRACKET_MAP[stack.pop()]:
-                         return False
+               ret = True
+               stack = list()
+               for c in s:
+                   if c in BRACKET_MAP:
+                       stack.append(c)
+                   else:
+                       # can not find the left bracket
+                       if not stack or c != BRACKET_MAP[stack.pop()]:
+                           return False
 
-             # if len(stack) !=0 means that can not find the right bracket
-             return len(stack) == 0
-         ```
+               # if len(stack) !=0 means that can not find the right bracket
+               return len(stack) == 0
+           ```
      * 022: Generate Parentheses (M)
-     * 241: Generate Parentheses (M)
+     * 241: Different Ways to Add Parentheses (M)
      * 032:	Longest Valid Parentheses (H)
-     * 301: Remove Invalid Parentheses
-   * **Subsequence**
+     * 301: Remove Invalid Parentheses (H)
+  * **Subsequence**
      * Longest Common Subsequence (LCS)
        * Ref:
          * https://www.youtube.com/watch?v=NnD96abizww
-       * Dynamic Programming: Time: O(n^2), Space: O(n^2)
+       * Approach2: DP: Time: O(n^2), Space: O(n^2)
          * Python Solution
            ```python
             @staticmethod
@@ -535,31 +677,58 @@ Table of Content
                                                   s2, l2-1,
                                                   memo)
            ```
-   * **Reorder**
+  * **Reorder**
      * 344: Reverse String (E)
+       * Python Solution
+       ```python
+       def reverseString(self, s: List[str]) -> None:
+        """
+        Do not return anything, modify s in-place instead.
+        """
+        if len(s) <= 1:
+            return
+
+        left, right = 0, len(s)-1
+
+        while left < right:
+            s[left], s[right] = s[right], s[left]
+            left += 1
+            right -= 1
+       ```
      * 541: Reverse String II (E)
        * You need to **reverse the first k characters for every 2k characters** counting from the start of the string.
-         * input:  s = "abcdefg", k = 2
-         * output: "bacdfeg"
+         * example1
+           * input: s = "abcdefg", k = 2
+           * output: "bacdfeg"
+         * example
+           * input: s = "abcdefgh", k = 3
+           * output: "cbadefhg"
        * Python Solution
         ```python
-          def reverseStr(self, s: str, k: int) -> str:
-              if k <= 1 :
-                  return s
+        def reverseStr(self, s: str, k: int) -> str:
+          def reverse_list(left, right):
+              while left < right:
+                  l[left], l[right] = l[right], l[left]
+                  left += 1
+                  right -= 1
 
-              l = list(s)
-              length = len(l)
-              start = 0
+          if k <= 1 or not s:
+              return s
 
-              while start < length:
-                  end = min(length-1, start+(k-1))
-                  self.reverse_list(l, start, end)
-                  start += 2*k
+          l = list(s)
+          n = len(l)
+          left = 0
 
-              return ''.join(l)
+          while left < n:
+              right = min(left+k-1, n-1)
+              reverse_list(left, right)
+
+              left = left + 2*k
+
+          return ''.join(l)
         ```
      * 151:	Reverse **Words** in a String	(M)
-       * Time O(n), Space O(n) (one pass)
+       * Approach1, from end to the end, Time O(n), Space O(n) (one pass)
          * From end to beginning of the string
          * Python solution
           ```python
@@ -589,7 +758,7 @@ Table of Content
 
             return "".join(output)
           ```
-       * Time O(n), Space O(n)
+       * Approach2, Time O(n), Space O(n)
          * Reverse the string, from left to right, reverse each word.
          * Python solution
           ```python
@@ -612,46 +781,44 @@ Table of Content
                 while w_end+1 < len(l) and not l[w_end+1].isspace():
                     w_end +=1
 
-                self.reverse_list(l, w_start, w_end)
+                reverse_list(l, w_start, w_end)
 
                 w_start = w_end + 1
 
             return "".join(l)
             ```
      * 186:	Reverse **Words** in a String II (M)
-       * Python Solution
-       ```python
-        def reverse_list(l, start, end):
-            while start < end:
-                l[start], l[end] = l[end], l[start]
-                start += 1
-                end -= 1
+       * Approach1, Time:O(n), Space:O(1)
+         * Python Solution
+         ```python
+         def reverseWords(self, s: List[str]) -> None:
+          def reverse_list(left, right):
+            while left < right:
+                s[left], s[right] = s[right], s[left]
+                left += 1
+                right -= 1
 
-        def reverseWords(self, s: List[str]) -> None:
-            """
-            Do not return anything, modify s in-place instead.
-            """
-            self.reverse_list(s, 0, len(s)-1)
+          reverse_list(0, len(s)-1)
 
-            w_start = 0
-            boundary = len(s)
+          w_start = 0
+          boundary = len(s)
+          while w_start < boundary:
+              while w_start + 1 < boundary and s[w_start].isspace():
+                  w_start += 1
 
-            while w_start < boundary:
-                while w_start + 1 < boundary and s[w_start].isspace():
-                    w_start += 1
+              if s[w_start].isspace():
+                  break
 
-                if s[w_start].isspace():
-                    break
+              w_end = w_start
+              while w_end + 1 < boundary and not s[w_end+1].isspace():
+                  w_end += 1
 
-                w_end = w_start
-                while w_end + 1 < boundary and not s[w_end + 1].isspace():
-                    w_end += 1
-
-                reverse_list(s, w_start, w_end)
-
-                w_start = w_end + 1
-       ```
+              reverse_list(w_start, w_end)
+              # skip the space after w_end
+              w_start = w_end + 2
+         ```
      * 345:	Reverse **Vowels** of a String (E)
+       * Approach1: Hash Table, Time:O(n), Space:O(k)
        * Python Solution
        ```python
         def reverseVowels(self, s: str) -> str:
@@ -675,78 +842,87 @@ Table of Content
 
          return "".join(l)
        ```
-   * **Isomorphism** and **Pattern**
+  * **Isomorphism** and **Pattern**
      * 205: **Isomorphic** Strings (E)
         * Example:
           * aabbaa,  112233 -> False
           * aabbaa,  112211 -> True
-        * Use hash Table to store **last seen index**
-        * Python Solution
-          ```python
-          def isIsomorphic(self, s: str, t: str) -> bool:
-            # -1 means that this char does not appear before
-            f = lambda: -1
-            d1 = collections.defaultdict(f)
-            d2 = collections.defaultdict(f)
-
-            for i in range(0, len(s)):
-                if d1[s[i]] != d2[t[i]]:
+        * Approach1, Use Hash Table
+          * Use hash Table to keep **last seen index**
+          * Python Solution
+            ```python
+            def isIsomorphic(self, s: str, t: str) -> bool:
+                if len(s) != len(t):
                     return False
 
-                d1[s[i]] = d2[t[i]] = i
+                # -1 means that this char does not appear before
+                f = lambda: -1
+                ds = collections.defaultdict(f)
+                dt = collections.defaultdict(f)
 
-            return True
-          ```
-     * 290: Word Pattern (E)
+                res = True
+                for i in range(len(s)):
+                    if ds[s[i]] != dt[t[i]]:
+                        res = False
+                        break
+
+                    ds[s[i]] = dt[t[i]] = i
+                return res
+            ```
+     * 290: Word **Pattern** (E)
        * The same concept as 205
+       * Approach1, Use Hash Table
+          * Use hash Table to keep **last seen index**
        * Python Solution
          ```python
          def wordPattern(self, pattern: str, str: str) -> bool:
-
           if not str or not pattern:
+              return False
+
+          txt = str.split()
+          if len(pattern) != len(txt):
               return False
 
           f = lambda : -1
           d1 = collections.defaultdict(f)
           d2 = collections.defaultdict(f)
 
-          txt = str.split()
-
-          if len(pattern) != len(txt):
-              return False
-
+          res = True
           for i in range(len(pattern)):
               if d1[pattern[i]] != d2[txt[i]]:
-                  return False
+                  res = False
+                  break
               d1[pattern[i]] = d2[txt[i]] = i
 
-          return True
+          return res
          ```
-   * **Anagram**
-     * The key is how to calculate signatures.
+  * **Anagram**
+    * The key is how to calculate **signatures**.
      * 242: Valid Anagram (E)
-       * Python Solution
-        ```python
-        def isAnagram(self, s: str, t: str) -> bool:
-          if len(s) != len(t):
-              return False
+       * Approach1: Use hash table, Time:O(n), Space:O(n)
+         * Python Solution
+          ```python
+          def isAnagram(self, s: str, t: str) -> bool:
+            if len(s) != len(t):
+                return False
 
-          d = collections.defaultdict(int)
+            d = collections.defaultdict(int)
+            for c in s:
+                d[c] += 1
 
-          for c in s:
-              d[c] += 1
+            res = True
+            for c in t:
+                if d[c] == 0:
+                    res = False
+                    break
+                d[c] -= 1
 
-          for c in t:
-              if d[c] == 0:
-                  return False
-
-              d[c] -= 1
-
-          return True
-       ```
+            return res
+         ```
+       * Approach2: Use sort, Time:O(nlogn), Space:O(n)
      * 049: Group Anagrams (M)
        * n is the number of strings, k is the maximum length of the strings
-       * Categorize by sorted string, Time: O(n*klog(k)) Space: O(nk)
+       * Approach1: Categorized by **sorted string**, Time: O(n*klog(k)) Space: O(nk)
          * Python Solution
             ```python
             def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
@@ -755,104 +931,141 @@ Table of Content
                 d[tuple(sorted(s))].append(s)
             return d.values()
             ```
-       * Categorize by Character Count, Time: O(nk), Space: O(nk)
-         * Transform each strings into a character count.
+       * Approach2: Categorized by **Character Count**, Time: O(nk), Space: O(nk)
          * Python Solution
             ```python
             def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
-              d = collections.defaultdict(list)
-              ord_a = ord('a')
-              for s in strs:
-                  # generate character count signature
-                  # we can nullify the array to reuse
+              def get_key(s):
                   count_arr = [0] * 26
                   for c in s:
-                      count_arr[ord(c)-ord_a] += 1
+                      count_arr[ord(c)-ord_base] += 1
 
-                  # use signature as key
-                  d[tuple(count_arr)].append(s)
+                  return tuple(count_arr)
+
+              d = collections.defaultdict(list)
+              ord_base = ord('a')
+              for s in strs:
+                  k = get_key(s)
+                  d[k].append(s)
 
               return d.values()
             ```
-     * 249: Group Shifted Strings (M)
+     * 249: Group **Shifted Strings** (M)
        * Time: O(nk)
          * n is the number of strings
          * k is the length of the string
-       * Example:
-         * [a, b] and [z, a]
-           * ord(a) = 97
-           * ord(b) = 98
-           * ord(z) = 122
-         * (ord(b) - ord(a)) ≡ 1 (mod 26)
-         * (ord(a) - ord(z)) ≡ -25 ≡ 1 (mod 26)
-         * -1 is **congruent** to -25 (modulo 26)
+       * Approach1: Group by diff string, Time:O(nk)
+         * Example:
+           * [a, b] and [z, a]
+             * ord(a) = 97
+             * ord(b) = 98
+             * ord(z) = 122
+           * (ord(b) - ord(a)) ≡ 1 (mod 26)
+           * (ord(a) - ord(z)) ≡ -25 ≡ 1 (mod 26)
+           * 1 is **congruent** to 25 (modulo 26)
        * Python Solution
          ```python
-         def groupStrings(self, strings: List[str]) -> List[List[str]]:
+        def groupStrings(self, strings: List[str]) -> List[List[str]]:
+          def get_key(s):
+              ord_first = ord(s[0])
+              return tuple((ord(c)- ord_first)%26  for c in s)
+
           d = collections.defaultdict(list)
           for s in strings:
-              # generate signature
-              k = tuple( (ord(c) - ord(s[0]))%26  for c in s)
-
-              # use signature as key
+              k = get_key(s)
               d[k].append(s)
 
           return d.values()
          ```
-   * Other
+  * Other
      * 387: First Unique Character in a String (E)
-       * Time: O(n), Space: O(c)
-         * Use Hash Table
-     * 058: Length of Last Word (E)
-       * Seach **from the end to the beginning**.
-       * Python Solution
-        ```python
-        def lengthOfLastWord(self, s: str) -> int:
-          w_count = 0
-          find = False
-          # traverse from end to start
-          for i in range(len(s)-1, -1, -1):
-              if s[i] != ' ':
-                  w_count += 1
-                  find = True
-              else:
-                  # we have found a word before
-                  if find:
-                      break
+       * Approach1: Use Hash Table to count the occurrence, Time: O(n), Space: O(c)
+         * Python Solution
+         ```python
+         def firstUniqChar(self, s: str) -> int:
+          res = not_found = -1
+          counter = collections.Counter(s)
+          for i, c in enumerate(s):
+            if counter[c] == 1:
+              res = i
+              break
 
-          return w_count
-        ```
-     * 014: Longest Common Prefix (E)
-       * Use **vertical scanning**, Time: O(mn)
+          return res
+         ```
+     * 058: Length of Last Word (E)
+       * Approach1: Seach **from the end to the beginning**.
+       * Python Solution
+          ```python
+          def lengthOfLastWord(self, s: str) -> int:
+            w_count = 0
+            found = False
+            # traverse from end to start
+            for i in range(len(s)-1, -1, -1):
+                if s[i] != ' ':
+                    w_count += 1
+                    found = True
+                else:
+                    # we have found a word before
+                    if find:
+                        break
+
+            return w_count
+          ```
+     * 014: Longest **Common Prefix** (E)
+       * Approach1: **vertical scanning**, Time: O(mn), Space: O(1)
+         * Notice the edge cases:
+           * 1 strings
+           * 1 character for each string, [a, b]
          * Time: O(mn)
            * Where m is the minimum length of str in strs and n is the number of strings.
          * Python Solution
              ```python
-             def longest_common_prefix(self, strs: List[str]) -> str:
-               if not strs:
-                   return ""
+             def longestCommonPrefix(self, strs: List[str]) -> str:
+              if not strs:
+                return ""
 
-              # set string 0 as vertical prefix
-               prefix = strs[0]
+              """
+              Need to cover
+              1. one string
+              2. one character with multiple strings
+              """
 
-               # Vertical Scanning
-               for i in range(0, len(prefix)):
-                   c = prefix[i]
-                   for j in range(1, len(strs)):
-                       # break if out of boundary or non-equal
-                       if i == len(strs[j]) or strs[j][i] != c:
-                           # backward one character
-                           prefix = prefix[:i]
-                           found = True
-                           break
+              # vertical scanning
+              # prefix is the maximum length of the common prefix
+              res = prefix = strs[0]
+              leave = False
 
-                   if found:
-                       break
+              # for each character in the prefix
+              for idx, c in enumerate(prefix):
+                  # compare with character in the same idx with other strings
+                  for i in range(1, len(strs)):
+                      compare_str = strs[i]
+                      if idx == len(compare_str) or c != compare_str[idx]:
+                          # truncate the prefix here
+                          res = prefix[0:idx]
+                          leave = True
+                          break
 
-               return prefix
+                  if leave:
+                      break
+
+              return res
              ```
      * 383: Ransom Note (E)
-        * Use Hash Table
+        * Approach1: Hash Table, Time:O(m+n), Space:O(m)
+          * Python Solution
+          ```python
+          def canConstruct(self, ransomNote: str, magazine: str) -> bool:
+            d = collections.Counter(magazine)
+
+            for w in ransomNote:
+                if w not in d or d[w] <= 0:
+                    return False
+                else:
+                    d[w] -= 1
+
+            return True
+          ```
      * 293: Flip Game (E)
         * python solution
         ```python
@@ -865,28 +1078,27 @@ Table of Content
           return output
         ```
      * 294: Flip Game II (M)
-       * backtracking: Time: O(n!!), Space: O(n*2)
+       * Approach1: backtracking: Time: O(n!!), Space: O(n*2)
          * **Double factorial**: (n-1) * (n-3) * (n-5) * ... 1=
           * python solution
             ```python
             def canWin(self, s: str) -> bool:
               # from 0 to len(s)-2
               for i in range(0, len(s)-1):
-
-                  # the 1st flip
+                  # the 1st makes the flip.
                   if s[i] == s[i+1] == '+':
                       first_flip_s = f"{s[0:i]}--{s[i+2:]}"
 
-                      # the 2nd flip
+                      # the 2nd person makes the flip.
                       if not self.canWin(first_flip_s):
                           # 1st person wins the game
                           return True
 
-              # can not make any flips
-              # 1st person loses the game
+              # can not make any flips or 2nd person always wins
+              # this is end condition
               return False
             ```
-       * backtracking with memo
+       * Approach1: backtracking with memo
          * time complexity:
            * number_of_distinct_strings * each_unique_string_first_time_computation_contribution
              * O(2^n) * n (not sure)
@@ -911,8 +1123,8 @@ Table of Content
                               memo[s] = True
                               return True
 
-                  # can not make any flips
-                  # first person loses the game
+                  # can not make any flips or 2nd person always wins
+                  # this is end condition
                   memo[s] = False
                   return False
 
@@ -924,7 +1136,7 @@ Table of Content
     * 217: Contains Duplicate (E)
       * Use hash Table
     * 219: Contains Duplicate II (E)
-      * find out whether there are two distinct indices i and j in the array such that nums[i] = nums[j] and the absolute difference between i and j is at most k.
+      * Find out whether there are two distinct indices i and j in the array such that nums[i] = nums[j] and the absolute difference between i and j is at most k.
       * Use hash Table to store index.
       * Python Solution
       ```python
@@ -969,19 +1181,20 @@ Table of Content
       * Python Solution
       ```python
       def removeDuplicates(self, nums: List[int]) -> int:
-        i = 2
-        for j in range(3, len(nums)):
-            if nums[j] > nums[i-2]:
-                nums[i] = nums[j]
+        i = 0
+        for n in nums:
+            if i < 2 or n > nums[i-2]:
+                nums[i] = n
                 i += 1
         return i
       ```
-  * **Container**
+  * **Containers**
     * 011: Container With Most Water (M)
-      * Greedy, Time O(n)
-        * How to calculate the area:
-          * min(left_border, right_border) * width
-        * 2 pointers approach, Time: O(n), Space: O(1)
+      * How to calculate the area?
+        * min(left_border, right_border) * width
+      * Approach1: brute force, Time: O(n^2), Space: O(1)
+        * Calculating area for all height pairs.
+      * Approach2: 2 pointer2 approach, Time: O(n), Space: O(1)
           * Move the index with shorter height to find the bigger area.
           * Python Solution
             ```python
@@ -1006,13 +1219,13 @@ Table of Content
     * 042: Trapping Rain Water (H) *
       * Ref:
         * [Solution](https://leetcode.com/problems/trapping-rain-water/solution/)
-      * How to calculate the area ?
+      * **How to calculate the area?**
         * Sum water amount of **each bin** (width=1)
           * Find left border
           * Find right border
           * Water area in the ith bin would be:
             * **min(left_border, right_border) - height of ith bin**
-      * Dynamic Programming, Time: O(n), Space: O(n)
+      * Approach1: DP, Time: O(n), Space: O(n)
         * Keep two arrays
           * left_max
             * The left_max[i] is the **left border** in ith bin.
@@ -1042,12 +1255,13 @@ Table of Content
                   right_max[i] = max(height[i], right_max[i+1])
 
               # sum the area for each bin
+              # infact, area of bin[0] and bin[1] is 1
               for l_max, r_max, h in zip(left_max, right_max, height):
                   area += min(l_max, r_max) - h
 
               return area
             ```
-      * 2 pointers approach, Time: O(n), Space: O(1)
+      * Approach2: 2 pointers approach, Time: O(n), Space: O(1)
           * [Concept]((https://leetcode.com/problems/trapping-rain-water/solution/))
             * If the right border > left border, the area of ith bin is determined by the left border.
             * vice versa
@@ -1067,6 +1281,7 @@ Table of Content
                   # area depends on left border
                   if height[left] <= height[right]:
                       if height[left] >= max_left:
+                          # new left border, do not need to calculate area
                           max_left = height[left]
                       else:
                           area += (max_left - height[left])
@@ -1075,6 +1290,7 @@ Table of Content
                   # area depends on right border
                   else:
                       if height[right] > max_right:
+                          # new right border, do not need to calculate area
                           max_right = height[right]
                       else:
                           area += (max_right - height[right])
@@ -1318,26 +1534,27 @@ Table of Content
     * 714: Best Time to Buy and Sell Stock with Transaction Fee (M), Time:O(n), Space:O(1)
       * Ref:
         * [solution](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/solution/)
-      * Cash(i):
-        * The cash in hand, if you are **not holding the stock** at the end of day(i):
-          * case1:
-            * cash[i] = cash[i-1]
-          * case2:
-            * cash[i] = hold[i-1] + prcie[i] - fee
-          * cash[i]
-            * max(case1, case2) = max(cash[i-1], hold[i-1] + prcie[i] - fee)
-      * Hold(i):
-        * The cash in hand, if you are **holding the stock** at the end of day(i):
-          * case1:
-            * hold[i] = hold[i-1]
-          * case2:
-            * hold[i] = **hold[i-1] + price[i] - fee** - price[i]
-          * case3:
-            * hold[i] = **cash[i-1]** - price[i]
-          * case2 and case3 can be reduced to
-            *  **cash[i]** - price[i]
-          * hold[i]
-            * max(case1, case2, case3) = max(hold[i-1], **cash[i]-price[i]**)
+      * Dynamic Programming
+        * Cash(i):
+          * The cash in hand, if you are **not holding the stock** at the end of day(i):
+            * case1:
+              * cash[i] = cash[i-1]
+            * case2:
+              * cash[i] = hold[i-1] + prcie[i] - fee
+            * cash[i]
+              * max(case1, case2) = max(cash[i-1], hold[i-1] + prcie[i] - fee)
+        * Hold(i):
+          * The cash in hand, if you are **holding the stock** at the end of day(i):
+            * case1:
+              * hold[i] = hold[i-1]
+            * case2:
+              * hold[i] = **hold[i-1] + price[i] - fee** - price[i]
+            * case3:
+              * hold[i] = **cash[i-1]** - price[i]
+            * case2 and case3 can be reduced to
+              *  **cash[i]** - price[i]
+            * hold[i]
+              * max(case1, case2, case3) = max(hold[i-1], **cash[i]-price[i]**)
       * Python Solution
           ```python
           def max_profit(self, prices: List[int], fee: int) -> int:
@@ -1473,6 +1690,7 @@ Table of Content
               # merge
               cur = intervals[i]
               last = output[-1]
+              # the last[end] implies the current last end time!
               if last[end] >= cur[start]:
                   last[end] = max(last[end], cur[end])
               else:
@@ -1635,7 +1853,7 @@ Table of Content
 
               return output
             ```
-    * 228: **Summary** Ranges (M)
+    * 228: **Summary Ranges** (M)
       * Given a sorted integer array without duplicates, return the summary of its ranges.
         * Input:
           * [0,1,2,4,5,7]
@@ -1667,7 +1885,7 @@ Table of Content
 
         return output
       ```
-    * 163: **Missing** Ranges (M)
+    * 163: **Missing Ranges** (M)
       * Example:
         * Input: nums = [0, 1, 3, 50, 75], lower = 0 and upper = 99
         * Output: ["2", "4->49", "51->74", "76->99"]
@@ -2067,6 +2285,7 @@ Table of Content
         ```
       * Infinite array
         * [Solution](https://leetcode.com/problems/game-of-life/discuss/73217/Infinite-board-solution/201780)
+    * 723：Candy Crush (M)
 ### Matrix
 ### Binary Search
   * 275: H-Index II (M) (Array)
@@ -2693,6 +2912,7 @@ Table of Content
       * Python Solution:
         ```python
         class KthLargest:
+
           def __init__(self, k: int, nums: List[int]):
               # You may assume that nums' length ≥ k-1 and k ≥ 1.
               self.heap = list()
@@ -2711,8 +2931,6 @@ Table of Content
               self._add(val)
               return self.heap[0]
         ```
-
-
     * Python Solution
   * 023: Merge k Sorted Lists (H)
   * 253: Meeting Rooms II (M)
@@ -2811,7 +3029,7 @@ Table of Content
                   if heap[0] < e:
                       heapq.heapreplace(heap, e)
 
-          return return [e.key for e in heap]
+          return [e.key for e in heap]
       ```
       * Python Implementation 2
         ```python
@@ -2819,6 +3037,7 @@ Table of Content
           counter = collections.Counter(nums)
           return heapq.nlargest(k, counter.keys(), key=counter.get)
         ```
+  * 692: Top K Frequent Words (M)
   * 332: Reconstruct Itinerary	(M)
   * 341: Flatten Nested List Iterator (M)
   * 218: The Skyline Problem (H)
@@ -3537,6 +3756,617 @@ Table of Content
   * 051: N-Queens (H)
   * 052: N-Queens II (H)
 ### Dynamic Programming
+  * Ref:
+    * [From good to great. How to approach most of DP problems](https://leetcode.com/problems/house-robber/discuss/156523/From-good-to-great.-How-to-approach-most-of-DP-problems.)
+  * This particular problem and most of others can be approached using the following sequence:
+    * Find recursive relation
+    * Recursive (top-down)
+    * Recursive + memo (top-down)
+    * Iterative + memo (bottom-up)
+    * Iterative + N variables (bottom-up)
+  * Fibonacci sequence:
+    * 509: Fibonacci Number (E)
+      * Find recursive relation
+        * n == 0
+        * n == 1
+        * n > 1
+          * f(n) = f(n-1) + f(n-2)
+      * Recursive + memo (top-down), Time:O(n), Space:(n)
+        * Python Solution
+        ```python
+        def fib(self, N: int) -> int:
+          def _fib(n):
+              if n <= 1:
+                  return memo[n]
+
+              if not memo[n]:
+                  memo[n] = _fib(n-1) + _fib(n-2)
+
+              return memo[n]
+
+          if N == 0:
+              return 0
+          if N == 1:
+              return 1
+
+          memo = [None] * (N+1)
+          memo[0] = 0
+          memo[1] = 1
+
+          return _fib(N)
+        ```
+      * Iterative + memo (bottom-up), Time:O(n), Space:(n)
+        * Python Solution
+        ```python
+        def fib(self, N: int) -> int:
+          if N == 0:
+              return 0
+          if N == 1:
+              return 1
+
+          memo = [None] * (N+1)
+          memo[0] = 0
+          memo[1] = 1
+
+          for i in range(2, N+1):
+              memo[i] = memo[i-1] + memo[i-2]
+
+          return memo[N]
+        ```
+      * Iterative + N variables (bottom-up), Time:O(n), Space:(1)
+        * Python Solution
+        ```python
+        def fib(self, N: int) -> int:
+          if N == 0:
+              return 0
+          if N == 1:
+              return 1
+
+          prev = 0
+          cur = 1
+          for _ in range(2, N+1):
+              prev, cur = cur, prev+cur
+
+          return cur
+        ```
+    * 070: Climbing Stairs (E)
+      * Find recursive relation
+        * n <= 2:
+          * n == 0 or n == 1
+            * 1
+          * n == 2
+            * 2 (1 + 1 or 2)
+        * n > 2:
+          * f(n) = f(n-2) + f(n-1)
+            * f(n-2) + 2 step
+            * f(n-1) + 1 step
+      * Recursive + memo (top-down), Time:O(n), Space:O(n)
+      * Iterative + memo (bottom-up), Time:O(n), Space:O(n)
+        * Python Solutino
+        ```python
+        def climbStairs(self, n: int) -> int:
+          """
+          Each time you can either climb 1 or 2 steps.
+          In how many distinct ways can you climb to the top?
+          """
+          if n == 0 or n == 1:
+              return 1
+
+          if n == 2:
+              return 2
+
+          # n >= 3
+          memo = [None] * (n + 1)
+          memo[0] = memo[1]= 1
+          memo[2] = 2
+
+          # 3 ~ n
+          for i in range(3, n+1):
+              memo[i] = memo[i-1] + memo[i-2]
+
+          return memo[n]
+        ```
+      * Iterative + N variables (bottom-up), Time:O(n), Space:O(1)
+        * Python Solution
+        ```python
+        def climbStairs(self, n: int) -> int:
+          """
+          Each time you can either climb 1 or 2 steps.
+          In how many distinct ways can you climb to the top?
+          """
+          if n == 0 or n == 1:
+              return 1
+
+          if n == 2:
+              return 2
+
+          prev = 1
+          cur = 2
+          for _ in range(3, n+1):
+              prev, cur = cur, prev + cur
+
+          return cur
+        ```
+      * [Log(n) Solution](https://leetcode.com/problems/climbing-stairs/solution/)
+    * 091: **Decode Ways** (M)
+      * Find recursive relation
+        * Check conditions
+          * one character
+            ```python
+            return True if '1' <= c <= '9' else False
+            ```
+          * two characters
+            ```python
+            return True if '10' <= cc <= '26' else False
+            ```
+        * Conditional Fibonaccci number
+          * n == 0
+            * check s[0]
+          * n == 1
+            * check s[0] + s[0] and s[0:2]
+          * n >= 2:
+            * init
+              * f(n) = 0
+            * if check s[n] == True
+              * f(n) += f(n-1)
+            * if check s[n-1:n+1] == True
+              * f(n) += f(n-2)
+      * Iterative + memo (bottom-up), Time:O(n), Space:O(n)
+        * Python Solution
+          ```python
+          def numDecodings(self, s: str) -> int:
+            """
+            'A' -> 1
+            'B' -> 2
+            ...
+            'Z' -> 26
+            Given a non-empty string containing only digits
+            determine the total number of ways to decode it.
+            """
+            def check_s_char(c):
+                return True if '1' <= c <= '9' else False
+
+            def check_d_char(cc):
+                return True if '10' <= cc <= '26' else False
+
+            n = len(s)
+            memo = [0] * n
+
+            if n == 0:
+                return 0
+
+            if check_s_char(s[0]):
+                memo[0] = 1
+            else:
+                memo[0] = 0
+            if n == 1:
+                return memo[0]
+
+            if memo[0] and check_s_char(s[1]):
+                memo[1] += 1
+            if check_d_char(s[0:2]):
+                memo[1] += 1
+
+            for i in range(2, n):
+                if check_s_char(s[i]):
+                    memo[i] += memo[i-1]
+
+                if check_d_char(s[i-1:i+1]):
+                    memo[i] += memo[i-2]
+
+            return memo[n-1]
+          ```
+      * Iterative + N variables (bottom-up), Time:O(n), Space:O(1)
+        * Python Solution
+        ```python
+        def numDecodings(self, s: str) -> int:
+            """
+            'A' -> 1
+            'B' -> 2
+            ...
+            'Z' -> 26
+            Given a non-empty string containing only digits
+            determine the total number of ways to decode it.
+            """
+            def check_s_char(c):
+                return True if '1' <= c <= '9' else False
+
+            def check_d_char(cc):
+                return True if '10' <= cc <= '26' else False
+
+            n = len(s)
+            memo = [0] * n
+
+            if n == 0:
+                return 0
+
+            prev = cur = 0
+            if check_s_char(s[0]):
+                prev = 1
+            if n == 1:
+                return prev
+
+            if prev and check_s_char(s[1]):
+                cur += 1
+            if check_d_char(s[0:2]):
+                cur += 1
+
+            for i in range(2, n):
+                last_cur = cur
+                cur = 0
+                if check_s_char(s[i]):
+                    cur += last_cur
+
+                if check_d_char(s[i-1:i+1]):
+                    cur += prev
+
+                prev = last_cur
+
+            return cur
+        ```
+  * **One Dimensional**:
+    * 062: Unique Paths (M)
+      * Combination:
+        * total m-1 down steps and n-1 right steps
+        * (m+n)!/m!n!
+        * Python Solution
+        ```python
+        from math import factorial as f
+        def uniquePaths(self, m: int, n: int) -> int:
+          if not m and not n:
+              return 0
+
+          if m == 1 or n == 1:
+              return 1
+
+          return int(f(m+n-2) /(f(m-1) * f(n-1)))
+        ```
+      * DP, Time:O(mn), Space:O(mn)
+        * Recursive relation
+        * for r == 0
+          * f(0, c) = 1
+        * for c == 0
+          * f(r, 0) = 1
+        * For r > 0 and c > 0
+          * f(r,c) = f(r-1) + f(c-1)
+        * Python Solution
+          ```python
+          def uniquePaths(self, m: int, n: int) -> int:
+            if not m and not n:
+                return 0
+
+            if m == 1 or n == 1:
+                return 1
+
+            memo = [[0 for _ in range(n)] for _ in range(m)]
+
+            # init the first row
+            for c in range(n):
+                memo[0][c] = 1
+
+            # init the first column
+            for r in range(m):
+                memo[r][0] = 1
+
+            for r in range(1, m):
+                for c in range(1, n):
+                    memo[r][c] = memo[r-1][c] + memo[r][c-1]
+
+            return memo[m-1][n-1]
+          ```
+      * DP, Time:O(mn), Space:O(n)
+        * In fact, keep one row is enough
+        * Python Solution
+        ```python
+        def uniquePaths(self, m: int, n: int) -> int:
+          if not m and not n:
+              return 0
+
+          if m == 1 or n == 1:
+              return 1
+
+          memo = [1 for _ in range(n)]
+
+          for _ in range(1, m):
+              for c in range(1, n):
+                  # memo[c] = from up + from left
+                  # memo[c] = memo[c] + memo[c-1]
+                  memo[c] += memo[c-1]
+
+          return memo[n-1]
+        ```
+    * 063: Unique Paths II (M)
+    * 120: Triangle (M)
+    * 279: Perfect Squares (M)
+    * 139: Word Break (M)
+    * 375: Guess Number Higher or Lower II (M)
+    * 322: Coin Change (H)
+    * 312: Burst Balloons (H)
+  * **Two Dimensional**:
+    * 256: Paint House (E)
+      * Find recursive relation
+        * n == 0: (first house)
+          * f_color[0][red] = costs[0][red]
+          * f_color[0][blue] = costs[0][green]
+          * f_color[0][green] = costs[0][green]
+        * n > 0:
+          * For each color at nth house, we have 3 choices
+            * f_color[n][red] = costs[n][red] + min(f_color[n-1][blue], f_color[n-1][green])
+            * f_color[n][blue] = costs[n][blue] + min(f_color[n-1][red], f_color[n-1][green])
+          * f_  color[n][green] = costs[n][green] + min(f_color[n-1][red], f_color[n-1][blue])
+        * and the minimum price if we painted to nth house would be
+          * min(f_color[n][red], f_color[n][blue], f_color[n][green])
+      * Iterative + memo (bottom-up), Time:O(nk), Space:(nk)
+        * Python Solution
+          ```python
+          def minCost(self, costs: List[List[int]]) -> int:
+            """
+            paint all the houses such that no two adjacent houses have the same color
+            Find the minimum cost to paint all houses
+            cost: n x 3 matrix for each house
+            red, blue, green
+            """
+            if not costs:
+                return 0
+
+            house_cnt = len(costs)
+            acc_cost = [[0 for _ in range(3)] for _ in range(house_cnt)]
+
+            r_idx, b_idx, g_idx = 0, 1, 2
+
+            # For the first house
+            acc_cost[0] = costs[0]
+
+            # For 1th to (n-1)th house
+            for i in range(1, house_cnt):
+                acc_cost[i][r_idx] = costs[i][r_idx] + min(acc_cost[i-1][b_idx], acc_cost[i-1][g_idx])
+                acc_cost[i][b_idx] = costs[i][b_idx] + min(acc_cost[i-1][r_idx], acc_cost[i-1][g_idx])
+                acc_cost[i][g_idx] = costs[i][g_idx] + min(acc_cost[i-1][r_idx], acc_cost[i-1][b_idx])
+
+            # unpack the last row
+            return min(*acc_cost[house_cnt-1])
+          ```
+      * Iterative + N variables (bottom-up), Time:O(nk), Space:(1)
+        * Python Solution:
+          ```python
+          def minCost(self, costs: List[List[int]]) -> int:
+            """
+            paint all the houses such that no two adjacent houses have the same color
+            Find the minimum cost to paint all houses
+            cost: n x 3 matrix for each house
+            red, blue, green
+            """
+            if not costs:
+                return 0
+
+            house_cnt = len(costs)
+            r_idx, b_idx, g_idx = 0, 1, 2
+            # For the first house
+            cur_r, cur_b, cur_g = costs[0][r_idx], costs[0][b_idx], costs[0][g_idx]
+
+            # For 1th to (n-1)th house
+            for i in range(1, house_cnt):
+                last_r, last_b, last_g = cur_r, cur_b, cur_g
+                cur_r = costs[i][r_idx] + min(last_b, last_g)
+                cur_b = costs[i][b_idx] + min(last_r, last_g)
+                cur_g = costs[i][g_idx] + min(last_r, last_b)
+
+            return min(cur_r, cur_b, cur_g)
+            ```
+    * 265: Paint House II (H) (L)
+    * 064: Minimum Path Sum (M)
+    * 072: Edit Distance (H)
+    * 097: Interleaving String (H)
+    * 174: Dungeon Game (H)
+    * 221: Maximal Square (M)
+    * 085: Maximal Rectangle (H)
+    * 363: Max Sum of Rectangle No Larger Than K	TreeSe (H)
+  * **Deduction**:
+    * 714: Best Time to Buy and Sell Stock with Transaction Fee (M) (Array)
+    * 276: Paint Fence (E)
+      * There is a fence with n posts, each post can be painted with one of the k colors.
+      * You have to paint all the posts such that no more than two adjacent fence posts have the same color.
+      * Find recursive relation
+        * n <= 2:
+          * n == 0:
+            * 0 color
+          * n == 1:
+            * k color
+          * n == 2:
+            * f_same: k * 1
+            * f_diff: k * (k-1)
+            * return f_same + f_diff
+        * n > 2
+          * f_same(i) = f_diff(i-1) * 1
+          * f_diff(i) = (f_same(i-1) + f_diff(i-1)) * (k-1)
+          * return f_same(i) + f_diff(i)
+      * Recursive + memo (top-down)
+      * Iterative + memo (bottom-up), Time: O(n), Space: O(n)
+        * Python Solution
+        ```python
+        def numWays(self, n: int, k: int) -> int:
+          """
+          n: number of posts
+          k: number of color
+          """
+          # no posts
+          if n == 0:
+              return 0
+
+          # 1 posts
+          if n == 1:
+              return k
+
+          # 2 posts
+          memo_same = [None] * n
+          memo_same[1] = k
+
+          memo_diff = [None] * n
+          memo_diff[1] = k * (k - 1)
+
+          # 2 to n-1
+          for i in range(2, n):
+              memo_same[i] = memo_diff[i-1]
+              memo_diff[i] = (memo_diff[i-1] +memo_same[i-1]) * (k - 1)
+
+          return memo_same[n-1] + memo_diff[n-1]
+
+        ```
+      * Iterative + N variables (bottom-up), Time: O(n), Space: O(1)
+        * Python Solution
+          ```python
+          def numWays(self, n: int, k: int) -> int:
+            """
+            n: number of posts
+            k: number of color
+            """
+            if n == 0:
+                return 0
+
+            if n == 1:
+                return k
+
+            # post == 2
+            same = k
+            diff = k * (k-1)
+
+            # for adding post==3 to post==n
+            for _ in range(3, n+1):
+                tmp = diff
+
+                # diff[i] = same[i-1] * (k-1) + diff[i-1] * (k-1)
+                diff = (diff + same) * (k-1)
+
+                # same[i] = diff[i-1] * 1
+                same = tmp
+
+            return diff + same
+    * 198: House Robber (E)
+      * Recursive relation
+        * For n < 2
+          * f(0) = nums[0]
+          * f(1) = max(nums[0], nums[1])
+        * For n >= 2
+          * f(n) = max(f(n-2)+monery(n), F(n-1))
+      * Recursive + memo (top-down), Time:O(n), Space:(n)
+        * Python Solution
+          ```python
+          def rob(self, nums: List[int]) -> int:
+          """
+          It will automatically contact the police if two adjacent houses were broken
+          into on the same night.
+          """
+            # R(n) = max(R(n-2)+monery(n), R(n-1))
+            def _rob(n):
+                if n == 0:
+                    return memo[0]
+                elif n == 1:
+                    return memo[1]
+                else:  # n >= 2
+                    if not memo[n]:
+                        memo[n] = max(_rob(n-2)+nums[n], _rob(n-1))
+                    return memo[n]
+
+            if not nums:
+                return 0
+
+            if len(nums) == 1:
+                return nums[0]
+
+            memo = [None] * len(nums)
+            memo[0] = nums[0]               # 1 house
+            memo[1] = max(nums[0], nums[1]) # 2 houses
+            return _rob(len(nums)-1)
+          ```
+      * Iterative + memo (bottom-up), Time:O(n), Space:(1)
+        * Python Solution
+        ```python
+        def rob(self, nums: List[int]) -> int:
+          """
+          It will automatically contact the police if two adjacent houses were broken
+          into on the same night.
+          """
+          if not nums:
+              return 0
+
+          if len(nums) == 1:
+              return nums[0]
+
+          memo = [None] * len(nums)
+          memo[0] = nums[0]               # 1 house
+          memo[1] = max(nums[0], nums[1]) # 2 houses
+
+          for i in range(2, len(nums)):
+              memo[i] = max(memo[i-2]+nums[i], memo[i-1])
+
+          return memo[len(nums)-1]
+        ```
+      * Iterative + N variables (bottom-up), Time:O(n), Space:(1)
+        * Python Solution
+        ```python
+        def rob(self, nums: List[int]) -> int:
+        """
+        It will automatically contact the police if two adjacent houses were broken
+        into on the same night.
+        """
+        if not nums:
+            return 0
+
+        if len(nums) == 1:
+            return nums[0]
+
+        prev_max = nums[0]
+        cur_max = max(nums[0], nums[1])
+
+        for i in range(2, len(nums)):
+            prev_max, cur_max = cur_max, max(prev_max+nums[i], cur_max)
+
+        return cur_max
+        ```
+    * 213: House Robber II (M)
+      * All houses at this place are arranged **in a circle**.
+      * How to break the circle ?
+        * (1) i not robbed
+        * (2) i robbed
+        * (3) pick the bigger one.
+      * Python Solution
+      ```python
+      def rob(snums: List[int]) -> int:
+
+          def rob_non_cycle(start, end):
+              n = end - start + 1
+              if n == 1:
+                  return nums[start]
+              if n == 2:
+                  return max(nums[start], nums[start+1])
+
+              prev_max = nums[start]
+              cur_max = max(nums[start], nums[start+1])
+              for i in range(start+2, end+1):
+                  prev_max, cur_max = cur_max, max(nums[i]+prev_max, cur_max)
+
+              return cur_max
+
+          n = len(nums)
+          if n == 0:
+              return 0
+          if n == 1:
+              return nums[0]
+          if n == 2:
+              return max(nums[0], nums[1])
+          if n == 3:
+              return max(nums[0], nums[1], nums[2])
+
+          # rob the first house
+          rob_first = nums[0] + rob_non_cycle(2, n-2)
+          # do not rob the first house
+          do_not_rob_first = rob_non_cycle(1, n-1)
+
+          return max(rob_first, do_not_rob_first)`
+      ```
+    * 337: House Robber III (M)
+    * 010: **Regular Expression** Matching (H)
+    * 044: **Wildcard** Matching (H)
 ### Backtracking
   * 294: Flip Game II (M)
   * **Subset**
@@ -3928,12 +4758,19 @@ Table of Content
 ### Bit Manipulation
 ### Union Field
 ### Graph
-
-### Error Prone List
+### Error List
+  * Math:
+    * 007: Reverse Integer
+    * 015: 3Sum (M)
   * String
-    * 028: Implement **strStr** (E) (**KMP** algorithm)
-    * 249: Group Shifted Strings (M)
-    * 049: Group Anagrams (M)
+    * substring
+      * 028: Implement **strStr** (E) (**KMP** algorithm)
+    * Anagram
+      * 049: Group Anagrams (M)
+      * 249: Group Shifted Strings (M)
+    * Other:
+      * 014: Longest Common Prefix (E)
+      * 294: Flip Game II (M)
   * Array
     * 275: H-Index II (M)
       * Binary search solution
@@ -3958,8 +4795,13 @@ Table of Content
 
 
 
-
-
-
-
-
+  * Dynamic Programming:
+    * Fibonacci sequence
+      * 070: Climbing Stairs
+      * 091: **Decode Ways**
+    * **One Dimensional**
+    * **Two Dimensional**
+      * 256: Paint House (E)
+    * **Deduction**
+      * 276: Paint Fence (E)
+      * 198: House Robber (E)
