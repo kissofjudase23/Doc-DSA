@@ -446,6 +446,12 @@ Table of Contents
 
 #### Dynamic Programming & Memorization
   * Dynamic Programming is mostly just a matter of taking a **recursive algorithm** and **finding the overlapping subproblems**. You then cache those results for future recursive calls.
+  * This particular problem and most of others can be approached using the following sequence:
+    * Find recursive relation
+    * Recursive (top-down)
+    * Recursive + memo (top-down)
+    * Iterative + memo (bottom-up)
+    * Iterative + N variables (bottom-up)
   * Example:
     * resursive: O(n^2), O(n)
       ```python
@@ -466,7 +472,6 @@ Table of Contents
             a, b = b, a + b
 
           return b
-
       ```
     * **Top-Down** Dynamic Programming (or Memoization): O(n), O(n)
       ```python
