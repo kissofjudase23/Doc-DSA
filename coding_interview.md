@@ -1029,10 +1029,9 @@ Table of Content
               1. one string
               2. one character with multiple strings
               """
-
               # vertical scanning
               # prefix is the maximum length of the common prefix
-              res = prefix = strs[0]
+              common_prefix = prefix = strs[0]
               leave = False
 
               # for each character in the prefix
@@ -1040,16 +1039,18 @@ Table of Content
                   # compare with character in the same idx with other strings
                   for i in range(1, len(strs)):
                       compare_str = strs[i]
-                      if idx == len(compare_str) or c != compare_str[idx]:
-                          # truncate the prefix here
-                          res = prefix[0:idx]
-                          leave = True
-                          break
+                      if idx < len(compare_str) and c == compare_str[idx]:
+                        continue
 
+                      common_prefix = prefix[0:idx]
+                      leave = True
+                      break
+
+                  # break outer loop
                   if leave:
                       break
 
-              return res
+              return common_prefix
              ```
      * 383: Ransom Note (E)
         * Approach1: Hash Table, Time:O(m+n), Space:O(m)
@@ -1134,38 +1135,59 @@ Table of Content
 ### Array
   * **Check Duplicate**
     * 217: Contains Duplicate (E)
-      * Use hash Table
+      * Approach1: Use hash Table
+        * Python Solution
+          ```python
+          def containsDuplicate(self, nums: List[int]) -> bool:
+            d = dict()
+            res = False
+
+            for num in nums:
+                if num not in d:
+                    d[num] = True
+                else:
+                    res = True
+                    break
+
+            return res
+          ```
     * 219: Contains Duplicate II (E)
       * Find out whether there are two distinct indices i and j in the array such that nums[i] = nums[j] and the absolute difference between i and j is at most k.
-      * Use hash Table to store index.
-      * Python Solution
-      ```python
-      def containsNearbyDuplicate(self, nums: List[int], k: int) -> bool:
-        hash_table = dict()
-        for i, num in enumerate(nums):
+      * Approach1: Use hash Table to store index.
+        * Python Solution
+        ```python
+        def containsNearbyDuplicate(self, nums: List[int], k: int) -> bool:
+          if not nums:
+              return False
 
-            if num in hash_table and (i - hash_table[num]) <= k:
-                return True
+          d = dict()
+          res = False
 
-            hash_table[num] = i
+          for idx, num in enumerate(nums):
+              if num in d and idx - d[num] <= k:
+                  res = True
+                  break
 
-        return False
-      ```
+              d[num] = idx
+
+          return res
+        ```
   * **Remove Duplicate**
     * 027: Remove elements (E)
-      * Like partition step of quick sort (keep the border)
-      * Copy the wanted elements to the position of the current border
-      * Python Solution
-        ```python
-        def removeElement(self, nums: List[int], val: int) -> int:
-          border = 0
-          for num in nums:
-              if num != val:
-                  nums[border] = num
-                  border += 1
+      * Approach1:
+        * Like partition step of quick sort (keep the border)
+        * Copy the wanted elements to the position of the current border
+        * Python Solution
+          ```python
+          def removeElement(self, nums: List[int], val: int) -> int:
+            border = 0
+            for num in nums:
+                if num != val:
+                    nums[border] = num
+                    border += 1
 
-          return border
-        ```
+            return border
+          ```
     * 026: Remove **Duplicates** from **Sorted Array** (E)
       * Python Solution
         ```python
@@ -1178,51 +1200,99 @@ Table of Content
           return i + 1
         ```
     * 080: Remove **Duplicates** from **Sorted Array** II (M) *
-      * Python Solution
-      ```python
-      def removeDuplicates(self, nums: List[int]) -> int:
-        i = 0
-        for n in nums:
-            if i < 2 or n > nums[i-2]:
-                nums[i] = n
-                i += 1
-        return i
-      ```
+      * Approach1: Use cnt
+        * Python Solution:
+          ```python
+          def removeDuplicates(self, nums: List[int]) -> int:
+            if not nums:
+                return 0
+
+            max_duplicate = 2
+            i, cnt = 0, 1
+            for j in range(1, len(nums)):
+                if nums[i] == nums[j]:
+                    cnt += 1
+                    if cnt <= max_duplicate:
+                        i += 1
+                        nums[i] = nums[j]
+
+                else:
+                    i += 1
+                    nums[i] = nums[j]
+                    cnt = 1
+
+            return i + 1
+          ```
+      * Approach2: See backward
+        * Python Solution
+          ```python
+          def removeDuplicates(self, nums: List[int]) -> int:
+            i = 0
+            for n in nums:
+                if i < 2 or n > nums[i-2]:
+                    nums[i] = n
+                    i += 1
+            return i
+          ```
   * **Containers**
     * 011: Container With Most Water (M)
       * How to calculate the area?
         * min(left_border, right_border) * width
       * Approach1: brute force, Time: O(n^2), Space: O(1)
         * Calculating area for all height pairs.
-      * Approach2: 2 pointer2 approach, Time: O(n), Space: O(1)
+        * Python Solution:
+        ```python
+        def maxArea(self, height: List[int]) -> int:
+          if not height:
+              return 0
+
+          max_area = 0
+          n = len(height)
+
+          # (0, 1), (0, 2), (0, 3)
+          # (1, 2), (1, 3)
+          # (2, 3)
+          for left in range(0, n-1):
+              for right in range(left+1, n):
+                  h = min(height[left], height[right])
+                  w = right - left
+                  area = h * w
+                  max_area = max(max_area, area)
+
+          return max_area
+        ```
+      * Approach2: greedy with 2 pointers, Time: O(n), Space: O(1)
           * Move the index with shorter height to find the bigger area.
           * Python Solution
             ```python
             def maxArea(self, height: List[int]) -> int:
-              start, end = 0, len(height)-1
+              if not height:
+                  return 0
+
               max_area = 0
+              left, right = 0, len(height)-1  # start from max width
 
-              while start < end:
-                  h = min(height[start], height[end])
-                  w = end - start
-                  cur_area = h*w
-                  max_area = max(max_area, cur_area)
+              while left < right:
+                  h = min(height[left], height[right])
+                  w = right - left
+                  area = h * w
+                  max_area = max(max_area, area)
 
-                  # move the smaller one
-                  if height[start] <= height[end]:
-                      start += 1
+                  # move the shorter border
+                  if height[left] <= height[right]:
+                      left += 1
                   else:
-                      end -= 1
+                      right -= 1
 
               return max_area
             ```
     * 042: Trapping Rain Water (H) *
       * Ref:
-        * [Solution](https://leetcode.com/problems/trapping-rain-water/solution/)
-      * **How to calculate the area?**
+        * https://leetcode.com/problems/trapping-rain-water/solution/
+      * How to calculate the area?
         * Sum water amount of **each bin** (width=1)
-          * Find left border
-          * Find right border
+          * 1. Find left border
+          * 2. Find right border
           * Water area in the ith bin would be:
             * **min(left_border, right_border) - height of ith bin**
       * Approach1: DP, Time: O(n), Space: O(n)
@@ -1234,50 +1304,50 @@ Table of Content
           * Python Solution
             ```python
             def trap(self, height: List[int]) -> int:
-              if not height:
-                  return 0
+              if not height or len(height) <= 2:
+                return 0
+
+              n = len(height)
+
+              left_max = [0] * n
+              right_max = [0] * n
+              left_max[0] = height[0]
+              right_max[n-1] = height[n-1]
+
+
+              for i in range(1, n):
+                  """
+                  left_max[i] should consider height[i]
+                  since if height[i] is the new border, the area of ith bin should be 0
+                  example:
+                  [2, 10, 5], for 1th bin, if we do not inlcude 10, the area would be negative.
+                  """
+                  left_max[i] = max(left_max[i-1], height[i])
+
+              for i in range(n-2, -1, -1):
+                  right_max[i] = max(right_max[i+1], height[i])
 
               area = 0
-              l = len(height)
-
-              left_max = [None] * l
-              right_max = [None] * l
-
-              left_max[0] = height[0]
-              right_max[l-1] = height[l-1]
-
-              # calculate left border array
-              for i in range(1, l):
-                  left_max[i] = max(height[i], left_max[i-1])
-
-              # calculate right border array
-              for i in range(l-2, -1, -1):
-                  right_max[i] = max(height[i], right_max[i+1])
-
-              # sum the area for each bin
-              # infact, area of bin[0] and bin[1] is 1
-              for l_max, r_max, h in zip(left_max, right_max, height):
-                  area += min(l_max, r_max) - h
+              for i in range(1, n-1):  # from 1 to n-2
+                area += min(left_max[i], right_max[i]) - height[i]
 
               return area
             ```
-      * Approach2: 2 pointers approach, Time: O(n), Space: O(1)
-          * [Concept]((https://leetcode.com/problems/trapping-rain-water/solution/))
+      * Approach2: greedy with 2 pointers, Time: O(n), Space: O(1)
+          * Concept
             * If the right border > left border, the area of ith bin is determined by the left border.
             * vice versa
             * So we fix the higher border, and move the lower border to calcualte the area
           * Python Solution
             ```python
             def trap(self, height: List[int]) -> int:
-              area = 0
               if not height:
-                  return area
+                  return 0
 
+              area = 0
               left, right = 0, len(height)-1
               max_left = max_right = 0
-
               while left < right:
-                  # determine the border
                   # area depends on left border
                   if height[left] <= height[right]:
                       if height[left] >= max_left:
@@ -1300,81 +1370,76 @@ Table of Content
             ```
   * **Jump Game**:
     * 055: Jump Game (M)
-      * [Solution](https://leetcode.com/problems/jump-game/solution/)
-      * Dynamic Programming
-        * We call a position in the array a **"good index" if starting at that position, we can reach the last index.** Otherwise, that index is called a "bad index".
-           ```python
-           class Status(object):
-              UNKNOWN = 1
-              GOOD = 2
-              BAD = 3
-           ```
-        * Top Down Approach, Time: O(n^2), Space: O(n)
-          * Python Solution
-            ```python
-            def canJump(self, nums: List[int]) -> bool:
-                length = len(nums)
-                memo = [Status.UNKNOWN] * length
-                memo[length-1] = Status.GOOD
+      * Ref:
+        * https://leetcode.com/problems/jump-game/solution/
+      * Approach1: DP, Recursive + memo (top-down), Time: O(n^2), Space: O(n)
+        * Python Solution
+          ```python
+          def canJump(self, nums: List[int]) -> bool:
+            def _can_jump_from(start):
+                # can not use True/False evaluation
+                if memo[start] is not None:
+                    return memo[start]
 
-                def _can_jump_from_position(nums: List[int], start: int):
+                memo[start] = False
+                max_jump_dst = min(start+nums[start], n-1)
 
-                    if memo[start] is not Status.UNKNOWN:
-                        return True if memo[start] is Status.GOOD else False
+                # from max_jump_dst to start + 1
+                for jump_dst in range(max_jump_dst, start, -1):
+                    if _can_jump_from(jump_dst):
+                        memo[start] = True
+                        break
 
-                    # max_jump = 0 would cause Status.BAD
-                    max_jump = min(start+nums[start], length-1)
+                return memo[start]
 
-                    # from max_jump to start + 1
-                    for jump in range(max_jump ,start, -1):
-                        if _can_jump_from_position(nums, start=jump):
-                            memo[start] = Status.GOOD
-                            return True
+            if not nums:
+                return False
 
-                    # failed
-                    memo[start] = Status.BAD
-                    return False
+            n = len(nums)
+            memo = [None] * n
+            memo[n-1] = True
 
-               return _can_jump_from_position(nums, start=0)
-            ```
-        * Buttom Up Approach, Time: O(n^2), Space: O(n)
-          * Python Solution
-            ```python
-            def canJump(self, nums: List[int]) -> bool:
-              length = len(nums)
-              memo = [Status.UNKNOWN] * length
-              memo[length-1] = Status.GOOD
+            return _can_jump_from(0)
+          ```
+      * Approach2: DP, Iterative + memo (botoom-up), Time: O(n^2), Space: O(n)
+        * Python Solution
+          ```python
+          def canJump(self, nums: List[int]) -> bool:
+            n = len(nums)
+            memo = [None] * n
+            memo[n-1] = True
 
-              # start from length-2 to 0
-              for start in range(length-2, -1, -1):
-                  max_jump = min(start+nums[start], length-1)
-                  # jump from max_jump to start
-                  for jump in range(max_jump, start, -1):
-                      # find the first good index
-                      if memo[jump] == Status.GOOD:
-                          memo[start] = Status.GOOD
-                          break
+            # from n-2 to 0
+            for start in range(n-2, -1, -1):
+                max_jump_dst = min(start+nums[start] ,n-1)
+                # from max_jump_dst to start+1
+                for jump_dst in range(max_jump_dst, start, -1):
+                    if memo[jump_dst]:
+                        memo[start] = True
+                        break
 
-              return memo[0] == Status.GOOD
-            ```
-      * Greedy, Time: O(n), Space: O(1)
+            return memo[0]
+          ```
+      * Approach2: Greedy, Time: O(n), Space: O(1)
         * **The main concept is to keep the left most good index**
           * If we can reach a GOOD index, then our position is a GOOD index as well. and this new GOOD index will be the new leftmost GOOD index.
         * Python Solution
           ```python
           def canJump(self, nums: List[int]) -> bool:
-            length = len(nums)
-            left_most_good_idx = length - 1
+            n = len(nums)
+            left_most_good_idx = n - 1
 
-            # from length-2 to 0
-            for start in range(length-2, -1, -1):
-              if start + nums[start] >= left_most_good_idx:
-                  left_most_good_idx = start
+            # from n-2 to 0
+            for start in range(n-2, -1, -1):
+                if start + nums[start] >= left_most_good_idx:
+                    left_most_good_idx = start
 
             return left_most_good_idx == 0
           ```
     * 045: Jump Game II (H) *
-      * [Greedy](https://leetcode.com/problems/jump-game-ii/discuss/18014/Concise-O(n)-one-loop-JAVA-solution-based-on-Greedy)
+      * Ref:
+        * https://leetcode.com/problems/jump-game-ii/discuss/18014/Concise-O(n)-one-loop-JAVA-solution-based-on-Greedy
+      * Approach1: Greedy
         * Find the minimum jump
         * Greedy
           * Time: O(n), Space: O(1)
@@ -1386,6 +1451,7 @@ Table of Content
             ```python
             def jump(self, nums: List[int]) -> int:
               jump_cnt = cur_border = cur_farthest = 0
+              # from 0 to n-2
               for cur in range(0, len(nums)-1):
                   cur_farthest = max(cur_farthest, cur+nums[cur])
                   # the boundary need to jump
@@ -1398,35 +1464,38 @@ Table of Content
             ```
   * **H-Index**
     * 274: H-Index (M)
-      * Use Hash Table, Time O(n), Space O(n)
+      * Approach1: Use Array to memo, Time O(n), Space O(n)
         * Concept
           * **The max index in the array would be len(array)**, that is we can restrict the number of the buckets.
-        * Use Hash table to accumulate the cnt of citations
+        * Use array to keep the cnt of citations
         * Python Solution
             ```python
             def hIndex(self, citations: List[int]) -> int:
+              max_cita = len(citations)
+              citas_acc = [0] * (max_cita+1)
 
-                max_cita = len(citations)
-                d = collections.defaultdict(int)
+              for cita in citations:
+                citas_acc[min(cita, max_cita)] += 1
 
-                for val in citations:
-                  d[min(max_cita, val)] += 1
-
-                h_index = cita_cnt = 0
-                # from max_cita to 1
-                for cita in range(max_cita, 0, -1):
-                  cita_cnt += d[cita]
+              res = 0
+              cita_cnt = 0
+              # from n to 0
+              for cita in range(max_cita, -1, -1):
+                  cita_cnt += citas_acc[cita]
                   if cita_cnt >= cita:
-                    h_index = cita
-                    break
-
-                return h_index
+                      res = cita
+                      break
+              return res
             ```
-      * Use Sort, Time: O(nlog(n)), Space: O(1)
+      * Approach2: Use Sort, Time: O(nlog(n)), Space: O(1)
         * Concept:
-          * Refer 275: H-Index II
+          * step1:
+            * Sorting costs O(nlog(n))
+          * step2:
+            * Find the H-Index costs O(log(n))
+            * please 275: H-Index II
     * 275: H-Index II (M)
-      * Linear search: O(n)
+      * Approach1: Linear search: O(n)
         * Concept
           * Sort the citations array in **ascending order** (draw it).
           * c = citations[i]. We would know that the number of articles whose citation number is higher than c would be n - i - 1.
@@ -1434,22 +1503,21 @@ Table of Content
         * Python Solution
           ```python
           def hIndex(self, citations: List[int]) -> int:
-            h_index = 0
             max_cita = len(citations)
-
+            h_idx = 0
             for idx, cita in enumerate(citations):
-              if cita >= (max_cita-idx):
-                  h_index = (max_cita-idx)
-                break
+                if cita >= (max_cita - idx):
+                    h_idx = max_cita - idx
+                    break
 
-            return 0
+            return h_idx
           ```
-      * **Binary Search**: O(log(n))
+      * Approach2: **Binary Search**: O(log(n))
         * Ref:
           * https://leetcode.com/problems/h-index-ii/discuss/71063/Standard-binary-search
           * https://leetcode.com/problems/h-index-ii/solution/
-        * About final condition max_cita - (right + 1) = max_cita - left
-          * The algorithm will jump out op while loop. We know for binary search, if it cannot find the target, **pointers left and right will be right besides the location which should be the target**.
+        * About final condition **max_cita - (right + 1)** = max_cita - left
+          * The algorithm will jump out of while loop. We know for binary search, if it cannot find the target, **pointers left and right will be right besides the location which should be the target**.
               ```text
                   left
                     v
@@ -1473,41 +1541,68 @@ Table of Content
                 if citations[mid] == (max_cita - mid):
                     return max_cita - mid
 
-                # search right section
+                # challenge fail, try to find lower h-index
                 elif citations[mid] < (max_cita - mid):
                     left = mid + 1
 
-                # search left section
+                # challenge success, try to find higher h-index
                 else:
                     right = mid - 1
 
-            #return max_cita - left
             return max_cita - (right+1)
           ```
   * **Best Time to Buy and Sell Stock**
-    * [General solution](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/discuss/108870/Most-consistent-ways-of-dealing-with-the-series-of-stock-problems)
-    * 121: Best Time to Buy and Sell Stock (E), Time:O(n), Space:O(1)
-      * Allow **1 transaction only**.
-      * For each round, keep the current minimum buy price and update best sell prcie.
-      * Python Solution:
+    * Ref:
+      * [General solution](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/discuss/108870/Most-consistent-ways-of-dealing-with-the-series-of-stock-problems)
+    * 121: Best Time to Buy and Sell Stock (E)
+      * You may complete **at most one transactions**.
+      * Approach1: Time:O(n), Space:O(1)
+        * For each round, keep the current minimum buy price and update best sell prcie.
+        * Python Solution:
+          ```python
+          def maxProfit(self, prices: List[int]) -> int:
+            if not prices:
+                return  0
+
+            max_profit = 0
+            min_price = prices[0]
+
+            for i in range(1, len(prices)):
+                profit = prices[i] - min_price
+                max_profit = max(profit, max_profit)
+                min_price = min(prices[i], min_price)
+
+            return max_profit
+          ```
+    * 122: Best Time to Buy and Sell Stock II (E)
+      * Multiple transcations allowed.
+      * Approach1: Peak Valley , Time:O(n), Space:O(1)
+        * Python Solution:
         ```python
         def maxProfit(self, prices: List[int]) -> int:
-          if not prices:
-              return  0
+          """
+          Peak Valley Approach
+          """
+          n = len(prices)
+          valley = 0
+          profit = 0
 
-          max_profit = 0
-          min_price = prices[0]
+          while valley < n:
+              while valley + 1 < n and prices[valley+1] <= prices[valley]:
+                  valley += 1
 
-          for i in range(1, len(prices)):
-              profit = prices[i] - min_price
-              max_profit = max(profit, max_profit)
-              min_price = min(prices[i], min_price)
+              peak = valley + 1
+              while peak + 1 < n and prices[peak+1] >= prices[peak]:
+                  peak += 1
 
-          return max_profit
+              if valley < peak < n:
+                  profit += (prices[peak]-prices[valley])
+
+              valley = peak + 1
+
+          return profit
         ```
-    * 122: Best Time to Buy and Sell Stock II (E), Time:O(n), Space:O(1)
-      * Multiple transcation allowed.
-      * [**Peak Valley** Approach](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/solution/)
+      * Approach2: Peak Valley II Time:O(n), Space:O(1)
         * Python Solution1
            ```python
            valley = peak = prices[0];
@@ -1531,10 +1626,10 @@ Table of Content
               if prices[i] > price[i-1]:
                   max_profit += prices[i] - price[i-1]
           ```
-    * 714: Best Time to Buy and Sell Stock with Transaction Fee (M), Time:O(n), Space:O(1)
+    * 714: Best Time to Buy and Sell **Stock with Transaction Fee** (M), Time:O(n), Space:O(1)
       * Ref:
         * [solution](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/solution/)
-      * Dynamic Programming
+      * Approach1: bottom up DP, Time:O(n), Space:O(1)
         * Cash(i):
           * The cash in hand, if you are **not holding the stock** at the end of day(i):
             * case1:
@@ -1555,178 +1650,257 @@ Table of Content
               *  **cash[i]** - price[i]
             * hold[i]
               * max(case1, case2, case3) = max(hold[i-1], **cash[i]-price[i]**)
-      * Python Solution
-          ```python
-          def max_profit(self, prices: List[int], fee: int) -> int:
-            cash = 0
-            hold = -prices[0]
-
-            for i in range(1, len(prices)):
-                cash = max(cash, hold+prices[i]-fee)
-                hold = max(hold, cash-prices[i])
-
-            return cash
-          ```
+        * Python Solution
+            ```python
+            def max_profit(self, prices: List[int], fee: int) -> int:
+              cash = 0
+              hold = -prices[0]
+              for i in range(1, len(prices)):
+                  """
+                  cash[i] = max(case1, case2)
+                  case1: cash[i-1]
+                  case2:  hold[i-1] + prices[i] - fee
+                  """
+                  cash = max(cash, hold+prices[i]-fee)
+                  """
+                  hold[i] = max(case1, case4)
+                  case1: hold[i-1]
+                  case2: case[i-1] - prices[i-1]
+                  case3: hold[i-1] + prices[i-1] - fee -prices[i-1]
+                  case4: cash[i] - prices[i-1]  (come from case2 and case3)
+                  """
+                  hold = max(hold, cash-prices[i])
+              return cash
+            ```
+    * 123: Best Time to Buy and Sell Stock III (H)
+      * You may complete **at most two transactions**.
+    * 188: Best Time to Buy and Sell Stock IV (H)
+      * You may complete **at most k transactions**.
   * **Shortest Word Distance**
     * 243: Shortest Word Distance (E) *
-       *  Calculate the distance and update the shortest distance in each round.
+       * Approach1: Time:O(n), Space:O(1)
+         * Calculate the distance and update the shortest distance in each round.
+           * Draw some cases1:
+             * 1 2 1* -> will cover two cases 1-2 and 2-1*
+             * 1 2 2* 1* -> still can cover
+               * 1-2* will not cover, but it is bigger than 1-2
+               * 2-1* is the same, it is bigger than 2*-1*
+           * Python Solution
+              ```python
+              def shortestDistance(self, words: List[str], word1: str, word2: str) -> int:
+                shortest_dist = len(words) # beyond upper bound
+                idx1 = idx2 = -1
+                found = False
+
+                for idx, w in enumerate(words):
+                    if w == word1:
+                        idx1 = idx
+
+                    elif w == word2:
+                        idx2 = idx
+
+                    if idx1 == -1 or idx2 == -1:
+                        continue
+
+                    shortest_dist = min(shortest_dist, abs(idx1-idx2))
+                    found = True
+
+                return shortest_dist if found else -1
+              ```
     * 245: Shortest Word Distance III (M) *
       * Allow **duplicated words**.
-      * Keep the shortest distance in each round.
-      * Python Solution
-          ```python
-          index1 = index2 = -1
-          same = True if word1 == word2 else False
+      * Approach1:
+        * The same concept with 243, but need to handle duplicated words
+        * Python Solution
+            ```python
+            def shortestWordDistance(self, words: List[str], word1: str, word2: str) -> int:
+              shortest_dist = len(words)
+              idx1 = idx2 = -1
+              found = False
+              same = True if word1 == word2 else False
 
-          for index, word in enumerate(words):
+              for idx, w in enumerate(words):
+                  if w == word1:
+                      if same:
+                          idx1, idx2 = idx2, idx
+                      else:
+                          idx1 = idx
+                  elif w == word2:
+                      idx2 = idx
 
-            if word == word1:
-                if same:
-                    index1, index2 = index2, index
-                else:
-                    index1 = index
+                  if idx1 == -1 or idx2 == -1:
+                      continue
 
-            elif word == word2:
-                index2 = index
+                  shortest_dist = min(shortest_dist, abs(idx1-idx2))
+                  found = True
 
-            if index1 != -1 and index2 != -1:
-                dist = min(dist, abs(index1-index2))
-          ```
+              return shortest_dist if found else -1
+            ```
     * 244: Shortest Word Distance II (M) **
        * **Init once** and **search for multiple time**.
-       * Using **Preprocessed Sorted Indices** and two pointers to traverse
-         * Space: O(n)
-           * For or the dictionary that we prepare in the constructor.
+       * Approach1: Time:O(K + L), Space:O(n)
+         * Using **Preprocessed Sorted Indices** and two pointers to traverse
+           * Space: O(n)
+             * For or the dictionary that we prepare in the constructor.
              * The keys represent all the unique words in the input and the values represent all of the indices from 0 ... N0...N.
          * Time Complexity:
            * Init step:
              * O(n), where n is the number of words.
            * Find the shortest distance :
-             * O(K + L)), where K and L represent the number of occurrences of the two words.
+             * O(K + L), where K and L represent the number of occurrences of the two words.
          * Python Solution
             ```python
-            i = j = 0
-            while i < len(list1) and j < len(list2):
-              index1, index2 = list1[i], list2[j]
-              # move the smaller one
-              if index1 < index2:
-                  dist = min(dist, index2-index1)
-                  i +=1
-              else: # index2 < index1
-                  dist = min(dist, index1-index2)
-                  j += 1
+            class WordDistance:
+              def __init__(self, words: List[str]):
+                  self.word_d = collections.defaultdict(list)
+                  for idx, w in enumerate(words):
+                      self.word_d[w].append(idx)
+
+              def shortest(self, word1: str, word2: str) -> int:
+                  idx_list_1 = self.word_d[word1]
+                  idx_list_2 = self.word_d[word2]
+                  idx1 = idx2 = 0
+                  shortest_dist = float('inf')
+
+                  while idx1 < len(idx_list_1) and idx2 < len(idx_list_2):
+                      w_idx1 = idx_list_1[idx1]
+                      w_idx2 = idx_list_2[idx2]
+                      shortest_dist = min(shortest_dist, abs(w_idx1-w_idx2))
+                      # move the smaller one
+                      if w_idx1 <= w_idx2:
+                          idx1 += 1
+                      else:
+                          idx2 += 1
+
+                  return shortest_dist
             ```
   * **Interval**
     * 252: Meeting Rooms (E)
       * Check if one person **can attend all meetings**.
-      * How to check overlaps
-        * Python Solution
-          ```python
-              min(interval1.end, interval2.end) > max(interval1.start, interval2.start)
-          ```
-      * Brute Force, Time:O(n^2)
-      * Check after sorting, Time:O(nlog(n))
+      * How to check overlaps ?
+        * min(interval1.end, interval2.end) > max(interval1.start, interval2.start)
+      * Approach1: Brute Force, Time:O(n^2)
+          * Python Solution
+            ```python
+            def canAttendMeetings(self, intervals: List[List[int]]) -> bool:
+              start, end = 0, 1
+              can_attend = True
+
+              # (0, 1), (0, 2), (0, 3)
+              #         (1, 2), (1, 3)
+              #                 (2, 3)
+              for i in range(0, len(intervals)-1):
+                  for j in range(i+1, len(intervals)):
+                      if min(intervals[i][end], intervals[j][end]) > max(intervals[i][start], intervals[j][start]):
+                          can_attend = False
+                          break
+
+              return can_attend
+            ```
+      * Approach2: Check after sorting, Time:O(nlog(n))
         * For **sorted intervals**
           * Check the overlap between interval[i] and interval[i+1] would be
-            * ```python
-              interval[i].end > interval[i+1],start
-              ```
             * If there is an overlap between interval 3 and interval1, then there is an overlap between interval2 and interval1 as well, since interval2.start < interval3.start.
         * Algo:
           * Sort by start time of intervals
           * Check if interval[i] and intervalp[i+1] have overlap.
-      * Python Solution
-        ```python
-        start, end = 0, 1
-
-        intervals.sort(key=lambda interval: interval[start])
-
-        for i in range(1, len(intervals)):
-            if intervals[i][start] < intervals[i-1][end]:
-              return False
-        return True
-        ```
-    * 253: Meeting Rooms II (M)
-      * Find the minimum requirement of the meeting rooms.
-      * Brute Force, Time: O(n^2), Space: O(1)
-      * Check after sorting, Time: O(nlog(n)), Space: O(n)
-        * [Use Min Heap to store end time of intervals]((https://leetcode.com/problems/meeting-rooms-ii/solution/))
-        * Sort the intervals by start time
-        * For every meeting room check if the minimum element of the heap is free or not.
-          * If the room is free, then we extract the topmost element and add it back with the ending time of the current meeting we are processing.
-          * If not, then we allocate a new room and add it to the heap.
         * Python Solution
           ```python
-          def minMeetingRooms(self, intervals: List[List[int]]) -> int:
-            if not intervals:
-                return 0
-
+          def canAttendMeetings(self, intervals: List[List[int]]) -> bool:
             start, end = 0, 1
+            can_attend = True
             intervals.sort(key=lambda interval: interval[start])
-            heap = list()
-            heapq.heappush(heap, intervals[0][end])
 
             for i in range(1, len(intervals)):
-                # heap[0] is current minimum end time
-                if heap[0] > intervals[i][start]:
-                    heapq.heappush(heap, intervals[i][end])
-                else:
-                    heapq.heapreplace(heap, intervals[i][end])
+                if intervals[i-1][end] > intervals[i][start]:
+                    can_attend = False
 
-            return len(heap)
+            return can_attend
           ```
+    * 253: Meeting Rooms II (M)
+      * Find the minimum requirement of the meeting rooms.
+      * Approach1: Brute Force, Time: O(n^2), Space: O(1)
+      * Approach2: Time: O(nlog(n)), Space: O(n)
+        * Check after sorting
+        * Algo
+          * Sort the intervals by start time
+          * For every meeting room check if the minimum element of the heap is free or not.
+            * If the room is free, then we extract the topmost element and add it back with the ending time of the current meeting we are processing.
+            * If not, then we allocate a new room and add it to the heap.
+        * Python Solution
+            ```python
+            def minMeetingRooms(self, intervals: List[List[int]]) -> int:
+              if not intervals:
+                  return 0
+
+              start, end = 0, 1
+              intervals.sort(key=lambda interval: interval[start])
+              heap = [intervals[0][end]]
+
+              for i in range(1, len(intervals)):
+                  # heap[0] is current minimum end time
+                  # need a new room
+                  if heap[0] > intervals[i][start]:
+                      heapq.heappush(heap, intervals[i][end])
+                  # reuse the room
+                  else:
+                      heapq.heapreplace(heap, intervals[i][end])
+
+              return len(heap)
+            ```
     * 056: Merge Intervals (M)
-      * Time: O(nlogn), Space: O(1)
+      * Approach1: Sorting and check, Time: O(nlogn), Space: O(n)
         * Sort the intervals by start time,
         * Update the output if there exists interval overlap.
         * Python Solution
           ```python
-          start, end = 0, 1
-          intervals.sort(key=lambda interval: interval[start])
-          output = list()
-          output.append(intervals[0].copy())
+          def merge(self, intervals: List[List[int]]) -> List[List[int]]:
+            if not intervals:
+                return []
 
-          for i in range(1, len(intervals)):
-              # merge
-              cur = intervals[i]
-              last = output[-1]
-              # the last[end] implies the current last end time!
-              if last[end] >= cur[start]:
-                  last[end] = max(last[end], cur[end])
-              else:
-                  output.append(cur.copy())
+            start, end = 0, 1
+            intervals.sort(key=lambda interval: interval[start])
+            output = [intervals[0][:]]
 
-          return output
+            for i in range(1, len(intervals)):
+                last = output[-1]
+                cur = intervals[i]
+
+                # merge
+                if last[end] >= cur[start]:
+                      last[end] = max(last[end], cur[end])
+                else:
+                    # copy
+                    output.append(cur[:])
+
+            return output
           ```
     * 057: Insert Interval (H)
     * 352: Data Stream as Disjoint Intervals (H)
-  * **Counter**
+  * **Subarray**
     * 053: Maximum Subarray (E)
-      * [**Kadane's Algorithm**](https://leetcode.com/problems/maximum-subarray/discuss/20211/Accepted-O(n)-solution-in-java) *
-       * Python Solution
-          ```python
-          def max_sub_array(self, nums: List[int]) -> int:
-              max_sum = max_sum_so_far = nums[0]
+       * Approach1: Kadane's Algorithm, O(n)
+         * Python Solution
+            ```python
+            def max_sub_array(self, nums: List[int]) -> int:
+                max_sum = max_sum_so_far = nums[0]
 
-              for i in range(1, len(nums)):
-                  max_sum_so_far = max(nums[i], max_sum_so_far+nums[i])
-                  max_sum = max(max_sum, max_sum_so_far)
+                for i in range(1, len(nums)):
+                    max_sum_so_far = max(nums[i], max_sum_so_far+nums[i])
+                    max_sum = max(max_sum, max_sum_so_far)
 
-              return max_sum
+                return max_sum
           ```
     * 152: Maximum **Product** Subarray (M)
-      * Time: O(n), Space: O(1)
-        * The concept is just like 53: maximum subarray
+      * Approach1: Kadane's Algorithm like algo, Time: O(n), Space: O(1)
+        * The concept is just like 53: maximum subarray, but need to notice negative value in the array.
         * Python Solution
           ```python
           def maxProduct(self, nums: List[int]) -> int:
-
             g_max = cur_min = cur_max = nums[0]
-
             for i in range(1, len(nums)):
-                # multiplied by a negative makes big number smaller,
-                # small number bigger so we redefine the extremums
-                # by swapping them
+                # we redefine the extremums by swapping them
+                # when multiplied by a negative
                 if nums[i] < 0:
                     cur_min, cur_max = cur_max, cur_min
 
@@ -1739,50 +1913,63 @@ Table of Content
           ```
     * 325: Maximum Size Subarray Sum **Equals k** (M)
       * Find the maximum length of a subarray that sums to k
-      * Time: O(n), Space: O(n)
+      * Approach1: Brute force, O(n^2)m, Space: O(1)
+        * List all pairs of acc and keep the max
+        * Python Solution
+          ```python
+          def subarraySum(self, nums: List[int], k: int) -> int:
+            max_len = 0
+            for start in range(0, len(nums)):
+              acc = 0 # reuse the acc
+              for end in range(start, len(nums)):
+                acc += nums[s]
+                if acc == k:
+                  max_len = max(end-start, max_len)
+            return max_len
+          ```
+      * Approach2: Hash Table, Time: O(n), Space: O(n)
         * [Concept](https://leetcode.com/problems/maximum-size-subarray-sum-equals-k/discuss/77784/O(n)-super-clean-9-line-Java-solution-with-HashMap)
           * Use hash table
             * key: accumulation value
             * val: index
+        * Use hash table to keep acc value and the index.
         * Python Solution
           ```python
           def maxSubArrayLen(self, nums: List[int], k: int) -> int:
-            max_len = 0
-            acc = 0
-            d = dict()
-            d[0] = -1 # init value for acc == k
+            acc = max_len = 0
+            # key:   accumulate value
+            # value: index of the accumulate value
+            d = {0: -1}
 
-            for idx, val in enumerate(nums):
-                acc += val
+            for idx, n in enumerate(nums):
+                acc += n
+                target_acc = acc - k  # target_acc + k = acc
+                if target_acc in d:
+                    max_len = max(max_len, idx-d[target_acc])
 
-                val_of_start_idx = acc - k
-                if val_of_start_idx in d:
-                    max_len = max(max_len, idx-d[val_of_start_idx])
-
+                # since we need the max diff, only update when there is not existing.
                 if acc not in d:
                     d[acc] = idx
 
             return max_len
           ```
     * 560: Subarray Sum **Equals K**, (M) ***
-      * [Solution](https://leetcode.com/problems/subarray-sum-equals-k/solution/)
-      * Time: O(n^2)m, Space: O(1)
+      * Approach1: brute force, O(n^2)m, Space: O(1)
+        * List all pairs of acc and keep the max
         * python solution
           ```python
           def subarraySum(self, nums: List[int], k: int) -> int:
             cnt = 0
             for start in range(0, len(nums)):
-              acc = 0
+              acc = 0 # reuse the acc
               for end in range(start, len(nums)):
                 acc += nums[s]
                 if acc == k:
                   cnt += 1
-
             return cnt
           ```
-      * Time: O(n), Space: O(n)
-        * Use hash table to keep acc value.
-        * Use incremental val to find the max size of subarray.
+      * Approach2: Use hash Table Time: O(n), Space: O(n)
+        * Use hash table to keep acc value and cnt
         * Python Solution
           ```python
           def subarraySum(self, nums: List[int], k: int) -> int:
@@ -1790,66 +1977,83 @@ Table of Content
             d = collections.defaultdict(int)
             d[0] += 1 # init value for acc == k
 
-            for idx, val in enumerate(nums):
-                acc += val
-                val_of_start_idx = acc - k
-                if val_of_start_idx in d:
-                    cnt += d[val_of_start_idx]
-                d[acc] += 1
+            for n in nums:
+              acc += n
+              target_acc = acc - k
 
+              if target_acc in d:
+                  cnt += d[target_acc]
+
+              d[acc] += 1
             return cnt
           ```
     * 238: **Product** of Array **Except Self** (M)
-      * Allow to use Division, Time:O(n)
+      * Approach1: Allow to use Division, Time:O(n)
         * We can simply take the product of all the elements in the given array and then, for each of the elements xx of the array, we can simply find product of array except self value by dividing the product by xx.
-        * Special cases
+        * Containing zero cases
           * exactly 1 zero
           * more than 1 zero
         * Python Solution,
           ```python
-          def product_except_self(self, nums: List[int]) -> List[int]:
-              zero_cnt = 0
-              products = 1
-              output = [0] * len(nums)
+          def productExceptSelf(self, nums: List[int]) -> List[int]:
+            product = 1
+            zero_idx = zero_cnt = 0
+            output = [0] * len(nums)
 
-              for i, num in enumerate(nums):
-                  if num != 0:
-                      products *= num
-                  else:
-                      zero_idx = i
-                      zero_cnt += 1
+            for idx, n in enumerate(nums):
+                if n == 0:
+                    zero_cnt += 1
+                    zero_idx = idx
+                else:
+                    product *= n
 
-              if zero_cnt > 1:
-                  pass
-              elif zero_cnt == 1:
-                  output[zero_idx] = products
-              else:
-                  for i in range(0, len(nums)):
-                      output[i] = int(products/nums[i])
-
-              return output
+            if zero_cnt == 1:
+              output[zero_idx] = product
+            elif zero_cnt == 0:
+              for i in range(len(output)):
+                output[i] = product//nums[i]
+            return output
             ```
-      * Not Allow to use Division:
-        * [Concept](https://leetcode.com/problems/product-of-array-except-self/solution/)
-          * **For every given index i, we will make use of the product of all the numbers to the left of it and multiply it by the product of all the numbers to the right**=.
+      * Approach2: Not Allow to use Division1: Time:O(n), Space:O(n)
+        * **For every given index i, we will make use of the product of all the numbers to the left of it and multiply it by the product of all the numbers to the right**.
+        * Python Solution:
+        ```python
+        def productExceptSelf(self, nums: List[int]) -> List[int]:
+          n = len(nums)
+          output = [0] * n
+          left_p = [1] * n
+          right_p = [1] * n
+
+          # 1 to n-1
+          for i in range(1, n):
+              left_p[i] = left_p[i-1] * nums[i-1]
+
+          # n-2 to 0
+          for i in range(n-2, -1, -1):
+              right_p[i] = right_p[i+1] * nums[i+1]
+
+          for i in range(0, n):
+              output[i] = left_p[i] * right_p[i]
+
+          return output
+        ```
+      * Approach3: Not Allow to use Division2: Time:O(n), Space:O(n)
+          * We can use a variable to replace right_product array
           * Python Solution:
             ```python
-            def product_except_self(self, nums: List[int]) -> List[int]:
+            def productExceptSelf(self, nums: List[int]) -> List[int]:
+              n = len(nums)
+              output = [0] * n
+              left_p = [1] * n
 
-              output = [0] * len(nums)
-              output[0] = 1
+              # 1 to n-1
+              for i in range(1, n):
+                  left_p[i] = left_p[i-1] * nums[i-1]
 
-              # left array, for nums[a,b,c,d]
-              # left would be [1, a, a*b, a*b*c]
-              for i in range(1, len(output)):
-                  output[i] = output[i-1] * nums[i-1]
-
-              # right would be [b*c*d, c*d, d, 1]
-              # use r to keep the right val
-              r = 1
-              for i in range(len(output)-1, -1, -1):
-                  output[i] = output[i] * r
-                  r *= nums[i]
+              right = 1
+              for i in range(n-1, -1, -1):
+                  output[i] = left_p[i] * right
+                  right *= nums[i]
 
               return output
             ```
@@ -1859,96 +2063,89 @@ Table of Content
           * [0,1,2,4,5,7]
         * Output:
           * ["0->2","4->5","7"]
+      * Approach1:
+        * Python Solution
+          ```python
+          def summaryRanges(self, nums: List[int]) -> List[str]:
+            n = len(nums)
+            output = list()
+            start = 0
 
-      * Python Solution
-      ```python
-      def summaryRanges(self, nums: List[int]) -> List[str]:
-        output = list()
+            while start < n:
+                end = start
+                while end + 1 < n and nums[end]+1 == nums[end+1]:
+                    end += 1
 
-        if not nums:
+                if end == start:
+                    output.append(str(nums[start]))
+                else:
+                    output.append(f'{nums[start]}->{nums[end]}')
+
+                start = end + 1
+
             return output
-
-        cur_start = cur_end = 0
-        while cur_start < len(nums):
-            # find the proper position of the end pointer
-            while (cur_end + 1) < len(nums) and nums[cur_end] + 1 == nums[cur_end + 1]:
-                cur_end += 1
-
-            # format the result
-            if cur_start == cur_end:
-                output.append(str(nums[cur_start]))
-            else:
-                output.append(f'{nums[cur_start]}->{nums[cur_end]}')
-
-            # prepare for next range
-            cur_start = cur_end = cur_end + 1
-
-        return output
-      ```
+          ```
     * 163: **Missing Ranges** (M)
       * Example:
         * Input: nums = [0, 1, 3, 50, 75], lower = 0 and upper = 99
         * Output: ["2", "4->49", "51->74", "76->99"]
-      * Need to know how to handle the boundary properly.
-      * Python Solution
-      ```python
+      * Approach1:
+        * Need to know how to handle the boundary properly.
+        * Python Solution
+        ```python
+          @staticmethod
           def format_result(left_boundary, right_boundary, output):
-              diff = right_boundary - left_boundary
-              # no missing
-              if diff < 2:
-                  return
-              # missing one
-              elif diff == 2:
-                  output.append(str(left_boundary+1))
-              # missining more than one
-              else: # diff > 2
-                  output.append(f"{left_boundary+1}->{right_boundary-1}")
+            diff = right_boundary - left_boundary
+            if diff == 2:
+                output.append(str(left_boundary+1))
+            elif diff > 2:
+                output.append(f"{left_boundary+1}->{right_boundary-1}")
 
           def findMissingRanges(self, nums: List[int], lower: int, upper: int) -> List[str]:
-
+              output = []
               left_boundary = lower - 1
-
-              output = list()
-
-              for right_boundary in nums:
-                  format_result(left_boundary, right_boundary, output)
+              for n in nums:
+                  right_boundary = n
+                  self.format_result(left_boundary, right_boundary, output)
                   left_boundary = right_boundary
 
-              # final
               right_boundary = upper + 1
-              format_result(left_boundary, right_boundary, output)
-
+              self.format_result(left_boundary, right_boundary, output)
               return output
-      ```
+          ```
     * 239: Sliding Window Maximum (H)
     * 295: Find Median from Data Stream (H)
   * **Reorder** and **Sort**
     * 189: Rotate Array (E)
-      * Space: **O(1)**
+      * Approach1: Space: **O(1)**
         * Use **three reverse** operations can solve this problem.
         * Python Solution
           ```python
+          def reverse(nums: List[int], start, end) -> None:
+            while start < end:
+              nums[start], nums[end] = nums[end], nums[start]
+              start +=1
+              end -=1
+
           def rotate(self, nums: List[int], k: int) -> None:
-          """
-          Do not return anything, modify nums in-place instead.
-          """
-          if not nums or not k:
-              return
+            """
+            Do not return anything, modify nums in-place instead.
+            """
+            if not nums or not k:
+                return
 
-          length = len(nums)
+            n = len(nums)
+            k = k % n
+            if k == 0:
+                return
 
-          k = k % length
-
-          if k == 0:
-              return
-
-          reverse(nums, 0, length-1)
-          reverse(nums, 0, k-1)
-          reverse(nums, k, length-1)
+            reverse(nums, 0, n-1)
+            reverse(nums, 0, k-1)
+            reverse(nums, k, n-1)
           ```
     * 088: Merge Sorted Array (E)
       * You may **assume that nums1 has enough space** (size that is greater or equal to m + n) to hold additional elements from nums2.
-      * Space O(1):
+      * Approach1: Space O(1):
         * Fill the arrary **from the end to the start**
         * Python Solution:
         ```python
@@ -1975,35 +2172,54 @@ Table of Content
               merge_runner -=1
         ```
     * 283: Move Zeroes (E)
-      * Like the partition step of quick sort
-        * **keep the border pointing to next available position.**
-        * Python Solution
-        ```python
-        def moveZeroes(self, nums: List[int]) -> None:
-          """
-          Do not return anything, modify nums in-place instead.
-          """
-          if len(nums) <= 1:
-              return
+      * **move all 0's to the end** of it while maintaining the relative order of the non-zero elements.
+      * Approach1
+        * Like the partition step of quick sort
+          * **keep the border pointing to next available position.**
+          * Python Solution
+          ```python
+          def moveZeroes(self, nums: List[int]) -> None:
+            """
+            Do not return anything, modify nums in-place instead.
+            """
+            if len(nums) <= 1:
+                return
 
-          border = 0
-          for i in range(0, len(nums)):
-              if nums[i] == 0:
-                  continue
-              nums[border], nums[i] = nums[i], nums[border]
-              border += 1
-         ```
+            border = 0
+            for i in range(0, len(nums)):
+                if nums[i] == 0:
+                    continue
+                nums[border], nums[i] = nums[i], nums[border]
+                border += 1
+           ```
     * 280: Wiggle Sort (M) *
       * Definition
         * **nums[0] <= nums[1] >= nums[2] <= nums[3]...**
-      * O(log(n))
+      * Approach1: sorting, O(log(n))
         * Sort and then pair swapping
-      * O(n)
+        * Python Solution
+          ```python
+          def wiggleSort(self, nums: List[int]) -> None:
+            """
+            Do not return anything, modify nums in-place instead.
+            nums[0] <= nums[1] >= nums[2] <= nums[3]
+            """
+            if len(nums) <= 1:
+                return
+
+            nums.sort()
+
+            # 1, 3, 5 .. n-2
+            for i in range(1, len(nums)-1, 2):
+                if nums[i] < nums[i+1]:
+                    nums[i], nums[i+1] = nums[i+1], nums[i]
+          ```
+      * Approach2: greedy, O(n)
         * Greedy from left to right
+        * Python Solution
           ```python
           def wiggleSort(self, nums: List[int]) -> None:
               less = True
-
               for i in range(len(nums)-1):
                 if less:
                   if nums[i] > nums[i+1]:
@@ -2012,11 +2228,11 @@ Table of Content
                   if nums[i] < nums[i+1]:
                     nums[i], nums[i+1] = nums[i+1], nums[i]
 
-              less = not less
+                less = not less
           ```
     * 075: Sort Colors (M)
-      * quick sort, time:O(nlog(n)), space:O(log(n))
-      * **Counting sort**, time:O(n+k), space:O(k)
+      * Approach1: Quick sort, Time:O(nlog(n)), Space:O(log(n))
+      * Approach2: **Counting sort**, Time:O(n+k), Space:O(k)
         * Python Solution:
         ```python
         def sortColors(self, nums: List[int]) -> None:
@@ -2026,6 +2242,7 @@ Table of Content
           if not nums:
               return
 
+          # 3 colors only
           color_num = 3
           cnt_array = [0] * color_num
 
@@ -2038,153 +2255,169 @@ Table of Content
                   nums[p] = color
                   p += 1
         ```
-      * **Dutch National Flag Problem**, time:O(n), O(1)
+      * Approach3: **Dutch National Flag Problem**, Time:O(n), Space:O(1)
         * Like 2 boundary quick sort
           * p0: boundary for 0
           * p2: boundary for 2
-          * p1: runner
-
+          * cur: runner
         * Python Solution
           ```python
           def sortColors(self, nums: List[int]) -> None:
-          """
-          Do not return anything, modify nums in-place instead.
-          """
-          if not nums:
-              return
+            """
+            Do not return anything, modify nums in-place instead.
+            """
+            if not nums:
+                return
 
-          p0 = p1= 0
-          p2 = len(nums) - 1
+            cur = p0 = 0
+            p2 = len(nums)-1
 
-          while p1 <= p2:
-              if nums[p1] == 2:
-                  nums[p1], nums[p2] = nums[p2], nums[p1]
-                  p2 -= 1
-              elif nums[p1] == 0:
-                  nums[p1], nums[p0] = nums[p0], nums[p1]
-                  p0 += 1
-                  p1 += 1 # p0 only forwards, p1 does not need to check again.
-              else:  # nums[p1] == 1
-                  p1 += 1
+            while cur <= p2:
+                if nums[cur] == 2:
+                    nums[cur], nums[p2] = nums[p2], nums[cur]
+                    p2 -= 1
+                elif nums[cur] == 0:
+                    nums[cur], nums[p0] = nums[p0], nums[cur]
+                    p0 += 1
+                    cur += 1  #p0 only forwards 1, p1 does not need to check again.
+                else:  # nums[cur] == 1
+                    cur += 1
           ```
   * Other:
-    * 277: [Find the Celebrity](https://pandaforme.github.io/2016/12/09/Celebrity-Problem/) (M) *
-      1. Find the **celebrity candidate**
-      2. Check if the candidate is the celebrity
-         * Check the people before the celebrity candidate:
-            * The celebrity does not know them but they know the celebrity.
-         * Check the people after the celebrity candidate:
-           * They should know the celebrity
-       * Python Solution
-          ````python
-          # Return True if a knows b
-          def knows(a,  b)
+    * 277: Find the Celebrity (M)
+      * Ref:
+        * https://pandaforme.github.io/2016/12/09/Celebrity-Problem/
+      * Approach1:
+        1. Find the **celebrity candidate**
+        2. Check if the candidate is the celebrity
+           * Check the people before the celebrity candidate:
+              * The celebrity does not know them but they know the celebrity.
+           * Check the people after the celebrity candidate:
+             * They should know the celebrity
+         * Python Solution
+            ````python
+            # Return True if a knows b
+            def knows(a,  b):
+              pass
 
-          def find_celebrity(self, n):
-              """
-              :type n: int
-              :rtype: int
-              """
-              unknown = -1
-              celebrity = 0
-              # find the celebrity candidate
-              for p in range(1, n):
-                  if not knows(celebrity, p):
-                      continue
-                  celebrity = p
+            def find_celebrity(self, n):
+                """
+                :type n: int
+                :rtype: int
+                """
+                unknown = -1
+                celebrity = 0
+                # find the celebrity candidate
+                for p in range(1, n):
+                    if not knows(celebrity, p):
+                        continue
+                    celebrity = p
 
-              # check people in the left side
-              for p in range(celebrity):
-                  if knows(p, celebrity) and not knows(celebrity, p):
-                      continue
-                  return unknown
+                # check people in the left side
+                for p in range(celebrity):
+                    if knows(p, celebrity) and not knows(celebrity, p):
+                        continue
+                    return unknown
 
-              # # check people in the right side
-              for p in range(celebrity+1, n):
-                  if knows(p, celebrity):
-                      continue
-                  return unknown
+                # # check people in the right side
+                for p in range(celebrity+1, n):
+                    if knows(p, celebrity):
+                        continue
+                    return unknown
 
-              return celebrity
-          ````
-    * 041: First missing positive (H) *
-      * [concept](https://leetcode.com/problems/first-missing-positive/discuss/17073/Share-my-O(n)-time-O(1)-space-solution):
-          * The idea is **like you put k balls into k+1 bins**, there must be a bin empty, the empty bin can be viewed as the missing number.
-      * Time O(n), Space O(n)
+                return celebrity
+            ````
+    * 041: First missing positive (H)
+      * Ref
+        * https://leetcode.com/problems/first-missing-positive/discuss/17073/Share-my-O(n)-time-O(1)-space-solution
+        * https://leetcode.com/problems/first-missing-positive/discuss/17071/My-short-c%2B%2B-solution-O(1)-space-and-O(n)-time
+      * The idea is **like you put k balls into k+1 bins**, there must be a bin empty, the empty bin can be viewed as the missing number.
+      * For example:
+        * if length of n is 3:
+          * The ideal case would be: [1, 2, 3], then the first missing is 3+1 = 4
+          * The missing case may be: [1, None, 3]  5, then the first missing is 2
+      * Approach1: Time O(n), Space O(n)
         * Use extra space to keep the sorted positve numbers.
         * Python Solution
           ```python
           def firstMissingPositive(self, nums: List[int]) -> int:
-            length = len(nums)
-            sorted_positive_nums = [None] * length
+            n = len(nums)
+            sorted_nums = [None] * n
 
-            for i in range(length):
-                if 0 < nums[i] <= length:
-                    # the correct position of nums[i] is in nums[nums[i]-1]
-                    correct = nums[i]-1  # need this correct
-                    sorted_positive_nums[correct] = nums[i]
+            for num in nums:
+                if 0 < num <= n:
+                    sorted_nums[num-1] = n
 
-            for i in range(length):
-                if sorted_positive_nums[i] != i+1:
-                    return i+1
+            res = n + 1 # not found
+            for i in range(0, n):
+                if not sorted_nums[i]:
+                    res = i+1
+                    break
 
-            # not found from 0 to length-1, so the first missing is in length-th
-            return length+1
+            return res
           ```
-      * [Time:O(n), Space:O(1)](https://leetcode.com/problems/first-missing-positive/discuss/17071/My-short-c%2B%2B-solution-O(1)-space-and-O(n)-time) *
+      * Approach2: Time O(n), Space O(1)
          1. Each number will be put in its right place at most once after first loop *
          2. Traverse the array to find the unmatch number
          * Python Solution
             ```python
             def firstMissingPositive(self, nums: List[int]) -> int:
-              length = len(nums)
+              n = len(nums)
 
-              for i in range(length):
+              for i in range(n):
                   # We visit each number once, and each number will
                   # be put in its right place at most once
-                  while 0 < nums[i] <= length and nums[nums[i]-1] != nums[i]:
+                  while 0 < nums[i] <= n and nums[nums[i]-1] != nums[i]:
                       # the correct position of nums[i] is in
                       # nums[nums[i]#-1]
                       correct = nums[i]-1  # need this correct
                       nums[i], nums[correct] = nums[correct] , nums[i]
 
-              for i in range(length):
-                  if nums[i] != i+1:
-                      return i+1
+              res = n + 1
+              for i in range(n):
+                  if n[i] != i+1:
+                      res i+1
+                      break
               # not found from 0 to length-1, so the first missing is in length-th
-              return length+1
+              return res
             ```
     * 299: Bulls and Cows (M)
-      * Time O(n), Space O(n) and **one pass**
-        * Bull:
-          * Two characters are the same and having the same index.
-        * Cow
-          * * Two characters are the same but do not have the same index.
+      * Bull:
+        * Two characters are the same and having the same index.
+      * Cow
+        * Two characters are the same but do not have the same index.
+      * Approach1: Hash TableTime O(n), Space O(n) and **one pass**
         * Use **hash Table** to count cows.
         * Python solution
           ```python
-          for s,g in zip(secret, guess):
-            if s == g:
-                bull += 1
-            else:  # s != g
-                if hash_table[s] < 0:
-                    # s appears in guess before
-                    cow += 1
-                if hash_table[g] > 0:
-                    # g appears in secret before
-                    cow += 1
+          def getHint(self, secret: str, guess: str) -> str:
+            bull, cow = 0, 0
+            d = collections.defaultdict(int)
 
-                hash_table[s] += 1
-                hash_table[g] -= 1
+            for s, g in zip(secret, guess):
 
-          return f'{bull}A{cow}B'
+                if s == g:
+                    bull += 1
+                else:
+                    if d[s] < 0:
+                        cow += 1
+
+                    if d[g] > 0:
+                        cow += 1
+
+                    d[s] += 1
+                    d[g] -= 1
+
+            return f'{bull}A{cow}B'
           ```
-    * 134: Gas Station (M) **
+    * 134: Gas Station (M)
         * Time: O(n)
-          * Concept
-            * **If car starts at A and can not reach B. Any station between A and B can not reach B.**
+          * Concept:
+            * rule1:
+              * **If car starts at A and can not reach B. Any station between A and B can not reach B.**
               * If A can't reach B, and there exists C between A & B which can reach B, then A can reach C first, then reach B from C, which is conflict with our init statement: A can't reach B. so, the assume that such C exists is invalid.
-            * **If the total number of gas is bigger than the total number of cost, there must be a solution.**
+            * rule2
+              * **If the total number of gas is bigger than the total number of cost, there must be a solution.**
               * [Proof](https://leetcode.com/problems/gas-station/discuss/287303/Proof%3A-if-the-sum-of-gas-greater-sum-of-cost-there-will-always-be-a-solution)
           * Python Solution
             ```python
@@ -2195,18 +2428,20 @@ Table of Content
 
             for i in range(len(gas)):
                 remain = gas[i] - cost[i]
-                total_tank += remain
                 cur_tank += remain
+                total_tank += remain
 
                 # try another start
+                # rule2
                 if cur_tank < 0:
+                    # rule1
                     start = i+1
                     cur_tank = 0
 
             return start if total_tank >= 0 else not_found
             ```
     * 289: Game of Life (M)
-      * Time: O(mn), Space: O(mn)
+      * Approach1: Time: O(mn), Space: O(mn)
         * Python Solution
           ```python
           def gameOfLife(self, board: List[List[int]]) -> None:
@@ -2216,8 +2451,6 @@ Table of Content
 
             rows = len(board)
             cols = len(board[0])
-
-            # copy board for reference
             copy_board = [[board[row][col] for col in range(cols)] for row in range(rows)]
 
             for row in range(rows):
@@ -2239,51 +2472,51 @@ Table of Content
                         if live_neighbors == 3:
                             board[row][col] = 1
           ```
-      * Time: O(mn), Space: O(1)
+      * Approach2: Time: O(mn), Space: O(1)
         * Use two temp status, live_2_dead and dead_2_live
         * Python Solution
-        ```python
-        class Status(object):
-          live_2_dead = -1
-          dead = 0
-          live = 1
-          dead_2_live = 2
+          ```python
+          class Status(object):
+            live_2_dead = -1
+            dead = 0
+            live = 1
+            dead_2_live = 2
 
-        def gameOfLife(self, board: List[List[int]]) -> None:
-          # coordinate diff for 8 neighbors
-          neighbors = [(1, 0), (1, -1), (0, -1), (-1, -1),
-                      (-1, 0), (-1,1), (0, 1), (1, 1)]
+          def gameOfLife(self, board: List[List[int]]) -> None:
+            # coordinate diff for 8 neighbors
+            neighbors = [(1, 0), (1, -1), (0, -1), (-1, -1),
+                        (-1, 0), (-1,1), (0, 1), (1, 1)]
 
-          rows = len(board)
-          cols = len(board[0])
+            rows = len(board)
+            cols = len(board[0])
 
-          for row in range(rows):
-              for col in range(cols):
-                  # calculate the cnt of live neighbors
-                  live_neighbors = 0
-                  for n in neighbors:
-                      r, c = row + n[0], col + n[1]
-                      if 0 <= r < rows and 0 <= c < cols \
-                        and abs(board[r][c]) == 1:  # Status.live and Status.live_2_dead
-                          live_neighbors += 1
+            for row in range(rows):
+                for col in range(cols):
+                    # calculate the cnt of live neighbors
+                    live_neighbors = 0
+                    for n in neighbors:
+                        r, c = row + n[0], col + n[1]
+                        if 0 <= r < rows and 0 <= c < cols \
+                          and abs(board[r][c]) == 1:  # Status.live and Status.live_2_dead
+                            live_neighbors += 1
 
-                  # change status
-                  if board[row][col] == Status.live:
-                      if live_neighbors < 2 or live_neighbors > 3:
-                          board[row][col] = Status.live_2_dead
+                    # change status
+                    if board[row][col] == Status.live:
+                        if live_neighbors < 2 or live_neighbors > 3:
+                            board[row][col] = Status.live_2_dead
 
-                  else: # ref_board[row][col] == 0
-                      if live_neighbors == 3:
-                          board[row][col] = Status.dead_2_live
+                    else: # ref_board[row][col] == 0
+                        if live_neighbors == 3:
+                            board[row][col] = Status.dead_2_live
 
-          for row in range(rows):
-              for col in range(cols):
-                  if board[row][col] > 0:
-                      board[row][col] = Status.live
-                  else:
-                      board[row][col] = Status.dead
-        ```
-      * Infinite array
+            for row in range(rows):
+                for col in range(cols):
+                    if board[row][col] > 0: # live and live to dead
+                        board[row][col] = Status.live
+                    else:                   # dead and dead to live
+                        board[row][col] = Status.dead
+          ```
+      * follow up: Infinite array
         * [Solution](https://leetcode.com/problems/game-of-life/discuss/73217/Infinite-board-solution/201780)
     * 723：Candy Crush (M)
 ### Matrix
@@ -3058,12 +3291,12 @@ Table of Content
       * Python Solution
         ```python
         class DLinkedNode(object):
+
           def __init__(self):
               self.key = None   # key is necessary for key pop operation
               self.val = None
               self.prev = None
               self.next = None
-
 
         class DLinkedList(object):
             def __init__(self):
@@ -3103,7 +3336,7 @@ Table of Content
 
         class LRUCache(object):
             def __init__(self, capacity: int):
-                self.d_ll = DLinkedList()
+                self.dll = DLinkedList()
                 self.d = dict()
                 self.len = 0
                 self.cap = capacity
@@ -3115,7 +3348,7 @@ Table of Content
                     return -1
 
                 node = self.d[key]
-                self.d_ll.move_to_head(node)
+                self.dll.move_to_head(node)
                 return node.val
 
             def put(self, key: int, value: int) -> None:
@@ -3126,20 +3359,19 @@ Table of Content
                     new_node.key = key
                     new_node.val = value
                     self.d[key] = new_node
-                    self.d_ll.insert_to_head(new_node)
+                    self.dll.insert_to_head(new_node)
 
                     if self.len + 1 > self.cap:
-                        pop_node = self.d_ll.pop_tail()
+                        pop_node = self.dll.pop_tail()
                         self.d.pop(pop_node.key)
                     else:
                         self.len += 1
-
                 else:
                     node = self.d[key]
                     node.val = value
-                    self.d_ll.move_to_head(node)
+                    self.dll.move_to_head(node)
         ```
-  * LFU
+  * 460: LFU Cache (H)
 ### Tree
   * 144: Binary Tree **Preorder** Traversal (M)
     * Use **one stack** for iterative method
@@ -3277,7 +3509,7 @@ Table of Content
 ### BFS & DFS
   * 200: Number of Islands (M)
     * Time: O(m*n), Space: O(m*n)
-    * BFS:
+    * Approach1: BFS:
       * Set visits to True before append to the queue to **reduce unnecessary iterations.**
       * Python Solution
         ```python
@@ -3299,11 +3531,13 @@ Table of Content
                 visits[r][c] = True
                 q = collections.deque()
                 q.append((r, c))
+
                 while q:
                     r, c = q.popleft()
                     for neigbor in cls.NEIGHBORS:
                         nr, nc = r+neigbor[0], c+neigbor[1]
 
+                        # out of range
                         if nr < 0 or nr >= row or nc < 0 or nc >= col:
                             continue
 
@@ -3326,10 +3560,10 @@ Table of Content
                       area_cnt += _bfs(r, c)
               return area_cnt
         ```
-    * DFS Recursive
+    * Approach2: DFS
       * Implementation is just like BFS, but use stack instead
       * Set visits to True before append to the queue to reduce unnecessary iterations.
-    * DFS
+    * Approach3: DFS recursive
       * Recursive
       * Python Solution
         ```python
@@ -3355,20 +3589,22 @@ Table of Content
 
               for neigbor in cls.NEIGHBORS:
                   _dfs(r+neigbor[0], c+neigbor[1])
+
               return 1
 
               if not grid or not grid[0]:
                     return 0
-              row, col = len(grid), len(grid[0])
-              area_cnt = 0
-              visits = [[False for _ in range(col)] for _ in range(row)]
-              for r in range(row):
-                  for c in range(col):
-                      area_cnt += _dfs(r, c)
 
-              return area_cnt
+            row, col = len(grid), len(grid[0])
+            area_cnt = 0
+            visits = [[False for _ in range(col)] for _ in range(row)]
+            for r in range(row):
+                for c in range(col):
+                    area_cnt += _dfs(r, c)
+
+            return area_cnt
         ```
-    * Union Find (Disjoint Set)
+    * Approach4: Union Find (Disjoint Set)
   * 339: **Nested List** Weight Sum (E)
     * The weight is defined from top down.
     * n: total number of nested elements
@@ -4772,11 +5008,19 @@ Table of Content
       * 014: Longest Common Prefix (E)
       * 294: Flip Game II (M)
   * Array
+    * Container
+      * 042: Trapping Rain Water (H)
+        * Don't forget why we should include height[i] for left_max and right_max array
+          * example:
+            * [2, 10, 5], for 1th bin, if we do not inlcude 10, the area would be negative.
+    * Jump Game
+      * 045: Jump Game II (H)
     * 275: H-Index II (M)
       * Binary search solution
-    * 045: Jump Game II (H)
     * 325: Maximum Size Subarray Sum **Equals k** (M)
     * 560: Subarray Sum **Equals K** (M)
+    * 152: Maximum **Product** Subarray (M)
+    * 134: Gas Station (M)
   * LinkedList
     * 148: Sort list (M)
     * 023: Merge k Sorted Lists (H)
@@ -4792,9 +5036,6 @@ Table of Content
     * 127: **Word Ladder**
   * Topological Sort
     * 207: Course Schedule (M)
-
-
-
   * Dynamic Programming:
     * Fibonacci sequence
       * 070: Climbing Stairs
