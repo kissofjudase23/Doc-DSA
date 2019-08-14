@@ -3256,7 +3256,40 @@ Table of Content
                  carry = val // 10
             return self.reverse(dummy.next)
         ```
-    * Approach2: Use Stack:
+    * Approach2: Use Stack Time:O(n), Space:O(1)
+      * Python Solution
+        ```python
+        def push_to_stack(self, head):
+          stack = list()
+          cur = head
+          while cur:
+              stack.append(cur)
+              cur = cur.next
+
+          return stack
+
+        def addTwoNumbers(self, l1: ListNode, l2: ListNode) -> ListNode:
+          s1 = self.push_to_stack(l1)
+          s2 = self.push_to_stack(l2)
+
+          head = None
+          carry = 0
+          while s1 or s2 or carry:
+              val = carry
+              if s1:
+                  val += s1.pop().val
+
+              if s2:
+                  val += s2.pop().val
+
+              # insert the new node to the head
+              new = ListNode(val%10)
+              new.next = head
+              head = new
+              carry = val // 10
+
+          return head
+        ```
   * 369: Plus One Linked List (M)
     * Example:
       * 1->2->3  ==> 1->2->4
@@ -3380,8 +3413,10 @@ Table of Content
             return self.mins[-1]
       ```
 ### Heap (Priority Queue)
-  * 703. Kth Largest Element in a Stream (E)
-    * Use heapq, Time: O(log(k)), Space: O(k)
+  * 023: Merge k Sorted Lists (H) (Linked List)
+  * 253: Meeting Rooms II (M) (Array)
+  * 703. **Kth Largest** Element in a Stream (E)
+    * Approach1: heap, Time: O(log(k)), Space: O(k)
       * Time: O(log(k))
         * __init__: O(nlog(k))
           * n items for heap push
@@ -3404,6 +3439,7 @@ Table of Content
               if len(self.heap) < self.cap:
                   heapq.heappush(self.heap, val)
               else:
+                  # replace the minimize element in the heap
                   if val > self.heap[0]:
                       heapq.heapreplace(self.heap, val)
 
@@ -3411,13 +3447,10 @@ Table of Content
               self._add(val)
               return self.heap[0]
         ```
-    * Python Solution
-  * 023: Merge k Sorted Lists (H)
-  * 253: Meeting Rooms II (M)
   * 215: **Kth Largest** Element in an Array (M)
     * Find the kth largest element in an unsorted array.
-    * Sort, Time: O(nlog(n)), Space:O(log(n))
-    * minimun heap, Time: O(nlog(k)), Space: O(1)
+    * Approach1: Sort, Time: O(nlog(n)), Space:O(log(n))
+    * Approach2: heap, Time: O(nlog(k)), Space: O(k)
       * keep the k element in the minimum heap
       * Time Complexity: O(nlog(l))
         * **heappush**
@@ -3425,54 +3458,56 @@ Table of Content
         * **heapreplace**
           * Replace the min, and make bubble down operation, cost log(k)
       * Python Solution
-      ```python
-      def findKthLargest(self, nums: List[int], k: int) -> int:
-        heap = []
-        for num in nums:
-            if len(heap) < k:
-                heapq.heappush(heap, num)
-
-            elif num > heap[0]:
-                heapq.heapreplace(heap, num)
-        return heap[0]
-      ```
-    * Quick select, Time: O(n), Space:O(1)
-      * Python Solution:
-      ```python
-      class Solution:
-        def partition(self, nums, start, end):
-            # to avoid worst case
-            pivot_ran = random.randint(start, end)
-            nums[pivot_ran], nums[end] = nums[end], nums[pivot_ran]
-
-            pivot = end
-            border = start
-            border_val = nums[pivot]
-            for cur in range(start, end):
-                if nums[cur] <= border_val:
-                    nums[border], nums[cur] = nums[cur], nums[border]
-                    border += 1
-
-            nums[border], nums[pivot] = nums[pivot], nums[border]
-            return border
-
-        def quick_select(self, nums, start, end, k_smallest):
-            while start <= end:
-              pivot = self.partition(nums, start, end)
-              if k_smallest == pivot:
-                  return nums[pivot]
-              elif k_smallest < pivot:
-                  end = pivot - 1
-              else:
-                  start = pivot + 1
-
+        ```python
         def findKthLargest(self, nums: List[int], k: int) -> int:
-            if k > len(nums):
-                return None
+          heap = []
+          for num in nums:
+              if len(heap) < k:
+                  heapq.heappush(heap, num)
+              elif num > heap[0]:
+                  # replace the minimize element in the heap
+                  heapq.heapreplace(heap, num)
 
-            # k_smallest is len(nums)-k
-            return self.quick_select(nums, 0, len(nums)-1, len(nums)-k)
-      ```
+          return heap[0]
+        ```
+    * Approach3: Quick select, Time: O(n), Space:O(1)
+      * Python Solution:
+        ```python
+        class Solution:
+          def partition(self, nums, start, end):
+              # to avoid worst case
+              pivot_ran = random.randint(start, end)
+
+              pivot = end
+              nums[pivot_ran], nums[pivot] = nums[pivot], nums[pivot_ran]
+              pivot_val = nums[pivot]
+
+              border = start
+              for cur in range(start, end):
+                  if nums[cur] <= pivot_val:
+                      nums[border], nums[cur] = nums[cur], nums[border]
+                      border += 1
+
+              nums[border], nums[pivot] = nums[pivot], nums[border]
+              return border
+
+          def quick_select(self, nums, start, end, k_smallest):
+              while start <= end:
+                pivot = self.partition(nums, start, end)
+                if k_smallest == pivot:
+                    return nums[pivot]
+                elif k_smallest < pivot:
+                    end = pivot - 1
+                else:
+                    start = pivot + 1
+
+          def findKthLargest(self, nums: List[int], k: int) -> int:
+              if k > len(nums):
+                  return None
+
+              # k_smallest is len(nums)-k
+              return self.quick_select(nums, 0, len(nums)-1, len(nums)-k)
+        ```
   * 347: **Top K Frequent** Elements (M)
     * Given a non-empty array of integers, return the **k most frequent elements**.
     * If k == 1, Time:O(n), Space:O(n)
@@ -3486,7 +3521,7 @@ Table of Content
         * O(k) for heap
       * Python Implementation 1:
       ```python
-      class Event(object):
+      class Element(object):
         def __init__(self, key, count):
             self.key = key
             self.count = count
@@ -3503,9 +3538,9 @@ Table of Content
 
           for key, cnt in d.items():
               if len(heap) < k:
-                  heapq.heappush(heap, Event(key, cnt))
+                  heapq.heappush(heap, Element(key, cnt))
               else:
-                  e = Event(key, cnt)
+                  e = Element(key, cnt)
                   if heap[0] < e:
                       heapq.heapreplace(heap, e)
 
@@ -3518,11 +3553,55 @@ Table of Content
           return heapq.nlargest(k, counter.keys(), key=counter.get)
         ```
   * 692: Top K Frequent Words (M)
+    * Approach1: heap, Time:O(nlogk), Space:O(n):
+      * Time:
+        * Create Hash Table: O(n)
+        * Insert to Heap: O(nlogk)
+        * Pop from heap: O(klogk)
+      * Space:
+        * Hash Table: O(n)
+        * Heap: O(k)
+      * Python Solution:
+        ```python
+        class Element(object):
+
+          def __init__(self, key, count):
+              self.key = key
+              self.count = count
+
+          def __lt__(self, other):
+              if self.count == other.count:
+                  # If two words have the same frequency,
+                  # then the word with the lower alphabetical order has higher priority
+                  return self.key > other.key
+              else:
+                  return self.count < other.count
+
+          def __repr__(self):
+              return str(f'{self.key}:{self.count}')
+
+        def topKFrequent(self, words: List[str], k: int) -> List[str]:
+            d = collections.Counter(words)
+            heap = list()
+
+            for key, cnt in d.items():
+                if len(heap) < k:
+                    heapq.heappush(heap, Element(key, cnt))
+                else:
+                    e = Element(key, cnt)
+                    if heap[0] < e:
+                        heapq.heapreplace(heap, e)
+
+            ret = list()
+            while heap:
+                ret.append(heapq.heappop(heap).key)
+            return ret[::-1]
+        ```
   * 332: Reconstruct Itinerary	(M)
   * 341: Flatten Nested List Iterator (M)
-  * 218: The Skyline Problem (H)
   * 313: Super Ugly Numbe (M)
   * 373: Find K Pairs with Smallest Sums (M)
+  * 218: The Skyline Problem (H)
 ### Cache
   * 146: LRU Cache (M)
     * Use ordered dict
@@ -3755,8 +3834,7 @@ Table of Content
   * 212: Word Search II (H)
 ### BFS & DFS
   * 200: Number of Islands (M)
-    * Time: O(m*n), Space: O(m*n)
-    * Approach1: BFS:
+    * Approach1: BFS, Time: O(mn), Space: O(mn)
       * Set visits to True before append to the queue to **reduce unnecessary iterations.**
       * Python Solution
         ```python
@@ -3807,11 +3885,10 @@ Table of Content
                       area_cnt += _bfs(r, c)
               return area_cnt
         ```
-    * Approach2: DFS
+    * Approach2: DFS, Time: O(mn), Space: O(mn)
       * Implementation is just like BFS, but use stack instead
       * Set visits to True before append to the queue to reduce unnecessary iterations.
-    * Approach3: DFS recursive
-      * Recursive
+    * Approach3: DFS recursive,
       * Python Solution
         ```python
         class NumberOfIsland(object):
@@ -3839,8 +3916,8 @@ Table of Content
 
               return 1
 
-              if not grid or not grid[0]:
-                    return 0
+            if not grid or not grid[0]:
+              return 0
 
             row, col = len(grid), len(grid[0])
             area_cnt = 0
@@ -3856,7 +3933,7 @@ Table of Content
     * The weight is defined from top down.
     * n: total number of nested elements
     * d: maximum level of nesting in the input
-    * BFS, Time: O(n), Space: O(n)
+    * Approach1: BFS, Time: O(n), Space: O(n)
       * Python Solution:
         ```python
         def depthSum(self, nestedList: List[NestedInteger]) -> int:
@@ -3885,7 +3962,7 @@ Table of Content
 
           return depth_sum
         ```
-    * DFS Recursice, Time: O(n), Space: O(n)
+    * Approach2: DFS Recursice, Time: O(n), Space: O(n)
       * Python Solution
         ```python
         def depthSum(self, nestedList: List[NestedInteger]) -> int:
@@ -3901,7 +3978,7 @@ Table of Content
 
           return _dfs(nlist=nestedList, depth=1)
         ```
-    * DFS Iteraitve, Time: O(n), Space: O(d)
+    * Approach3: DFS Iteraitve, Time: O(n), Space: O(d)
       * Python Solution
         ```python
         def depthSum(self, nestedList: List[NestedInteger]) -> int:
@@ -3927,7 +4004,7 @@ Table of Content
     * The weight is defined from bottom up.
     * n: total number of nested elements
     * d: maximum level of nesting in the input
-    * BFS, Time: O(n), Space: O(n)
+    * Approach1: BFS, Time: O(n), Space: O(n)
       * Without depth variable
       * For example:
         * [1, [2, [3]]]
@@ -3941,7 +4018,6 @@ Table of Content
           * iter3:
             * acc = 1 + 2 + 3
             * depth sum = 1 + 2 + 3
-          *
       * Python Solution
       ```python
         def depthSumInverse(self, nestedList: List[NestedInteger]) -> int:
@@ -3968,7 +4044,7 @@ Table of Content
 
           return  depth_sum
       ```
-    * DFS recursive, Time: O(n), Space: O(d)
+    * Approach2: DFS recursive, Time: O(n), Space: O(d)
       * Use hash table to store acc val for each level
       * Post process to get the result
       * Python Solution
@@ -4004,7 +4080,7 @@ Table of Content
   * 286: Walls and Gates (M)
     * r: number of rows
     * c: number of columns
-    * BFS, search from **EMPTY**, Time: O(**(rc)^2**), Space: O(rc))
+    * Approach1: BFS, search from **EMPTY**, Time: O(**(rc)^2**), Space: O(rc))
       * This approach can not reuse the calculation info.
       * Time: O(**(rc)^2**)
       * Space: O(rc))
@@ -4064,10 +4140,11 @@ Table of Content
                     if rooms[r][c] == EMPTY:
                         rooms[r][c] = _bfs(r, c)
         ```
-    * BFS, search from **GATE**, Time: O((rc)), Space: O(rc))
+    * Approach2: BFS, search from **GATE**, Time: O((rc)), Space: O(rc))
       * This approach **can avoid recalculation**.
       * Time: O((rc))
       * Space: O(rc))
+        * Queue Size
       * Python Solution:
         ```python
         def wallsAndGates(rooms: List[List[int]]) -> None:
@@ -4090,26 +4167,27 @@ Table of Content
                     if rooms[r][c] == GATE:
                         q.append((r, c))
 
+            distance = 0
             while q:
                 q_len = len(q)
+                distance += 1
                 for _ in range(q_len):
                     r, c = q.popleft()
                     for neigbor in NEIGHBORS:
-
                         nr, nc = r+neigbor[0], c+neigbor[1]
 
                         if nr < 0 or nr >= row or nc < 0 or nc >= col:
                             continue
 
-                        if rooms[nr][nc] != EMPTY:
+                        if rooms[nr][nc] != EMPTY: # WALL or GATE
                             continue
 
-                        rooms[nr][nc] = rooms[r][c] + 1
-
+                        rooms[nr][nc] = distance
                         q.append((nr, nc))
         ```
     * DFS
   * 130: Surrounded Regions (M)
+    * A region is captured by flipping all 'O's into 'X's in that surrounded region.
     * BFS: Time:O(rc), Space:O(rc)
       * Try to Group region
       * Python Solution
@@ -4131,7 +4209,6 @@ Table of Content
                         for neighbor in NEIGHBORS:
 
                             nr, nc = r + neighbor[0], c + neighbor[1]
-
                             # check boundary
                             if nr < 0 or nr >= row or nc < 0 or nc >= col:
                                 # do not break here since we try to extend the max regino as possible
@@ -4172,7 +4249,7 @@ Table of Content
         ```
   * 127: **Word Ladder** (M)
       * Assume length of words is k and number of words is n
-      * BFS, Time:O(nk), Space:O(n*k^2)
+      * Approach1: BFS, Time:O(nk), Space:O(n*k^2)
         * Time: O(n*d)
           * Build transformation dict cost: O(n*d)
           * Find the target word in the transformation dict cost: O(n*d)
@@ -4196,28 +4273,29 @@ Table of Content
             w_combo_d = collections.defaultdict(list)
             for w in wordList:
                 for i in range(len(w)):
-                    w_combo_d[f'{w[:i]}*{w[i+1:]}'].append(w)
+                    w_key = f'{w[:i]}*{w[i+1:]}'
+                    w_combo_d[w_key].append(w)
 
             q = collections.deque()
             q.append(beginWord)
             visited = {beginWord: True}
-            level = 2
-
+            level = 1
             '''
             BFS to find the shorted transformation
             '''
             while q:
                 q_len = len(q)
+                level += 1
                 for _ in range(q_len):
                     w = q.popleft()
                     for i in range(len(w)):
+                        # transfrom key
+                        w_key = f'{w[:i]}*{w[i+1:]}'
 
-                        word_key = f'{w[:i]}*{w[i+1:]}'
-
-                        if word_key not in w_combo_d:
+                        if w_key not in w_combo_d:
                             continue
 
-                        for next_transform_w in w_combo_d[word_key]:
+                        for next_transform_w in w_combo_d[w_key]:
                             if next_transform_w in visited:
                                 continue
 
@@ -4228,13 +4306,10 @@ Table of Content
 
                             q.append(next_transform_w)
 
-                        w_combo_d.pop(word_key)
-
-                level += 1
-
+                        w_combo_d.pop(w_key)
             return 0
           ```
-      * Bidirectional BFS
+      * Approach2: Bidirectional BFS
   * 126: **Word Ladder** II (H)
   * 051: N-Queens (H)
   * 052: N-Queens II (H)
@@ -4249,12 +4324,12 @@ Table of Content
     * Iterative + N variables (bottom-up)
   * Fibonacci sequence:
     * 509: Fibonacci Number (E)
-      * Find recursive relation
+      * Recursive relation
         * n == 0
         * n == 1
         * n > 1
           * f(n) = f(n-1) + f(n-2)
-      * Recursive + memo (top-down), Time:O(n), Space:(n)
+      * Approach1: Recursive + memo (top-down), Time:O(n), Space:(n)
         * Python Solution
         ```python
         def fib(self, N: int) -> int:
@@ -4278,7 +4353,7 @@ Table of Content
 
           return _fib(N)
         ```
-      * Iterative + memo (bottom-up), Time:O(n), Space:(n)
+      * Approach2: Iterative + memo (bottom-up), Time:O(n), Space:(n)
         * Python Solution
         ```python
         def fib(self, N: int) -> int:
@@ -4296,7 +4371,7 @@ Table of Content
 
           return memo[N]
         ```
-      * Iterative + N variables (bottom-up), Time:O(n), Space:(1)
+      * Approach3: Iterative + N variables (bottom-up), Time:O(n), Space:(1)
         * Python Solution
         ```python
         def fib(self, N: int) -> int:
@@ -4313,7 +4388,7 @@ Table of Content
           return cur
         ```
     * 070: Climbing Stairs (E)
-      * Find recursive relation
+      * Recursive relation
         * n <= 2:
           * n == 0 or n == 1
             * 1
@@ -4323,8 +4398,8 @@ Table of Content
           * f(n) = f(n-2) + f(n-1)
             * f(n-2) + 2 step
             * f(n-1) + 1 step
-      * Recursive + memo (top-down), Time:O(n), Space:O(n)
-      * Iterative + memo (bottom-up), Time:O(n), Space:O(n)
+      * Approach1: Recursive + memo (top-down), Time:O(n), Space:O(n)
+      * Approach2: Iterative + memo (bottom-up), Time:O(n), Space:O(n)
         * Python Solutino
         ```python
         def climbStairs(self, n: int) -> int:
@@ -4349,7 +4424,7 @@ Table of Content
 
           return memo[n]
         ```
-      * Iterative + N variables (bottom-up), Time:O(n), Space:O(1)
+      * Approach3: Iterative + N variables (bottom-up), Time:O(n), Space:O(1)
         * Python Solution
         ```python
         def climbStairs(self, n: int) -> int:
@@ -4370,9 +4445,9 @@ Table of Content
 
           return cur
         ```
-      * [Log(n) Solution](https://leetcode.com/problems/climbing-stairs/solution/)
+      * Approach4: [Log(n) Solution](https://leetcode.com/problems/climbing-stairs/solution/)
     * 091: **Decode Ways** (M)
-      * Find recursive relation
+      * Recursive relation
         * Check conditions
           * one character
             ```python
@@ -4394,7 +4469,7 @@ Table of Content
               * f(n) += f(n-1)
             * if check s[n-1:n+1] == True
               * f(n) += f(n-2)
-      * Iterative + memo (bottom-up), Time:O(n), Space:O(n)
+      * Approach1: Iterative + memo (bottom-up), Time:O(n), Space:O(n)
         * Python Solution
           ```python
           def numDecodings(self, s: str) -> int:
@@ -4439,7 +4514,7 @@ Table of Content
 
             return memo[n-1]
           ```
-      * Iterative + N variables (bottom-up), Time:O(n), Space:O(1)
+      * Approach2: Iterative + N variables (bottom-up), Time:O(n), Space:O(1)
         * Python Solution
         ```python
         def numDecodings(self, s: str) -> int:
@@ -4489,7 +4564,7 @@ Table of Content
         ```
   * **One Dimensional**:
     * 062: Unique Paths (M)
-      * Combination:
+      * Approach1: Combination:
         * total m-1 down steps and n-1 right steps
         * (m+n)!/m!n!
         * Python Solution
@@ -4504,7 +4579,7 @@ Table of Content
 
           return int(f(m+n-2) /(f(m-1) * f(n-1)))
         ```
-      * DP, Time:O(mn), Space:O(mn)
+      * Approach2: DP, Time:O(mn), Space:O(mn)
         * Recursive relation
         * for r == 0
           * f(0, c) = 1
@@ -4537,7 +4612,7 @@ Table of Content
 
             return memo[m-1][n-1]
           ```
-      * DP, Time:O(mn), Space:O(n)
+      * Approach3: DP, Time:O(mn), Space:O(n)
         * In fact, keep one row is enough
         * Python Solution
         ```python
@@ -4548,12 +4623,12 @@ Table of Content
           if m == 1 or n == 1:
               return 1
 
+          # init first row
           memo = [1 for _ in range(n)]
 
           for _ in range(1, m):
               for c in range(1, n):
-                  # memo[c] = from up + from left
-                  # memo[c] = memo[c] + memo[c-1]
+                  # memo[c] = memo[c] (from up) + memo[c-1] (from left)
                   memo[c] += memo[c-1]
 
           return memo[n-1]
@@ -4567,7 +4642,7 @@ Table of Content
     * 312: Burst Balloons (H)
   * **Two Dimensional**:
     * 256: Paint House (E)
-      * Find recursive relation
+      * Recursive relation
         * n == 0: (first house)
           * f_color[0][red] = costs[0][red]
           * f_color[0][blue] = costs[0][green]
@@ -4579,7 +4654,7 @@ Table of Content
           * f_  color[n][green] = costs[n][green] + min(f_color[n-1][red], f_color[n-1][blue])
         * and the minimum price if we painted to nth house would be
           * min(f_color[n][red], f_color[n][blue], f_color[n][green])
-      * Iterative + memo (bottom-up), Time:O(nk), Space:(nk)
+      * Approach1: Iterative + memo (bottom-up), Time:O(nk), Space:(nk)
         * Python Solution
           ```python
           def minCost(self, costs: List[List[int]]) -> int:
@@ -4609,7 +4684,7 @@ Table of Content
             # unpack the last row
             return min(*acc_cost[house_cnt-1])
           ```
-      * Iterative + N variables (bottom-up), Time:O(nk), Space:(1)
+      * Approach2: Iterative + N variables (bottom-up), Time:O(nk), Space:(1)
         * Python Solution:
           ```python
           def minCost(self, costs: List[List[int]]) -> int:
@@ -4624,7 +4699,8 @@ Table of Content
 
             house_cnt = len(costs)
             r_idx, b_idx, g_idx = 0, 1, 2
-            # For the first house
+
+            # For the 0th house
             cur_r, cur_b, cur_g = costs[0][r_idx], costs[0][b_idx], costs[0][g_idx]
 
             # For 1th to (n-1)th house
@@ -4649,7 +4725,7 @@ Table of Content
     * 276: Paint Fence (E)
       * There is a fence with n posts, each post can be painted with one of the k colors.
       * You have to paint all the posts such that no more than two adjacent fence posts have the same color.
-      * Find recursive relation
+      * Recursive relation
         * n <= 2:
           * n == 0:
             * 0 color
@@ -4663,8 +4739,8 @@ Table of Content
           * f_same(i) = f_diff(i-1) * 1
           * f_diff(i) = (f_same(i-1) + f_diff(i-1)) * (k-1)
           * return f_same(i) + f_diff(i)
-      * Recursive + memo (top-down)
-      * Iterative + memo (bottom-up), Time: O(n), Space: O(n)
+      * Approach1: Recursive + memo (top-down)
+      * Approach2: Iterative + memo (bottom-up), Time: O(n), Space: O(n)
         * Python Solution
         ```python
         def numWays(self, n: int, k: int) -> int:
@@ -4695,7 +4771,7 @@ Table of Content
           return memo_same[n-1] + memo_diff[n-1]
 
         ```
-      * Iterative + N variables (bottom-up), Time: O(n), Space: O(1)
+      * Approach3: Iterative + N variables (bottom-up), Time: O(n), Space: O(1)
         * Python Solution
           ```python
           def numWays(self, n: int, k: int) -> int:
@@ -4840,9 +4916,9 @@ Table of Content
           if n == 3:
               return max(nums[0], nums[1], nums[2])
 
-          # rob the first house
+          # rob the 0th house and skip 1th hourse and (n-1)th house
           rob_first = nums[0] + rob_non_cycle(2, n-2)
-          # do not rob the first house
+          # do not rob the 0th
           do_not_rob_first = rob_non_cycle(1, n-1)
 
           return max(rob_first, do_not_rob_first)`
@@ -4856,7 +4932,7 @@ Table of Content
     * 078: Subsets (M)
       * Ref:
         * [C++ Recursive/Iterative/Bit-Manipulation](https://leetcode.com/problems/subsets/discuss/27278/C%2B%2B-RecursiveIterativeBit-Manipulation)
-      * Recursive Time: O(n*2^n), Space:(2^n):
+      * Approach1: Recursive Time: O(n*2^n), Space:(2^n):
         * DFS Traverse
         * Example:
           * []
@@ -4871,7 +4947,8 @@ Table of Content
           ```python
           def subsets_rec(nums: List[int]) -> List[List[int]]:
               def _subsets(cur: list, start):
-              # make a copy
+
+              # make a copy, append subs cur len(nums)-1
               subs.append(cur[:])
 
               if start == len(nums):
@@ -4891,7 +4968,7 @@ Table of Content
               _subsets(cur, 0)
               return subs
           ```
-      * Iterative, Time: O(n*2^n), Space:(2^n)
+      * Approach2: Iterative, Time: O(n*2^n), Space:(2^n)
         * Time: O(n*2^n)
           * total:1 + 2 + 2^2 + 2^3 ...2^(n-1) = O(2^n) round
             * in each round needs O(n) to copy list
@@ -4906,18 +4983,17 @@ Table of Content
           ```python
           def subsets(self, nums: List[int]) -> List[List[int]]:
               subs = [[]]
-
               for num in nums:
                   subs_len = len(subs)
                   for i in range(subs_len):
-                      # copy without num
+                      # copy without num and append to the tail
                       subs.append(subs[i].copy())
-                      # with num
+                      # update with num
                       subs[i].append(num)
 
               return subs
           ```
-      * Iterative, **bit manipulation**, Time: O(n*2^n), Space:(2^n)
+      * Approach3: Iterative, **bit manipulation**, Time: O(n*2^n), Space:(2^n)
         * Time: O(n*2^n)
           * Total (2^n) round
             * For each round need to iterater all nums which takes O(n) time
@@ -4938,7 +5014,8 @@ Table of Content
             ```python
             def subsets_iter_bit(nums: List[int]) -> List[List[int]]:
                 subs = []
-                subs_len = 2 ** len(nums
+                subs_len = 2 ** len(nums)
+
                 for sub_idx in range(subs_len):
                     new_sub = []
                     for num_idx in range(len(nums)):
@@ -4951,8 +5028,9 @@ Table of Content
     * 090: Subsets II (M)
   * **Combinations**
     * 077: Combinations (M)
-      * Recursive Time: O(k * n!/(n!*(n-k))!), Space: O(n!/(n!*(n-k)!)
+      * Approach1: Recursive Time: O(k * n!/(n!*(n-k))!), Space: O(n!/(n!*(n-k)!)
         * Time: O(k* n!/(n!*(n-k)!)
+          * total n!/(n!*(n-k)! combinations
           * k is the time to pupulate each combinations
         * Space: O(n!/(n!*(n-k)!)
           * Total O(n!/(n!*(n-k)!) combintations
@@ -4986,7 +5064,7 @@ Table of Content
           _combination(cur=cur, start=1)
           return comb
         ```
-      * Iterative
+      * Approach12 Iterative
         * Python Solution
         ```python
         def combin_iter_v2(n: int, k: int) -> List[List[int]]:
@@ -5019,7 +5097,7 @@ Table of Content
     * 377: Combination Sum IV (M)
   * **Permutation**
     * 046: Permutations (M)
-      * Recursive, Time: O(n!), Space: O(n!),
+      * Approach1: Recursive, Time: O(n!), Space: O(n!),
         * Time: O(n!)
           * Total: n * n-1 * n-2..  * 2 * 1  -> n!
         * Space: O(n!)
@@ -5045,7 +5123,7 @@ Table of Content
             _permute(start=0)
             return perms
           ```
-      * Iterative, Time: O(n!), Space: O(n!)
+      * Approach2: Iterative, Time: O(n!), Space: O(n!)
         * Time: O(n!)
           * Total: 1 * 2 * 3 * ... (n-1) * n operation -> n!
         * Space: O(n!)
@@ -5082,7 +5160,7 @@ Table of Content
     * https://www.youtube.com/watch?v=ddTC4Zovtbc
     * https://leetcode.com/problems/course-schedule-ii/solution/
   * 207: Course Schedule (M)
-    * [Node Indegree + BFS], Time: O(V+E), Space: O(V+E)
+    * Approach1: Node Indegree + BFS, Time: O(V+E), Space: O(V+E)
       * Time: O(V+E)
         * Build Outdegree List Graph and Indegree Array
           * O(E)
@@ -5141,6 +5219,7 @@ Table of Content
             while q:
                 cur = q.popleft()
                 unsheduled_cnt -= 1
+                # remove outdegree edges of node
                 for nxt in g_adj[cur]:
                     a_indegree[nxt] -= 1
                     # indegree == 0 means no prequisites
@@ -5149,7 +5228,7 @@ Table of Content
 
             return unsheduled_cnt == 0
         ```
-    * [DFS]:
+    * Approach2: DFS:
       * Algorithm:
         * For each of the nodes in our graph, we will run a depth first search in case that node was not already visited in some other node's DFS traversal.
         * Suppose we are executing the depth first search for a node N. We will recursively traverse all of the neighbors of node N which have not been processed before.
@@ -5194,6 +5273,7 @@ Table of Content
                 for course, preq in prerequisites:
                     g_adj[preq].append(course)
 
+                # perhaps start from indegree 0 ??
                 for course in range(numCourses):
                     if visits[course] == Status.WHITE:
                         dfs(course)
@@ -5240,6 +5320,8 @@ Table of Content
   * 269: Alien Dictionary (H)
 ### Bit Manipulation
 ### Union Field
+  * 200: Number of Islands (M)
+  * 305: Number of Islands II (H)
 ### Graph
 ### Error List
   * Math:
@@ -5274,8 +5356,11 @@ Table of Content
     * 023: Merge k Sorted Lists (H)
     * 143: **Reorder** List (M)
     * 061: **Rotate** list (M)
+    * 445: Add Two Numbers II (M)
   * Cache
     * 146: LRU Cache (M)
+  * Heap
+    * 692: Top K Frequent Words (M)
   * BackTracking
     * 077: Combinations (M)
   * BFS & DFS
@@ -5283,7 +5368,8 @@ Table of Content
       * For BFS / DFS iterations, set visits to True before append to the queue to **reduce unnecessary queue/stack push/pop operations.**
     * 286: Walls and Gates (M)
       * Start From Gates
-    * 127: **Word Ladder**
+    * 364: **Nested List** Weight Sum II (M)
+    * 127: Word Ladder (M)
   * Topological Sort
     * 207: Course Schedule (M)
   * Dynamic Programming:
