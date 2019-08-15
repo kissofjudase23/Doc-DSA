@@ -303,6 +303,7 @@ Table of Contents
 ### Graph
 * Representation
   * Complexity
+    * Incidence (vertex to edge)
 
     |                  | Storage        | Add Vertex     | Add Edge       | Remove Vertex  | Remove Edge |
     |------------------|----------------|----------------|----------------|----------------|-------------|
@@ -310,13 +311,21 @@ Table of Contents
     | Incidence List   | O(\|V\|+\|E\|) | O(1)           | O(1)           | O(\|E\|)       | O(\|E\|)    |
     | Adjacency Matrix | O(\|V\|^2)     | O(\|V\|^2)     | O(1)           | O(\|V\|^2)     | O(1)        |
     | Incidence Matrix | O(\|V\|*\|E\|) | O(\|V\|*\|E\|) | O(\|V\|*\|E\|) | O(\|V\|*\|E\|) | O(\|E\|)    |
+
 * Algorithm:
   * Traverse
     * BFS
       * Need Queue Support
     * DFS
       * Need Stack Support
-
+  * Euler trail
+    * A finite graph that **visits every edge** exactly once.
+  * Euler circuit
+    * An **Eulerian trail** that **starts and ends on the same vertex**.
+  * Hamilton path
+    * A finite graph that **visits every vertex** exactly once.
+  * Hamilton cycle
+    * An Hamilton path that **starts and ends on the same vertex**.
   * Topological Sort
 
     |                  | Average Time   | Worst Time     | Space          |

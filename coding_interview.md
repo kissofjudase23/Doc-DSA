@@ -21,11 +21,10 @@ Table of Content
   - [BFS & DFS](#bfs--dfs)
   - [Dynamic Programming](#dynamic-programming)
   - [Backtracking](#backtracking)
-  - [Topological Sort](#topological-sort)
+  - [Graph](#graph)
   - [Bit Manipulation](#bit-manipulation)
   - [Union Field](#union-field)
-  - [Graph](#graph)
-  - [Error List](#error-prone-list)
+  - [Error List](#error-list)
 
 ## FAQ
   * [What is tail recursion?](https://stackoverflow.com/questions/33923/what-is-tail-recursion)
@@ -3597,7 +3596,6 @@ Table of Content
                 ret.append(heapq.heappop(heap).key)
             return ret[::-1]
         ```
-  * 332: Reconstruct Itinerary	(M)
   * 341: Flatten Nested List Iterator (M)
   * 313: Super Ugly Numbe (M)
   * 373: Find K Pairs with Smallest Sums (M)
@@ -5155,51 +5153,194 @@ Table of Content
     * 031: Next Permutation (M)
     * 060: Permutation Sequence (M)
   * 291: Word Pattern II
-### Topological Sort
-  * Ref:
-    * https://www.youtube.com/watch?v=ddTC4Zovtbc
-    * https://leetcode.com/problems/course-schedule-ii/solution/
-  * 207: Course Schedule (M)
-    * Approach1: Node Indegree + BFS, Time: O(V+E), Space: O(V+E)
-      * Time: O(V+E)
-        * Build Outdegree List Graph and Indegree Array
-          * O(E)
-        * Traverse the Nodes and Edges: O(V+E)
-          * Traverse the Nodes
-              * Each node would be traverse at most once.
-              * Operation for push node to queue and pop node from queue.
-          * Traverse the edges.
-            * Each edge would be traversed at most once.
-            * Operation for **removing outdegree of the node**.
-      * Space:O(V+E)
-        * Graph of adjency list
-          * O(V+E)
-        * Indegree Array
-          * O(V)
-        * BFS Queue
-          * O(V)
-      * Algorithm
-        * Definition:
-          * **Indegree of the Course:**
-            * How many prequisites courses of it.
-          * **Outdegree of Course**
-            * How many courses' prequisite is this course.
-        * The algorithm
-          * We first process all the nodes/course with **0 in-degree** implying no prerequisite courses required. **If we remove all these courses from the graph, along with their outgoing edges**, we can find out the courses/nodes that should be processed next. These would again be the nodes with 0 in-degree. We can continuously do this until all the courses have been accounted for.
-        * Data Structures
-          * **A graph of adjency list with indegree**
-            * If course u is a prerequisite of course v, then the adjacency list of u will contain v.
-          * **A degree array**
-            * Calculate how many prerequisite courses for each.
-      * Python Solution:
+### Graph
+  * Eulerian trail
+    * 332: Reconstruct Itinerary	(M)
+      * This is the problem of Eulerian trail
+        * vertex: airport
+        * edge: ticket
+      * Approach1: DFS Recursive, Hierholzer's algorithm, Time:O(V+E), Space:O(V+E)
+        * FAQ
+          * how do you make sure there is no dead end since you always choose the "smallest" arrivals (min heap) ?
+            * Starting at the first node, **we can only get stuck at the ending point, since every node except for the first and the last node has even number of edges, when we enter a node we can always get out**.
+            * Now we are at the destination
+              * case1: if all edges are visited, we are done, and the dfs returns to the very first state.
+              * case2: Otherwise** we need to "insert" the unvisited loop into corresponding position, and in the dfs method, it returns to the node with extra edges, **starts another recursion and adds the result before the next path**. This process continues until all edges are visited.
+            * Example:
+              * A Graph:, start is A, end is E
+                * A -> [B, E]  # start vertex
+                * B -> [C]
+                * C -> [A]
+                * E -> []      # end vertex
+              * Case 1:
+                * s1: A
+                * s2: A -> **B->C->A->E** (Iterative B end)
+              * Case 2:
+                * s1: A
+                * s2: A -> **E** (iterative E end)
+                * s2: A -> **B->C->A** (Iterative B end) -> E
+        * Python Solution:
+          ```python
+          def findItinerary(self, tickets: List[List[str]]) -> List[str]:
+
+            def _dfs(departure):
+                arrival_heap = flights[departure]
+                while arrival_heap:
+                    _dfs(heapq.heappop(arrival_heap))
+                path.appendleft(departure)
+            """
+            Hierholzer's algorithm for Eulerian path
+            Since the problem asks for lexical order smallest solution,
+            we can put the neighbors in a min-heap
+            """
+            flights = collections.defaultdict(list)
+            path = collections.deque()
+
+            for departure, arrivial in tickets:
+                arrival_heap = flights[departure]
+                heapq.heappush(arrival_heap, arrivial)
+
+            _dfs("JFK")
+
+          return path
+          ```
+  * Eulerian circuit
+  * Hamilton path
+  * Hamilton cycle
+  * Minimum Spanning Tree
+  * Shortest Path
+  * Topological Sort
+    * Ref:
+      * https://www.youtube.com/watch?v=ddTC4Zovtbc
+      * https://leetcode.com/problems/course-schedule-ii/solution/
+    * 207: Course Schedule (M)
+      * Approach1: Node Indegree + BFS, Time: O(V+E), Space: O(V+E)
+        * Time: O(V+E)
+          * Build Outdegree List Graph and Indegree Array
+            * O(E)
+          * Traverse the Nodes and Edges: O(V+E)
+            * Traverse the Nodes
+                * Each node would be traverse at most once.
+                * Operation for push node to queue and pop node from queue.
+            * Traverse the edges.
+              * Each edge would be traversed at most once.
+              * Operation for **removing outdegree of the node**.
+        * Space:O(V+E)
+          * Graph of adjency list
+            * O(V+E)
+          * Indegree Array
+            * O(V)
+          * BFS Queue
+            * O(V)
+        * Algorithm
+          * Definition:
+            * **Indegree of the Course:**
+              * How many prequisites courses of it.
+            * **Outdegree of Course**
+              * How many courses' prequisite is this course.
+          * The algorithm
+            * We first process all the nodes/course with **0 in-degree** implying no prerequisite courses required. **If we remove all these courses from the graph, along with their outgoing edges**, we can find out the courses/nodes that should be processed next. These would again be the nodes with 0 in-degree. We can continuously do this until all the courses have been accounted for.
+          * Data Structures
+            * **A graph of adjency list with indegree**
+              * If course u is a prerequisite of course v, then the adjacency list of u will contain v.
+            * **A degree array**
+              * Calculate how many prerequisite courses for each.
+        * Python Solution:
+          ```python
+          def canFinish(self, numCourses: int, prerequisites: List[List[int]]) -> bool:
+              """
+              graph of adjency list:
+              If course u is a prerequisite of course v,
+              then the adjacency list of u will contain v.
+              """
+              # outdegree Adjacency list, the list stores nodes of outdegree
+              g_adj = [[] for _ in range(numCourses)]
+
+              # indegree array
+              a_indegree = [0 for _ in range(numCourses)]
+
+              for course, preq_course in prerequisites:
+                  g_adj[preq_course].append(course)
+                  a_indegree[course] += 1
+
+              q = collections.deque()
+              for course, indegree in enumerate(a_indegree):
+                  # indegree == 0 means no prequisites
+                  if indegree == 0:
+                      q.append(course)
+
+              unsheduled_cnt = numCourses
+              while q:
+                  cur = q.popleft()
+                  unsheduled_cnt -= 1
+                  # remove outdegree edges of node
+                  for nxt in g_adj[cur]:
+                      a_indegree[nxt] -= 1
+                      # indegree == 0 means no prequisites
+                      if a_indegree[nxt] == 0:
+                          q.append(nxt)
+
+              return unsheduled_cnt == 0
+          ```
+      * Approach2: DFS:
+        * Algorithm:
+          * For each of the nodes in our graph, we will run a depth first search in case that node was not already visited in some other node's DFS traversal.
+          * Suppose we are executing the depth first search for a node N. We will recursively traverse all of the neighbors of node N which have not been processed before.
+          * Once the processing of all the neighbors is done, we will add the node N to the stack. We are making use of a stack to simulate the ordering we need. When we add the node N to the stack, all the nodes that require the node N as a prerequisites (among others) will already be in the stack.
+        * Python Solution
+          ```python
+          class Status(object):
+            WHITE = 1  # default
+            GRAY =  2  # processing
+            BLACK = 3  # done
+
+          class Solution:
+              def findOrder(self, numCourses: int, prerequisites: List[List[int]]) -> List[int]:
+                  is_cyclic = False
+                  scheduled_course = []
+
+                  def dfs(course):
+                      # !!! don't forget use nonlocal
+                      nonlocal is_cyclic
+
+                      if is_cyclic:
+                          return
+
+                      visits[course] = Status.GRAY
+
+                      for next_course in g_adj[course]:
+                          if visits[next_course] == Status.WHITE:
+                              dfs(next_course)
+
+                          # graph cucle found
+                          elif visits[next_course] == Status.GRAY:
+                              is_cyclic = True
+                              return
+                      # done
+                      visits[course] = Status.BLACK
+                      scheduled_course.append(course)
+
+                  # Adjacency list of outdegree
+                  g_adj = [[] for _ in range(numCourses)]
+                  visits = [Status.WHITE for _ in range(numCourses)]
+
+                  for course, preq in prerequisites:
+                      g_adj[preq].append(course)
+
+                  # perhaps start from indegree 0 ??
+                  for course in range(numCourses):
+                      if visits[course] == Status.WHITE:
+                          dfs(course)
+
+                  return scheduled_course[::-1] if not is_cyclic else []
+          ```
+    * 210: Course Schedule II (M)
+      * Same Concept as 207, the only difference is to keep the scheduled courses list.
+      * Python Solution
         ```python
-        def canFinish(self, numCourses: int, prerequisites: List[List[int]]) -> bool:
-            """
-            graph of adjency list:
-            If course u is a prerequisite of course v,
-            then the adjacency list of u will contain v.
-            """
-            # outdegree Adjacency list, the list stores nodes of outdegree
+        def findOrder(self, numCourses: int, prerequisites: List[List[int]]) -> List[int]:
+
+            # graph Adjacency list, the list stores nodes of outdegree
             g_adj = [[] for _ in range(numCourses)]
 
             # indegree array
@@ -5215,114 +5356,26 @@ Table of Content
                 if indegree == 0:
                     q.append(course)
 
-            unsheduled_cnt = numCourses
+            scheduled_course = list()
             while q:
                 cur = q.popleft()
-                unsheduled_cnt -= 1
-                # remove outdegree edges of node
+                scheduled_course.append(cur)
+
                 for nxt in g_adj[cur]:
                     a_indegree[nxt] -= 1
-                    # indegree == 0 means no prequisites
                     if a_indegree[nxt] == 0:
                         q.append(nxt)
 
-            return unsheduled_cnt == 0
+            if len(scheduled_course) == numCourses:
+                return scheduled_course
+            else:
+                return []
         ```
-    * Approach2: DFS:
-      * Algorithm:
-        * For each of the nodes in our graph, we will run a depth first search in case that node was not already visited in some other node's DFS traversal.
-        * Suppose we are executing the depth first search for a node N. We will recursively traverse all of the neighbors of node N which have not been processed before.
-        * Once the processing of all the neighbors is done, we will add the node N to the stack. We are making use of a stack to simulate the ordering we need. When we add the node N to the stack, all the nodes that require the node N as a prerequisites (among others) will already be in the stack.
-      * Python Solution
-        ```python
-        class Status(object):
-          WHITE = 1  # default
-          GRAY =  2  # processing
-          BLACK = 3  # done
-
-        class Solution:
-            def findOrder(self, numCourses: int, prerequisites: List[List[int]]) -> List[int]:
-                is_cyclic = False
-                scheduled_course = []
-
-                def dfs(course):
-                    # !!! don't forget use nonlocal
-                    nonlocal is_cyclic
-
-                    if is_cyclic:
-                        return
-
-                    visits[course] = Status.GRAY
-
-                    for next_course in g_adj[course]:
-                        if visits[next_course] == Status.WHITE:
-                            dfs(next_course)
-
-                        # graph cucle found
-                        elif visits[next_course] == Status.GRAY:
-                            is_cyclic = True
-                            return
-                    # done
-                    visits[course] = Status.BLACK
-                    scheduled_course.append(course)
-
-                # Adjacency list of outdegree
-                g_adj = [[] for _ in range(numCourses)]
-                visits = [Status.WHITE for _ in range(numCourses)]
-
-                for course, preq in prerequisites:
-                    g_adj[preq].append(course)
-
-                # perhaps start from indegree 0 ??
-                for course in range(numCourses):
-                    if visits[course] == Status.WHITE:
-                        dfs(course)
-
-                return scheduled_course[::-1] if not is_cyclic else []
-        ```
-  * 210: Course Schedule II (M)
-    * Same Concept as 207, the only difference is to keep the scheduled courses list.
-    * Python Solution
-      ```python
-      def findOrder(self, numCourses: int, prerequisites: List[List[int]]) -> List[int]:
-
-          # graph Adjacency list, the list stores nodes of outdegree
-          g_adj = [[] for _ in range(numCourses)]
-
-          # indegree array
-          a_indegree = [0 for _ in range(numCourses)]
-
-          for course, preq_course in prerequisites:
-              g_adj[preq_course].append(course)
-              a_indegree[course] += 1
-
-          q = collections.deque()
-          for course, indegree in enumerate(a_indegree):
-              # indegree == 0 means no prequisites
-              if indegree == 0:
-                  q.append(course)
-
-          scheduled_course = list()
-          while q:
-              cur = q.popleft()
-              scheduled_course.append(cur)
-
-              for nxt in g_adj[cur]:
-                  a_indegree[nxt] -= 1
-                  if a_indegree[nxt] == 0:
-                      q.append(nxt)
-
-          if len(scheduled_course) == numCourses:
-              return scheduled_course
-          else:
-              return []
-      ```
-  * 269: Alien Dictionary (H)
+    * 269: Alien Dictionary (H)
 ### Bit Manipulation
 ### Union Field
   * 200: Number of Islands (M)
   * 305: Number of Islands II (H)
-### Graph
 ### Error List
   * Math:
     * 007: Reverse Integer
