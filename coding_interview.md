@@ -227,6 +227,173 @@ Table of Content
     * 018: 4Sum (M)
   * Other
 ### String
+  * Remove Duplicate
+    * 316: Remove Duplicate Letters (H)
+  * Encode and Decode:
+    * 271: Encode and Decode Strings (M)
+      * Approach1: Non-ASCII Delimiter
+      * Approach2: Chunked Transfer Encoding
+  * Number:
+    * 168: **Excel Sheet** Column Title (E)
+      * Ref:
+        * https://leetcode.com/problems/excel-sheet-column-title/discuss/51404/Python-solution-with-explanation
+      * Example:
+        ```txt
+        A   1     AA    26+ 1     BA  2×26+ 1     ...     ZA  26×26+ 1     AAA  1×26²+1×26+ 1
+        B   2     AB    26+ 2     BB  2×26+ 2     ...     ZB  26×26+ 2     AAB  1×26²+1×26+ 2
+        .   .     ..    .....     ..  .......     ...     ..  ........     ...  .............
+        .   .     ..    .....     ..  .......     ...     ..  ........     ...  .............
+        .   .     ..    .....     ..  .......     ...     ..  ........     ...  .............
+        Z  26     AZ    26+26     BZ  2×26+26     ...     ZZ  26×26+26     AAZ  1×26²+1×26+26
+
+        ABCD＝A×26³＋B×26²＋C×26¹＋D＝1×26³＋2×26²＋3×26¹＋4
+        ZZZZ＝Z×26³＋Z×26²＋Z×26¹＋Z＝26×26³＋26×26²＋26×26¹＋26
+        ```
+      * Approach1: Time:O(log(n)), Space:O(log(n))
+        * Time:
+          * Total O(log(n)) round
+        * Space:
+          * Each round will increase one character in the deque
+        * Python Solution:
+          ```python
+          def convertToTitle(self, n):
+            result = collections.deque()
+            ord_a = ord('A')
+
+            while n > 0:
+                pop = (n-1) % 26
+                n = (n-1) // 26
+                result.appendleft(chr(pop+ord_a))
+
+            return "".join(result)
+          ```
+    * 171: **Excel Sheet** Column Number (E)
+      * Approach1: Time:O(n), Space:O(1)
+        * Python Solution
+          ```python
+          def titleToNumber(self, s):
+            """
+            :type s: str
+            :rtype: int
+            """
+            ord_a = ord('A')
+            result = 0
+
+            # from n-1 to 0
+            for i in range(len(s)):
+                pop = ord(s[i]) - ord_a + 1
+                result = result * 26 + pop
+
+            return result
+          ```
+    * 013: **Romain** to Integer (E)
+      * Approach1: From right to left and keep cur max, Time:O(n), Space:O(1)
+        * Python Solution
+        ```python
+        def romanToInt(self, s):
+          if len(s) < 1:
+              return 0
+
+          scores = {'I': 1, 'V': 5, 'X': 10, 'L': 50, 'C': 100, 'D': 500, 'M': 1000}
+          cur_max = 0
+
+          # n-1
+          num = cur_max = scores[s[len(s)-1]]
+
+          # from n-2 to 0
+          for i in range(len(s)-2, -1, -1):
+              symbol = s[i]
+              score = scores[symbol]
+              if score >= cur_max:
+                  cur_max = max(cur_max, score)
+                  num += score
+              else:
+                  num -= score
+
+          return num
+        ```
+    * 012: Integer to **Roman** (M)
+      * Approach1, O(log(n)) ??, O(1)
+        * Time:
+        * Space:
+        * Python Solution
+          ```python
+          def intToRoman(self, num):
+            symbols = [ "M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I" ]
+            values = [ 1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1 ]
+            res = ""
+            while num:
+                for symbol, val in zip(symbols, values):
+                    cnt = num//val  # symbol cnt
+                    if not cnt:
+                        continue
+                    res += cnt * symbol
+                    num %= val
+
+            return res
+          ```
+    * 246:**Strobogrammatic** Number (E)
+      * Approach1, Time:O(n), Space:O(1)
+        * Python Solution
+          ```python
+          def isStrobogrammatic(self, num):
+            d = {'6':'9', '9':'6', '8':'8', '1':'1', '0':'0'}
+
+            s = str(num)
+            start, end = 0, len(s) - 1
+            ret = True
+            while start <= end:
+                # if start == end:
+                # the valid cases would be '8':'8', '1':'1', '0':'0'
+                if num[start] not in d or d[num[start]] != num[end]:
+                    ret = False
+                    break
+
+                end -= 1
+                start += 1
+
+            return ret
+          ```
+    * 247 **Strobogrammatic** Number II (M)
+      * Approach1, Bottom up iterative: Time: O(nk^n), Space:O(nk^n)
+        * Time: O(nk^n)
+          * About O(k^n) combinations
+          * each combination cost O(n) to copy
+        * Space: O(nk^n)
+          * About O(k^n) combinations
+          * each combination needs O(n) space
+        * Python Solution:
+          ```python
+            def findStrobogrammatic(self, n):
+            if n < 1:
+                return ['']
+
+            d_non_final = {'6':'9', '9':'6', '8':'8', '1':'1', '0':'0'}
+            d_final = d_non_final.copy()
+            d_final.pop('0') # exclude 0
+
+            if n % 2:
+                comb = ['0', '1', '8']
+            else:
+                comb = ['']  # need to put an empty string
+
+            # 0 to n//2-1
+            for i in range(n//2):
+                d = d_non_final
+                if i == n//2 - 1:
+                    d = d_final
+
+                next_comb = []
+                for s in comb:
+                    for key, val in d.items():
+                        next_comb.append(f'{key}{s}{val}')
+
+                comb = next_comb
+
+            return comb
+          ```
+    * 248 **Strobogrammatic** Number II (H)
+    * 273: Integer to **English Words** (H)
   * **Edit Distance**
     * 161: One Edit Distance (M)
        * Notice the **zero edit distance cases**.
@@ -819,28 +986,29 @@ Table of Content
      * 345:	Reverse **Vowels** of a String (E)
        * Approach1: Hash Table, Time:O(n), Space:O(k)
        * Python Solution
-       ```python
-        def reverseVowels(self, s: str) -> str:
-          vowels = collections.Counter('aeiouAEIOU')
-          l = list(s)
-          start,end = 0, len(l) - 1
+        ```python
+          def reverseVowels(self, s: str) -> str:
+            vowels = collections.Counter('aeiouAEIOU')
+            l = list(s)
+            start,end = 0, len(l) - 1
 
-          while start < end:
-              while start < end and l[start] not in vowels:
-                  start += 1
+            while start < end:
+                while start < end and l[start] not in vowels:
+                    start += 1
 
-              while start < end and l[end] not in vowels:
-                  end -= 1
+                while start < end and l[end] not in vowels:
+                    end -= 1
 
-              if start >= end:
-                  break
+                if start >= end:
+                    break
 
-              l[start], l[end] = l[end], l[start]
-              start +=1
-              end -= 1
+                l[start], l[end] = l[end], l[start]
+                start +=1
+                end -= 1
 
-         return "".join(l)
-       ```
+          return "".join(l)
+        ```
+     * 358: Rearrange String k Distance Apart (H)
   * **Isomorphism** and **Pattern**
      * 205: **Isomorphic** Strings (E)
         * Example:
@@ -976,6 +1144,95 @@ Table of Content
 
           return d.values()
          ```
+  * Deduction:
+    * 38: Count and Say (E)
+      * Approach1:
+        * Python Solution
+          ```python
+          def countAndSay(self, n: int) -> str:
+          cur = '1'
+          for i in range(2, n+1):
+              tmp = ''
+              start = 0
+              while start < len(cur):
+                  end = start
+                  cnt = 0
+
+                  while end < len(cur) and cur[end] == cur[start]::
+                      cnt += 1
+                      end += 1
+
+                  tmp += f'{cnt}{cur[start]}'
+                  start = end
+
+              cur = tmp
+
+          return cur
+          ```
+    * 293: Flip Game (E)
+        * python solution
+        ```python
+        def generatePossibleNextMoves(self, s: str) -> List[str]:
+          output = list()
+          # from 0 to n-2
+          for i in range(len(s)-1):
+              if s[i] == s[i+1] == '+':
+                  output.append(f"{s[0:i]}--{s[i+2:]}")
+          return output
+        ```
+    * 294: Flip Game II (M)
+      * Approach1: backtracking: Time: O(n!!), Space: O(n*2)
+        * **Double factorial**: (n-1) * (n-3) * (n-5) * ... 1=
+         * python solution
+           ```python
+           def canWin(self, s: str) -> bool:
+             # from 0 to len(s)-2
+             for i in range(0, len(s)-1):
+                 # the 1st makes the flip.
+                 if s[i] == s[i+1] == '+':
+                     first_flip_s = f"{s[0:i]}--{s[i+2:]}"
+
+                     # the 2nd person makes the flip.
+                     if not self.canWin(first_flip_s):
+                         # 1st person wins the game
+                         return True
+
+             # can not make any flips or 2nd person always wins
+             # this is end condition
+             return False
+           ```
+      * Approach1: backtracking with memo
+        * time complexity:
+          * number_of_distinct_strings * each_unique_string_first_time_computation_contribution
+            * O(2^n) * n (not sure)
+        * space complexity:
+          * O(n^2)
+        * python solution
+           ```python
+           def canWin(self, s: str) -> bool:
+             memo = dict()
+
+             def _canWin(self, s):
+                 if s in memo:
+                     return memo[s]
+
+                 # from 0 to len(s)-2
+                 for i in range(0, len(s)-1):
+                     if s[i] == s[i+1] == '+':
+                         first_flip_s = f"{s[0:i]}--{s[i+2:]}"
+                         # the 2nd flip
+                         if not self.canWin(first_flip_s):
+                             # first person wins the game
+                             memo[s] = True
+                             return True
+
+                 # can not make any flips or 2nd person always wins
+                 # this is end condition
+                 memo[s] = False
+                 return False
+
+             return _canWin(self, s)
+           ```
   * Other
      * 387: First Unique Character in a String (E)
        * Approach1: Use Hash Table to count the occurrence, Time: O(n), Space: O(c)
@@ -1066,70 +1323,6 @@ Table of Content
 
             return True
           ```
-     * 293: Flip Game (E)
-        * python solution
-        ```python
-        def generatePossibleNextMoves(self, s: str) -> List[str]:
-          output = list()
-          # from 0 to n-2
-          for i in range(len(s)-1):
-              if s[i] == s[i+1] == '+':
-                  output.append(f"{s[0:i]}--{s[i+2:]}")
-          return output
-        ```
-     * 294: Flip Game II (M)
-       * Approach1: backtracking: Time: O(n!!), Space: O(n*2)
-         * **Double factorial**: (n-1) * (n-3) * (n-5) * ... 1=
-          * python solution
-            ```python
-            def canWin(self, s: str) -> bool:
-              # from 0 to len(s)-2
-              for i in range(0, len(s)-1):
-                  # the 1st makes the flip.
-                  if s[i] == s[i+1] == '+':
-                      first_flip_s = f"{s[0:i]}--{s[i+2:]}"
-
-                      # the 2nd person makes the flip.
-                      if not self.canWin(first_flip_s):
-                          # 1st person wins the game
-                          return True
-
-              # can not make any flips or 2nd person always wins
-              # this is end condition
-              return False
-            ```
-       * Approach1: backtracking with memo
-         * time complexity:
-           * number_of_distinct_strings * each_unique_string_first_time_computation_contribution
-             * O(2^n) * n (not sure)
-         * space complexity:
-           * O(n^2)
-         * python solution
-            ```python
-            def canWin(self, s: str) -> bool:
-              memo = dict()
-
-              def _canWin(self, s):
-                  if s in memo:
-                      return memo[s]
-
-                  # from 0 to len(s)-2
-                  for i in range(0, len(s)-1):
-                      if s[i] == s[i+1] == '+':
-                          first_flip_s = f"{s[0:i]}--{s[i+2:]}"
-                          # the 2nd flip
-                          if not self.canWin(first_flip_s):
-                              # first person wins the game
-                              memo[s] = True
-                              return True
-
-                  # can not make any flips or 2nd person always wins
-                  # this is end condition
-                  memo[s] = False
-                  return False
-
-              return _canWin(self, s)
-            ```
      * 087: Scramble String (H)
 ### Array
   * **Check Duplicate**
@@ -3822,6 +4015,9 @@ Table of Content
                 self.stack.append(current)
                 current = current.left
       ```
+  * 098: Validate Binary Search Tree (M)
+  * 112: Path Sum (E)
+  * 113: Path Sum II (M)
 ### Trie (Prefix Tree)
   * 208: Implement Trie (M)
     * Serach word and search prefix
@@ -5159,50 +5355,86 @@ Table of Content
       * This is the problem of Eulerian trail
         * vertex: airport
         * edge: ticket
-      * Approach1: DFS Recursive, Hierholzer's algorithm, Time:O(V+E), Space:O(V+E)
-        * FAQ
-          * how do you make sure there is no dead end since you always choose the "smallest" arrivals (min heap) ?
-            * Starting at the first node, **we can only get stuck at the ending point, since every node except for the first and the last node has even number of edges, when we enter a node we can always get out**.
-            * Now we are at the destination
-              * case1: if all edges are visited, we are done, and the dfs returns to the very first state.
-              * case2: Otherwise** we need to "insert" the unvisited loop into corresponding position, and in the dfs method, it returns to the node with extra edges, **starts another recursion and adds the result before the next path**. This process continues until all edges are visited.
-            * Example:
-              * A Graph:, start is A, end is E
-                * A -> [B, E]  # start vertex
-                * B -> [C]
-                * C -> [A]
-                * E -> []      # end vertex
-              * Case 1:
-                * s1: A
-                * s2: A -> **B->C->A->E** (Iterative B end)
-              * Case 2:
-                * s1: A
-                * s2: A -> **E** (iterative E end)
-                * s2: A -> **B->C->A** (Iterative B end) -> E
+      * FAQ
+        * how do you make sure there is no dead end since you always choose the "smallest" arrivals (min heap) ?
+          * Starting at the first node, **we can only get stuck at the ending point, since every node except for the first and the last node has even number of edges, when we enter a node we can always get out**.
+          * Now we are at the destination
+            * case1: if all edges are visited, we are done, and the dfs returns to the very first state.
+            * case2: Otherwise** we need to "insert" the unvisited loop into corresponding position, and in the dfs method, it returns to the node with extra edges, **starts another recursion and adds the result before the next path**. This process continues until all edges are visited.
+          * Example:
+            * A Graph:, start is A, end is E
+              * A -> [B, E]  # start vertex
+              * B -> [C]
+              * C -> [A]
+              * E -> []      # end vertex
+            * Case 1:
+              * s1: A
+              * s2: A -> **B->C->A->E** (Iterative B end)
+            * Case 2:
+              * s1: A
+              * s2: A -> **E** (iterative E end)
+              * s2: A -> **B->C->A** (Iterative B end) -> E
+      * Approach1: Hierholzer's algorithm, DFS Recursive, Time:O(Elog(E)), Space:O(E)
+        * Time: O(ELog(E))
+          * Generate Adjacency List: O(ELog(E))
+          * Traverse every edge: O(ELog(E))
+        * Space: O(E)
+          * Adjacency List: O(E)
+          * Recursive Call: O(E)
         * Python Solution:
           ```python
           def findItinerary(self, tickets: List[List[str]]) -> List[str]:
-
             def _dfs(departure):
                 arrival_heap = flights[departure]
                 while arrival_heap:
                     _dfs(heapq.heappop(arrival_heap))
-                path.appendleft(departure)
-            """
-            Hierholzer's algorithm for Eulerian path
-            Since the problem asks for lexical order smallest solution,
-            we can put the neighbors in a min-heap
-            """
+
+                # apeendleft to avoid unnecessary reverse
+                route.appendleft(departure)
+
             flights = collections.defaultdict(list)
-            path = collections.deque()
+            route = collections.deque()
 
             for departure, arrivial in tickets:
                 arrival_heap = flights[departure]
+                # put the neighbors in a min-heap for lexical order
                 heapq.heappush(arrival_heap, arrivial)
 
+            # start from JFK
             _dfs("JFK")
 
-          return path
+          return route
+          ```
+      * Approach2: Hierholzer's algorithm, DFS Iterative Time:O(Elog(E)), Space:O(E)
+        * Time: O(ELog(E))
+          * Generate Adjacency List: O(ELog(E))
+          * Traverse every edge: O(ELog(E))
+        * Space: O(E)
+          * Adjacency List: O(E)
+          * Stack: O(E)
+        * Python Solution
+          ```python
+          def findItinerary(self, tickets: List[List[str]]) -> List[str]:
+            flights = collections.defaultdict(list)
+
+            for departure, arrivial in tickets:
+                arrival_heap = flights[departure]
+                # put the neighbors in a min-heap for lexical order
+                heapq.heappush(arrival_heap, arrivial)
+
+            stack = ["JFK"]  # start from JFK
+            route = collections.deque()
+
+            while stack:
+                departure = stack[-1]
+                arrival_heap = flights[departure]
+                if arrival_heap:
+                    stack.append(heapq.heappop(arrival_heap))
+                else:
+                    # apeendleft to avoid unnecessary reverse
+                    route.appendleft(stack.pop())
+
+            return route
           ```
   * Eulerian circuit
   * Hamilton path
@@ -5386,6 +5618,9 @@ Table of Content
     * Anagram
       * 049: Group Anagrams (M)
       * 249: Group Shifted Strings (M)
+    * Number and carry:
+      * 168: Excel Sheet Column Title (E)
+      * 013: Romain to Integer (E)
     * Other:
       * 014: Longest Common Prefix (E)
       * 294: Flip Game II (M)
