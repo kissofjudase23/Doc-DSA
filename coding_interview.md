@@ -313,9 +313,9 @@ Table of Content
           return num
         ```
     * 012: Integer to **Roman** (M)
-      * Approach1, O(log(n)) ??, O(1)
-        * Time:
-        * Space:
+      * Approach1
+        * Time: ??
+        * Space: ??
         * Python Solution
           ```python
           def intToRoman(self, num):
@@ -393,7 +393,11 @@ Table of Content
             return comb
           ```
     * 248 **Strobogrammatic** Number II (H)
+      * Write a function to count the total strobogrammatic numbers that exist in the range of low <= num <= high.
     * 273: Integer to **English Words** (H)
+    * 065: Valid Number (H)
+  * Text
+    * 068: Text Justification (H)
   * **Edit Distance**
     * 161: One Edit Distance (M)
        * Notice the **zero edit distance cases**.
@@ -450,7 +454,6 @@ Table of Content
           # exactly one edit distance
           return True
         ```
-    * 072: Edit Distance (H)
   * **SubString**
      * 028: Implement **strStr** (E)
        * Find Sub-String
@@ -561,15 +564,263 @@ Table of Content
 
             return res
            ```
-     * 003:	Longest Substring Without Repeating Characters (M)
-     * 395: Longest Substring with At Least K Repeating Characters (M)
-     * 030: Substring with Concatenation of All Words (H)
+     * 003:	Longest Substring **Without Repeating** Characters (M)
+       * Approach1: Brute Force, Time:O(n^2), Space:O(n)
+         * Iterative all pairs and use hash table to keep previous values
+           * [1], [1,2], [1,2,3], # start with index 0
+           * [2], [2,3]           # start with index 1
+           * [3]                  # start with index 2
+         * Python Solution:
+          ```python
+          def lengthOfLongestSubstring(self, s: str) -> int:
+              max_len = 0
+              for start in range(len(s)):
+                  d = dict()
+                  cur_len = 0
+
+                  for end in range(start, len(s)):
+                      if s[end] in d:
+                          break  # find duplicate
+
+                      cur_len += 1
+                      d[s[end]] = True
+                      max_len = max(max_len, cur_len)
+
+              return max_len
+          ```
+       * Approach2: Sliding Window, Time:O(n)~O(2n), Space:O(n)
+         * Use hash table to keep  occurrence  of characters
+         * For the window [start, end]
+           * if s[end] is not in hash table.
+             * Move end to end + 1 to extend window
+             * Try to update maximum window len
+           * else
+             * Move start to start + 1 to move window
+           **Note**:
+             * End does not need to be move backward, since the window size will be smaller than the current max
+             * So the key concept is how to forward the start.
+         * Worst case: O(2n)
+           * [a,a,a,a,a,a,a]
+           * Each character need to be visited twice by start and end.
+         * Python Solution:
+           ```python
+           def lengthOfLongestSubstring(self, s: str) -> int:
+              max_len = start = end = 0
+              d = dict()
+              while end < len(s):
+                  if s[end] not in d:
+                      d[s[end]] = True
+                      max_len = max(end-start+1, max_len)
+                      end += 1         # forward end to extend window size
+                  else:
+                      d.pop(s[start])  # key in dict is unique
+                      start += 1       # forward start to move window
+
+              return max_len
+           ```
+       * Approach3: Sliding Window Optimized, Time:O(n), Space:O(n)
+         * All combinatinons are:
+           * start with index_0
+           * start with index_1
+           * ...
+           * start with index_n-1
+         * For the window [start, end]
+           * Use hash table to keep index of each character.
+           * if s[end] is not in hash table.
+             * Move end to end + 1 to extend window
+           * else
+             * Move start to hash[s[end]] + 1 to move window
+               * skip from start + 1 to s[end]
+             * Example: ***
+                ```txt
+                idx 0  1  2  3  4  5  6
+                val a  x  b  x  x  x  b
+                    s  s1 s2 s3       end
+                s should jump to s3.
+                s1, s2 can be skipped, since their max window size would be
+                smaller than the [s:end]
+                ```
+          * **Note**:
+             * Dnd does not need to be move backwarded, since the window size will be smaller than the current max
+             * So the key concept is how to forward the start.
+          Python Solution:
+            ```python
+            def lengthOfLongestSubstring(self, s: str) -> int:
+              max_len = start = 0
+              d = dict()
+
+              for end, c in enumerate(s):
+                  # backward does not make sense
+                  # for example: axxbxxbxxa, backward to first a cause error
+                  if c in d and d[c] >= start:
+                      start = d[c] + 1
+
+                  max_len = max(max_len, end-start+1)
+                  d[c] = end
+
+              return max_len
+            ```
      * 076: Minimum Window Substring (H)
+       * Approach1: Brute Force: Time:O(m^2+n), Space:O(m+n)
+         * Time:
+           * Generate Hash Table pattern: O(n)
+           * Compare all pairs : O(m^2)
+         * Find all paris
+           * [1], [1,2], [1,2,3], # start with index 0
+           * [2], [2,3]           # start with index 1
+           * [3]                  # start with index 2
+         * Python Solution:
+           ```python
+           def minWindow(self, s, t):
+            if not t or not s:
+                return ""
+
+            # substring length, start and end
+            res = [float('inf'), None, None]
+            counter_t = collections.Counter(t)
+            desired_formed = len(counter_t)
+
+            for start in range(len(s)):
+                formed = 0
+                counter_s = collections.defaultdict(int)
+                for end in range(start, len(s)):
+                    c = s[end]
+
+                    counter_s[c] += 1
+                    if counter_s[c] == counter_t[c]:
+                        formed += 1
+
+                    if formed == desired_formed:
+                        w_len = end - start + 1
+                        # print(start, end, s[start:end+1])
+                        if w_len < res[0]:
+                            res[0], res[1], res[2] = w_len, start, end
+
+                        break # break since we want to find the minimum one
+
+             return "" if res[0] == float('inf') else s[res[1]: res[2]+1]
+           ```
+       * Approach2: Sliding Window: Time:O(m+n), Space:O(m)
+         * Time: O(m+n)
+           * Generate Hash Table for Pattern: O(n)
+           * Scan Txt string: O(m)
+         * Space: O(m+n)
+           * Hash Table for Pattern: O(m)
+           * Hash Table for txt: O(m)
+         * Ref:
+           * https://leetcode.com/articles/minimum-window-substring/
+         * Algo:
+           * All combinatinons are:
+             * start with index_0
+             * start with index_1
+             * ...
+             * start with index_n-1
+           * Steps:
+             * s1: We start with two pointers, start and end initially pointing to the first element of the string s.
+             * s2: We use the end pointer to expand the window until we get a desirable window i.e. a window that contains all of the characters of t.
+               * **This is the minimum window starting with current start**
+             * s3: Once we have a window with all the characters, we can move the left pointer ahead one by one. If the window is still a desirable one we keep on updating the minimum window size.
+               * **Try to find other minimum window with other start**
+             * s4: If the window is not desirable any more, we repeat step2 onwards.
+           * example for step3:
+              ```txt
+              idx 0  1  2  3  4  5
+              val x  x  x  x  x  x
+                  s1 s2          end
+
+              * Assume the minimum desired window starting from s1 is s[s1:end+1], if [s2:end+1] is also a desired window, then [s2:end+1] is the minimum window starting with s2
+                * Proof: If [s2:end+1] is not, then [s1:end+1] will not be the minimum one.
+              ```
+           * Python Solution
+              ```python
+              def minWindow(self, s, t):
+                if not t or not s:
+                    return ""
+
+                # substring length, start and end
+                res = [float('inf'), None, None]
+                counter_t = collections.Counter(t)
+
+                """
+                formed is used to keep track of how many unique characters in t are present in the
+                current window in its desired frequency.
+                e.g. if t is "AABC" then the window must have two A's, one B and one C.
+                    Thus formed would be = 3 when all these conditions are met.
+                """
+                cur_formed = 0
+                desired_formed = len(counter_t)
+                counter_s = collections.defaultdict(int)
+                start = end = 0
+
+                while end < len(s):
+                    c = s[end]
+
+                    if c in counter_t:
+                        counter_s[c] += 1
+                        if counter_s[c] == counter_t[c]:
+                            cur_formed += 1
+
+                    while start <= end and cur_formed == desired_formed:
+                        c_start = s[start]
+
+                        w_len = end - start + 1
+                        if w_len < res[0]:
+                            res[0], res[1], res[2] = w_len, start, end
+
+                        if c_start in counter_t:
+                            counter_s[c_start] -= 1
+                            if counter_s[c_start] < counter_t[c_start]:
+                                cur_formed -= 1
+
+                        start += 1
+
+                    end += 1
+
+
+                return "" if res[0] == float('inf') else s[res[1]: res[2]+1]
+              ```
+     * 030: Substring with Concatenation of All Words (H)
+     * 395: Longest Substring with **At Least K Repeating** Characters (M)
      * 340: Longest Substring with At Most K Distinct Characters (H)
      * 159: Longest Substring with At Most Two Distinct Characters (H)
   * **Palindrome**
-     * 009: Palindrome Number (E)
-     * 125:	Valid Palindrome (E)
+     * 009: Palindrome **Number** (E)
+       * Approach1: Covert to string, Time:O(n), Space:O(n)
+         * Python Solution
+          ```python
+          def isPalindrome(self, x: int) -> bool:
+            s = str(x)
+            left, right = 0, len(s)-1
+
+            res = True
+            while left < right:
+                if s[left] != s[right]:
+                    res = False
+                    break
+
+                left += 1
+                right -=1
+
+            return res
+          ```
+       * Approach2: Reverse the interger, Time:O(log(n)), Space:O(1)
+         * Python Solution
+            ```python
+            def isPalindrome(self, x: int) -> bool:
+              if x < 0:
+                  return False
+
+              ref_x = x
+
+              rev = 0
+              while x:
+                  pop = x % 10
+                  x = x // 10
+                  rev = rev * 10 + pop
+
+              return rev == ref_x
+            ```
+     * 125:	**Valid** Palindrome (E)
        * Approach1: Time O(n), Space O(1)
          * Python Solution
           ```python
@@ -592,7 +843,7 @@ Table of Content
                   r -= 1
               return True
           ```
-     * 266:	Palindrome Permutation (E)
+     * 266:	Palindrome **Permutation** (E)
        * Approach1: Time O(n), Space O(c)
          * Python Solution
             ```python
@@ -772,8 +1023,8 @@ Table of Content
                return len(stack) == 0
            ```
      * 022: Generate Parentheses (M)
-     * 241: Different Ways to Add Parentheses (M)
      * 032:	Longest Valid Parentheses (H)
+     * 241: Different Ways to Add Parentheses (M)
      * 301: Remove Invalid Parentheses (H)
   * **Subsequence**
      * Longest Common Subsequence (LCS)
@@ -1685,64 +1936,7 @@ Table of Content
             * Sorting costs O(nlog(n))
           * step2:
             * Find the H-Index costs O(log(n))
-            * please 275: H-Index II
-    * 275: H-Index II (M)
-      * Approach1: Linear search: O(n)
-        * Concept
-          * Sort the citations array in **ascending order** (draw it).
-          * c = citations[i]. We would know that the number of articles whose citation number is higher than c would be n - i - 1.
-          * And together with the current article, **there are n - i articles that are cited at least c times**.
-        * Python Solution
-          ```python
-          def hIndex(self, citations: List[int]) -> int:
-            max_cita = len(citations)
-            h_idx = 0
-            for idx, cita in enumerate(citations):
-                if cita >= (max_cita - idx):
-                    h_idx = max_cita - idx
-                    break
-
-            return h_idx
-          ```
-      * Approach2: **Binary Search**: O(log(n))
-        * Ref:
-          * https://leetcode.com/problems/h-index-ii/discuss/71063/Standard-binary-search
-          * https://leetcode.com/problems/h-index-ii/solution/
-        * About final condition **max_cita - (right + 1)** = max_cita - left
-          * The algorithm will jump out of while loop. We know for binary search, if it cannot find the target, **pointers left and right will be right besides the location which should be the target**.
-              ```text
-                  left
-                    v
-              0, 1, 4, 5, 7
-                 ^
-              right
-              ```
-          * For the case, (left, **right, new_left**)
-            * Old range can not satisfied the requirement.
-          * For the case, (**new_right, left**, right)
-            * Old range can satisfied the requirement.
-        * Python Solution
-          ```python
-          def hIndex(self, citations: List[int]) -> int:
-            max_cita = len(citations)
-            left = 0
-            right = max_cita - 1
-
-            while left <= right:
-                mid = (left + right) // 2
-                if citations[mid] == (max_cita - mid):
-                    return max_cita - mid
-
-                # challenge fail, try to find lower h-index
-                elif citations[mid] < (max_cita - mid):
-                    left = mid + 1
-
-                # challenge success, try to find higher h-index
-                else:
-                    right = mid - 1
-
-            return max_cita - (right+1)
-          ```
+            * please refer 275: H-Index II
   * **Best Time to Buy and Sell Stock**
     * Ref:
       * [General solution](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/discuss/108870/Most-consistent-ways-of-dealing-with-the-series-of-stock-problems)
@@ -2071,7 +2265,20 @@ Table of Content
     * 352: Data Stream as Disjoint Intervals (H)
   * **Subarray**
     * 053: Maximum Subarray (E)
-       * Approach1: Kadane's Algorithm, O(n)
+       * Approach1: Brute Force, O(n^2)
+         * Python Solution
+            ```python
+            def maxSubArray(self, nums: List[int]) -> int:
+              max_sum = 0
+              for start in range(len(nums)):
+                  max_sum_so_far = 0
+                  for end in range(start, len(nums)):
+                      max_sum_so_far += nums[end]
+                      max_sum = max(max_sum_so_far, max_sum)
+
+              return max_sum
+            ```
+       * Approach2: Kadane's Algorithm, O(n)
          * Python Solution
             ```python
             def max_sub_array(self, nums: List[int]) -> int:
@@ -2084,7 +2291,8 @@ Table of Content
                 return max_sum
           ```
     * 152: Maximum **Product** Subarray (M)
-      * Approach1: Kadane's Algorithm like algo, Time: O(n), Space: O(1)
+      * Approach1: Brute Force, Time:O(n^2)
+      * Approach2: Kadane's Algorithm like algo, Time: O(n), Space: O(1)
         * The concept is just like 53: maximum subarray, but need to notice negative value in the array.
         * Python Solution
           ```python
@@ -2105,7 +2313,7 @@ Table of Content
           ```
     * 325: Maximum Size Subarray Sum **Equals k** (M)
       * Find the maximum length of a subarray that sums to k
-      * Approach1: Brute force, O(n^2)m, Space: O(1)
+      * Approach1: Brute force, O(n^2), Space: O(1)
         * List all pairs of acc and keep the max
         * Python Solution
           ```python
@@ -2146,7 +2354,7 @@ Table of Content
             return max_len
           ```
     * 560: Subarray Sum **Equals K**, (M) ***
-      * Approach1: brute force, O(n^2)m, Space: O(1)
+      * Approach1: brute force, O(n^2), Space: O(1)
         * List all pairs of acc and keep the max
         * python solution
           ```python
@@ -2713,7 +2921,137 @@ Table of Content
     * 723：Candy Crush (M)
 ### Matrix
 ### Binary Search
-  * 275: H-Index II (M) (Array)
+  * 275: H-Index II (M)
+    * Approach1: Linear search: O(n)
+      * Concept
+        * Sort the citations array in **ascending order** (draw it).
+        * c = citations[i]. We would know that the number of articles whose citation number is higher than c would be n - i - 1.
+        * And together with the current article, **there are n - i articles that are cited at least c times**.
+      * Python Solution
+        ```python
+        def hIndex(self, citations: List[int]) -> int:
+          max_cita = len(citations)
+          h_idx = 0
+          for idx, cita in enumerate(citations):
+              if cita >= (max_cita - idx):
+                  h_idx = max_cita - idx
+                  break
+
+          return h_idx
+        ```
+    * Approach2: **Binary Search**: O(log(n))
+      * Ref:
+        * https://leetcode.com/problems/h-index-ii/discuss/71063/Standard-binary-search
+        * https://leetcode.com/problems/h-index-ii/solution/
+      * About final condition **max_cita - (right + 1)** = max_cita - left
+        * The algorithm will jump out of while loop. We know for binary search, if it cannot find the target, **pointers left and right will be right besides the location which should be the target**.
+            ```text
+                left
+                  v
+            0, 1, 4, 5, 7
+               ^
+            right
+            ```
+        * For the case, (left, **right, new_left**)
+          * Old range can not satisfied the requirement.
+        * For the case, (**new_right, left**, right)
+          * Old range can satisfied the requirement.
+      * Python Solution
+        ```python
+        def hIndex(self, citations: List[int]) -> int:
+          max_cita = len(citations)
+          left = 0
+          right = max_cita - 1
+
+          while left <= right:
+              mid = (left + right) // 2
+              if citations[mid] == (max_cita - mid):
+                  return max_cita - mid
+
+              # challenge fail, try to find lower h-index
+              elif citations[mid] < (max_cita - mid):
+                  left = mid + 1
+
+              # challenge success, try to find higher h-index
+              else:
+                  right = mid - 1
+
+          return max_cita - (right+1)
+        ```
+  * 004: Median of Two Sorted Arrays (H)
+    * Approach1: Merge and Find, Time:O(m+n), Space:O(m+n)
+      * Time: O(m+n)
+        * Merge takes O(m+n)
+      * Space: O(m+n)
+        * Extra space to keep merged array
+    * Approach2: Binary Search, Time:O(log(min(m,n))), Space:O(1)
+      * Ref:
+        * [Concept](https://www.youtube.com/watch?v=LPFhl65R7ww)
+        * [Implementation](https://leetcode.com/problems/median-of-two-sorted-arrays/discuss/2481/Share-my-O(log(min(mn)))-solution-with-explanation)
+      * ![median_of_2](./image/algo/median_of_two.png)
+      * Python Solution:
+        ```python
+        MAX_VAL = float('inf')
+        MIN_VAL = -float('inf')
+
+        def findMedianSortedArrays(self, nums1: List[int], nums2: List[int]) -> float:
+            n1 = len(nums1)
+            n2 = len(nums2)
+
+            if n1 > n2:
+                # keep n1 shorter
+                nums1, nums2 = nums2, nums1
+                n1, n2 = n2, n1
+
+            """
+            This number means how many number is smaller than the median:
+            0:  0 elements are smaller than the median
+            n1: all elements are smaller than the median
+            ( total n + 1 cases starting from 0 to n )
+            """
+            left_b = 0
+            right_b = n1
+
+            """
+            The half len of merged array (merge nums1 and nums2)
+            +1 to let left side of the merged array has more than one element when the length is odd.
+            p_n1 + p_n2 = (n1 + n2 + 1) // 2
+            """
+            half_len = (n1 + n2 + 1) // 2
+
+            while left_b <= right_b:
+                p_n1 = (left_b + right_b)//2
+                # p_n1 + p_n2 = (n1 + n2 + 1) // 2
+                p_n2 = half_len - p_n1
+                """
+                p_n1 == 0 means nothing is there on left side. Use -INF as sentinel
+                p_n1 == n1 means there is nothing on right side. Use +INF as sentinel
+                for example, if nums1 = [1, 2, 3]
+                case0: [-INF], [1, 2, 3]  # partition_n1 == 0
+                case1: [1], [2,3]
+                case2: [1, 2], [3]
+                case3: [1, 2, 3], [+INF]  # partition_n1 == n1
+                """
+                max_left_n1 = MIN_VAL if p_n1 == 0 else nums1[p_n1-1]  # case0
+                min_right_n1 = MAX_VAL if p_n1 == n1 else nums1[p_n1]  # case3
+
+                max_left_n2 = MIN_VAL if p_n2 == 0 else nums2[p_n2-1]
+                min_right_n2 = MAX_VAL if p_n2 == n2 else nums2[p_n2]
+
+                if (max_left_n1 <= min_right_n2 and max_left_n2 <= min_right_n1):
+                    if (n1 + n2) % 2 == 0:  # even number of elements
+                        return (max(max_left_n1, max_left_n2) + min(min_right_n1, min_right_n2))/2
+                    else:
+                        return float(max(max_left_n1, max_left_n2))
+
+                elif max_left_n1 > min_right_n2:
+                    # shrink n1 left part
+                    right_b = p_n1 - 1
+
+                else: # max_left_n2 > min_right_n1
+                    # shrink n2 left part, that is, increase n1 left part
+                    left_b = p_n1 + 1
+            ```
 ### Linked List
 * **Techiniques**:
   * The "**Runner**"
@@ -2921,11 +3259,10 @@ Table of Content
             return dummy.next
         ```
   * 025: **Reverse** Nodes in **k-Group** (H)
-    * Approach1: Dummy Node, Time:O(n), Space:O(1)
+    * Approach1: Two Passes, Time:O(n), Space:O(1)
       * Python Solution
         ```python
         def reverseKGroup(self, head: ListNode, k: int) -> ListNode:
-
           if not head or k <= 1:
             return head
 
@@ -2956,6 +3293,39 @@ Table of Content
 
           return dummy.next
         ```
+    * Approach2: One Pass, Time:O(n), Space:O(1)
+      * Python Solution
+      ```python
+      def reverseKGroup(self, head: ListNode, k: int) -> ListNode:
+        if not head or k <= 1:
+            return head
+
+        prev_end = dummy = ListNode(0)
+        runner = dummy.next = head
+        n = 0
+
+        while runner:
+            n += 1
+            if n % k == 0:
+                prev = prev_end
+                cur = prev_end.next
+
+                for _ in range(k):
+                    nxt = cur.next
+                    cur.next = prev
+                    prev, cur = cur, nxt
+
+                next_prev_end = prev_end.next
+                prev_end.next = prev
+                runner = next_prev_end.next = cur
+                prev_end = next_prev_end
+
+                # update runner
+            else:
+                runner = runner.next
+
+        return dummy.next
+      ```
   * 024: **Swap** Nodes in **Pair** (M) *
     * Approach1: Dummy Node, Time:O(n), Space:O(1)
       * Use 3 pointers, prev ,current and next.
@@ -4020,12 +4390,240 @@ Table of Content
   * 113: Path Sum II (M)
 ### Trie (Prefix Tree)
   * 208: Implement Trie (M)
-    * Serach word and search prefix
+    * Approach1: Iterative
+      * Insert: O(k)
+      * Search: O(k)
+      * Python Solution:
+        ```python
+        class Node(object):
+          def __init__(self):
+              self.children = collections.defaultdict(Node)
+              self.end_of_word = False
+
+        class Trie:
+          def __init__(self):
+              """
+              Initialize your data structure here.
+              """
+              self.root = Node()
+
+          def insert(self, word: str) -> None:
+              """
+              Inserts a word into the trie.
+              """
+              cur = self.root
+              for c in word:
+                  child = cur.children[c]
+                  cur = child
+
+              cur.end_of_word = True
+
+          def search(self, word: str) -> bool:
+              """
+              Returns if the word is in the trie.
+              """
+              cur = self.root
+              for c in word:
+                  if c not in cur.children:
+                      return False
+                  cur = cur.children[c]
+
+              return cur.end_of_word
+
+          def startsWith(self, prefix: str) -> bool:
+              """
+              Returns if there is any word in the trie that starts with the given prefix.
+              """
+              cur = self.root
+              for c in prefix:
+                  if c not in cur.children:
+                      return False
+                  cur = cur.children[c]
+
+              return True
+        ```
+    * Approach2: Recurisve:
+      ```python
+      import collections
+
+      class Node(object):
+          def __init__(self):
+              self.children = collections.defaultdict(Node)
+              self.end_of_word = False
+
+      class Trie:
+
+          def __init__(self):
+              """
+              Initialize your data structure here.
+              """
+              self.root = Node()
+
+          def insert(self, word: str) -> None:
+              """
+              Inserts a word into the trie.
+              """
+              def insert_with_idx(cur, idx):
+                  if idx == w_len:
+                      cur.end_of_word = True
+                      return
+
+                  insert_with_idx(cur.children[word[idx]], idx+1)
+
+              w_len = len(word)
+              insert_with_idx(self.root, 0)
+
+
+          def search(self, word: str) -> bool:
+              """
+              Returns if the word is in the trie.
+              """
+              def search_with_idx(cur, idx):
+                  if idx == w_len:
+                      return cur.end_of_word
+
+                  c = word[idx]
+                  if c not in cur.children:
+                      return False
+                  return search_with_idx(cur.children[c], idx+1)
+
+              w_len = len(word)
+              return search_with_idx(self.root, 0)
+
+
+          def startsWith(self, prefix: str) -> bool:
+              """
+              Returns if there is any word in the trie that starts with the given prefix.
+              """
+              def search_with_idx(cur, idx):
+                  if idx == w_len:
+                      return True
+
+                  c = prefix[idx]
+                  if c not in cur.children:
+                      return False
+                  return search_with_idx(cur.children[c], idx+1)
+
+              w_len = len(prefix)
+              return search_with_idx(self.root, 0)
+      ```
   * 211: Add and Search Word - Data structure design (M)
     * search word (**support wildcard**)
-      * For iterative methods
-        * Use **stack** for traversal, and **use continue instead of return false when not found**.
+    * Approach1: Iterative:
+      * Python Solution
+        ```python
+        class Node(object):
+          def __init__(self):
+              self.children = collections.defaultdict(Node)
+              self.end_of_word = False
+
+        class WordDictionary:
+
+            def __init__(self):
+                """
+                Initialize your data structure here.
+                """
+                self.root = Node()
+
+
+            def addWord(self, word: str) -> None:
+                """
+                Adds a word into the data structure.
+                """
+                cur = self.root
+
+                for c in word:
+                    cur = cur.children[c]
+
+                cur.end_of_word = True
+
+            def search(self, word: str) -> bool:
+                """
+                Returns if the word is in the data structure.
+                A word could contain the dot character '.' to represent any one letter.
+                """
+                stack = list()
+                stack.append((self.root, 0))
+                w_len = len(word)
+
+                found = False
+                while stack:
+                    cur, idx = stack.pop()
+                    # final node
+                    if idx == w_len:
+                        if cur.end_of_word:
+                            found = True
+                            break
+                        else:
+                            continue
+
+                    c = word[idx]
+                    if c == '.':
+                        for child in cur.children.values():
+                            stack.append((child, idx+1))
+
+                    else:
+                        if c in cur.children:
+                            stack.append((cur.children[c], idx+1))
+
+                return found
+        ```
+    * Approach2: Recursive:
+      * Python Solution
+        ```python
+        class Node(object):
+
+          def __init__(self):
+              self.children = collections.defaultdict(Node)
+              self.end_of_word = False
+
+        class WordDictionary:
+
+            def __init__(self):
+                """
+                Initialize your data structure here.
+                """
+                self.root = Node()
+
+            def addWord(self, word: str) -> None:
+                """
+                Adds a word into the data structure.
+                """
+                cur = self.root
+
+                for c in word:
+                    cur = cur.children[c]
+
+                cur.end_of_word = True
+
+            def search(self, word: str) -> bool:
+                """
+                Returns if the word is in the data structure.
+                A word could contain the dot character '.' to represent any one letter.
+                """
+                def search_with_idx(cur, idx):
+                    if idx == w_len:
+                        return cur.end_of_word
+
+                    c = word[idx]
+                    if c == '.':
+                        res = False
+                        for child in cur.children.values():
+                            if search_with_idx(child, idx+1):
+                                res = True
+                                break
+                        return res
+                    else:
+                        if c in cur.children:
+                            return search_with_idx(cur.children[c], idx+1)
+                        return False
+
+                w_len = len(word)
+                return search_with_idx(self.root, 0)
+        ```
+
   * 212: Word Search II (H)
+  * 642: Design Search Autocomplete System (H)
 ### BFS & DFS
   * 200: Number of Islands (M)
     * Approach1: BFS, Time: O(mn), Space: O(mn)
@@ -4511,7 +5109,7 @@ Table of Content
   * Ref:
     * [From good to great. How to approach most of DP problems](https://leetcode.com/problems/house-robber/discuss/156523/From-good-to-great.-How-to-approach-most-of-DP-problems.)
   * This particular problem and most of others can be approached using the following sequence:
-    * Find recursive relation
+    * Recursive relation
     * Recursive (top-down)
     * Recursive + memo (top-down)
     * Iterative + memo (bottom-up)
@@ -4835,6 +5433,7 @@ Table of Content
     * 322: Coin Change (H)
     * 312: Burst Balloons (H)
   * **Two Dimensional**:
+    * String Subsequence
     * 256: Paint House (E)
       * Recursive relation
         * n == 0: (first house)
@@ -4878,7 +5477,7 @@ Table of Content
             # unpack the last row
             return min(*acc_cost[house_cnt-1])
           ```
-      * Approach2: Iterative + N variables (bottom-up), Time:O(nk), Space:(1)
+      * Approach2: Iterative + N variables (bottom-up), Time:O(nk), Space:(n)
         * Python Solution:
           ```python
           def minCost(self, costs: List[List[int]]) -> int:
@@ -4909,6 +5508,82 @@ Table of Content
     * 265: Paint House II (H) (L)
     * 064: Minimum Path Sum (M)
     * 072: Edit Distance (H)
+      * Ref:
+        * https://leetcode.com/problems/edit-distance/discuss/159295/Python-solutions-and-intuition
+      * Recursive relation
+        * if word1[i] == word[j]  # no edit
+          * memo[i][j] = memo[i-1][j-1]
+        * elif word1[i] =! word[j]:
+          * memo[i][j] = minimum of
+            * 1 + memo[i][j-1]    # insert
+            * 1 + memo[i-1][j]    # delete
+            * 1 + memo[i-1][j-1]  # replacement
+      * Recursive (top-down)
+        * Python Solution
+        ```python
+          def minDistance(self, word1: str, word2: str) -> int:
+            def min_distance_idx(idx1, idx2):
+                # run out both string
+                if idx1 == -1 and idx2 == -1:
+                    return 0
+
+                if idx1 == -1:
+                    return idx2 + 1
+
+                if idx2 == -1:
+                    return idx1 + 1
+
+                if word1[idx1] == word2[idx2]:
+                    return  min_distance_idx(idx1-1, idx2-1)
+                else:
+                    replace = min_distance_idx(idx1-1, idx2-1)
+                    insert = min_distance_idx(idx1, idx2-1)
+                    delete = min_distance_idx(idx1-1, idx2)
+                    return 1 + min(replace, insert, delete)
+
+              return min_distance_idx(len(word1)-1, len(word2)-1)
+        ```
+      * Iterative + memo (bottom-up)
+        * Python Solution
+          ```python
+          def minDistance(self, word1: str, word2: str) -> int:
+
+            if not word1 and not word2:
+                return 0
+
+            if not word1:
+                return len(word2)
+
+            if not word2:
+                return len(word1)
+
+            n1, n2 = len(word1), len(word2)
+            row, col = n1 + 1, n2 + 1
+
+            memo = [[None for _ in range(col)] for _ in range(row)]
+
+            # init first row,
+            # assume there is a dummy character before word1 and word2
+            for c in range(col):
+                # insert operation
+                memo[0][c] = c
+
+            # init first col
+            for r in range(row):
+                # insert operation
+                memo[r][0] = r
+
+            for i in range(1, row):
+                for j in range(1, col):
+                    if word1[i-1] == word2[j-1]:
+                        memo[i][j] = memo[i-1][j-1]
+                    else:
+                        memo[i][j] = 1 + min(memo[i-1][j-1],
+                                             memo[i][j-1],
+                                             memo[i-1][j])
+
+            return memo[row-1][col-1]
+          ```
     * 097: Interleaving String (H)
     * 174: Dungeon Game (H)
     * 221: Maximal Square (M)
@@ -5351,7 +6026,7 @@ Table of Content
   * 291: Word Pattern II
 ### Graph
   * Eulerian trail
-    * 332: Reconstruct Itinerary	(M)
+    * 332: Reconstruct Itinerary (M)
       * This is the problem of Eulerian trail
         * vertex: airport
         * edge: ticket
@@ -5428,7 +6103,7 @@ Table of Content
             while stack:
                 departure = stack[-1]
                 arrival_heap = flights[departure]
-                if arrival_heap:
+                if arrival_heap:  # do not use while here
                     stack.append(heapq.heappop(arrival_heap))
                 else:
                     # apeendleft to avoid unnecessary reverse
@@ -5615,6 +6290,8 @@ Table of Content
   * String
     * substring
       * 028: Implement **strStr** (E) (**KMP** algorithm)
+      * 003: Longest Substring Without Repeating Characters (M)
+      * 076: Minimum Window Substring (H)
     * Anagram
       * 049: Group Anagrams (M)
       * 249: Group Shifted Strings (M)
@@ -5632,19 +6309,21 @@ Table of Content
             * [2, 10, 5], for 1th bin, if we do not inlcude 10, the area would be negative.
     * Jump Game
       * 045: Jump Game II (H)
-    * 275: H-Index II (M)
-      * Binary search solution
     * 325: Maximum Size Subarray Sum **Equals k** (M)
     * 560: Subarray Sum **Equals K** (M)
     * 152: Maximum **Product** Subarray (M)
     * 134: Gas Station (M)
   * LinkedList
-    * 025: **Reverse** Nodes in **k-Group**
+    * 025: **Reverse** Nodes in **k-Group** (H)
     * 148: Sort list (M)
     * 023: Merge k Sorted Lists (H)
     * 143: **Reorder** List (M)
     * 061: **Rotate** list (M)
+      * old_head, new_tail, new_head, old_tail
     * 445: Add Two Numbers II (M)
+  * Binary Search:
+    * 275: H-Index II (M)
+    * 004: Median of Two Sorted Arrays (H)
   * Cache
     * 146: LRU Cache (M)
   * Heap
@@ -5658,8 +6337,11 @@ Table of Content
       * Start From Gates
     * 364: **Nested List** Weight Sum II (M)
     * 127: Word Ladder (M)
-  * Topological Sort
-    * 207: Course Schedule (M)
+  * Graph
+    * Eulerian trail
+      * 332: Reconstruct Itinerary (M)
+    * Topological Sort
+      * 207: Course Schedule (M)
   * Dynamic Programming:
     * Fibonacci sequence
       * 070: Climbing Stairs
