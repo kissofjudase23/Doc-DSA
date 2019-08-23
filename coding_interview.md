@@ -405,55 +405,55 @@ Table of Content
          * Merge the insert and remove cases (find the short one)
          * Use short and long string pointers to traverse and compare
          * Python Solution
-         ```python
-        def isOneEditDistance(self, s: str, t: str) -> bool:
-          """
-          case1: Insert a character into s to get t
-          case2: Delete a character from s to get t
-          case3: Replace a character of s to get t
-          """
-          diff = len(s) - len(t)
-          if abs(diff) >= 2:
-              return False
+          ```python
+          def isOneEditDistance(self, s: str, t: str) -> bool:
+            """
+            case1: Insert a character into s to get t
+            case2: Delete a character from s to get t
+            case3: Replace a character of s to get t
+            """
+            diff = len(s) - len(t)
+            if abs(diff) >= 2:
+                return False
 
-          # find the short and long strings
-          # case2 can be merged to case1
-          same_len = False
-          if diff < 0:
-              short, long = s, t
-          elif diff == 0:
-              short, long = s, t
-              same_len = True
-          else:
-              short, long = t, s
+            # find the short and long strings
+            # case2 can be merged to case1
+            same_len = False
+            if diff < 0:
+                short, long = s, t
+            elif diff == 0:
+                short, long = s, t
+                same_len = True
+            else:
+                short, long = t, s
 
-          # traverse the short one
-          i = j = 0
-          edit_cnt = 0
-          while i < len(short):
-              if short[i] == long[j]:
-                  i += 1
-                  j += 1
-              else:
-                  if edit_cnt:
-                      return False
-                  edit_cnt += 1
+            # traverse the short one
+            i = j = 0
+            edit_cnt = 0
+            while i < len(short):
+                if short[i] == long[j]:
+                    i += 1
+                    j += 1
+                else:
+                    if edit_cnt:
+                        return False
+                    edit_cnt += 1
 
-                  # This is case3
-                  if same_len:
-                      i += 1
-                      j += 1
-                  # This is case 1 and case2
-                  else:
-                      j += 1
+                    # This is case3
+                    if same_len:
+                        i += 1
+                        j += 1
+                    # This is case 1 and case2
+                    else:
+                        j += 1
 
-          # zero edit distance case
-          if same_len and not edit_cnt:
-              return False
+            # zero edit distance case
+            if same_len and not edit_cnt:
+                return False
 
-          # exactly one edit distance
-          return True
-        ```
+            # exactly one edit distance
+            return True
+          ```
   * **SubString**
      * 028: Implement **strStr** (E)
        * Find Sub-String
@@ -859,6 +859,7 @@ Table of Content
 
               return odd_cnt <= 1
             ```
+     * 267:	Palindrome **Permutation** II (M)
      * 005: **Longest** Palindromic Substring (M)
        * Ref:
          * https://leetcode.com/problems/longest-palindromic-substring/solution/
@@ -894,7 +895,7 @@ Table of Content
 
               return s[l:r+1]
             ```
-       * Approach2: DP, Time: O(n^2), Space: O(n^2)
+       * Approach2: DP (enhancement of Brute Force), Time: O(n^2), Space: O(n^2)
          * The concept is like brute force, but reuse previous palindrom comparison results
           * memo[i][j]:
            * means s[i:j+1] is a palindrom or not
@@ -987,11 +988,99 @@ Table of Content
 
             return s[l:r+1]
             ```
-       * Approach4: Manacher's Algorithm, Time: O(n), Space: O(n^2)
-     * 336:	Palindrome **Pairs** (H)
+       * Approach4: Manacher's Algorithm, Time: O(n), Space: O(n)
+         * Ref:
+           * https://www.youtube.com/watch?v=nbTSfrEfo6M
      * 214:	**Shortest** Palindrome (H)
-     * 131:	Palindrome Partitioning (M)
-     * 132:	Palindrome Partitioning II (H)
+       * The problem can be converted to longest palindrome substring **starts from 0**
+         * For example: str = "abade"
+             * The longest palindrom substr substring from 0 is "aba"
+             * The **reverse** the substring after "aba" is "ed"
+             * Append "ed" before the head, 'ed'abadede is the answer.
+       * Approach1: Brute Force, Time:O(n^2), Space:O(n)
+         * Reverse the string
+         * Find the **longest common prefix of the str and suffix of reverse str**
+         * For example:
+           * str = "abade"
+           * rev = "edaba"
+           * The longest common suffix of rev and prefix of str is "aba"
+           * so the result would be xx + abaxx = xxabaxx
+         * Python Solution
+            ```python
+            def shortestPalindrome(self, s: str) -> str:
+              rev = s[::-1]
+              res = ""
+              for i in range(0, len(s)):
+                  # try to find longest common suffix of rev and prefix of s
+                  if rev[i:] == s[:len(s)-i]:
+                      res = rev[:i] + s
+                      break
+              return res
+            ```
+       * Approach2: KMP, Time:O(n), Space:O(n)
+         * Use Kmp to speed up finding the **longest common prefix of the str and suffix of reverse str**
+         * For example:
+           * str = "abade"
+           * rev = "edaba"
+           * create a tmp string **str + # rev_str**
+             * '#' is used to force the match in reverse str starts from its first index)
+             ```txt
+             a b a d e # e d a b a
+             0 0 1 0 0 0 0 0 1 2 3 <--- 3 is what we want
+             ```
+          * we know the length of the palindrom substring is 3, final anser would be
+            * ed + abade = edabade
+          * Python Solution:
+              ```python
+              def shortestPalindrome(self, s: str) -> str:
+
+                def get_lps(s):
+                    lps = [0] * len(s)
+                    i = 0 # pointer prefix
+                    j = 1 # pointer to suffix
+                    while j < len(s):
+                        if s[j] == s[i]:
+                            i += 1
+                            lps[j] = i
+                            j += 1
+                        else:
+                            if i:
+                                i = lps[i-1]
+                            else:
+                                lps[j] = 0
+                                j += 1
+                    return lps
+
+                if not s:
+                    return ""
+
+                if len(s) == 1:
+                    return s
+
+                # separator is used to force the match in reverse str starts from its first index
+                separator = '#'
+                rev = s[::-1]
+                """
+                string + separator + reverse string
+                """
+                lps = get_lps(f'{s}{separator}{rev}')
+                palindrom_len = lps[-1]
+
+                return rev[:len(s)-palindrom_len] + s
+              ```
+     * 336:	Palindrome **Pairs** (H)
+       * n: number of words
+       * k: average length of each word
+       * Approach1: Brute force: Time:O(n^2*k), Space:O(1)
+         * Iteraitve each pair and check
+         * (0, 1), (0, 2), (0, 3)  # each pair need to check twice: (0,1) and (1,0)
+         * (1, 2), (1, 3)
+         * (2, 3)
+       * Approach2: Use Trie
+         * Corner Cases:
+           * Two words shoud be distinct from each other, how to avoid ?
+     * 131:	Palindrome **Partitioning** (M)
+     * 132:	Palindrome **Partitioning** II (M)
   * **Parentheses**
      * 020: Valid Parentheses (E)
        * Valid Cases:
@@ -1023,77 +1112,169 @@ Table of Content
                return len(stack) == 0
            ```
      * 022: Generate Parentheses (M)
-     * 032:	Longest Valid Parentheses (H)
+       * Approach1-1: Brute Force, Recursive, Time:O(n*n^(2n))
+         * f(n) = f(n-1) + '('  or f(n-1) + ')'
+         * Time Complexity:
+           * total n^(2n) combination
+         * Space Complexity:
+         * Python Solution:
+          ```python
+          def generateParenthesis(self, n: int) -> List[str]:
+            def valid(cur):
+                bal = 0
+                for bracket in cur:
+                    if bracket == '(':
+                        bal += 1
+                    else:
+                        bal -= 1
+                        if bal < 0:
+                            return False
+                return bal == 0
+
+            def backtrack(cur):
+                if len(cur) == 2*n:
+                    if valid(cur):
+                        res.append("".join(cur))
+                    return
+
+                # case1: f(n) = f(n-1) + '('
+                cur.append('(')
+                backtrack(cur)
+                cur.pop()
+                # case2 : f(n) = f(n-1) + ')'
+                cur.append(')')
+                backtrack(cur)
+                cur.pop()
+
+            res = []
+            cur = []
+            backtrack(cur)
+            return res
+          ```
+       * Approach1-2: Brute Force, Iterative: Time:O(n*n^(2n))
+         * Python Solution
+         ```python
+         def generateParenthesis(self, n: int) -> List[str]:
+            def valid(cur):
+                bal = 0
+                for bracket in cur:
+                    if bracket == '(':
+                        bal += 1
+                    else:
+                        bal -= 1
+                        if bal < 0:
+                            return False
+
+                return bal == 0
+
+            combos = [[]]
+            res = []
+            for _ in range(2*n):
+                combo_len = len(combos)
+                for j in range(combo_len):
+                    combo = combos[j]
+                    copy=combo.copy()
+                    copy.append('(')
+                    combos.append(copy)
+                    combo.append(')')
+
+            for combo in combos:
+                if valid(combo):
+                    res.append("".join(combo))
+
+            return res
+         ```
+       * Approach2-1: Control the left and right, Recursive:
+         * Add them only when we know it will remain a valid sequence (cut off the tree)
+         * Python Solution:
+          ```python
+          def generateParenthesis(self, n: int) -> List[str]:
+              def backtrack(s, left, right):
+                  if len(s) == 2*n:
+                      res.append(s)
+                      return
+
+                  # cut off the tree
+                  if left < n:
+                      backtrack(s+'(', left+1, right)
+
+                  if right < left:
+                      backtrack(s+')', left, right+1)
+
+              res = []
+              backtrack(s="", left=0, right=0)
+              return res
+          ```
+       * Approach2-2: Control the left and right, Iterative:
+         * Python Solution:
+          ```python
+          def generateParenthesis(self, n: int) -> List[str]:
+            res = []
+            stack = []
+            # s, left ,right
+            stack.append(('(', 1, 0))
+            while stack:
+                s, left, right = stack.pop()
+                if len(s) == 2*n:
+                    res.append(s)
+                    continue
+
+                if left < n:
+                    stack.append((s+'(', left+1, right))
+
+                if right < left:
+                    stack.append((s+')', left, right+1))
+
+            return res
+          ```
      * 241: Different Ways to Add Parentheses (M)
+     * 032:	Longest Valid Parentheses (H)
      * 301: Remove Invalid Parentheses (H)
   * **Subsequence**
-     * Longest Common Subsequence (LCS)
-       * Ref:
-         * https://www.youtube.com/watch?v=NnD96abizww
-       * Approach2: DP: Time: O(n^2), Space: O(n^2)
-         * Python Solution
-           ```python
-            @staticmethod
-            def traverse_lcs_memo(s1, s1_idx, s2, s2_idx, memo):
-                """ traverse the memo array to find lcs
-                """
-                lcs_len = memo[s1_idx][s2_idx]
-                lcs = [None] * lcs_len
-                i, j = s1_idx, s2_idx
+    * Definition:
+      * A subsequence of a string is a new string which is formed from the original string by deleting some (can be none) of the characters without disturbing the relative positions of the remaining characters.
+    * Longest Common Subsequence (LCS) (DP)
+    * 392: Is Subsequence (E)
+      * Approach1: Iterate subsequence, Time:O(n), Space:O(1)
+        * Python Solution
+          ```python
+          def isSubsequence(self, s: str, t: str) -> bool:
+            if not s:
+                return True
 
-                while lcs_len:
-                    if s1[i] == s2[j]:
-                        lcs_len -= 1
-                        lcs[lcs_len] = s1[i]
-                        i -= 1
-                        j -= 1
-                    else:
-                        if memo[i][j] == memo[i-1][j]:
-                            i -= 1
-                        else:  # memo[i][j] == memo[i][j-1]
-                            j -= 1
+            i = 0
+            res = True
+            for c in s:
+                while i < len(t) and t[i] != c:
+                    i += 1
 
-                return "".join(lcs)
+                if i == len(t):  # not found
+                    res = False
+                    break
 
-            @staticmethod
-            def lcs(s1, s2):
-                """
-                Longest common sequence
-                Time: O(n^2), Space: O(n^2)
-                Ref: https://www.youtube.com/watch?v=NnD96abizww
-                """
-                if not s1 or not s2:
-                    return ""
+                i += 1
 
-                l1, l2 = len(s1), len(s2)
+            return res
+          ```
+      * Approach2: Iterate original string, Time:O(n), Space:O(1)
+        * Python Solution
+          ```python
+            def isSubsequence(self, s: str, t: str) -> bool:
+              if not s:
+                  return True
 
-                memo = [[0 for _ in range(l2)] for _ in range(l1)]
-
-                if s1[0] == s2[0]:
-                    memo[0][0] = 1
-
-                # init first row
-                for j in range(1, l2):
-                    if memo[0][j-1] or s2[j] == s1[0]:
-                        memo[0][j] = 1
-
-                # init first column
-                for i in range(1, l1):
-                    if memo[i-1][0] or s1[i] == s2[0]:
-                        memo[i][0] = 1
-
-                # complete the memo
-                for i in range(1, l1):
-                    for j in range(1, l2):
-                        if s1[i] == s2[j]:
-                            memo[i][j] = memo[i-1][j-1] + 1
-                        else:
-                            memo[i][j] = max(memo[i-1][j], memo[i][j-1])
-
-                return StrUtils.traverse_lcs_memo(s1, l1-1,
-                                                  s2, l2-1,
-                                                  memo)
-           ```
+              res = False
+              i = j = 0
+              for c in t:
+                  if c == s[i]:
+                      i += 1
+                      if i == len(s):
+                          res = True
+                          break
+              return res
+          ```
+    * 187: Repeated DNA Sequences (M)
+    * 115: Distinct Subsequences (H)
   * **Reorder**
      * 344: Reverse String (E)
        * Python Solution
@@ -1396,29 +1577,29 @@ Table of Content
           return d.values()
          ```
   * Deduction:
-    * 38: Count and Say (E)
+    * 038: Count and Say (E)
       * Approach1:
         * Python Solution
           ```python
           def countAndSay(self, n: int) -> str:
-          cur = '1'
-          for i in range(2, n+1):
-              tmp = ''
-              start = 0
-              while start < len(cur):
-                  end = start
-                  cnt = 0
+            # 1
+            cur = "1"
+            # 2 to n
+            for _ in range(2, n+1):
+                start = end = 0
+                nxt = []
+                while start < len(cur):
+                    cnt = 0
+                    while end < len(cur) and cur[end] == cur[start]:
+                        cnt += 1
+                        end += 1
 
-                  while end < len(cur) and cur[end] == cur[start]::
-                      cnt += 1
-                      end += 1
+                    nxt.append(f"{cnt}{cur[start]}")
+                    start = end
 
-                  tmp += f'{cnt}{cur[start]}'
-                  start = end
+                cur = "".join(nxt)
 
-              cur = tmp
-
-          return cur
+            return cur
           ```
     * 293: Flip Game (E)
         * python solution
@@ -2920,6 +3101,22 @@ Table of Content
         * [Solution](https://leetcode.com/problems/game-of-life/discuss/73217/Infinite-board-solution/201780)
     * 723：Candy Crush (M)
 ### Matrix
+ * 054:	Spiral Matrix
+ * 059:	Spiral Matrix II
+ * 073:	Set Matrix Zeroes
+ * 311:	Sparse Matrix Multiplication
+ * 329:	Longest Increasing Path in a Matrix
+ * 378:	Kth Smallest Element in a Sorted Matrix
+ * 074:	Search a 2D Matrix
+ * 240:	Search a 2D Matrix II
+ * 370:	Range Addition
+ * 079:	Word Search
+ * 296:	Best Meeting Point
+ * 361: Bomb Enemy
+ * 317: Shortest Distance from All Buildings
+ * 302: Smallest Rectangle Enclosing Black Pixels
+ * 036: Valid Sudoku
+ * 037: Sudoku Solver
 ### Binary Search
   * 275: H-Index II (M)
     * Approach1: Linear search: O(n)
@@ -3052,6 +3249,20 @@ Table of Content
                     # shrink n2 left part, that is, increase n1 left part
                     left_b = p_n1 + 1
             ```
+  * 278: First Bad Version
+  * 035: Search Insert Position
+  * 033: Search in Rotated Sorted Array
+  * 081: Search in Rotated Sorted Array II
+  * 153: Find Minimum in Rotated Sorted Array
+  * 154: Find Minimum in Rotated Sorted Array II
+  * 162: Find Peak Element
+  * 374: Guess Number Higher or Lower
+  * 034: Search for a Range
+  * 349: Intersection of Two Arrays
+  * 350: Intersection of Two Arrays II
+  * 315: Count of Smaller Numbers After Self
+  * 300: Longest Increasing Subsequence
+  * 354: Russian Doll Envelopes
 ### Linked List
 * **Techiniques**:
   * The "**Runner**"
@@ -4165,12 +4376,14 @@ Table of Content
   * 218: The Skyline Problem (H)
 ### Cache
   * 146: LRU Cache (M)
-    * Use ordered dict
-    * Use dict and doubly linked list
+    * Approach1: Use ordered dict
+    * Approach2: Use dict and doubly linked list
       * Put
-        * insert_head
-        * pop_tail
-        * move_to_head
+        * new record
+          * insert_head
+          * pop_tail if necessary
+        * already existing
+          * move_to_head
       * Get
         * move_to_head
       * For Doubly linked list
@@ -4178,9 +4391,8 @@ Table of Content
       * Python Solution
         ```python
         class DLinkedNode(object):
-
           def __init__(self):
-              self.key = None   # key is necessary for key pop operation
+              self.key = None   # key is necessary for key pop operation of hash
               self.val = None
               self.prev = None
               self.next = None
@@ -4196,7 +4408,6 @@ Table of Content
             def insert_to_head(self, node):
                 node.prev = self.head
                 node.next = self.head.next
-
                 self.head.next.prev = node
                 self.head.next = node
 
@@ -4260,134 +4471,211 @@ Table of Content
         ```
   * 460: LFU Cache (H)
 ### Tree
-  * 144: Binary Tree **Preorder** Traversal (M)
-    * Use **one stack** for iterative method
-    * Python Solution
-      ```python
-      def preorderTraversal(self, root: TreeNode) -> List[int]:
-          if not root:
-              return []
+  * Preorder
+    * 144: Binary Tree **Preorder** Traversal (M)
+      * Approach1: Recursive:
+        * Python Solution:
+          ```python
+          def preorderTraversal(self, root: TreeNode) -> List[int]:
+            def _preorder(node):
+                if not node:
+                    return
 
-          visits = list()
-          stack = list()
-          stack.append(root)
+                output.append(node.val)
+                _preorder(node.left)
+                _preorder(node.right)
 
-          while stack:
-              node = stack.pop()
-              visits.append(node.val)
+            output = []
+            _preorder(root)
+            return output
+          ```
+      * Approach2: Iterative1:
+        * Python Solution
+          ```python
+          def preorderTraversal(self, root: TreeNode) -> List[int]:
+              if not root:
+                  return []
 
-              if node.right:
-                  stack.append(node.right)
+              visits = list()
+              stack = list()
+              stack.append(root)
 
-              if node.left:
-                  stack.append(node.left)
+              while stack:
+                  node = stack.pop()
+                  visits.append(node.val)
 
-          return visits
-      ```
-  * 094: Binary Tree **Inorder** Traversal (M)
-    * Use **one stack** for iterative method
-    * Python Solution
-      ```python
-      def inorderTraversal(self, root: TreeNode) -> List[int]:
-        visits = list()
-        stack = list()
-        current = root
+                  if node.right:
+                      stack.append(node.right)
 
-        while current or stack:
-            if current:
-                stack.append(current)
-                current = current.left
-            else:
-                current = stack.pop()
-                visits.append(current.val)
-                current = current.right
+                  if node.left:
+                      stack.append(node.left)
 
-        return visits
-      ```
-  * 145: Binary Tree **Postorder** Traversal (H)
-    * Use **two stacks** for iterative method
-    * Python Solution
-      ```python
-      def postorderTraversal(self, root: TreeNode) -> List[int]:
-        if not root:
-            return []
+              return visits
+          ```
+      * Approach3: Iterative2:
+        * Python Solution
+          ```python
+          def preorderTraversal(self, root: TreeNode) -> List[int]:
+            if not root:
+                return []
 
-        stack = list()
-        visits = list()
-        stack.append(root)
+            stack = []
+            output = []
 
-        while stack:
-            current = stack.pop()
-            visits.append(current.val)
-            if current.left:
-                stack.append(current.left)
-            if current.right:
-                stack.append(current.right)
+            cur = root
+            while cur or stack:
+                if not cur:
+                    cur = stack.pop()
 
-        visits.reverse()
-        return visits
+                output.append(cur.val)
+                if cur.right:
+                    stack.append(cur.right)
+                cur = cur.left
 
-      ```
-  * 102: Binary **Tree Level** Order Traversal (M) *
-    * BFS
-      * Use **the length of the queue** for each round
+            return output
+          ```
+    * 112: Path Sum (E)
+    * 113: Path Sum II (M)
+  * Inorder
+    * 094: Binary Tree **Inorder** Traversal (M)
+      * Approach1: Recursive
+        * Python Solution
+          ```python
+          def inorderTraversal(self, root: TreeNode) -> List[int]:
+            def _inorder(node):
+                if not node:
+                    return
+
+                _inorder(node.left)
+                output.append(node.val)
+                _inorder(node.right)
+
+            output = []
+            _inorder(root)
+            return output
+          ```
+      * Approach2: Iterative
+        * Python Solution
+          ```python
+          def inorderTraversal(self, root: TreeNode) -> List[int]:
+            if not root:
+                return []
+
+            output = []
+            stack = []
+            cur = root
+            while cur or stack:
+                if cur:
+                    stack.append(cur)
+                    cur = cur.left
+                else:
+                    cur = stack.pop()
+                    output.append(cur.val)
+                    cur = cur.right
+
+            return output
+          ```
+  * Postorder
+    * 145: Binary Tree **Postorder** Traversal (H)
+      * Approach1: Recursive
+        * Python Solution
+            ```python
+            def postorderTraversal(self, root: TreeNode) -> List[int]:
+              def _postorder(node):
+                  if not node:
+                      return
+
+                  _postorder(node.left)
+                  _postorder(node.right)
+                  output.append(node.val)
+
+              output = []
+              _postorder(root)
+              return output
+          ```
+      * Approach2: Iterative, two stacks
+        * Python Solution
+            ```python
+              def postorderTraversal(self, root: TreeNode) -> List[int]:
+                if not root:
+                    return
+
+                stack = [root]
+                # reverse order
+                output = collections.deque()
+
+                while stack:
+                    node = stack.pop()
+                    output.appendleft(node.val)
+
+                    if node.left:
+                        stack.append(node.left)
+
+                    if node.right:
+                        stack.append(node.right)
+
+                return output
+            ```
+  * BFS
+    * 102: Binary **Tree Level** Order Traversal (M) *
+      * Approach1: DFS Recursive
+      * Approach2: BFS Iterative
+        * Python Solution
+          ```python
+          def levelOrder(self, root: TreeNode) -> List[List[int]]:
+            if not root:
+                return []
+
+            visits = list()
+            q = deque()
+            q.append(root)
+
+            while q:
+                q_len = len(q)
+
+                level_visits = []
+                for _ in range(q_len):
+                    node = q.popleft()
+                    level_visits.append(node.val)
+                    if node.left:
+                        q.append(node.left)
+                    if node.right:
+                        q.append(node.right)
+
+                visits.append(level_visits)
+
+            return visits
+          ```
+  * Binary Search Tree
+    * 098: Validate Binary Search Tree (M)
+    * 173: Binary Search Tree Iterator (M) *
       * Python Solution
         ```python
-        def levelOrder(self, root: TreeNode) -> List[List[int]]:
-          if not root:
-              return
+        class BSTIterator:
 
-          visits = list()
-          q = deque()
-          q.append(root)
+          def __init__(self, root: TreeNode):
+              self.stack = list()
+              self._push_all(root)
 
-          while q:
-              q_len = len(q)
+          def next(self) -> int:
+              """
+              @return the next smallest number
+              """
+              current = self.stack.pop()
+              self._push_all(current.right)
+              return current.val
 
-              level_visits = []
-              for _ in range(q_len):
-                  node = q.popleft()
-                  level_visits.append(node.val)
-                  if node.left:
-                      q.append(node.left)
-                  if node.right:
-                      q.append(node.right)
+          def hasNext(self) -> bool:
+              """
+              @return whether we have a next smallest number
+              """
+              return len(self.stack) != 0
 
-              visits.append(level_visits)
-
-          return visits
+          def _push_all(self, current: TreeNode):
+              while current:
+                  self.stack.append(current)
+                  current = current.left
         ```
-  * 173: Binary Search Tree Iterator (M) *
-    * Python Solution
-      ```python
-      class BSTIterator:
-
-        def __init__(self, root: TreeNode):
-            self.stack = list()
-            self._push_all(root)
-
-        def next(self) -> int:
-            """
-            @return the next smallest number
-            """
-            current = self.stack.pop()
-            self._push_all(current.right)
-            return current.val
-
-        def hasNext(self) -> bool:
-            """
-            @return whether we have a next smallest number
-            """
-            return len(self.stack) != 0
-
-        def _push_all(self, current: TreeNode):
-            while current:
-                self.stack.append(current)
-                current = current.left
-      ```
-  * 098: Validate Binary Search Tree (M)
-  * 112: Path Sum (E)
-  * 113: Path Sum II (M)
 ### Trie (Prefix Tree)
   * 208: Implement Trie (M)
     * Approach1: Iterative
@@ -4621,7 +4909,6 @@ Table of Content
                 w_len = len(word)
                 return search_with_idx(self.root, 0)
         ```
-
   * 212: Word Search II (H)
   * 642: Design Search Autocomplete System (H)
 ### BFS & DFS
@@ -5433,7 +5720,73 @@ Table of Content
     * 322: Coin Change (H)
     * 312: Burst Balloons (H)
   * **Two Dimensional**:
-    * String Subsequence
+    * Longest Common Subsequence:
+      * Ref:
+         * https://www.youtube.com/watch?v=NnD96abizww
+      * Approach1: DP: Time: O(n^2), Space: O(n^2)
+        * Python Solution
+         ```python
+          @staticmethod
+          def traverse_lcs_memo(s1, s1_idx, s2, s2_idx, memo):
+              """ traverse the memo array to find lcs
+              """
+              lcs_len = memo[s1_idx][s2_idx]
+              lcs = [None] * lcs_len
+              i, j = s1_idx, s2_idx
+
+              while lcs_len:
+                  if s1[i] == s2[j]:
+                      lcs_len -= 1
+                      lcs[lcs_len] = s1[i]
+                      i -= 1
+                      j -= 1
+                  else:
+                      if memo[i][j] == memo[i-1][j]:
+                          i -= 1
+                      else:  # memo[i][j] == memo[i][j-1]
+                          j -= 1
+
+              return "".join(lcs)
+
+          @staticmethod
+          def lcs(s1, s2):
+              """
+              Longest common sequence
+              Time: O(n^2), Space: O(n^2)
+              Ref: https://www.youtube.com/watch?v=NnD96abizww
+              """
+              if not s1 or not s2:
+                  return ""
+
+              l1, l2 = len(s1), len(s2)
+
+              memo = [[0 for _ in range(l2)] for _ in range(l1)]
+
+              if s1[0] == s2[0]:
+                  memo[0][0] = 1
+
+              # init first row
+              for j in range(1, l2):
+                  if memo[0][j-1] or s2[j] == s1[0]:
+                      memo[0][j] = 1
+
+              # init first column
+              for i in range(1, l1):
+                  if memo[i-1][0] or s1[i] == s2[0]:
+                      memo[i][0] = 1
+
+              # complete the memo
+              for i in range(1, l1):
+                  for j in range(1, l2):
+                      if s1[i] == s2[j]:
+                          memo[i][j] = memo[i-1][j-1] + 1
+                      else:
+                          memo[i][j] = max(memo[i-1][j], memo[i][j-1])
+
+              return StrUtils.traverse_lcs_memo(s1, l1-1,
+                                                s2, l2-1,
+                                                memo)
+         ```
     * 256: Paint House (E)
       * Recursive relation
         * n == 0: (first house)
@@ -5797,6 +6150,7 @@ Table of Content
     * 044: **Wildcard** Matching (H)
 ### Backtracking
   * 294: Flip Game II (M)
+  * 022: Generate Parentheses (M)
   * **Subset**
     * 078: Subsets (M)
       * Ref:
@@ -5816,18 +6170,17 @@ Table of Content
           ```python
           def subsets_rec(nums: List[int]) -> List[List[int]]:
               def _subsets(cur: list, start):
+                # make a copy, append subs cur len(nums)-1
+                subs.append(cur[:])
 
-              # make a copy, append subs cur len(nums)-1
-              subs.append(cur[:])
+                if start == len(nums):
+                    return
 
-              if start == len(nums):
-                  return
-
-              for i in range(start, len(nums)):
-                  cur.append(nums[i])
-                  # !!! start = i =1 rather than start + 1
-                  _subsets(cur, start=i+1)
-                  cur.pop()
+                for i in range(start, len(nums)):
+                    cur.append(nums[i])
+                    # !!! start = i =1 rather than start + 1
+                    _subsets(cur, start=i+1)
+                    cur.pop()
 
               subs = []
               cur = []
@@ -5839,7 +6192,7 @@ Table of Content
           ```
       * Approach2: Iterative, Time: O(n*2^n), Space:(2^n)
         * Time: O(n*2^n)
-          * total:1 + 2 + 2^2 + 2^3 ...2^(n-1) = O(2^n) round
+          * total:1 + 2 + 4 + 8 ...2^n = O(2^n) round
             * in each round needs O(n) to copy list
         * Space: O(2^n)
           * Total (2^n) subsets (only two status for each character)
@@ -5865,8 +6218,7 @@ Table of Content
       * Approach3: Iterative, **bit manipulation**, Time: O(n*2^n), Space:(2^n)
         * Time: O(n*2^n)
           * Total (2^n) round
-            * For each round need to iterater all nums which takes O(n) time
-              * You can think that you need to populate 2^n sets
+            * For each round need to populate the new set taking O(n) time
         * Space: O(2^n)
           * Total (2^n) subsets (only two status for each character)
         * example:
@@ -5884,10 +6236,11 @@ Table of Content
             def subsets_iter_bit(nums: List[int]) -> List[List[int]]:
                 subs = []
                 subs_len = 2 ** len(nums)
+                num_len = len(nums)
 
                 for sub_idx in range(subs_len):
                     new_sub = []
-                    for num_idx in range(len(nums)):
+                    for num_idx in range(num_len):
                         if sub_idx & (1 << num_idx):
                             new_sub.append(nums[num_idx])
                     subs.append(new_sub)
@@ -5904,36 +6257,36 @@ Table of Content
         * Space: O(n!/(n!*(n-k)!)
           * Total O(n!/(n!*(n-k)!) combintations
         * Python Solution
-        ```python
-        def combination_rec(n: int, k: int) -> List[List[int]]:
-        """
-        DFS Traverse
-        Time: O(k* n!/(n!*(n-k)!))
-        Space: O(n!/(n!*(n-k)!))
-        """
-          def _combination(cur: list, start):
-              if len(cur) == k:
-                  comb.append(cur[:])
-                  return
+          ```python
+          def combination_rec(n: int, k: int) -> List[List[int]]:
+          """
+          DFS Traverse
+          Time: O(k* n!/(n!*(n-k)!))
+          Space: O(n!/(n!*(n-k)!))
+          """
+            def _combination(cur: list, start):
+                if len(cur) == k:
+                    comb.append(cur[:])
+                    return
 
-              # skip the cases that can not satisfy k == len(cur) in the future
-              if k - len(cur) > n - start + 1:  # included start
-                  return
+                # skip the cases that can not satisfy k == len(cur) in the future
+                if k - len(cur) > n - start + 1:  # included start
+                    return
 
-              # from start to n
-              for i in range(start, n+1):
-                  cur.append(i)
-                  _combination(cur=cur, start=i+1)
-                  cur.pop()
+                # from start to n
+                for i in range(start, n+1):
+                    cur.append(i)
+                    _combination(cur=cur, start=i+1)
+                    cur.pop()
 
-          comb = []
-          cur = []
-          if k > n:
-              return comb
-          _combination(cur=cur, start=1)
-          return comb
-        ```
-      * Approach12 Iterative
+            comb = []
+            cur = []
+            if k > n:
+                return comb
+            _combination(cur=cur, start=1)
+            return comb
+          ```
+      * Approach2 Iterative
         * Python Solution
         ```python
         def combin_iter_v2(n: int, k: int) -> List[List[int]]:
@@ -5946,13 +6299,12 @@ Table of Content
           start = 1
           while True:
               l = len(cur)
-
               if l == k:
                   comb.append(cur[:])
               # k - l > n - start + 1 means that l will not satisfy k in the future
               # in fact, (k - l) > (n - start + 1)  can cover start > n when (l-k) = -1
               if l == k or (k - l) > (n - start + 1) or start > n:
-                  if not cur:
+                  if not cur: # done !
                       break
                   start = cur.pop() + 1
               else:
@@ -6010,11 +6362,12 @@ Table of Content
                 perms = [[nums[0]]]
 
                 for i in range(1, len(nums)):
+                    new_num = nums[i]
                     new_perms = []
                     for perm in perms:
                         # n + 1 position for each perm
                         for b in range(len(perm)+1):
-                            new_perms.append(perm[:b]+[nums[i]]+perm[b:])
+                            new_perms.append(perm[:b] + new_num + perm[b:])
 
                     perms = new_perms
 
@@ -6288,6 +6641,8 @@ Table of Content
     * 007: Reverse Integer
     * 015: 3Sum (M)
   * String
+    * 038: Count and Say (E)
+    * 392: Is Subsequence (E)
     * substring
       * 028: Implement **strStr** (E) (**KMP** algorithm)
       * 003: Longest Substring Without Repeating Characters (M)
@@ -6329,7 +6684,9 @@ Table of Content
   * Heap
     * 692: Top K Frequent Words (M)
   * BackTracking
+    * 022: Generate Parentheses (M)
     * 077: Combinations (M)
+    * 078: Subsets (M)
   * BFS & DFS
     * 200: Number of Islands (M)
       * For BFS / DFS iterations, set visits to True before append to the queue to **reduce unnecessary queue/stack push/pop operations.**
