@@ -4471,7 +4471,7 @@ Table of Content
         ```
   * 460: LFU Cache (H)
 ### Tree
-  * Preorder
+  * **Preorder**
     * 144: Binary Tree **Preorder** Traversal (M)
       * Approach1: Recursive:
         * Python Solution:
@@ -4534,9 +4534,16 @@ Table of Content
 
             return output
           ```
+    * 100: Same Tree
+    * 101: Symmetric Tree
+    * 226: Invert Binary Tree
+    * 257: Binary Tree Paths
     * 112: Path Sum (E)
     * 113: Path Sum II (M)
-  * Inorder
+    * 129: Sum Root to Leaf Numbers
+    * 298: Binary Tree Longest Consecutive Sequence
+    * 111: Minimum Depth of Binary Tree	preorder
+  * **Inorder**
     * 094: Binary Tree **Inorder** Traversal (M)
       * Approach1: Recursive
         * Python Solution
@@ -4575,7 +4582,7 @@ Table of Content
 
             return output
           ```
-  * Postorder
+  * **Postorder**
     * 145: Binary Tree **Postorder** Traversal (H)
       * Approach1: Recursive
         * Python Solution
@@ -4616,66 +4623,356 @@ Table of Content
 
                 return output
             ```
-  * BFS
-    * 102: Binary **Tree Level** Order Traversal (M) *
-      * Approach1: DFS Recursive
-      * Approach2: BFS Iterative
+    * 104: Maximum Depth of Binary Tree	postorder
+    * 110: Balanced Binary Tree	postorder
+    * 124: Binary Tree Maximum Path Sum	postorder
+    * 250: Count Univalue Subtrees	postorder
+    * 366: Find Leaves of Binary Tree	postorder
+    * 337: House Robber III
+  * **BFS**
+    * 226. Invert Binary Tree (E)
+      * Approach1: BFS, Recursive, Time:O(n), Space:O(n)
+          ```python
+          def invertTree(self, root: TreeNode) -> TreeNode:
+            def _invert(node):
+
+                if not node:
+                    return
+
+                node.left, node.right = node.right, node.left
+                _invert(node.left)
+                _invert(node.right)
+
+            _invert(root)
+            return root
+          ```
+      * Approach2: BFS, Iterative, Time:O(n), Space:O(n)
+          ```python
+          def invertTree(self, root: TreeNode) -> TreeNode:
+            if not root:
+                return root
+
+            q = collections.deque([root])
+            while q:
+                node = q.pop()
+                node.left, node.right = node.right, node.left
+                if node.left:
+                    q.append(node.left)
+
+                if node.right:
+                    q.append(node.right)
+
+            return root
+          ```
+    * 102: Binary Tree Level Order Traversal (E)
+      * Approach1: DFS Recursive, Time:O(n), Space:O(n)
+        * Python Solution
+          ```python
+          def _level_order(node, level):
+            if not node:
+                return
+
+            if len(visits) < (level+1):
+                for _ in range((level+1)-len(visits)):
+                    visits.append([])
+
+            visits[level].append(node.val)
+            _level_order(node.left, level+1)
+            _level_order(node.right, level+1)
+
+            if not root:
+                return []
+
+            visits = []
+            _level_order(root, level=0)
+            return visits
+          ```
+      * Approach2: BFS Iterative, Time:O(n), Space:O(n)
         * Python Solution
           ```python
           def levelOrder(self, root: TreeNode) -> List[List[int]]:
             if not root:
                 return []
 
-            visits = list()
-            q = deque()
-            q.append(root)
+            visits = []
+            q = collections.deque([root])
 
             while q:
                 q_len = len(q)
+                cur_visits = []
+                visits.append(cur_visits)
 
-                level_visits = []
                 for _ in range(q_len):
                     node = q.popleft()
-                    level_visits.append(node.val)
+                    cur_visits.append(node.val)
+
+                    if node.left:
+                        q.append(node.left)
+
+                    if node.right:
+                        q.append(node.right)
+
+              return visits
+          ```
+    * 107: Binary Tree Level Order Traversal II (E)
+      * Bottom up
+      * Approach1: DFS Recursive, Time:O(n), Space:O(n)
+        ```python
+          def levelOrderBottom(self, root: TreeNode) -> List[List[int]]:
+          if not root:
+              return []
+
+            def _level_order_bottom(node, level):
+
+                if not node:
+                    return
+
+                if len(visits) < level + 1:
+                    visits.appendleft([])
+
+                visits[len(visits)-1-level].append(node.val)
+
+                _level_order_bottom(node.left, level+1)
+                _level_order_bottom(node.right, level+1)
+
+            visits = collections.deque()
+            _level_order_bottom(root, level=0)
+            return visits
+        ```
+      * Approach2: BFS Iterative, Time:O(n), Space:O(n)
+        * Python Solution
+          ```python
+          def levelOrderBottom(self, root: TreeNode) -> List[List[int]]:
+            if not root:
+                return []
+
+            visits = collections.deque()
+            q = collections.deque([root])
+
+            while q:
+                q_len = len(q)
+                cur_visits = []
+                visits.appendleft(cur_visits)
+                for _ in range(q_len):
+                    node = q.popleft()
+                    cur_visits.append(node.val)
+
+                    if node.left:
+                        q.append(node.left)
+
+                    if node.right:
+                        q.append(node.right)
+
+            return visits
+          ```
+    * 637: Average of Levels in Binary Tree (E)
+      * Approach1 BFS: Time:O(n), Space:O(n)
+        * Python Solution
+          ```python
+          def averageOfLevels(self, root: TreeNode) -> List[float]:
+            if not root:
+                return []
+
+            output = []
+            q = collections.deque([root])
+            while q:
+                level_cnt = len(q)
+                acc = 0
+
+                for _ in range(level_cnt):
+                    node = q.popleft()
+                    acc += node.val
                     if node.left:
                         q.append(node.left)
                     if node.right:
                         q.append(node.right)
 
-                visits.append(level_visits)
+                output.append(acc/level_cnt)
+            return output
+          ```
+      * Approach2 DFS
+    * 103: Binary Tree Zigzag Level Order Traversal (M)
+      * Approach1: BFS, Time:O(n), Space:O(n)
+        * Python Solution:
+          ```python
+          def zigzagLevelOrder(self, root: TreeNode) -> List[List[int]]:
+            if not root:
+                return []
+
+            visits = []
+            q = collections.deque([root])
+            append_left = False
+            while q:
+                q_len  = len(q)
+                cur_visits = collections.deque()
+                visits.append(cur_visits)
+
+                for _ in range(q_len):
+                    node = q.popleft()
+                    if append_left:
+                        cur_visits.appendleft(node.val)
+                    else:
+                        cur_visits.append(node.val)
+
+                    if node.left:
+                        q.append(node.left)
+                    if node.right:
+                        q.append(node.right)
+
+                append_left = not append_left
 
             return visits
           ```
-  * Binary Search Tree
+      * Approach2: DFS, Time:O(n), Space:O(n)
+        * Python Solution
+          ```python
+          def zigzagLevelOrder(self, root: TreeNode) -> List[List[int]]:
+            def _zigzag_level_order(node, level):
+                if not root:
+                    return
+
+                if len(visits) < level + 1:
+                    visits.append(collections.deque())
+
+                if level % 2:
+                    visits[level].appendleft(node.val)
+                else:
+                    visits[level].append(node.val)
+
+                if node.left:
+                    _zigzag_level_order(node.left, level+1)
+                if node.right:
+                    _zigzag_level_order(node.right, level+1)
+
+            if not root:
+                return []
+
+            visits = []
+            _zigzag_level_order(root, 0)
+            return visits
+          ```
+    * 199: Binary Tree Right Side View (M)
+      * Approach1 BFS
+        * Python Solution
+          ```python
+          def rightSideView(self, root: TreeNode) -> List[int]:
+            if not root:
+                return []
+
+            visits = []
+            q = collections.deque([root])
+
+            while q:
+                q_len = len(q)
+                cur = None
+                for _ in range(q_len):
+                    cur = q.popleft()
+                    if cur.left:
+                        q.append(cur.left)
+                    if cur.right:
+                        q.append(cur.right)
+
+                visits.append(cur.val)
+            return visits
+          ```
+      * Approach2 DFS Recursive:
+        * Python Solution
+          ```python
+          def rightSideView(self, root: TreeNode) -> List[int]:
+            def right_side_view(node, level):
+                if not node:
+                    return
+
+                if len(visits) < level + 1:
+                    visits.append(node.val)
+
+                # right first
+                if node.right:
+                    right_side_view(node.right, level+1)
+
+                if node.left:
+                    right_side_view(node.left, level+1)
+
+            if not root:
+                return []
+
+            visits = []
+            right_side_view(root, 0)
+            return visits
+          ```
+    * 314: Binary Tree Vertical Order Traversal	(M)
+      * Node in the same vertical order should be in the same group (from top to down)
+      * List group from left to right
+      * Approach1: BFS
+        * BFS for top-down traversal of each group
+        * Sort the key of the dic to output from left to right
+        * Python Solution:
+          ```python
+          def verticalOrder(self, root: TreeNode) -> List[List[int]]:
+            if not root:
+                return []
+
+            d = collections.defaultdict(list)
+            # node and group index
+            q = collections.deque([(root, 0)])
+
+            while q:
+                node, idx = q.popleft()
+                d[idx].append(node.val)
+                if node.left:
+                    q.append((node.left, idx-1))
+
+                if node.right:
+                    q.append((node.right, idx+1))
+
+            return [d[key] for key in sorted(d.keys())]
+          ```
+      *
+  * **Binary Search Tree** (BST)
     * 098: Validate Binary Search Tree (M)
     * 173: Binary Search Tree Iterator (M) *
-      * Python Solution
-        ```python
-        class BSTIterator:
+      * Approach1: In-Order Iterative
+        * Python Solution
+          ```python
+          class BSTIterator:
 
-          def __init__(self, root: TreeNode):
-              self.stack = list()
-              self._push_all(root)
+            def __init__(self, root: TreeNode):
+                self.stack = list()
+                self._push_all(root)
 
-          def next(self) -> int:
-              """
-              @return the next smallest number
-              """
-              current = self.stack.pop()
-              self._push_all(current.right)
-              return current.val
+            def next(self) -> int:
+                """
+                @return the next smallest number
+                """
+                cur = self.stack.pop()
+                self._push_all(cur.right)
+                return cur.val
 
-          def hasNext(self) -> bool:
-              """
-              @return whether we have a next smallest number
-              """
-              return len(self.stack) != 0
+            def hasNext(self) -> bool:
+                """
+                @return whether we have a next smallest number
+                """
+                return len(self.stack) != 0
 
-          def _push_all(self, current: TreeNode):
-              while current:
-                  self.stack.append(current)
-                  current = current.left
-        ```
+            def _push_all(self, cur: TreeNode):
+                while cur:
+                    self.stack.append(cur)
+                    cur = cur.left
+          ```
+    * 235: Lowest Common Ancestor of a Binary Search Tree	preorder
+    * 236: Lowest Common Ancestor of a Binary Tree	postorder
+    * 108: Convert Sorted Array to Binary Search Tree	binary search
+    * 109: Convert Sorted List to Binary Search Tree	binary search
+    * 230: Kth Smallest Element in a BST inorder
+    * 297: Serialize and Deserialize Binary Tree	BFS
+    * 285: Inorder Successor in BST inorder
+    * 270: Closest Binary Search Tree Value	preorder
+    * 272: Closest Binary Search Tree Value II	inorder
+    * 99: Recover Binary Search Tree	inorde
+  * **Other**:
+    * 116: Populating Next Right Pointers in Each Node (M)
+    * 117: Populating Next Right Pointers in Each Node II	(M)
+    * 096: Unique Binary Search Trees	(M)
 ### Trie (Prefix Tree)
   * 208: Implement Trie (M)
     * Approach1: Iterative
@@ -6676,6 +6973,9 @@ Table of Content
     * 061: **Rotate** list (M)
       * old_head, new_tail, new_head, old_tail
     * 445: Add Two Numbers II (M)
+  * Tree:
+    * BFS:
+      * 107: Binary Tree Level Order Traversal II
   * Binary Search:
     * 275: H-Index II (M)
     * 004: Median of Two Sorted Arrays (H)
