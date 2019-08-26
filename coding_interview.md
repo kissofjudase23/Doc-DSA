@@ -225,9 +225,83 @@ Table of Content
                 return res
             ```
     * 018: 4Sum (M)
-  * Majority
+  * **Majority**
+    * The majority element is the element that appears more than ⌊ n/2 ⌋ times.
     * 169: Majority Element (E)
+      * Notice the odd and even cases
+      * Approach1: Sorting, Time:O(nlogn), Space:O(log(n)
+        * Python,
+        ```python
+        def majorityElement(self, nums: List[int]) -> int:
+          nums.sort()
+          n = len(nums)
+          return nums[n//2]
+        ```
+      * Approach2: Hash, Time:O(n), Space:O(n)
+        * Python
+          ```python
+          def majorityElement(self, nums: List[int]) -> int:
+            n = len(nums)
+            majority_cnt = n//2
+
+            majority = None
+            d = collections.defaultdict(int)
+            for n in nums:
+                d[n] += 1
+                if d[n] > majority_cnt:
+                    majority = n
+                    break
+
+            return majority
+          ```
+      * Approach3: Boyer-Moore Voting Algorithm, Time:O(n), Space:O(1)
+        * Ref:
+          * https://gregable.com/2013/10/majority-vote-algorithm-find-majority.html
+        * We maintain a count, which is incremented whenever we see an instance of our current candidate for majority element and decremented whenever we see anything else. Whenever count equals 0, we effectively forget about everything in nums up to the current index and consider the current number as the candidate for majority element.
+        * Example:
+          * [5,5,5,5,5,1,2,3,4] -> final cnt = 1, majority=5
+          * [5,1,5,2,5,3,5,4,5] -> final cnt = 1, majority=5
+          * [1,2,3,4,5,5,5,5,5] -> final cnt = 5, majority=5
+          * After scanning the array,
+            * The cnt of the majority should be greater than 1
+            * The cnt of the majority should be equal to 0
+        * Python
+          ```python
+          def majorityElement(self, nums: List[int]) -> int:
+            cnt = 0
+            majority = None
+            for n in nums:
+                if not cnt:
+                    majority = n
+
+                if n == majority:
+                    cnt += 1
+                else:
+                    cnt -= 1
+
+            return majority
+          ```
     * 229: Majority Element II (M)
+      * Given an integer array of size n, find all elements that appear more than ⌊ n/3 ⌋ times.
+      * Approach1: Hash, Time:O(n), Space:O(n)
+        * Python
+          ```python
+          def majorityElement(self, nums: List[int]) -> List[int]:
+            d = collections.defaultdict(int)
+            d_out = {}
+            majority_cnt = len(nums) // 3
+
+            for n in nums:
+                if n in d_out:
+                    continue
+
+                d[n] += 1
+                if d[n] > majority_cnt:
+                    d_out[n] = True
+
+            return d_out.keys()
+          ```
+      * Approach2: Boyer-Moore Voting Algorithm
   * Pascal's Triangle
     * 118: Pascal's Triangle (E)
     * 119: Pascal's Triangle II (E)
@@ -7379,7 +7453,11 @@ Table of Content
 ### Error List
   * Math:
     * 007: Reverse Integer
-    * 015: 3Sum (M)
+    * sum
+      * 015: 3Sum (M)
+    * Majority:
+      * 169: Majority Element (E)
+      *
   * String
     * 038: Count and Say (E)
     * 392: Is Subsequence (E)
