@@ -148,7 +148,7 @@ Table of Content
 
         return reverse
       ```
-  * Sum
+  * **Sum**
     * 001: Two Sum (E)
       * Approach1: Use hash table, Time: O(n), Space: O(n)
         * Python Solution
@@ -257,23 +257,25 @@ Table of Content
       * Approach3: Boyer-Moore Voting Algorithm, Time:O(n), Space:O(1)
         * Ref:
           * https://gregable.com/2013/10/majority-vote-algorithm-find-majority.html
-        * We maintain a count, which is incremented whenever we see an instance of our current candidate for majority element and decremented whenever we see anything else. Whenever count equals 0, we effectively forget about everything in nums up to the current index and consider the current number as the candidate for majority element.
+        * Algo:
+          * We maintain a count,
+            * which is incremented whenever we see an instance of our current candidate for majority element
+            * and decremented whenever we see anything else. Whenever count equals 0, we effectively forget about everything in nums up to the current index and consider the current number as the candidate for majority element.
         * Example:
           * [5,5,5,5,5,1,2,3,4] -> final cnt = 1, majority=5
           * [5,1,5,2,5,3,5,4,5] -> final cnt = 1, majority=5
           * [1,2,3,4,5,5,5,5,5] -> final cnt = 5, majority=5
           * After scanning the array,
             * The cnt of the majority should be greater than 1
-            * The cnt of the majority should be equal to 0
+            * The cnt of the non-majority should be equal to 0 and will be forgot.
         * Python
           ```python
           def majorityElement(self, nums: List[int]) -> int:
             cnt = 0
             majority = None
             for n in nums:
-                if not cnt:
+                if cnt == 0:
                     majority = n
-
                 if n == majority:
                     cnt += 1
                 else:
@@ -302,8 +304,30 @@ Table of Content
             return d_out.keys()
           ```
       * Approach2: Boyer-Moore Voting Algorithm
-  * Pascal's Triangle
+  * **Pascal's Triangle**
     * 118: Pascal's Triangle (E)
+      * Approach1: DP: O(n^2), Space:O(n^2)
+        * Python
+          ```python
+          def generate(self, numRows: int) -> List[List[int]]:
+            if numRows < 1:
+                return []
+
+            triangle = [[1]]
+            if numRows == 1:
+                return triangle
+
+            # index from 1 to numRows - 1
+            for row in range(1, numRows):
+                new_row = [None] * (row+1)
+                new_row[0] = new_row[-1] = 1 # first and last element
+                for i in range(1, row):
+                    new_row[i] = triangle[-1][i-1] + triangle[-1][i]
+                triangle.append(new_row)
+
+            return triangle
+          ```
+      * Approach2:
     * 119: Pascal's Triangle II (E)
 ### String
   * Remove Duplicate
@@ -4550,7 +4574,7 @@ Table of Content
   * 460: LFU Cache (H)
 ### Tree
   * **Preorder**
-    * 144: Binary Tree Preorder Traversal (M)
+    * 144: Binary Tree Preorder **Traversal** (M)
       * Approach1: Recursive:
         * Python Solution:
           ```python
@@ -4612,8 +4636,196 @@ Table of Content
 
             return output
           ```
-    * 129: Sum Root to Leaf Numbers (M)
-    * 298: Binary Tree Longest Consecutive Sequence (M)
+    * 226. **Invert** Binary Tree (E)
+      * Approach1: DFS, Recursive, Time:O(n), Space:O(n)
+          ```python
+          def invertTree(self, root: TreeNode) -> TreeNode:
+            def _invert(node):
+
+                if not node:
+                    return
+
+                node.left, node.right = node.right, node.left
+                _invert(node.left)
+                _invert(node.right)
+
+            _invert(root)
+            return root
+          ```
+      * Approach2: BFS, Iterative, Time:O(n), Space:O(n)
+          ```python
+          def invertTree(self, root: TreeNode) -> TreeNode:
+            if not root:
+                return root
+
+            q = collections.deque([root])
+            while q:
+                node = q.popleft()
+                node.left, node.right = node.right, node.left
+                if node.left:
+                    q.append(node.left)
+
+                if node.right:
+                    q.append(node.right)
+
+            return root
+          ```
+    * 100: **Same** Tree (E)
+      * Approach1: BFS Time:O(n), Space:O(n)
+        * Python
+        ```python
+        def isSameTree(self, p: TreeNode, q: TreeNode) -> bool:
+          q = collections.deque([(p, q)])
+          res = True
+
+          while q:
+              node_p, node_q = q.popleft()
+
+              # 0 node
+              if not node_p and not node_q:
+                  continue
+              # 1 node
+              if not node_p or not node_q:
+                  res = False
+                  break
+
+              # 2 nodes
+              if node_p.val != node_q.val:
+                  res = False
+                  break
+              q.append((node_p.left, node_q.left))
+              q.append((node_p.right, node_q.right))
+
+          return res
+        ```
+      * Approach2: DFS Time:O(n), Space:O(n)
+        * Python
+          ```python
+          def isSameTree(self, p: TreeNode, q: TreeNode) -> bool:
+            def is_same_tree(node_p, node_q):
+                # 0 node
+                if not node_p and not node_q:
+                    return True
+
+                # 1 node
+                if not node_p or not node_q:
+                    return False
+
+                if node_p.val != node_q.val:
+                    return False
+
+                # left tree
+                if not is_same_tree(node_p.left, node_q.left):
+                    return False
+
+                # right tree
+                if not is_same_tree(node_p.right, node_q.right):
+                    return False
+
+                return True
+
+            return is_same_tree(p, q)
+          ```
+    * 111: **Minimum Depth** of Binary Tree	(E)
+      * Notice the definiton of leaf node (no children)
+      * So root can be the leaf node if it does not have children.
+      * Approach1: DFS Recursive, Time:O(n), Space:O(n)
+        * Python
+          ```python
+          def minDepth(self, root: TreeNode) -> int:
+            def dfs(node, depth):
+                nonlocal min_depth
+                if not node.left and not node.right:
+                    min_depth = min(min_depth, depth)
+                    return
+
+                if node.left:
+                    dfs(node.left, depth+1)
+
+                if node.right:
+                    dfs(node.right, depth+1)
+
+            if not root:
+                return 0
+
+            min_depth = float('inf')
+            dfs(root, 1)
+            return min_depth
+          ```
+      * Approach2: BFS Iterative, Top Down, Time:O(n), Space:O(n)
+        * Python
+          ```python
+          def minDepth(self, root: TreeNode) -> int:
+            if not root:
+                return 0
+
+            # node and depth
+            q = collections.deque([(root, 1)])
+            min_depth = float('inf')
+
+            while q:
+                node, depth = q.popleft()
+                # this is a leaf node
+                if not node.left and not node.right:
+                    min_depth = min(min_depth, depth)
+                else:
+                  if node.left:
+                      q.append((node.left, depth+1))
+
+                  if node.right:
+                      q.append((node.right, depth+1))
+
+            return min_depth
+          ```
+    * 104: **Maximum Depth** of Binary Tree (E)
+      * Approach1: DFS Recursive, top down level cnt Time:O(n), Space:O(n)
+        * Python
+          ```python
+          def maxDepth(self, root: TreeNode) -> int:
+            def dfs(node, depth):
+                nonlocal max_depth
+
+                if not node.left and not node.right:
+                    max_depth = max(max_depth, depth)
+
+                if node.left:
+                    dfs(node.left, depth+1)
+
+                if node.right:
+                    dfs(node.right, depth+1)
+
+            if not root:
+                return 0
+
+            max_depth = 0
+            dfs(root, 1)
+            return max_depth
+          ```
+      * Approach2: BFS Iterative, top down level cnt
+        * Python
+        ```python
+        def maxDepth(self, root: TreeNode) -> int:
+          if not root:
+              return 0
+
+          max_depth = -float('inf')
+          q = collections.deque([(root, 1)])
+
+          while q:
+              node, depth = q.popleft()
+
+              if not node.left and not node.right:
+                  max_depth = max(max_depth, depth)
+
+              else:
+                  if node.left:
+                      q.append((node.left, depth+1))
+
+                  if node.right:
+                      q.append((node.right, depth+1))
+
+          return max_depth
+        ```
   * **Inorder**
     * 094: Binary Tree **Inorder** Traversal (M)
       * Approach1: Recursive
@@ -4654,7 +4866,7 @@ Table of Content
             return output
           ```
   * **Postorder**
-    * 145: Binary Tree **Postorder** Traversal (H)
+    * 145: Binary Tree Postorder **Traversal** (H)
       * Approach1: Recursive
         * Python Solution
             ```python
@@ -4694,103 +4906,327 @@ Table of Content
 
                 return output
             ```
-    * 110: Balanced Binary Tree
-    * 124: Binary Tree Maximum Path Sum
-    * 250: Count Univalue Subtrees
-    * 366: Find Leaves of Binary Tree
-    * 337: House Robber III
-  * **BFS & DFS**
-    * 226. **Invert** Binary Tree (E)
-      * Approach1: DFS, Recursive, Time:O(n), Space:O(n)
+    * 110: **Balanced** Binary Tree (E)
+      * A binary tree in which the depth of the two subtrees of **every node** never differ by more than 1.
+      * Even left subtree and right subtree are balanced trees, the tree may not be balanced tree.
+      * Approach1-1: Recursive, Time:O(n), Space:O(n)
+        * Python
           ```python
-          def invertTree(self, root: TreeNode) -> TreeNode:
-            def _invert(node):
+          def isBalanced(self, root: TreeNode) -> bool:
+            def dfs(node, depth):
+                depth += 1
+                left_d = right_d = depth
 
-                if not node:
-                    return
-
-                node.left, node.right = node.right, node.left
-                _invert(node.left)
-                _invert(node.right)
-
-            _invert(root)
-            return root
-          ```
-      * Approach2: BFS, Iterative, Time:O(n), Space:O(n)
-          ```python
-          def invertTree(self, root: TreeNode) -> TreeNode:
-            if not root:
-                return root
-
-            q = collections.deque([root])
-            while q:
-                node = q.popleft()
-                node.left, node.right = node.right, node.left
+                # check left subtree
                 if node.left:
-                    q.append(node.left)
+                    is_balanced, left_d = dfs(node.left, depth)
+                    if not is_balanced:
+                        return False, -1 # -1 means don't care
 
+                # check right subtree
                 if node.right:
-                    q.append(node.right)
+                    is_balanced, right_d = dfs(node.right, depth)
+                    if not is_balanced:
+                        return False, -1
 
-            return root
-          ```
-    * 100: **Same** Tree (E)
-      * Approach1: BFS Time:O(n), Space:O(n)
-        * Python Solution
-        ```python
-        def isSameTree(self, p: TreeNode, q: TreeNode) -> bool:
-          q = collections.deque([(p, q)])
-          res = True
+                # check itself
+                return abs(left_d-right_d) <= 1, max(left_d, right_d)
 
-          while q:
-              node_p, node_q = q.popleft()
-
-              # 0 node
-              if not node_p and not node_q:
-                  continue
-              # 1 node
-              if not node_p or not node_q:
-                  res = False
-                  break
-
-              # 2 nodes
-              if node_p.val != node_q.val:
-                  res = False
-                  break
-              q.append((node_p.left, node_q.left))
-              q.append((node_p.right, node_q.right))
-
-          return res
-        ```
-        *
-      * Approach2: DFS Time:O(n), Space:O(n)
-        * Python Solution
-          ```python
-          def isSameTree(self, p: TreeNode, q: TreeNode) -> bool:
-            def is_same_tree(node_p, node_q):
-                # 0 node
-                if not node_p and not node_q:
-                    return True
-
-                # 1 node
-                if not node_p or not node_q:
-                    return False
-
-                if node_p.val != node_q.val:
-                    return False
-
-                # left tree
-                if not is_same_tree(node_p.left, node_q.left):
-                    return False
-
-                # right tree
-                if not is_same_tree(node_p.right, node_q.right):
-                    return False
-
+            if not root:
                 return True
 
-            return is_same_tree(p, q)
+            is_balanced, _ = dfs(root, 0)
+
+            return is_balanced
           ```
+      * Approach1-2: Recursive, Time:O(n), Space:O(n)
+        * Bottom up len, prevent unnecessary depth arg
+          * Python
+            ```python
+            def isBalanced(self, root: TreeNode) -> bool:
+              def dfs(node):
+                  if not node:
+                      return True, 0
+
+                  left_d = right_d = 0
+                  if node.left: # check left subtree
+                      is_balanced, left_d = dfs(node.left)
+                      if not is_balanced:
+                          return False, -1  # -1 means don't care
+
+                  if node.right: # check right subtree
+                      is_balanced, right_d = dfs(node.right)
+                      if not is_balanced:
+                          return False, -1
+
+                  # check the node itself
+                  return abs(left_d-right_d)<=1, max(left_d, right_d)+1
+
+              if not root:
+                  return True
+
+              return dfs(root)[0]
+            ```
+      * Approach2: Bottom up postorder iterative, Time:O(n), Space:O(n)
+        * Python
+          ```python
+          def isBalanced(self, root: TreeNode) -> bool:
+            if not root:
+                return True
+
+            post_order = collections.deque()
+            stack = [root]
+            # create post order list
+            while stack:
+                node = stack.pop()
+                post_order.appendleft(node)
+                if node.left:
+                    stack.append(node.left)
+                if node.right:
+                    stack.append(node.right)
+
+            memo = collections.defaultdict(int)
+            is_balanced = True
+            # post order traversal
+            for node in post_order:
+                # get depth of left subtree and right subtree
+                left_d, right_d = memo[node.left], memo[node.right]
+                if abs(left_d - right_d) > 1:
+                    is_balanced = False
+                    break
+                # save tree depth to the memo
+                memo[node] = max(left_d, right_d) + 1
+            return is_balanced
+          ```
+    * 124: Binary Tree **Maximum Path Sum** (H)
+      * A path is defined as any sequence of nodes from some starting node to any node in the tree along the parent-child connections.
+      * A "path" is like unicursal, **can't come back**
+      * There are two cases for each node:
+        * case1: do not connect with parent, the node can connect with two children.
+        * case2: connect with parent, the node can connect with at most one child.
+      * Approach1: Iterative
+        * Python
+          ```python
+          def maxPathSum(self, root: TreeNode) -> int:
+            if not root:
+                return 0
+
+            # create post order list
+            stack = [root]
+            post_order = collections.deque()
+            while stack:
+                node = stack.pop()
+                post_order.appendleft(node)
+                if node.left:
+                    stack.append(node.left)
+
+                if node.right:
+                    stack.append(node.right)
+
+            # traverse the post order and calculate the max sum path for each node
+            max_sum = -float('inf')
+            memo = collections.defaultdict(int)
+            for node in post_order:
+                s = node.val
+                # get max left path and max right path
+                max_left = max(memo[node.left], 0)
+                max_right = max(memo[node.right], 0)
+
+                # case1: do not connect with parent, the node can connect with two children.
+                max_sum = max(max_sum, s+max_left+max_right)
+
+                # case2: connect with parent, the node can connect with at most one child.
+                memo[node] = s+max(max_left, max_right)
+
+            return max_sum
+          ```
+      * Approach2: Recursive
+        * Python
+          ```python
+          def maxPathSum(self, root: TreeNode) -> int:
+            def dfs(node):
+                if not node:
+                    return 0
+
+                s = node.val
+                max_left = max(dfs(node.left), 0)
+                max_right = max(dfs(node.right), 0)
+
+                # case1: do not connect with parent, the node can connect with two children.
+                nonlocal max_sum
+                max_sum = max(max_sum, s+max_left+max_right)
+
+                # case2: connect with parent, the node can connect with at most one child.
+                return s+max(max_left, max_right)
+
+            if not root:
+                return 0
+
+            max_sum = -float('inf')
+            dfs(root)
+            return max_sum
+          ```
+    * 250: Count **Univalue Subtrees** (M)
+      * A Uni-value subtree means all nodes of the subtree have the same value.
+      * Recursive:
+        * Python
+          ```python
+          def countUnivalSubtrees(self, root: TreeNode) -> int:
+            def dfs(node):
+                nonlocal cnt
+                # leaf node
+                if not node.left and not node.right:
+                    cnt += 1
+                    return True
+
+                is_univalue = True
+                for child in (node.left, node.right):
+                    if not child:
+                        continue
+                    if not dfs(child) or node.val != child.val:
+                        is_univalue = False
+                        # can not break here, since subtree may be uni-value
+
+                if is_univalue:
+                    cnt += 1
+                return is_univalue
+
+            if not root:
+                return 0
+            cnt = 0
+            dfs(root)
+            return cnt
+          ```
+      * Iterative:
+        * Python
+          ```python
+          def countUnivalSubtrees(self, root: TreeNode) -> int:
+            if not root:
+                return 0
+
+            stack = [root]
+            post_order = collections.deque()
+            while stack:
+                node = stack.pop()
+                post_order.appendleft(node)
+                if node.left:
+                    stack.append(node.left)
+                if node.right:
+                    stack.append(node.right)
+
+            memo = dict()
+            cnt = 0
+            for node in post_order:
+                # leaf node
+                if not node.left and not node.right:
+                    cnt += 1
+                    memo[node] = True
+                    continue
+
+                is_univalue = True
+                for child in (node.left, node.right):
+                    if not child:
+                        continue
+
+                    if not memo[child] or node.val != child.val:
+                        is_univalue = False
+                        break
+
+                if is_univalue:
+                    cnt += 1
+
+                memo[node] = is_univalue
+
+            return cnt
+        ```
+    * 687. Longest **Univalue Path** (E)
+      * Similar to 124
+      * Recursive:
+        * Python
+          ```python
+          def longestUnivaluePath(self, root: TreeNode) -> int:
+            def dfs(node):
+                nonlocal max_cnt
+                # leaf node
+                if not node.left and not node.right:
+                    return 1
+
+                left_cnt = right_cnt = 0
+                if node.left:
+                    cnt = dfs(node.left)
+                    if node.val == node.left.val:
+                        left_cnt = cnt
+
+                if node.right:
+                    cnt = dfs(node.right)
+                    if node.val == node.right.val:
+                        right_cnt = cnt
+
+                # case1: do not connect to parent node
+                max_cnt = max(max_cnt, 1+left_cnt+right_cnt)
+
+                # case2: connect to parent node
+                return 1+max(left_cnt,right_cnt)
+
+
+            if not root:
+                return 0
+
+            max_cnt = 1
+
+            dfs(root)
+
+            return max_cnt - 1
+          ```
+      * Iterative:
+        * Python
+          ```python
+          def longestUnivaluePath(self, root: TreeNode) -> int:
+
+            if not root:
+                return 0
+
+            stack = [root]
+            post_order = collections.deque()
+            while stack:
+                node = stack.pop()
+                post_order.appendleft(node)
+
+                if node.left:
+                    stack.append(node.left)
+
+                if node.right:
+                    stack.append(node.right)
+
+            max_cnt = 1
+            memo = dict()
+            for node in post_order:
+                if not node.left and not node.right:
+                    memo[node] = 1
+                    continue
+
+                left_cnt = right_cnt = 0
+                if node.left:
+                    cnt = memo[node.left]
+                    if node.val == node.left.val:
+                        left_cnt = cnt
+
+                if node.right:
+                    cnt = memo[node.right]
+                    if node.val == node.right.val:
+                        right_cnt = cnt
+
+                # case1, do not connect to parent
+                max_cnt = max(max_cnt, 1+left_cnt+right_cnt)
+
+                # case2, connect to parent
+                memo[node] = 1 + max(left_cnt, right_cnt)
+
+            return max_cnt-1
+          ```
+    * 366: Find Leaves of Binary Tree (M)
+    * 337: House Robber III (M)
+  * **BFS & DFS**
     * 101: **Symmetric** Tree (E)
       * Approach1: DFS Recursive, Time:O(n), Space:O(n)
         * Python
@@ -4801,20 +5237,15 @@ Table of Content
                 if not left and not right:
                     return True
 
-                # 1
+                # 1 node
                 if not left or not right:
                     return False
 
                 if left.val != right.val:
                     return False
 
-                if not is_symmetric(left.left, right.right):
-                    return False
-
-                if not is_symmetric(left.right, right.left):
-                    return False
-
-                return True
+                return is_symmetric(left.left, right.right) and \
+                       is_symmetric(left.right, right.left)
 
             if not root:
                 return True
@@ -4829,7 +5260,6 @@ Table of Content
                 return True
 
               q = collections.deque([(root.left, root.right)])
-
               is_symmetric = True
               while q:
                   left, right = q.popleft()
@@ -5076,105 +5506,141 @@ Table of Content
 
             return output
           ```
-    * 111: **Minimum Depth** of Binary Tree	(E)
-      * Notice the definiton of leaf node (no children)
-      * So root can be the leaf node if it does not have children.
+    * 129: Sum Root to Leaf Numbers (M)
       * Approach1: BFS Iterative, Time:O(n), Space:O(n)
-        * Python
-          ```python
-          def minDepth(self, root: TreeNode) -> int:
-            if not root:
-                return 0
-
-            # node and depth
-            q = collections.deque([(root, 1)])
-            min_depth = float('inf')
-
-            while q:
-                node, depth = q.popleft()
-
-                # this is a leaf node
-                if not node.left and not node.right:
-                    min_depth = min(min_depth, depth)
-                else:
-                  if node.left:
-                      q.append((node.left, depth+1))
-
-                  if node.right:
-                      q.append((node.right, depth+1))
-
-            return min_depth
-          ```
-      * Approach2: DFS Recursive, Time:O(n), Space:O(n)
-        * Python
-          ```python
-          def minDepth(self, root: TreeNode) -> int:
-            def dfs(node, depth):
-                if not node.left and not node.right:
-                    return depth
-
-                min_depth = float('inf')
-                if node.left:
-                    min_depth = min(dfs(node.left, depth+1), min_depth)
-
-                if node.right:
-                    min_depth = min(dfs(node.right, depth+1), min_depth)
-
-                return min_depth
-
-            if not root:
-                return 0
-
-            return dfs(root, 1)
-          ```
-    * 104: **Maximum Depth** of Binary Tree (E)
-      * Approach1: BFS Iterative:
-        * Python
         ```python
-        def maxDepth(self, root: TreeNode) -> int:
+        def sumNumbers(self, root: TreeNode) -> int:
           if not root:
               return 0
 
-          max_depth = -float('inf')
-          q = collections.deque([(root, 1)])
-
+          q = collections.deque([(root, 0)])
+          sum_leaf = 0
           while q:
-              node, depth = q.popleft()
+              node, s = q.popleft()
+              s += node.val
 
               if not node.left and not node.right:
-                  max_depth = max(max_depth, depth)
+                  sum_leaf += s
 
-              else:
-                  if node.left:
-                      q.append((node.left, depth+1))
+              if node.left:
+                  q.append((node.left, s*10))
 
-                  if node.right:
-                      q.append((node.right, depth+1))
+              if node.right:
+                  q.append((node.right, s*10))
 
-          return max_depth
+          return sum_leaf
         ```
-      * Approach2: DFS Recursive: Time:O(n), Space:O(n)
-        * Python
-          ```python
-          def maxDepth(self, root: TreeNode) -> int:
-            def dfs(node, depth):
-                if not node.left and not node.right:
-                    return depth
+      * Approach2: DFS Recursive, Time:O(n), Space:O(n)
+        ```python
+        def sumNumbers(self, root: TreeNode) -> int:
+          def dfs(node, s):
+              nonlocal sum_leaf
+              s += node.val
 
-                max_depth = -float('inf')
-                if node.left:
-                    max_depth = max(max_depth, dfs(node.left, depth+1))
+              if not node.left and not node.right:
+                  sum_leaf += s
+                  return
 
-                if node.right:
-                    max_depth = max(max_depth, dfs(node.right, depth+1))
+              if node.left:
+                  dfs(node.left, s*10)
 
-                return max_depth
+              if node.right:
+                  dfs(node.right, s*10)
 
             if not root:
                 return 0
 
-            return dfs(root, 1)
+            sum_leaf = 0
+            dfs(root, 0)
+            return sum_leaf
+
+        ```
+    * 298: Binary Tree **Longest Consecutive** Sequence (M)
+      * Approach1-1: BFS Iterative, from the perspective of cur, Time:O(n), Space:O(n)
+        * Python
+          ```python
+          def longestConsecutive(self, root: TreeNode) -> int:
+            if not root:
+                return 0
+
+            dummy_val = root.val # ensue there is no consecutive for root
+            q = collections.deque([(root, dummy_val, 0)])
+            max_path = 0
+            while q:
+                # current node, prev val, prev acc path length
+                node, p_val, p_acc_path = q.popleft()
+
+                if node.val == p_val+1:
+                    acc_path = p_acc_path + 1
+                else: # node.val != p_val+1, restart
+                    acc_path = 1
+                    max_path = max(max_path, p_acc_path)
+
+                # leaf node
+                if not node.left and not node.right:
+                    max_path = max(max_path, acc_path)
+                    continue
+
+                if node.left:
+                    q.append((node.left, node.val, acc_path))
+
+                if node.right:
+                    q.append((node.right, node.val, acc_path))
+
+            return max_path
           ```
+      * Approach1-2: BFS Iterative, from the perspective of parent node Time:O(n), Space:O(n)
+        * From the perspective of parent, can avoid unnecessary prev_val arg passing
+        * python
+          ```python
+          def longestConsecutive(self, root: TreeNode) -> int:
+            if not root:
+                return 0
+
+            # perspective of dummy node before root
+            q = collections.deque([(root, 1)])
+            max_path = 0
+            while q:
+              # current node, cur path
+              node, path = q.popleft()
+              max_path = max(max_path, path)
+
+              for child in (node.left, node.right):
+                  if not child:
+                      continue
+
+                  new_path = 1
+                  if node.val+1 == child.val:
+                      new_path = path+1
+
+                  q.append((child, new_path))
+
+          return max_path
+          ```
+      * Approach2: DFS Recursive, Time:O(n), Space:O(n)
+        * Python
+        ```python
+        def longestConsecutive(self, root: TreeNode) -> int:
+          def dfs(node, path):
+              nonlocal max_path
+              max_path = max(max_path, path)
+              for child in (node.left, node.right):
+                if not child:
+                    continue
+
+                new_path = 1
+                if node.val + 1 == child.val:
+                    new_path = path + 1
+                dfs(child, new_path)
+
+          if not root:
+              return 0
+
+          max_path = 0
+          dfs(root, 1)
+
+          return max_path
+        ```
     * 102: Binary Tree Level Order Traversal (E)
       * Approach1: DFS Recursive, Time:O(n), Space:O(n)
         * Python Solution
@@ -7457,7 +7923,6 @@ Table of Content
       * 015: 3Sum (M)
     * Majority:
       * 169: Majority Element (E)
-      *
   * String
     * 038: Count and Say (E)
     * 392: Is Subsequence (E)
@@ -7495,16 +7960,20 @@ Table of Content
       * old_head, new_tail, new_head, old_tail
     * 445: Add Two Numbers II (M)
   * Tree:
+    * PreOrder:
+      * 111: **Minimum Depth** of Binary Tree	(E)
     * PostOrder:
       * 145: Binary Tree **Postorder** Traversal (H)
+      * 110: **Balanced** Binary Tree (E)
+      * 124: Binary Tree **Maximum Path Sum** (H)
+      * 250: Count **Univalue Subtrees** (M)
     * BFS & DFS:
       * 107: Binary Tree Level Order Traversal II
         * Recursive
       * 113: Path **Sum** II (M)
       * 314: Binary Tree **Vertical Order** Traversal	(M)
       * 101: **Symmetric** Tree (E)
-      * 111: **Minimum Depth** of Binary Tree	(E)
-      *
+      * 298: Binary Tree **Longest Consecutive** Sequence (M)
   * Binary Search:
     * 275: H-Index II (M)
     * 004: Median of Two Sorted Arrays (H)
@@ -7538,3 +8007,5 @@ Table of Content
     * **Deduction**
       * 276: Paint Fence (E)
       * 198: House Robber (E)
+
+
