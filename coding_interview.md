@@ -4752,7 +4752,30 @@ Table of Content
             dfs(root, 1)
             return min_depth
           ```
-      * Approach2: BFS Iterative, Top Down, Time:O(n), Space:O(n)
+      * Approach2: DFS Recursive, Bottom up level cnt, postorder
+        * Python
+          ```python
+          def minDepth(self, root: TreeNode) -> int:
+            def dfs(node):
+                if not node.left and not node.right:
+                    return 1
+
+                min_depth = float('inf')
+
+                if node.left:
+                    min_depth = min(min_depth, dfs(node.left))
+
+                if node.right:
+                    min_depth = min(min_depth, dfs(node.right))
+
+                return min_depth + 1
+
+            if not root:
+                return 0
+
+            return dfs(root)
+          ```
+      * Approach3: BFS Iterative, Top Down, Time:O(n), Space:O(n)
         * Python
           ```python
           def minDepth(self, root: TreeNode) -> int:
@@ -4801,7 +4824,29 @@ Table of Content
             dfs(root, 1)
             return max_depth
           ```
-      * Approach2: BFS Iterative, top down level cnt
+      * Approach2: DFS Recursive, Bottom up level cnt, postorder
+        * Python
+          ```python
+          def maxDepth(self, root: TreeNode) -> int:
+            def dfs(node):
+                if not node.left and not node.right:
+                    return 1
+
+                max_depth = 0
+                if node.left:
+                    max_depth = max(max_depth, dfs(node.left))
+
+                if node.right:
+                    max_depth = max(max_depth, dfs(node.right))
+
+                return max_depth + 1
+
+            if not root:
+                return 0
+
+            return dfs(root)
+          ```
+      * Approach3: BFS Iterative, top down level cnt
         * Python
         ```python
         def maxDepth(self, root: TreeNode) -> int:
@@ -4826,6 +4871,91 @@ Table of Content
 
           return max_depth
         ```
+    * 298: Binary Tree **Longest Consecutive** Sequence (M)
+      * Approach1-1: BFS Iterative, from the perspective of cur, Time:O(n), Space:O(n)
+        * Python
+          ```python
+          def longestConsecutive(self, root: TreeNode) -> int:
+            if not root:
+                return 0
+
+            dummy_val = root.val # ensue there is no consecutive for root
+            q = collections.deque([(root, dummy_val, 0)])
+            max_path = 0
+            while q:
+                # current node, prev val, prev acc path length
+                node, p_val, p_acc_path = q.popleft()
+
+                if node.val == p_val+1:
+                    acc_path = p_acc_path + 1
+                else: # node.val != p_val+1, restart
+                    acc_path = 1
+                    max_path = max(max_path, p_acc_path)
+
+                # leaf node
+                if not node.left and not node.right:
+                    max_path = max(max_path, acc_path)
+                    continue
+
+                if node.left:
+                    q.append((node.left, node.val, acc_path))
+
+                if node.right:
+                    q.append((node.right, node.val, acc_path))
+
+            return max_path
+          ```
+      * Approach1-2: BFS Iterative, from the perspective of parent node Time:O(n), Space:O(n)
+        * From the perspective of parent, can avoid unnecessary prev_val arg passing
+        * python
+          ```python
+          def longestConsecutive(self, root: TreeNode) -> int:
+            if not root:
+                return 0
+
+            # perspective of dummy node before root
+            q = collections.deque([(root, 1)])
+            max_path = 0
+            while q:
+              # current node, cur path
+              node, path = q.popleft()
+              max_path = max(max_path, path)
+
+              for child in (node.left, node.right):
+                  if not child:
+                      continue
+
+                  new_path = 1
+                  if node.val+1 == child.val:
+                      new_path = path+1
+
+                  q.append((child, new_path))
+
+          return max_path
+          ```
+      * Approach2: DFS Recursive, Time:O(n), Space:O(n)
+        * Python
+          ```python
+          def longestConsecutive(self, root: TreeNode) -> int:
+            def dfs(node, path):
+                nonlocal max_path
+                max_path = max(max_path, path)
+                for child in (node.left, node.right):
+                  if not child:
+                      continue
+
+                  new_path = 1
+                  if node.val + 1 == child.val:
+                      new_path = path + 1
+                  dfs(child, new_path)
+
+            if not root:
+                return 0
+
+            max_path = 0
+            dfs(root, 1)
+            return max_path
+          ```
   * **Inorder**
     * 094: Binary Tree **Inorder** Traversal (M)
       * Approach1: Recursive
@@ -5224,8 +5354,70 @@ Table of Content
 
             return max_cnt-1
           ```
-    * 366: Find Leaves of Binary Tree (M)
+    * 366: **Find Leaves** of Binary Tree (M)
+      * Recursive:
+        * Python
+          ```python
+          def findLeaves(self, root: TreeNode) -> List[List[int]]:
+            def dfs(node):
+                # case1: leaf node -> level == 0
+                # case2: non leaf node-> level == max_child level + 1
+                level = 0 # leaf node, level is 0
+
+                if node.left:
+                    level = max(dfs(node.left)+1, level)
+                if node.right:
+                    level = max(dfs(node.right)+1, level)
+
+                if len(output) < level + 1:
+                    output.append([])
+
+                output[level].append(node.val)
+
+                return level
+
+            if not root:
+                return []
+
+            output = []
+            dfs(root)
+            return output
+          ```
+      * Iterative:
+        * Python
+          ```python
+          def findLeaves(self, root: TreeNode) -> List[List[int]]:
+            if not root:
+                return []
+
+            stack = [root]
+            post_order = collections.deque()
+            while stack:
+                node = stack.pop()
+                post_order.appendleft(node)
+                if node.left:
+                    stack.append(node.left)
+                if node.right:
+                    stack.append(node.right)
+
+            output = []
+            memo = dict()
+            for node in post_order:
+                level = 0
+                if node.left:
+                    level = max(level, memo[node.left]+1)
+                if node.right:
+                    level = max(level, memo[node.right]+1)
+
+                memo[node] = level
+                if len(output) < level + 1:
+                    output.append([])
+                output[level].append(node.val)
+
+            return output
+          ```
     * 337: House Robber III (M)
+      * See DP
   * **BFS & DFS**
     * 101: **Symmetric** Tree (E)
       * Approach1: DFS Recursive, Time:O(n), Space:O(n)
@@ -5555,92 +5747,6 @@ Table of Content
             return sum_leaf
 
         ```
-    * 298: Binary Tree **Longest Consecutive** Sequence (M)
-      * Approach1-1: BFS Iterative, from the perspective of cur, Time:O(n), Space:O(n)
-        * Python
-          ```python
-          def longestConsecutive(self, root: TreeNode) -> int:
-            if not root:
-                return 0
-
-            dummy_val = root.val # ensue there is no consecutive for root
-            q = collections.deque([(root, dummy_val, 0)])
-            max_path = 0
-            while q:
-                # current node, prev val, prev acc path length
-                node, p_val, p_acc_path = q.popleft()
-
-                if node.val == p_val+1:
-                    acc_path = p_acc_path + 1
-                else: # node.val != p_val+1, restart
-                    acc_path = 1
-                    max_path = max(max_path, p_acc_path)
-
-                # leaf node
-                if not node.left and not node.right:
-                    max_path = max(max_path, acc_path)
-                    continue
-
-                if node.left:
-                    q.append((node.left, node.val, acc_path))
-
-                if node.right:
-                    q.append((node.right, node.val, acc_path))
-
-            return max_path
-          ```
-      * Approach1-2: BFS Iterative, from the perspective of parent node Time:O(n), Space:O(n)
-        * From the perspective of parent, can avoid unnecessary prev_val arg passing
-        * python
-          ```python
-          def longestConsecutive(self, root: TreeNode) -> int:
-            if not root:
-                return 0
-
-            # perspective of dummy node before root
-            q = collections.deque([(root, 1)])
-            max_path = 0
-            while q:
-              # current node, cur path
-              node, path = q.popleft()
-              max_path = max(max_path, path)
-
-              for child in (node.left, node.right):
-                  if not child:
-                      continue
-
-                  new_path = 1
-                  if node.val+1 == child.val:
-                      new_path = path+1
-
-                  q.append((child, new_path))
-
-          return max_path
-          ```
-      * Approach2: DFS Recursive, Time:O(n), Space:O(n)
-        * Python
-        ```python
-        def longestConsecutive(self, root: TreeNode) -> int:
-          def dfs(node, path):
-              nonlocal max_path
-              max_path = max(max_path, path)
-              for child in (node.left, node.right):
-                if not child:
-                    continue
-
-                new_path = 1
-                if node.val + 1 == child.val:
-                    new_path = path + 1
-                dfs(child, new_path)
-
-          if not root:
-              return 0
-
-          max_path = 0
-          dfs(root, 1)
-
-          return max_path
-        ```
     * 102: Binary Tree Level Order Traversal (E)
       * Approach1: DFS Recursive, Time:O(n), Space:O(n)
         * Python Solution
@@ -5912,8 +6018,105 @@ Table of Content
             return [d[key] for key in sorted(d.keys())]
           ```
   * **Binary Search Tree** (BST)
-    * 098: Validate Binary Search Tree (M)
-    * 173: Binary Search Tree Iterator (M) *
+    * 098: **Validate** Binary Search Tree (M)
+      * Definition:
+        * The left subtree of a node contains only nodes with keys less than the node's key.
+        * The right subtree of a node contains only nodes with keys greater than the node's key.
+        * Both the left and right subtrees must also be binary search trees.
+      * Approach1: Postorder, Recursive, Time:O(n), Space:O(n)
+        * For each node
+          * The maximum val of left subtree should be less than the node val
+          * The minimum val of right subtree should be greater than the node val
+          * that is : l_max < node.val < r_min
+        * Python:
+          ```python
+          def isValidBST(self, root: TreeNode) -> bool:
+            def dfs(node):
+                if not node:
+                    # is_valid, min_val, max_val
+                    return True, float('inf'), float('-inf'),
+
+                l_is_valid, l_min, l_max = dfs(node.left)
+                if not l_is_valid:
+                    return False, None, None # None means don't care
+
+                r_is_valid, r_min, r_max = dfs(node.right)
+                if not r_is_valid:
+                    return False, None, None # None means don't care
+
+                # is_valid: if the tree is a binary search tree
+                # minimum value in the tree
+                # maximum value in the tree
+                return l_max < node.val < r_min, \
+                        min(node.val, l_min, r_min), max(node.val, l_max, r_max)
+
+            return dfs(root)[0]
+          ```
+      * Approach2: Preorder Recursive, Time:O(n), Space:O(n)
+        * Python
+          ```python
+          def isValidBST(self, root: TreeNode) -> bool:
+            def dfs(node, lower, upper):
+                if not node:
+                    return True
+
+                if not lower < node.val < upper:
+                    return False
+
+                return dfs(node.left, lower, node.val) and dfs(node.right, node.val, upper)
+
+            return dfs(root, float('-inf'), float('inf'))
+          ```
+      * Approach3: Preorder, Iterative
+        * Python
+          ```python
+          def isValidBST(self, root: TreeNode) -> bool:
+            if not root:
+                return True
+
+            is_valid = True
+            stack = [(root, float('-inf'), float('inf'))]
+
+            while stack:
+                node, lower, upper = stack.pop()
+                if not lower < node.val < upper:
+                    is_valid = False
+                    break
+
+                if node.left:
+                    stack.append((node.left, lower, node.val))
+
+                if node.right:
+                    stack.append((node.right, node.val, upper))
+
+            return is_valid
+          ```
+      * Approach4: InOrder Iterative
+        * Python
+          ```python
+          def isValidBST(self, root: TreeNode) -> bool:
+            if not root:
+                return True
+
+            cur = root
+            stack = []
+            in_order = float('-inf')
+            is_valid = True
+            while stack or cur:
+                if cur:
+                    stack.append(cur)
+                    cur = cur.left
+                else:
+                    cur = stack.pop()
+                    if cur.val <= in_order:
+                        is_valid = False
+                        break
+                    in_order = cur.val
+                    cur = cur.right
+
+            return is_valid
+          ```
+    * 173: Binary Search Tree **Iterator** (M) *
       * Approach1: In-Order Iterative
         * Python Solution
           ```python
@@ -5942,16 +6145,72 @@ Table of Content
                     self.stack.append(cur)
                     cur = cur.left
           ```
-    * 235: Lowest Common Ancestor of a Binary Search Tree	preorder
-    * 236: Lowest Common Ancestor of a Binary Tree	postorder
-    * 108: Convert Sorted Array to Binary Search Tree	binary search
-    * 109: Convert Sorted List to Binary Search Tree	binary search
-    * 230: Kth Smallest Element in a BST inorder
-    * 297: Serialize and Deserialize Binary Tree	BFS
-    * 285: Inorder Successor in BST inorder
-    * 270: Closest Binary Search Tree Value	preorder
-    * 272: Closest Binary Search Tree Value II	inorder
-    * 99: Recover Binary Search Tree	inorde
+    * 235: **Lowest Common Ancestor** of a Binary Search Tree (E)
+      * Algo:
+        * 1: Start traversing the tree from the root node.
+        * 2: If both the nodes p and q are in the right subtree, then continue the search with right subtree starting step 1.
+        * 3: If both the nodes p and q are in the left subtree, then continue the search with left subtree starting step 1.
+        * 4: If both step 2 and step 3 are not true, this means we have found the node which is common to node p's and q's subtrees. and hence we return this common node as the LCA.
+      * Recursive:
+        * python
+          ```python
+          def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+            def dfs(node):
+                val = node.val
+                # find right subtree
+                if node.val < p_val and node.val < q_val:
+                    if node.right:
+                        return dfs(node.right)
+                    else:
+                        return None
+                elif node.val > p_val and node.val > q_val:
+                    if node.left:
+                        return dfs(node.left)
+                    else:
+                        return None
+                else:
+                    return node
+
+            if not root:
+                return None
+
+            p_val = p.val
+            q_val = q.val
+
+            return dfs(root)
+          ```
+      * Iterative:
+        * Python
+          ```python
+          def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+            if not root:
+                return None
+
+            p_val = p.val
+            q_val = q.val
+
+            cur = root
+            while cur:
+                if cur.val < p_val and cur.val < q_val:
+                    cur = cur.right
+
+                elif cur.val > p_val and cur.val > q_val:
+                    cur = cur.left
+
+                else:
+                    break
+
+            return cur
+          ```
+    * 236: **Lowest Common Ancestor** of a Binary Tree (M)
+    * 108: Convert Sorted Array to Binary Search Tree	binary search (E)
+    * 109: Convert Sorted List to Binary Search Tree binary search (M)
+    * 230: Kth Smallest Element in a BST (M)
+    * 297: Serialize and Deserialize Binary Tree (H)
+    * 285: Inorder Successor in BST (M)
+    * 270: Closest Binary Search Tree Value (E)
+    * 272: Closest Binary Search Tree Value II (H)
+    * 099: Recover Binary Search Tree (H)
   * **Other**:
     * 116: Populating Next Right Pointers in Each Node (M)
     * 117: Populating Next Right Pointers in Each Node II	(M)
@@ -6985,6 +7244,7 @@ Table of Content
           # init first row
           memo = [1 for _ in range(n)]
 
+          # 1 to m-1 rows
           for _ in range(1, m):
               for c in range(1, n):
                   # memo[c] = memo[c] (from up) + memo[c-1] (from left)
@@ -7068,6 +7328,7 @@ Table of Content
                                                 memo)
          ```
     * 256: Paint House (E)
+      * There are a row of n houses, each house can be painted with one of the three colors: red, blue or green. The cost of painting each house with a certain color is different. You have to paint all the houses such that no two adjacent houses have the same color.
       * Recursive relation
         * n == 0: (first house)
           * f_color[0][red] = costs[0][red]
@@ -7244,35 +7505,34 @@ Table of Content
       * Approach1: Recursive + memo (top-down)
       * Approach2: Iterative + memo (bottom-up), Time: O(n), Space: O(n)
         * Python Solution
-        ```python
-        def numWays(self, n: int, k: int) -> int:
-          """
-          n: number of posts
-          k: number of color
-          """
-          # no posts
-          if n == 0:
-              return 0
+          ```python
+          def numWays(self, n: int, k: int) -> int:
+            """
+            n: number of posts
+            k: number of color
+            """
+            # no posts
+            if n == 0:
+                return 0
 
-          # 1 posts
-          if n == 1:
-              return k
+            # 1 posts
+            if n == 1:
+                return k
 
-          # 2 posts
-          memo_same = [None] * n
-          memo_same[1] = k
+            # 2 posts
+            memo_same = [None] * n
+            memo_same[1] = k
 
-          memo_diff = [None] * n
-          memo_diff[1] = k * (k - 1)
+            memo_diff = [None] * n
+            memo_diff[1] = k * (k - 1)
 
-          # 2 to n-1
-          for i in range(2, n):
-              memo_same[i] = memo_diff[i-1]
-              memo_diff[i] = (memo_diff[i-1] +memo_same[i-1]) * (k - 1)
+            # 2 to n-1
+            for i in range(2, n):
+                memo_same[i] = memo_diff[i-1]
+                memo_diff[i] = (memo_diff[i-1] +memo_same[i-1]) * (k - 1)
 
-          return memo_same[n-1] + memo_diff[n-1]
-
-        ```
+            return memo_same[n-1] + memo_diff[n-1]
+          ```
       * Approach3: Iterative + N variables (bottom-up), Time: O(n), Space: O(1)
         * Python Solution
           ```python
@@ -7390,42 +7650,131 @@ Table of Content
         * (1) i not robbed
         * (2) i robbed
         * (3) pick the bigger one.
-      * Python Solution
-      ```python
-      def rob(snums: List[int]) -> int:
+      * Python
+        ```python
+        def rob(snums: List[int]) -> int:
+            def rob_non_cycle(start, end):
+                n = end - start + 1
+                if n == 1:
+                    return nums[start]
+                if n == 2:
+                    return max(nums[start], nums[start+1])
 
-          def rob_non_cycle(start, end):
-              n = end - start + 1
-              if n == 1:
-                  return nums[start]
-              if n == 2:
-                  return max(nums[start], nums[start+1])
+                prev_max = nums[start]
+                cur_max = max(nums[start], nums[start+1])
+                for i in range(start+2, end+1):
+                    prev_max, cur_max = cur_max, max(nums[i]+prev_max, cur_max)
 
-              prev_max = nums[start]
-              cur_max = max(nums[start], nums[start+1])
-              for i in range(start+2, end+1):
-                  prev_max, cur_max = cur_max, max(nums[i]+prev_max, cur_max)
+                return cur_max
 
-              return cur_max
+            n = len(nums)
+            if n == 0:
+                return 0
+            if n == 1:
+                return nums[0]
+            if n == 2:
+                return max(nums[0], nums[1])
+            if n == 3:
+                return max(nums[0], nums[1], nums[2])
 
-          n = len(nums)
-          if n == 0:
-              return 0
-          if n == 1:
-              return nums[0]
-          if n == 2:
-              return max(nums[0], nums[1])
-          if n == 3:
-              return max(nums[0], nums[1], nums[2])
+            # rob the 0th house and skip 1th hourse and (n-1)th house
+            rob_first = nums[0] + rob_non_cycle(2, n-2)
+            # do not rob the 0th
+            do_not_rob_first = rob_non_cycle(1, n-1)
 
-          # rob the 0th house and skip 1th hourse and (n-1)th house
-          rob_first = nums[0] + rob_non_cycle(2, n-2)
-          # do not rob the 0th
-          do_not_rob_first = rob_non_cycle(1, n-1)
-
-          return max(rob_first, do_not_rob_first)`
-      ```
+            return max(rob_first, do_not_rob_first)`
+        ```
     * 337: House Robber III (M)
+      * Ref:
+        * https://leetcode.com/problems/house-robber-iii/discuss/79330/Step-by-step-tackling-of-the-problem
+      * Recursive Relation1:
+        * terminate case: when tree is empty, return 0
+        * case1: Rob node: f(n) = node.val
+                                 + f(n.left.left) + f(n.left.right)
+                                 + f(n.right.left) + f(n.right.right)
+        * case2: Do not rob node: f(n) = f(n.left) + f(n.right)
+      * Approach1: Recursive + memo (top-down), Time:O(n), Space:O(n)
+        * Python,
+          ```python
+          def rob(self, root: TreeNode) -> int:
+            def dfs(node):
+                if not node:
+                    return 0
+
+                if node not in memo:
+                    rob = node.val
+                    if node.left:
+                        rob += (dfs(node.left.left) + dfs(node.left.right))
+                    if node.right:
+                        rob += (dfs(node.right.left) + dfs(node.right.right))
+
+                    do_not_rob = dfs(node.left)+dfs(node.right)
+
+                    memo[node] = max(rob, do_not_rob)
+
+                return memo[node]
+
+            memo = dict()
+            return dfs(root)
+          ```
+      * Recursive Relation2:
+          * terminate case: when tree is empty, return 0, 0 (rob and not rob)
+          * case1: Rob node: f(n) = node.val + f(n.left)[left_not_rob] + f(n.right)[right_not_rob]
+          * case2: Do not rob node: f(n) = max(f(n.left)) + max(f(n.right))
+      * Approach2: Recursive without memo (top-down), Time:O(n), Space:O(n)
+        * Every node return two values, rob the node and do not rob the node
+        * Python
+          ```python
+          def rob(self, root: TreeNode) -> int:
+            def dfs(node):
+                if not node:
+                    return 0, 0
+
+                l_rob, l_not_rob = dfs(node.left)
+                r_rob, r_not_rob = dfs(node.right)
+
+                rob = node.val + l_not_rob + r_not_rob
+                do_not_rob = max(l_rob, l_not_rob) + max(r_rob, r_not_rob)
+
+                return rob, do_not_rob
+
+            return max(dfs(root))
+          ```
+      * Approach3: Iterative, postorder, Time:O(n), Space:O(n)
+        * Python
+          ```python
+          def rob(self, root: TreeNode) -> int:
+            if not root:
+                return 0
+
+            stack = [root]
+            post_order = collections.deque()
+            while stack:
+                node = stack.pop()
+                post_order.appendleft(node)
+
+                if node.left:
+                    stack.append(node.left)
+                if node.right:
+                    stack.append(node.right)
+
+            memo = dict()
+            for node in post_order:
+                l_rob = l_not_rob = 0
+                if node.left:
+                    l_rob, l_not_rob = memo[node.left]
+
+                r_rob = r_not_rob = 0
+                if node.right:
+                    r_rob, r_not_rob = memo[node.right]
+
+                rob = node.val + l_not_rob + r_not_rob
+                not_rob = max(l_rob, l_not_rob) + max(r_rob, r_not_rob)
+
+                memo[node] = (rob, not_rob)
+
+            return max(memo[root])
+          ```
     * 010: **Regular Expression** Matching (H)
     * 044: **Wildcard** Matching (H)
 ### Backtracking
@@ -7962,18 +8311,22 @@ Table of Content
   * Tree:
     * PreOrder:
       * 111: **Minimum Depth** of Binary Tree	(E)
+      * 298: Binary Tree **Longest Consecutive** Sequence (M)
+      * 235: **Lowest Common Ancestor** of a Binary Search Tree (E)
     * PostOrder:
       * 145: Binary Tree **Postorder** Traversal (H)
       * 110: **Balanced** Binary Tree (E)
       * 124: Binary Tree **Maximum Path Sum** (H)
       * 250: Count **Univalue Subtrees** (M)
+      * 366: **Find Leaves** of Binary Tree (M)
     * BFS & DFS:
       * 107: Binary Tree Level Order Traversal II
         * Recursive
       * 113: Path **Sum** II (M)
       * 314: Binary Tree **Vertical Order** Traversal	(M)
       * 101: **Symmetric** Tree (E)
-      * 298: Binary Tree **Longest Consecutive** Sequence (M)
+    * Binary Search Tree
+      * 098: Validate Binary Search Tree (M)
   * Binary Search:
     * 275: H-Index II (M)
     * 004: Median of Two Sorted Arrays (H)
@@ -8004,8 +8357,11 @@ Table of Content
     * **One Dimensional**
     * **Two Dimensional**
       * 256: Paint House (E)
+      * 072: Edit Distance (H)
     * **Deduction**
       * 276: Paint Fence (E)
       * 198: House Robber (E)
+      * 213: House Robber II (M)
+      * 337: House Robber III (M)
 
 
