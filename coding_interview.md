@@ -5078,26 +5078,23 @@ Table of Content
                   if not node:
                       return True, 0
 
-                  left_d = right_d = 0
-                  if node.left: # check left subtree
-                      is_balanced, left_d = dfs(node.left)
-                      if not is_balanced:
-                          return False, -1  # -1 means don't care
+                  is_balanced, left_d = dfs(node.left)
+                  if not is_balanced:
+                    return False, -1  # -1 means don't care
 
-                  if node.right: # check right subtree
-                      is_balanced, right_d = dfs(node.right)
-                      if not is_balanced:
-                          return False, -1
+                  is_balanced, right_d = dfs(node.right)
+                  if not is_balanced:
+                    return False, -1
 
                   # check the node itself
-                  return abs(left_d-right_d)<=1, max(left_d, right_d)+1
+                  return abs(left_d-right_d)<=1, 1+max(left_d, right_d)
 
               if not root:
                   return True
 
               return dfs(root)[0]
             ```
-      * Approach2: Bottom up postorder iterative, Time:O(n), Space:O(n)
+      * Approach2: Iterative, Time:O(n), Space:O(n)
         * Python
           ```python
           def isBalanced(self, root: TreeNode) -> bool:
@@ -5125,7 +5122,7 @@ Table of Content
                     is_balanced = False
                     break
                 # save tree depth to the memo
-                memo[node] = max(left_d, right_d) + 1
+                memo[node] = 1+ max(left_d, right_d)
             return is_balanced
           ```
     * 124: Binary Tree **Maximum Path Sum** (H)
@@ -5360,24 +5357,21 @@ Table of Content
           ```python
           def findLeaves(self, root: TreeNode) -> List[List[int]]:
             def dfs(node):
-                # case1: leaf node -> level == 0
-                # case2: non leaf node-> level == max_child level + 1
-                level = 0 # leaf node, level is 0
+              # case1: empty node -> level == -1
+              # case2: non leaf node-> level == max_child level + 1
+              if not node:
+                  return -1
 
-                if node.left:
-                    level = max(dfs(node.left)+1, level)
-                if node.right:
-                    level = max(dfs(node.right)+1, level)
+              level = 1 + max(dfs(node.left), dfs(node.right))
 
-                if len(output) < level + 1:
-                    output.append([])
+              if len(output) < level + 1:
+                  output.append([])
+              output[level].append(node.val)
 
-                output[level].append(node.val)
-
-                return level
+              return level
 
             if not root:
-                return []
+              return []
 
             output = []
             dfs(root)
@@ -5401,23 +5395,100 @@ Table of Content
                     stack.append(node.right)
 
             output = []
-            memo = dict()
+            memo = collections.defaultdict(lambda: -1)
             for node in post_order:
-                level = 0
-                if node.left:
-                    level = max(level, memo[node.left]+1)
-                if node.right:
-                    level = max(level, memo[node.right]+1)
-
+                level = 1 + max(memo[node.left], memo[node.right])
                 memo[node] = level
+
                 if len(output) < level + 1:
                     output.append([])
                 output[level].append(node.val)
 
-            return output
+                return output
           ```
     * 337: House Robber III (M)
       * See DP
+    * 236: **Lowest Common Ancestor** of a **Binary Tree** (M)
+      * Algo:
+        * https://leetcode.com/articles/lowest-common-ancestor-of-a-binary-tree/
+      * Three cases to find the LCA:
+        * mid + left
+        * mid + right
+        * left + right
+      * Approach1: postorder recursive, Time:O(n), Space:O(n)
+        * algo:
+          * Start traversing the tree from the root node.
+          * If either of the left or the right branch returns True, this means one of the two nodes was found below.
+          * If the current node itself is one of p or q, we would mark a variable mid as True and continue the search for the other node in the left and right branches.
+          * If at any point in the traversal, any two of the three flags left, right or mid become True, this means we have found the lowest common ancestor for the nodes p and q.
+        * Python
+          ```python
+          def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+            def dfs(node):
+                if not node:
+                    return False
+
+                mid = True if node is p or node is q else False
+                left = dfs(node.left)
+                right = dfs(node.right)
+
+                """
+                mid + left
+                mid + right
+                left + right
+                """
+                if mid + left + right >=2:
+                    nonlocal lca
+                    lca = node
+
+                return mid or left or right
+
+            if not root:
+                return None
+
+            lca = None
+            dfs(root)
+            return lca
+          ```
+      * Approach2: postorder iterative, Time:O(n), Space:O(n)
+        * Python
+          ```python
+          def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+            if not root:
+                return None
+
+            stack = [root]
+            post_order = collections.deque()
+            while stack:
+                node = stack.pop()
+                post_order.appendleft(node)
+
+                if node.left:
+                    stack.append(node.left)
+
+                if node.right:
+                    stack.append(node.right)
+
+            memo = collections.defaultdict(bool)
+            lca = None
+            for node in post_order:
+                mid = True if node is p or node is q else False
+                left = memo[node.left]
+                right = memo[node.right]
+
+                """
+                mid + left
+                mid + right
+                left + right
+                """
+                if mid + left + right >= 2:
+                    lca = node
+                    break
+
+                memo[node] = mid or left or right
+
+            return lca
+          ```
   * **BFS & DFS**
     * 101: **Symmetric** Tree (E)
       * Approach1: DFS Recursive, Time:O(n), Space:O(n)
@@ -6017,6 +6088,70 @@ Table of Content
 
             return [d[key] for key in sorted(d.keys())]
           ```
+    * 297: **Serialize** and **Deserialize** Binary Tree (H)
+      * Approach1: BFS + pickle, Time:O(n), Space:O(n)
+        * Python
+         ```python
+        class Codec:
+            def serialize(self, root):
+                """Encodes a tree to a single string.
+
+                :type root: TreeNode
+                :rtype: str
+                """
+                if not root:
+                    return []
+
+                q = collections.deque([root])
+                bfs = []
+                while q:
+                    node = q.popleft()
+                    if not node:
+                        # insert None to list
+                        bfs.append(None)
+                        continue
+
+                    bfs.append(node.val)
+                    q.append(node.left)
+                    q.append(node.right)
+
+                return pickle.dumps(bfs)
+
+            def deserialize(self, data):
+                """Decodes your encoded data to tree.
+
+                :type data: str
+                :rtype: TreeNode
+                """
+                if not data:
+                    return None
+
+                bfs = pickle.loads(data)
+
+                if not bfs:
+                    return None
+
+                root = TreeNode(bfs[0])
+                i = 1
+                q = collections.deque([root])
+
+                while q:
+                    node = q.popleft()
+                    # left
+                    if bfs[i] != None:
+                        node.left = TreeNode(bfs[i])
+                        q.append(node.left)
+                    i += 1
+
+                    # right
+                    if bfs[i] != None:
+                        node.right = TreeNode(bfs[i])
+                        q.append(node.right)
+                    i += 1
+
+                return root
+        ```
+      * Approach2: DFS + pickle
   * **Binary Search Tree** (BST)
     * 098: **Validate** Binary Search Tree (M)
       * Definition:
@@ -6067,22 +6202,19 @@ Table of Content
 
             return dfs(root, float('-inf'), float('inf'))
           ```
-      * Approach3: Preorder, Iterative
+      * Approach3: Preorder, Iterative, Time:O(n), Space:O(n)
         * Python
           ```python
           def isValidBST(self, root: TreeNode) -> bool:
             if not root:
                 return True
-
             is_valid = True
             stack = [(root, float('-inf'), float('inf'))]
-
             while stack:
                 node, lower, upper = stack.pop()
                 if not lower < node.val < upper:
                     is_valid = False
                     break
-
                 if node.left:
                     stack.append((node.left, lower, node.val))
 
@@ -6091,7 +6223,7 @@ Table of Content
 
             return is_valid
           ```
-      * Approach4: InOrder Iterative
+      * Approach4: InOrder Iterative, Time:O(n), Space:O(n)
         * Python
           ```python
           def isValidBST(self, root: TreeNode) -> bool:
@@ -6116,12 +6248,245 @@ Table of Content
 
             return is_valid
           ```
+    * 701: **Insert** into a BST (M)
+      * Recursive:
+        * Python
+          ```python
+          def insertIntoBST(self, root: TreeNode, val: int) -> TreeNode:
+            def dfs(node):
+                if val > node.val:
+                    if node.right:
+                        dfs(node.right)
+                    else:
+                        node.right = TreeNode(val)
+
+                elif val < node.val:
+                    if node.left:
+                        dfs(node.left)
+                    else:
+                        node.left = TreeNode(val)
+
+            if not root:
+                return TreeNode(val)
+
+            dfs(root)
+
+            return root
+          ```
+      * Iterative:
+        * Python
+          ```python
+          def insertIntoBST(self, root: TreeNode, val: int) -> TreeNode:
+            if not root:
+                return TreeNode(val)
+
+            cur = root
+            prev = None
+            while cur:
+                prev = cur
+                if val > cur.val:
+                    if cur.right:
+                        cur = cur.right
+                    else:
+                        cur.right = TreeNode(val)
+                        break
+
+                elif val < cur.val:
+                    if cur.left:
+                        cur = cur.left
+                    else:
+                        cur.left = TreeNode(val)
+                        break
+                else:
+                    break
+
+            return root
+          ```
+    * 450: **Delete** Node in a BST (M)
+      * Definition
+        * Predecessor:
+          * maxium value in the left subtree
+          * one step left and then right till you can
+        * Successor:
+          * minimum value in the right subtree
+          * one step right and then left till you can
+      * Recursive1: Time:O(n), Space:O(n)
+        * Ref:
+          * https://leetcode.com/articles/delete-node-in-a-bst/
+        * Python
+          ```python
+          def deleteNode(self, root: TreeNode, key: int) -> TreeNode:
+            def get_predecessor(node):
+                "maximum value in the left subtree"
+                cur = node.left
+                while cur.right:
+                    cur = cur.right
+
+                return cur
+
+            def get_successor(node):
+                "minimum value in the right subtree"
+                cur = node.right
+                while cur.left:
+                    cur = cur.left
+
+                return cur
+
+            def dfs(node, val):
+
+                if not node:  # not found
+                    return None
+
+                if val < node.val:
+                    node.left = dfs(node.left, val)
+
+                elif val > node.val:
+                    node.right = dfs(node.right, val)
+
+                else: # val == node.val:
+                    if not node.left and not node.right:
+                        return None  # leaf node
+
+                    if not node.left:
+                        return node.right
+
+                    if not node.right:
+                        return node.left
+
+                    if node.right:
+                        # minimum value in the right subtree
+                        successor = get_successor(node)
+                        node.val = successor.val
+                        node.right = dfs(node.right, successor.val)
+
+                    else:
+                        # maximum value in the left subtree
+                        predecessor = get_predecessor(node)
+                        node.val = predecessor.val
+                        node.left = dfs(node.left, predecessor.val)
+
+                return node
+
+            return dfs(root, key)
+          ```
+      * Recursive2: Time:O(n), Space:O(n)
+        * Find the node:
+          * case1: leaf node, return None to parent node
+          * case2: no left subtree, return right subtree
+          * case3: no right subtree, return left subtree
+          * case4: node.right replaces the node, and append node.left to the left of the successor
+        * Python
+          ```python
+          def deleteNode(self, root: TreeNode, key: int) -> TreeNode:
+            def get_successor(node):
+                cur = node.right
+                while cur.left:
+                    cur = cur.left
+                return cur
+
+            def dfs(node):
+                if not node:
+                    return None # not found
+
+                if key < node.val:
+                    node.left = dfs(node.left)
+                    return node
+
+                elif key > node.val:
+                    node.right = dfs(node.right)
+                    return node
+
+                else: # key == node.val
+
+                    # leaf node
+                    if not node.left and not node.right:
+                        return None
+
+                    if not node.left:
+                        return node.right
+
+                    if not node.right:
+                        return node.left
+
+                    right_min = get_successor(node)
+                    right_min.left = node.left
+
+                    # node.right replaces the node
+                    return node.right
+
+            if not root:
+                return None
+
+            return dfs(root)
+          ```
+      * Iterative2: Time:O(n), Space:O(n)
+        * Find the node:
+          * case1: leaf node, return None to parent node
+          * case2: no left subtree, return right subtree
+          * case3: no right subtree, return left subtree
+          * case4: node.right replaces the node, and append node.left to the left of the successor
+        * Python
+        ```python
+        def deleteNode(self, root: TreeNode, key: int) -> TreeNode:
+
+          def get_successor(node):
+              cur = node.right
+              while cur.left:
+                  cur = cur.left
+              return cur
+
+          def delete_node(node):
+
+              # leaf node
+              if not node.left and not node.right:
+                  return None
+
+              if not node.left:
+                  return node.right
+
+              if not node.right:
+                  return node.left
+
+              right_min = get_successor(node)
+              right_min.left = node.left
+
+              # node.right replace the node
+              return node.right
+
+
+          if not root:
+              return None
+
+          prev = None
+          cur = root
+          while cur:
+              if key < cur.val:
+                  prev = cur
+                  cur = cur.left
+              elif key > cur.val:
+                  prev = cur
+                  cur = cur.right
+              else:  # cur.val == key
+                  break
+
+          if not cur:
+              return root # not found
+
+          if not prev:    # delete root node
+              return delete_node(cur)
+
+          if key < prev.val:
+              prev.left = delete_node(cur)
+          else:
+              prev.right = delete_node(cur)
+
+          return root
+        ```
     * 173: Binary Search Tree **Iterator** (M) *
       * Approach1: In-Order Iterative
         * Python Solution
           ```python
           class BSTIterator:
-
             def __init__(self, root: TreeNode):
                 self.stack = list()
                 self._push_all(root)
@@ -6147,11 +6512,18 @@ Table of Content
           ```
     * 235: **Lowest Common Ancestor** of a Binary Search Tree (E)
       * Algo:
+        * https://leetcode.com/articles/lowest-common-ancestor-of-a-binary-search-tree/
         * 1: Start traversing the tree from the root node.
         * 2: If both the nodes p and q are in the right subtree, then continue the search with right subtree starting step 1.
         * 3: If both the nodes p and q are in the left subtree, then continue the search with left subtree starting step 1.
         * 4: If both step 2 and step 3 are not true, this means we have found the node which is common to node p's and q's subtrees. and hence we return this common node as the LCA.
-      * Recursive:
+          * cur + left
+          * cur + right
+          * left + right
+      * FAQ
+        * How to error handling if p and q are not in the tree ?? Use 236 (postorder)
+
+      * Preorder Recursive, Time:O(n), Space:O(n)
         * python
           ```python
           def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
@@ -6179,7 +6551,7 @@ Table of Content
 
             return dfs(root)
           ```
-      * Iterative:
+      * Preorder Iterative, Time:O(n), Space:O(1)
         * Python
           ```python
           def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
@@ -6202,11 +6574,120 @@ Table of Content
 
             return cur
           ```
-    * 236: **Lowest Common Ancestor** of a Binary Tree (M)
-    * 108: Convert Sorted Array to Binary Search Tree	binary search (E)
-    * 109: Convert Sorted List to Binary Search Tree binary search (M)
-    * 230: Kth Smallest Element in a BST (M)
-    * 297: Serialize and Deserialize Binary Tree (H)
+    * 108: Convert **Sorted Array** to Binary Search Tree	binary search (E)
+      * A height-balanced binary tree is defined as a binary tree in which the depth of the two subtrees of every node never differ by more than 1.
+      * Recursive: Time:O(n), Space:O(log(n))
+        * Python
+          ```python
+          def sortedArrayToBST(self, nums: List[int]) -> TreeNode:
+            def dfs(node, left, right):
+                mid = (left + right) // 2
+                node.val = nums[mid]
+
+                if left < mid:
+                    node.left = TreeNode(0)
+                    dfs(node.left, left, mid-1)
+
+                if right > mid:
+                    node.right = TreeNode(0)
+                    dfs(node.right, mid+1, right)
+
+            if not nums:
+                return None
+
+            root = TreeNode(0)
+            dfs(root, 0, len(nums)-1)
+            return root
+          ```
+      * Iterative: Time:O(n), Space:(log(n))
+        * Python
+          ```python
+          def sortedArrayToBST(self, nums: List[int]) -> TreeNode:
+            if not nums:
+                return None
+
+            root = TreeNode(0)
+            stack = [(root, 0, len(nums)-1)]
+
+            while stack:
+                node, left, right = stack.pop()
+                mid = (left + right) // 2
+                node.val = nums[mid]
+
+                if left < mid:
+                    node.left = TreeNode(0)
+                    stack.append((node.left, left, mid-1))
+
+                if right > mid:
+                    node.right = TreeNode(0)
+                    stack.append((node.right, mid+1, right))
+
+            return root
+
+          ```
+    * 109: Convert **Sorted List** to Binary Search Tree binary search (M)
+      * Approach1: Two Pointer to find middle, Time:O(nlog(n)), space:O(log(n))
+        * Time: O(nlogn)
+          * n/2 + 2*n/4 + 4*n/8 + ... logn * 1
+        * This is not a good approach, since the input will be changed.
+      * Approach2: Transfer to array, Time:O(log(n)), Space:O(n)
+        * Pytyon
+          ```python
+          def sortedListToBST(self, head: ListNode) -> TreeNode:
+            if not head:
+                return None
+
+            nums = []
+            while head:
+                nums.append(head.val)
+                head = head.next
+
+            left = 0
+            right = len(nums)-1
+            root = TreeNode(0)
+            stack = [(root, left, right)]
+
+            while stack:
+                node, left, right = stack.pop()
+                mid = (left + right)//2
+                node.val = nums[mid]
+                if left < mid:
+                    node.left = TreeNode(0)
+                    stack.append((node.left, left, mid-1))
+
+                if right > mid:
+                    node.right = TreeNode(0)
+                    stack.append((node.right, mid+1, right))
+
+            return root
+          ```
+      * Approach3: Inorder Simulation, Time:O(n), Space:O(log(n)
+    * 230: **Kth Smallest** Element in a BST (M)
+      * Approach1: Inorder Traversal, Time:O(h+k), Space:O(h)
+        * Python
+          ```python
+          def kthSmallest(self, root: TreeNode, k: int) -> int:
+            cur = root
+            stack = []
+            cnt = 0
+            target = None
+            while cur or stack:
+                if cur:
+                    stack.append(cur)
+                    cur = cur.left
+                else:
+                    cur = stack.pop()
+                    cnt += 1
+                    if cnt == k:
+                        target = cur.val
+                        break
+
+                    cur = cur.right
+
+            return target
+          ```
+      * Follow up:
+        * What if the BST is modified (insert/delete operations) often and you need to find the kth smallest frequently? How would you optimize the kth Smallest routine?
     * 285: Inorder Successor in BST (M)
     * 270: Closest Binary Search Tree Value (E)
     * 272: Closest Binary Search Tree Value II (H)
@@ -8312,13 +8793,13 @@ Table of Content
     * PreOrder:
       * 111: **Minimum Depth** of Binary Tree	(E)
       * 298: Binary Tree **Longest Consecutive** Sequence (M)
-      * 235: **Lowest Common Ancestor** of a Binary Search Tree (E)
     * PostOrder:
       * 145: Binary Tree **Postorder** Traversal (H)
       * 110: **Balanced** Binary Tree (E)
       * 124: Binary Tree **Maximum Path Sum** (H)
       * 250: Count **Univalue Subtrees** (M)
       * 366: **Find Leaves** of Binary Tree (M)
+      * 236: **Lowest Common Ancestor** of a Binary Tree (M)
     * BFS & DFS:
       * 107: Binary Tree Level Order Traversal II
         * Recursive
@@ -8327,6 +8808,9 @@ Table of Content
       * 101: **Symmetric** Tree (E)
     * Binary Search Tree
       * 098: Validate Binary Search Tree (M)
+      * 235: **Lowest Common Ancestor** of a Binary Search Tree (E)
+      * 108: **Convert Sorted Array** to Binary Search Tree	binary search (E)
+      * 450: **Delete** Node in a BST (M)
   * Binary Search:
     * 275: H-Index II (M)
     * 004: Median of Two Sorted Arrays (H)
