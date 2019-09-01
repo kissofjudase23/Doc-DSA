@@ -2490,7 +2490,7 @@ Table of Content
     * 253: Meeting Rooms II (M)
       * Find the minimum requirement of the meeting rooms.
       * Approach1: Brute Force, Time: O(n^2), Space: O(1)
-      * Approach2: Time: O(nlog(n)), Space: O(n)
+      * Approach2: Min Heap: O(nlog(n)), Space: O(n)
         * Check after sorting
         * Algo
           * Sort the intervals by start time
@@ -4287,10 +4287,12 @@ Table of Content
             return self.mins[-1]
       ```
 ### Heap (Priority Queue)
-  * 023: Merge k Sorted Lists (H) (Linked List)
+  * 023: Merge k Sorted Lists (H) (LinkedList)
+    * pleaser refer linked list section (use min heap)
   * 253: Meeting Rooms II (M) (Array)
+    * Please refer array section, use min heap
   * 703. **Kth Largest** Element in a Stream (E)
-    * Approach1: heap, Time: O(log(k)), Space: O(k)
+    * Approach1: min heap, Time: O(log(k)), Space: O(k)
       * Time: O(log(k))
         * __init__: O(nlog(k))
           * n items for heap push
@@ -4323,8 +4325,8 @@ Table of Content
         ```
   * 215: **Kth Largest** Element in an Array (M)
     * Find the kth largest element in an unsorted array.
-    * Approach1: Sort, Time: O(nlog(n)), Space:O(log(n))
-    * Approach2: heap, Time: O(nlog(k)), Space: O(k)
+    * Approach1: Sorting, Time: O(nlog(n)), Space:O(log(n))
+    * Approach2: min heap, Time: O(nlog(k)), Space: O(k)
       * keep the k element in the minimum heap
       * Time Complexity: O(nlog(l))
         * **heappush**
@@ -4384,50 +4386,50 @@ Table of Content
         ```
   * 347: **Top K Frequent** Elements (M)
     * Given a non-empty array of integers, return the **k most frequent elements**.
-    * If k == 1, Time:O(n), Space:O(n)
+    * If k == 1, Hash Table, Time:O(n), Space:O(n)
       * Use dictionary and keep the max key
-    * If k > 1, Time:O(nlog(k)), Space:O(n)
+    * If k > 1, Hash Table + min heap Time:O(nlog(k)), Space:O(n)
       * Time O(nlog(k))
         * build hash map :O(n)
         * build heap :O(nlog(k))
       * Space: O(n)
         * O(n) for hash table
         * O(k) for heap
-      * Python Implementation 1:
-      ```python
-      class Element(object):
-        def __init__(self, key, count):
-            self.key = key
-            self.count = count
+      * Approach1: heapq-1:
+        ```python
+        class Element(object):
+          def __init__(self, key, count):
+              self.key = key
+              self.count = count
 
-        def __lt__(self, other):
-            return self.count < other.count
+          def __lt__(self, other):
+              return self.count < other.count
 
-        def __repr__(self):
-            return str(self.key)
+          def __repr__(self):
+              return str(self.key)
 
-      def topKFrequent(nums: List[int], k: int) -> List[int]:
-          d = collections.Counter(nums)
-          heap = list()
+        def topKFrequent(nums: List[int], k: int) -> List[int]:
+            d = collections.Counter(nums)
+            heap = list()
 
-          for key, cnt in d.items():
-              if len(heap) < k:
-                  heapq.heappush(heap, Element(key, cnt))
-              else:
-                  e = Element(key, cnt)
-                  if heap[0] < e:
-                      heapq.heapreplace(heap, e)
+            for key, cnt in d.items():
+                if len(heap) < k:
+                    heapq.heappush(heap, Element(key, cnt))
+                else:
+                    e = Element(key, cnt)
+                    if heap[0] < e:
+                        heapq.heapreplace(heap, e)
 
-          return [e.key for e in heap]
-      ```
-      * Python Implementation 2
+            return [e.key for e in heap]
+        ```
+      * Approach2: heapq-2
         ```python
         def topKFrequent(self, nums: List[int], k: int) -> List[int]:
           counter = collections.Counter(nums)
           return heapq.nlargest(k, counter.keys(), key=counter.get)
         ```
-  * 692: Top K Frequent Words (M)
-    * Approach1: heap, Time:O(nlogk), Space:O(n):
+  * 692: **Top K Frequent** Words (M)
+    * Approach1: hash table + min heap, Time:O(nlogk), Space:O(n):
       * Time:
         * Create Hash Table: O(n)
         * Insert to Heap: O(nlogk)
@@ -4958,6 +4960,34 @@ Table of Content
           ```
   * **Inorder**
     * 094: Binary Tree **Inorder** Traversal (M)
+    * 173: Binary Search Tree **Iterator** (M) *
+      * Approach1: In-Order Iterative
+        * Python Solution
+          ```python
+          class BSTIterator:
+            def __init__(self, root: TreeNode):
+                self.stack = list()
+                self._push_all(root)
+
+            def next(self) -> int:
+                """
+                @return the next smallest number
+                """
+                cur = self.stack.pop()
+                self._push_all(cur.right)
+                return cur.val
+
+            def hasNext(self) -> bool:
+                """
+                @return whether we have a next smallest number
+                """
+                return len(self.stack) != 0
+
+            def _push_all(self, cur: TreeNode):
+                while cur:
+                    self.stack.append(cur)
+                    cur = cur.left
+          ```
       * Approach1: Recursive
         * Python Solution
           ```python
@@ -6107,7 +6137,7 @@ Table of Content
                 while q:
                     node = q.popleft()
                     if not node:
-                        # insert None to list
+                        # insert None to list can help to deserialize the tree
                         bfs.append(None)
                         continue
 
@@ -6141,7 +6171,7 @@ Table of Content
                     if bfs[i] != None:
                         node.left = TreeNode(bfs[i])
                         q.append(node.left)
-                    i += 1
+                    i += 1  # move forward event bfs[i] is None
 
                     # right
                     if bfs[i] != None:
@@ -6153,12 +6183,12 @@ Table of Content
         ```
       * Approach2: DFS + pickle
   * **Binary Search Tree** (BST)
+    * Definition of BST:
+      * The **left subtree** of a node contains only nodes with keys **less than** the node's key.
+      * The **right subtree** of a node contains only nodes with keys **greater than** the node's key.
+      * Both the left and right subtrees must also be binary search trees.
     * 098: **Validate** Binary Search Tree (M)
-      * Definition:
-        * The left subtree of a node contains only nodes with keys less than the node's key.
-        * The right subtree of a node contains only nodes with keys greater than the node's key.
-        * Both the left and right subtrees must also be binary search trees.
-      * Approach1: Postorder, Recursive, Time:O(n), Space:O(n)
+      * Approach1: Postorder, Recursive, Time:O(h), Space:O(h)
         * For each node
           * The maximum val of left subtree should be less than the node val
           * The minimum val of right subtree should be greater than the node val
@@ -6187,7 +6217,7 @@ Table of Content
 
             return dfs(root)[0]
           ```
-      * Approach2: Preorder Recursive, Time:O(n), Space:O(n)
+      * Approach2: Preorder Recursive, Time:O(h), Space:O(h)
         * Python
           ```python
           def isValidBST(self, root: TreeNode) -> bool:
@@ -6202,7 +6232,7 @@ Table of Content
 
             return dfs(root, float('-inf'), float('inf'))
           ```
-      * Approach3: Preorder, Iterative, Time:O(n), Space:O(n)
+      * Approach3: Preorder, Iterative, Time:O(h), Space:O(h)
         * Python
           ```python
           def isValidBST(self, root: TreeNode) -> bool:
@@ -6223,7 +6253,7 @@ Table of Content
 
             return is_valid
           ```
-      * Approach4: InOrder Iterative, Time:O(n), Space:O(n)
+      * Approach4: InOrder Iterative, Time:O(h), Space:O(h)
         * Python
           ```python
           def isValidBST(self, root: TreeNode) -> bool:
@@ -6249,7 +6279,7 @@ Table of Content
             return is_valid
           ```
     * 701: **Insert** into a BST (M)
-      * Recursive:
+      * Recursive: Time:O(h), Space:O(h)
         * Python
           ```python
           def insertIntoBST(self, root: TreeNode, val: int) -> TreeNode:
@@ -6273,7 +6303,7 @@ Table of Content
 
             return root
           ```
-      * Iterative:
+      * Iterative: Time:O(h), Space:O(h)
         * Python
           ```python
           def insertIntoBST(self, root: TreeNode, val: int) -> TreeNode:
@@ -6306,11 +6336,18 @@ Table of Content
       * Definition
         * Predecessor:
           * maxium value in the left subtree
-          * one step left and then right till you can
         * Successor:
           * minimum value in the right subtree
-          * one step right and then left till you can
-      * Recursive1: Time:O(n), Space:O(n)
+      * 2 Cases for parent node:
+        * It is the root.
+        * It is not the root.
+      * 3 Cases for delete node
+        * It is a leaf node
+          * Return None to parent node
+        * It has only one subtree
+          * Return the one subtree to parent
+        * It has two subtrees:
+      * Recursive1: Time:O(h), Space:O(h)
         * Ref:
           * https://leetcode.com/articles/delete-node-in-a-bst/
         * Python
@@ -6369,7 +6406,7 @@ Table of Content
 
             return dfs(root, key)
           ```
-      * Recursive2: Time:O(n), Space:O(n)
+      * Recursive2: Time:O(h), Space:O(h)
         * Find the node:
           * case1: leaf node, return None to parent node
           * case2: no left subtree, return right subtree
@@ -6419,7 +6456,7 @@ Table of Content
 
             return dfs(root)
           ```
-      * Iterative2: Time:O(n), Space:O(n)
+      * Iterative2: Time:O(h), Space:O(h)
         * Find the node:
           * case1: leaf node, return None to parent node
           * case2: no left subtree, return right subtree
@@ -6482,34 +6519,6 @@ Table of Content
 
           return root
         ```
-    * 173: Binary Search Tree **Iterator** (M) *
-      * Approach1: In-Order Iterative
-        * Python Solution
-          ```python
-          class BSTIterator:
-            def __init__(self, root: TreeNode):
-                self.stack = list()
-                self._push_all(root)
-
-            def next(self) -> int:
-                """
-                @return the next smallest number
-                """
-                cur = self.stack.pop()
-                self._push_all(cur.right)
-                return cur.val
-
-            def hasNext(self) -> bool:
-                """
-                @return whether we have a next smallest number
-                """
-                return len(self.stack) != 0
-
-            def _push_all(self, cur: TreeNode):
-                while cur:
-                    self.stack.append(cur)
-                    cur = cur.left
-          ```
     * 235: **Lowest Common Ancestor** of a Binary Search Tree (E)
       * Algo:
         * https://leetcode.com/articles/lowest-common-ancestor-of-a-binary-search-tree/
@@ -6575,7 +6584,7 @@ Table of Content
             return cur
           ```
     * 108: Convert **Sorted Array** to Binary Search Tree	binary search (E)
-      * A height-balanced binary tree is defined as a binary tree in which the depth of the two subtrees of every node never differ by more than 1.
+      * A **height-balanced binary** tree is defined as a binary tree in which the depth of the two subtrees of every node never differ by more than 1.
       * Recursive: Time:O(n), Space:O(log(n))
         * Python
           ```python
@@ -6688,14 +6697,213 @@ Table of Content
           ```
       * Follow up:
         * What if the BST is modified (insert/delete operations) often and you need to find the kth smallest frequently? How would you optimize the kth Smallest routine?
-    * 285: Inorder Successor in BST (M)
-    * 270: Closest Binary Search Tree Value (E)
-    * 272: Closest Binary Search Tree Value II (H)
-    * 099: Recover Binary Search Tree (H)
+        * Doubly Linked List + Dict + Tree ??
+    * 285: **Inorder Successor** in BST (M)
+      * successor:
+        * if the node with the smallest key greater than p.val
+        * Successor is the smallest node in the inorder traversal after the current one.
+      * Approach1: Inorder Traversal: Time:O(h), Space:O(h)
+        * Python
+          ```python
+          def inorderSuccessor(self, root: 'TreeNode', p: 'TreeNode') -> 'TreeNode':
+            if not root or not p:
+                return None
+
+            cur = root
+            stack = []
+            is_found = False
+            successor = None
+            while cur or stack:
+                if cur:
+                    stack.append(cur)
+                    cur = cur.left
+
+                else:
+                    cur = stack.pop()
+
+                    if is_found:
+                        successor = cur
+                        break
+
+                    if cur is p:
+                        is_found = True
+
+                    cur = cur.right
+
+            return successor
+          ```
+    * 510: **Inorder Successor** in BST II (M)
+      * Two cases:
+        * Have right subtree:
+          * return minimum value of right subtree
+        * Do not have right subtree
+          * find the successor from ancestors
+      * Approach1: Iterative: Time:O(h), Space:O(1)
+        * Python
+          ```python
+          def inorderSuccessor(self, node: 'Node') -> 'Node':
+            if not node:
+                return None
+
+            successor = None
+            key = node.val
+
+            # case1, have the right subtree, return the minimum value from right subtree
+            if node.right:
+                cur = node.right
+                while cur.left:
+                    cur = cur.left
+                successor = cur
+
+            # case2, do not have the right subtree, try to find from ancestors
+            else:
+                cur = node.parent
+                while cur and cur.val < key:
+                    cur = cur.parent
+                if cur and cur.val > key:
+                    successor = cur
+
+            return successor
+          ```
+    * 270: **Closest** Binary Search Tree Value (E)
+      * Inorder Recursive:
+        * Python
+          ```python
+          def closestValue(self, root: TreeNode, target: float) -> int:
+            def dfs(node):
+                if node.left:
+                    dfs(node.left)
+
+                nonlocal closet
+                if closet is None or abs(node.val-target) < abs(closet-target):
+                    closet = node.val
+
+                if node.right:
+                    dfs(node.right)
+
+            if not root:
+                return None
+
+            closet = NONE
+            dfs(root)
+
+            return closet
+          ```
+      * Inorder Iterative:
+        * Python
+          ```python
+          def closestValue(self, root: TreeNode, target: float) -> int:
+            if not root:
+                return None
+
+            cur = root
+            stack = []
+            closet = None
+            found = False
+
+            while cur or stack:
+                if cur:
+                    stack.append(cur)
+                    cur = cur.left
+
+                else:
+                    cur = stack.pop()
+                    # equal is for init cases
+                    if closet is None or abs(cur.val-target) <= abs(closet-target):
+                        closet = cur.val
+                    else:
+                        break
+                    cur = cur.right
+
+            return closet
+          ```
+    * 272: **Closest** Binary Search Tree Value II (H)
+      * Approach1: Max Heap, Time:O(nlogk), Space:O(n)
+        * Python
+          ```python
+          # for max heap
+          class Element(object):
+              def __init__(self, key, diff):
+                  self.key = key
+                  self.diff = diff
+
+              def __lt__(self, other):
+                  return self.diff > other.diff
+
+              def __repr__(self):
+                  return str(self.key)
+
+          def closestKValues(self, root: TreeNode, target: float, k: int) -> List[int]:
+              if not root or k < 1:
+                  return []
+
+              heap = []
+              stack = []
+              cur = root
+
+              while cur or stack:
+                  if cur:
+                      stack.append(cur)
+                      cur = cur.left
+                  else:
+                      cur = stack.pop()
+                      diff = abs(target-cur.val)
+                      if len(heap) < k:
+                          heapq.heappush(heap, Element(cur.val, diff))
+                      elif diff < heap[0].diff:
+                          heapq.heapreplace(heap, Element(cur.val, diff))
+                      else:
+                          break
+                      cur = cur.right
+
+              return [e.key for e in heap]
+          ```
+      * Approach2: Deque, Time:O(n), Space:O(n)
+        * There are 3 cases for diff sequences.
+          * 1. 0 1 2 3 4 5
+          * 2. 5 4 3 2 1 0
+          * 3. 3 2 1 0 1 2 3
+        * Python
+          ```python
+          def closestKValues(self, root: TreeNode, target: float, k: int) -> List[int]:
+            if not root or k < 1:
+                return []
+
+            k_closets = collections.deque()
+            stack = []
+            cur = root
+            while cur or stack:
+                if cur:
+                    stack.append(cur)
+                    cur = cur.left
+                else:
+                    cur = stack.pop()
+                    k_closets.append(cur.val)
+                    cur = cur.right
+
+            while len(k_closets) > k:
+                # pop the bigger one
+                if abs(k_closets[0]-target) >= abs(k_closets[-1]-target):
+                    k_closets.popleft()
+                else:
+                    k_closets.pop()
+
+            return k_closets
+          ```
+     099: Recover Binary Search Tree (H)
   * **Other**:
     * 116: Populating Next Right Pointers in Each Node (M)
     * 117: Populating Next Right Pointers in Each Node II	(M)
     * 096: Unique Binary Search Trees	(M)
+    * 156: Binary Tree Upside Down (M)
+    * 114: Flatten Binary Tree to Linked List	(M)
+    * 255: Verify Preorder Sequence in Binary Search Tree (M)
+    * 333: Largest BST Subtree (M)
+    * 222: Count Complete Tree Nodes (M)
+    * 105: Construct Binary Tree from Preorder and Inorder Traversal (M)
+    * 106: Construct Binary Tree from Inorder and Postorder Traversal	(M)
+    * 095: Unique Binary Search Trees II (M)
+    * 331: Verify Preorder Serialization of a Binary Tree	(M)
 ### Trie (Prefix Tree)
   * 208: Implement Trie (M)
     * Approach1: Iterative
@@ -8806,11 +9014,16 @@ Table of Content
       * 113: Path **Sum** II (M)
       * 314: Binary Tree **Vertical Order** Traversal	(M)
       * 101: **Symmetric** Tree (E)
-    * Binary Search Tree
+      * 297: **Serialize** and **Deserialize** Binary Tree (H)
+    * Binary Search Tree (BST)
       * 098: Validate Binary Search Tree (M)
+      * 450: **Delete** Node in a BST (M)
       * 235: **Lowest Common Ancestor** of a Binary Search Tree (E)
       * 108: **Convert Sorted Array** to Binary Search Tree	binary search (E)
-      * 450: **Delete** Node in a BST (M)
+      * 285: **Inorder Successor** in BST (M)
+      * 510: **Inorder Successor** in BST II (M)
+      * 270: **Closest** Binary Search Tree Value (E)
+      * 272: **Closest** Binary Search Tree Value II (H)
   * Binary Search:
     * 275: H-Index II (M)
     * 004: Median of Two Sorted Arrays (H)
