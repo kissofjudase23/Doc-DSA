@@ -2212,6 +2212,7 @@ Table of Content
                   if cita_cnt >= cita:
                       res = cita
                       break
+
               return res
             ```
       * Approach2: Use Sort, Time: O(nlog(n)), Space: O(1)
@@ -2799,6 +2800,401 @@ Table of Content
           ```
     * 239: Sliding Window Maximum (H)
   * **Reorder** and **Sort**
+    * 912. Sort an Array (M)
+      * Approach1: **Insertion** Sort, Time:O(n^2), Space:O(1)
+        * Insert 1th, 2th, ... n-1th elements to the array
+        * Iterative:
+          * Python
+            ```python
+            def sortArray(self, nums: List[int]) -> List[int]:
+              n = len(nums)
+
+              if n <= 1:
+                  return nums
+
+              # from 1 to n-1
+              for insert in range(1, n):
+                  for compare in range(insert-1, -1, -1):
+                      if nums[compare] > nums[compare+1]:
+                          nums[compare], nums[compare+1] = nums[compare+1], nums[compare]
+
+              return nums
+            ```
+        * Recursive:
+          * Python
+            ```python
+            def sortArray(self, nums: List[int]) -> List[int]:
+              def insertion_sort(insert):
+                  if insert < 1:
+                      return
+
+                  insertion_sort(insert-1)
+
+                  for compare in range(insert-1, -1, -1):
+                      if nums[compare] > nums[compare+1]:
+                          nums[compare], nums[compare+1] = nums[compare+1], nums[compare]
+
+              n = len(nums)
+
+              if n <= 1:
+                  return nums
+
+              insertion_sort(n-1)
+
+              return nums
+            ```
+      * Approach2: **Selection** Sort, Time:O(n^2), Space:O(1)
+        * Select min from 0 to n-2
+        * Iterative:
+          * Python
+            ```python
+            def sortArray(self, nums: List[int]) -> List[int]:
+              n = len(nums)
+              if n <= 1:
+                  return nums
+
+              # from 0 to n-2
+              for select in range(0, n-1):
+                  minimum = select
+                  # from select + 1 to n-1
+                  for compare in range(select+1, n):
+                      if nums[compare] < nums[minimum]:
+                          minimum = compare
+
+                  if minimum != select:
+                      nums[select], nums[minimum] = nums[minimum], nums[select]
+
+              return nums
+            ```
+        * Recursive:
+          * Python
+            ```python
+            def sortArray(self, nums: List[int]) -> List[int]:
+              def selection(select):
+                  if select >= n-1:
+                      return
+
+                  minimum = select
+                  # from select + 1 to n-1
+                  for compare in range(select+1, n):
+                      if nums[compare] < nums[minimum]:
+                          minimum = compare
+
+                  if minimum != select:
+                      nums[select], nums[minimum] = nums[minimum], nums[select]
+
+                  selection(select+1)
+
+              n = len(nums)
+
+              if n <= 1:
+                  return nums
+
+              selection(0)
+
+              return nums
+            ```
+      * Approach3: **Bubble** Sort, Time:O(n^2), Space:O(1)
+        * Bubble max to the end from n-1 to 1
+        * Iterative:
+          * Python
+            ```python
+            def sortArray(self, nums: List[int]) -> List[int]:
+              n = len(nums)
+
+              if n <= 1:
+                  return nums
+
+              is_swap = False
+              for bubble in range(n-1, 1, -1):
+                  for compare in range(0, bubble):
+                      if nums[compare] > nums[compare+1]:
+                          nums[compare], nums[compare+1] = nums[compare+1], nums[compare]
+                          is_swap = True
+
+                  if not is_swap:
+                      break
+
+              return nums
+            ```
+        * Recursive:
+          * Python
+            ```python
+            def sortArray(self, nums: List[int]) -> List[int]:
+              def bubble_sort(bubble):
+                  if bubble >= n:
+                      return
+
+                  bubble_sort(bubble+1)
+
+                  for compare in range(0, bubble):
+                      if nums[compare] > nums[compare+1]:
+                          nums[compare], nums[compare+1] = nums[compare+1], nums[compare]
+                          is_swap = True
+
+              n = len(nums)
+              if n <= 1:
+                  return nums
+
+              bubble_sort(1)
+
+              return nums
+            ```
+      * Approach4: **Quick** Sort, Time:O(nlogn), Space:O(n)
+        * Iterative:
+          * Python
+            ```python
+            def sortArray(self, nums: List[int]) -> List[int]:
+              def get_partition(left, right):
+                  pivot_ran = random.randint(left, right)
+                  pivot = right
+                  nums[pivot], nums[pivot_ran] = nums[pivot_ran], nums[pivot]
+
+                  border = left
+                  pivot_val = nums[pivot]
+
+                  for cur in range(border, right):
+                      if nums[cur] <= pivot_val:
+                          nums[cur], nums[border] = nums[border], nums[cur]
+                          border += 1
+
+                  nums[pivot], nums[border] = nums[border], nums[pivot]
+
+                  return border
+
+              n = len(nums)
+              if n <= 1:
+                  return nums
+
+              stack = [(0, n-1)]
+              while stack:
+                  left, right = stack.pop()
+
+                  partition = get_partition(left, right)
+
+                  if left < partition:
+                      stack.append((left, partition-1))
+
+                  if partition < right:
+                      stack.append((partition+1, right))
+
+              return nums
+            ```
+        * Recursive:
+          * Python
+            ```python
+            def sortArray(self, nums: List[int]) -> List[int]:
+              def get_partition(left, right):
+                  pivot_ran = random.randint(left, right)
+                  pivot = right
+                  nums[pivot], nums[pivot_ran] = nums[pivot_ran], nums[pivot]
+
+                  border = left
+                  pivot_val = nums[pivot]
+
+                  for cur in range(border, right):
+                      if nums[cur] <= pivot_val:
+                          nums[cur], nums[border] = nums[border], nums[cur]
+                          border += 1
+
+                  nums[pivot], nums[border] = nums[border], nums[pivot]
+
+                  return border
+
+              def quick_sort(left, right):
+                  if left >= right:
+                      return
+
+                  partition = get_partition(left, right)
+                  quick_sort(left, partition-1)
+                  quick_sort(partition+1, right)
+
+              if len(nums) <= 1:
+                  return nums
+
+              quick_sort(0, len(nums)-1)
+
+              return nums
+            ```
+      * Approach5: **Merge** Sort, Time:O(nlogn), Space:O(n)
+        * Iterative
+          * Python
+            ```python
+            def sortArray(self, nums: List[int]) -> List[int]:
+              def merge(array,
+                        left_start, left_end,
+                        right_start, right_end):
+
+                  left_window = array[left_start:left_end+1]
+                  right_window = array[right_start:right_end+1]
+                  l = r = 0
+                  cur = left_start
+
+                  while l < len(left_window) and r < len(right_window):
+                      if left_window[l] <= right_window[r]:
+                          array[cur] = left_window[l]
+                          l += 1
+                      else:
+                          array[cur] = right_window[r]
+                          r += 1
+                      cur += 1
+
+                  while l < len(left_window):
+                      array[cur] = left_window[l]
+                      l += 1
+                      cur += 1
+
+              if len(nums) <= 1:
+                  return nums
+
+              windows_size = 1
+              while windows_size < len(nums):
+                  left = 0
+                  while left + windows_size < len(nums):
+                      mid = left + windows_size
+                      right = mid + windows_size
+
+                      merge(nums,
+                          left, mid-1,
+                          mid, right-1)
+
+                      left += (2*windows_size)
+
+                  windows_size *= 2
+
+              return nums
+            ```
+        * Recursice
+          ```python
+          def sortArray(self, nums: List[int]) -> List[int]:
+            def merge(array,
+                      left_start, left_end,
+                      right_start, right_end):
+
+              left_window = array[left_start:left_end+1]
+              right_window = array[right_start:right_end+1]
+              l = r = 0
+              cur = left_start
+
+              while l < len(left_window) and r < len(right_window):
+                  if left_window[l] <= right_window[r]:
+                      array[cur] = left_window[l]
+                      l += 1
+                  else:
+                      array[cur] = right_window[r]
+                      r += 1
+                  cur += 1
+
+              while l < len(left_window):
+                  array[cur] = left_window[l]
+                  l += 1
+                  cur += 1
+
+            def merge_sort(array, left, right):
+                if left >= right:
+                    return
+
+                mid = (left+right)//2
+                merge_sort(array, left, mid)
+                merge_sort(array, mid+1, right)
+
+                merge(array,
+                      left, mid,
+                      mid+1, right)
+
+                merge_sort(nums, 0, len(nums)-1)
+
+                return nums
+          ```
+      * Approach6: **Heap** Sort, Time:O(nlogn), Space:O(n)
+        * Do max heapify (bubble down), and swap the max to the end
+        * Iterative:
+          * Python
+            ```python
+            def max_heapify(cur, boundary):
+              """
+              boundary is exclusive
+              bubble down heapify
+              """
+              while cur < boundary:  # notice the cur may be 0
+                  maximum = cur
+                  left = 2*cur + 1
+                  right = 2*cur + 2
+
+                  if left < boundary and nums[left] > nums[maximum]:
+                      maximum = left
+
+                  if right < boundary and nums[right] > nums[maximum]:
+                      maximum = right
+
+                  if cur == maximum:
+                      break
+
+                  nums[cur], nums[maximum] = nums[maximum], nums[cur]
+                  cur = maximum
+
+              n = len(nums)
+              if n <= 1:
+                  return nums
+
+              # init heapify
+              # from n//2 to 0
+              for start in range(n//2, -1, -1):
+                  max_heapify(start, n)
+
+              # from n-1 to 1
+              for boundary in range(n-1, 0, -1):
+                  # swap the maximum to the end
+                  nums[0], nums[boundary] = nums[boundary], nums[0]
+                  max_heapify(0, boundary)
+
+              return nums
+            ```
+        * Recursive:
+          * Python
+            ```python
+            def sortArray(self, nums: List[int]) -> List[int]:
+              def max_heapify(cur, boundary):
+                  """
+                  boundary is exclusive
+                  bubble down heapify
+                  """
+                  while cur < boundary:
+                      maximum = cur
+                      left = 2*cur + 1
+                      right = 2*cur + 2
+
+                      if left < boundary and nums[left] > nums[maximum]:
+                          maximum = left
+
+                      if right < boundary and nums[right] > nums[maximum]:
+                          maximum = right
+
+                      if cur == maximum:
+                          break
+
+                      nums[cur], nums[maximum] = nums[maximum], nums[cur]
+                      cur = maximum
+
+              n = len(nums)
+
+              if n <= 1:
+                  return nums
+
+              # init heapify
+              # from n//2 to 0
+              for i in range(n//2, -1, -1):
+                  max_heapify(cur=i, boundary=n)
+
+              # from n-1 to 1
+              for i in range(n-1, 0, -1):
+                  # swap the maximum to the end
+                  nums[0], nums[i] = nums[i], nums[0]
+                  max_heapify(cur=0, boundary=i)
+
+              return nums
+
+            ```
     * 189: Rotate Array (E)
       * Approach1: Space: **O(1)**
         * Use **three reverse** operations can solve this problem.
@@ -3351,6 +3747,7 @@ Table of Content
                     # shrink n2 left part, that is, increase n1 left part
                     left_b = p_n1 + 1
             ```
+  * 222: Count Complete Tree Nodes (M)
   * 278: First Bad Version
   * 035: Search Insert Position
   * 033: Search in Rotated Sorted Array
@@ -4577,7 +4974,7 @@ Table of Content
 ### Tree
   * **Preorder**
     * 144: Binary Tree Preorder **Traversal** (M)
-      * Approach1: Recursive:
+      * Approach1: Recursive, Time:O(n), Space:O(n):
         * Python Solution:
           ```python
           def preorderTraversal(self, root: TreeNode) -> List[int]:
@@ -4593,7 +4990,7 @@ Table of Content
             _preorder(root)
             return output
           ```
-      * Approach2: Iterative1:
+      * Approach2: Iterative1, Time:O(n), Space:O(n):
         * Python Solution
           ```python
           def preorderTraversal(self, root: TreeNode) -> List[int]:
@@ -4616,7 +5013,7 @@ Table of Content
 
               return visits
           ```
-      * Approach3: Iterative2:
+      * Approach3: Iterative2, Time:O(n), Space:O(n):
         * Python Solution
           ```python
           def preorderTraversal(self, root: TreeNode) -> List[int]:
@@ -4674,32 +5071,32 @@ Table of Content
           ```
     * 100: **Same** Tree (E)
       * Approach1: BFS Time:O(n), Space:O(n)
-        * Python
-        ```python
-        def isSameTree(self, p: TreeNode, q: TreeNode) -> bool:
-          q = collections.deque([(p, q)])
-          res = True
+          * Python
+          ```python
+          def isSameTree(self, p: TreeNode, q: TreeNode) -> bool:
+            q = collections.deque([(p, q)])
+            res = True
 
-          while q:
-              node_p, node_q = q.popleft()
+            while q:
+                node_p, node_q = q.popleft()
+                # 0 node
+                if not node_p and not node_q:
+                    continue
+                # 1 node
+                if not node_p or not node_q:
+                    res = False
+                    break
 
-              # 0 node
-              if not node_p and not node_q:
-                  continue
-              # 1 node
-              if not node_p or not node_q:
-                  res = False
-                  break
+                # 2 nodes
+                if node_p.val != node_q.val:
+                    res = False
+                    break
 
-              # 2 nodes
-              if node_p.val != node_q.val:
-                  res = False
-                  break
-              q.append((node_p.left, node_q.left))
-              q.append((node_p.right, node_q.right))
+                q.append((node_p.left, node_q.left))
+                q.append((node_p.right, node_q.right))
 
-          return res
-        ```
+            return res
+          ```
       * Approach2: DFS Time:O(n), Space:O(n)
         * Python
           ```python
@@ -4958,8 +5355,50 @@ Table of Content
             dfs(root, 1)
             return max_path
           ```
+    * 331: Verify Preorder Serialization of a Binary Tree	(M)
   * **Inorder**
     * 094: Binary Tree **Inorder** Traversal (M)
+      * Approach1: Recursive, Time:O(n), Space:O(n):
+        * Python
+          ```python
+          def inorderTraversal(self, root: TreeNode) -> List[int]:
+            def _inorder(node):
+                if not node:
+                    return
+
+                _inorder(node.left)
+                output.append(node.val)
+                _inorder(node.right)
+
+
+            if not root:
+                return []
+
+            output = []
+            _inorder(root)
+            return output
+          ```
+      * Approach2: Iterative, Time:O(n), Space:O(n):
+        * Python
+          ```python
+          def inorderTraversal(self, root: TreeNode) -> List[int]:
+            if not root:
+                return []
+
+            output = []
+            stack = []
+            cur = root
+            while cur or stack:
+                if cur:
+                    stack.append(cur)
+                    cur = cur.left
+                else:
+                    cur = stack.pop()
+                    output.append(cur.val)
+                    cur = cur.right
+
+            return output
+          ```
     * 173: Binary Search Tree **Iterator** (M) *
       * Approach1: In-Order Iterative
         * Python Solution
@@ -5025,9 +5464,192 @@ Table of Content
 
             return output
           ```
+    * 105: Construct Binary Tree from **Preorder** and **Inorder** Traversal (M)
+      * Preorder -> find the root node (from left)
+      * Inorder -> find the left subtree and right subtree of each root
+      * Approach1: DFS Recursive (first version), Time:O(n^2) Space:O(n)
+        * Python, Time:O(n^2) Space:O(n)
+          * Time:
+            * Find the partition costs O(n) for n nodes
+          * Space:
+            * Call stack and copy the inorder , preorder list cost O(n)
+          ```python
+          def buildTree(self, preorder: List[int], inorder: List[int]) -> TreeNode:
+            def get_subtree_partition(inorder, root_val):
+                # partition is the idx of thr root node
+                for idx, val in enumerate(inorder):
+                    if val == root_val:
+                        return idx
+
+                return None
+
+            def build_tree(preorder, inorder):
+                if not preorder:
+                    return None
+
+                root_val = preorder[0]
+                root = TreeNode(root_val)
+                partition = get_subtree_partition(inorder, root_val)
+                if partition is None:
+                    return None
+
+                left_inorder = inorder[:partition]
+                left_preorder = preorder[1:len(left_inorder)+1]
+                root.left = build_tree(left_preorder, left_inorder)
+
+                right_inorder = inorder[partition+1:]
+                right_preorder = preorder[len(left_inorder)+1:]
+                root.right = build_tree(right_preorder, right_inorder)
+
+                return root
+
+            if not preorder or not inorder:
+                return None
+
+            return build_tree(preorder, inorder)
+          ```
+      * Approach2: DFS Recursive (optimization), Time:O(n), Space:O(n)
+        * Use hash table to speed up the searching
+        * Prevent unused list copy
+        * Time:O(n), Space:O(n)
+          * Python
+            ```python
+            def buildTree(self, preorder: List[int], inorder: List[int]) -> TreeNode:
+              def build_tree(left, right):
+                  if left > right:
+                      return None
+
+                  nonlocal pre_idx
+                  root_val = preorder[pre_idx]
+                  partition_idx = inorder_d[root_val]
+                  root= TreeNode(root_val)
+
+                  pre_idx += 1 # <----- use this to control preorder
+
+                  root.left = build_tree(left, partition_idx-1)
+                  root.right = build_tree(partition_idx+1, right)
+
+                  return root
+
+              if not preorder:
+                  return None
+
+              inorder_d = dict()
+              for idx, c in enumerate(inorder):
+                  inorder_d[c] = idx
+
+              pre_idx = 0
+
+              return build_tree(0, len(inorder)-1)
+            ```
+      * Approach3: Iterative, Time:O(n), Space:O(n)
+        * Python
+          ```python
+          def buildTree(self, preorder: List[int], inorder: List[int]) -> TreeNode:
+            if not preorder or not inorder:
+                return None
+
+            inorder_d = dict()
+            for idx, c in enumerate(inorder):
+                inorder_d[c] = idx
+
+            pre_idx = 0
+            root = TreeNode(0)
+
+            stack = [(root, 0, len(inorder)-1)]
+
+            while stack:
+                node, left, right = stack.pop()
+                val = preorder[pre_idx]
+                node.val = val
+                partition = inorder_d[val]
+
+                pre_idx += 1 # control the cur root idx of preorder
+
+                if partition+1 <= right:
+                    node.right = TreeNode(0)
+                    stack.append((node.right, partition+1, right))
+
+                # finish left subtree first (of pre_idx would be wrong)
+                if left <= partition-1:
+                    node.left = TreeNode(0)
+                    stack.append((node.left, left, partition-1))
+
+            return root
+          ```
+    * 106: Construct Binary Tree from **Inorder** and **Postorder** Traversal	(M)
+      * Preorder -> find the root node (from right)
+      * Inorder -> find the left subtree and right subtree of each root
+      * Approach1: Recurisve, Time:O(n), Space:O(n)
+        * Python
+          ```python
+          def buildTree(self, inorder: List[int], postorder: List[int]) -> TreeNode:
+            def build_tree(left, right):
+                if left > right:
+                    return None
+
+                nonlocal post_idx
+                root_val = postorder[post_idx]
+                root = TreeNode(root_val)
+                partition = inorder_d[root_val]
+
+                post_idx -= 1
+                # complete the right subtree first
+                root.right = build_tree(partition+1, right)
+                root.left = build_tree(left, partition-1)
+
+                return root
+
+            if not inorder or not postorder:
+                return None
+
+            post_idx = len(postorder) - 1
+
+            inorder_d = dict()
+            for idx, c in enumerate(inorder):
+                inorder_d[c] = idx
+
+            return build_tree(0, len(inorder)-1)
+          ```
+      * Approach2: Iterative, Time:O(n), Space:O(n)
+        * Python
+          ```python
+          def buildTree(self, inorder: List[int], postorder: List[int]) -> TreeNode:
+
+            if not inorder or not postorder:
+                return None
+
+            post_idx = len(postorder) - 1
+
+            inorder_d = dict()
+            for idx, c in enumerate(inorder):
+                inorder_d[c] = idx
+
+            root = TreeNode(0)
+            stack = [(root, 0, len(inorder)-1)]
+
+            while stack:
+                node, left, right = stack.pop()
+                val = postorder[post_idx]
+                node.val = val
+                partition = inorder_d[val]
+
+                post_idx -= 1
+
+                if left <= partition-1:
+                    node.left = TreeNode(0)
+                    stack.append((node.left, left, partition-1))
+
+                # complete the right subtree first
+                if partition+1 <= right:
+                    node.right = TreeNode(0)
+                    stack.append((node.right, partition+1, right))
+
+            return root
+          ```
   * **Postorder**
     * 145: Binary Tree Postorder **Traversal** (H)
-      * Approach1: Recursive
+      * Approach1: Recursive, Time:O(n), Space:O(n)
         * Python Solution
             ```python
             def postorderTraversal(self, root: TreeNode) -> List[int]:
@@ -5043,7 +5665,8 @@ Table of Content
               _postorder(root)
               return output
           ```
-      * Approach2: Iterative, two stacks
+      * Approach2: Iterative, from end to start, Time:O(n), Space:O(n)
+        * traverse order: root -> right -> left (use deque)
         * Python Solution
             ```python
               def postorderTraversal(self, root: TreeNode) -> List[int]:
@@ -5060,12 +5683,41 @@ Table of Content
 
                     if node.left:
                         stack.append(node.left)
-
                     if node.right:
                         stack.append(node.right)
 
                 return output
             ```
+      * Approach3: Iterative, from start to end, Time:O(n), Space:O(n)
+        * traverse order: left -> right -> root
+        * Python
+          ```python
+          def postorderTraversal(self, root: TreeNode) -> List[int]:
+            if not root:
+                return
+
+            stack = []
+            output = []
+            prev_traverse = None
+            cur = root
+
+            while cur or stack:
+                if cur:
+                    stack.append(cur)
+                    cur = cur.left
+                else:
+                    top = stack[-1]
+                    # top.right != prev_traverse means top.right has not traversed yet
+                    if top.right and top.right != prev_traverse:
+                        cur = top.right
+
+                    else:
+                        output.append(top.val)
+                        prev_traverse = stack.pop()
+
+            return output
+          ```
+      * Approach4: Morris Traversal, Time:O(n), Space:O(1)
     * 110: **Balanced** Binary Tree (E)
       * A binary tree in which the depth of the two subtrees of **every node** never differ by more than 1.
       * Even left subtree and right subtree are balanced trees, the tree may not be balanced tree.
@@ -5519,6 +6171,32 @@ Table of Content
 
             return lca
           ```
+    * 114: Flatten Binary Tree to Linked List	(M)
+      * Right->Left->Root
+      * Recursive:
+        * https://leetcode.com/problems/flatten-binary-tree-to-linked-list/submissions/
+        * Python
+          ```python
+          def flatten(self, root: TreeNode) -> None:
+            def _flatten(node):
+                if not node:
+                    return
+
+                _flatten(node.right)
+                _flatten(node.left)
+
+                nonlocal prev
+                node.right = prev
+                node.left = None
+                prev = node    # prev pointer to flattern list
+
+            if not root:
+                return
+
+            prev = None
+            _flatten(root)
+          ```
+      * Iterative:
   * **BFS & DFS**
     * 101: **Symmetric** Tree (E)
       * Approach1: DFS Recursive, Time:O(n), Space:O(n)
@@ -6097,7 +6775,7 @@ Table of Content
         * Space:
           * Queue: O(n)
           * Dictionary: O(n)
-        * Python Solution:
+        * Python:
           ```python
           def verticalOrder(self, root: TreeNode) -> List[List[int]]:
             if not root:
@@ -6121,67 +6799,148 @@ Table of Content
     * 297: **Serialize** and **Deserialize** Binary Tree (H)
       * Approach1: BFS + pickle, Time:O(n), Space:O(n)
         * Python
-         ```python
-        class Codec:
-            def serialize(self, root):
-                """Encodes a tree to a single string.
+          ```python
+          class Codec:
+              def serialize(self, root):
+                  """Encodes a tree to a single string.
 
-                :type root: TreeNode
-                :rtype: str
-                """
-                if not root:
-                    return []
+                  :type root: TreeNode
+                  :rtype: str
+                  """
+                  if not root:
+                      return []
 
-                q = collections.deque([root])
-                bfs = []
-                while q:
-                    node = q.popleft()
-                    if not node:
-                        # insert None to list can help to deserialize the tree
-                        bfs.append(None)
-                        continue
+                  q = collections.deque([root])
+                  bfs = []
+                  while q:
+                      node = q.popleft()
+                      if not node:
+                          # insert None to list can help to deserialize the tree
+                          bfs.append(None)
+                          continue
 
-                    bfs.append(node.val)
-                    q.append(node.left)
-                    q.append(node.right)
+                      bfs.append(node.val)
+                      q.append(node.left)
+                      q.append(node.right)
 
-                return pickle.dumps(bfs)
+                  return pickle.dumps(bfs)
 
-            def deserialize(self, data):
-                """Decodes your encoded data to tree.
+              def deserialize(self, data):
+                  """Decodes your encoded data to tree.
 
-                :type data: str
-                :rtype: TreeNode
-                """
-                if not data:
-                    return None
+                  :type data: str
+                  :rtype: TreeNode
+                  """
+                  if not data:
+                      return None
 
-                bfs = pickle.loads(data)
+                  bfs = pickle.loads(data)
 
-                if not bfs:
-                    return None
+                  if not bfs:
+                      return None
 
-                root = TreeNode(bfs[0])
-                i = 1
-                q = collections.deque([root])
+                  root = TreeNode(bfs[0])
+                  i = 1
+                  q = collections.deque([root])
 
-                while q:
-                    node = q.popleft()
-                    # left
-                    if bfs[i] != None:
-                        node.left = TreeNode(bfs[i])
-                        q.append(node.left)
-                    i += 1  # move forward event bfs[i] is None
+                  while q:
+                      node = q.popleft()
+                      # left
+                      if bfs[i] != None:
+                          node.left = TreeNode(bfs[i])
+                          q.append(node.left)
+                      i += 1  # move forward even bfs[i] is None
 
-                    # right
-                    if bfs[i] != None:
-                        node.right = TreeNode(bfs[i])
-                        q.append(node.right)
-                    i += 1
+                      # right
+                      if bfs[i] != None:
+                          node.right = TreeNode(bfs[i])
+                          q.append(node.right)
+                      i += 1
 
-                return root
-        ```
+                  return root
+           ```
       * Approach2: DFS + pickle
+    * 116 & 117: **Populating Next Right Pointers** in Each Node (M)
+      * A perfect binary tree
+        * where all leaves are on the same level, and every parent has two children.
+      * Approach1: Use queue, Time:O(n), Space:O(n)
+        * Python
+          ```python
+          def connect(self, root: 'Node') -> 'Node':
+
+          if not root:
+              return root
+
+          q = collections.deque([root])
+          dummy = Node(0)
+          while q:
+              q_len = len(q)
+
+              prev = dummy
+              for _ in range(q_len):
+                  cur = q.popleft()
+                  if cur.left:
+                      q.append(cur.left)
+                  if cur.right:
+                      q.append(cur.right)
+
+                  prev.next = cur
+                  prev = cur
+
+          return root
+          ```
+      * Approach2: Use next pointer, perfect binary tree, Time:O(n), Space:O(1)
+        * Python
+          ```python
+          def connect(self, root: 'Node') -> 'Node':
+            if not root:
+                return None
+
+            head = root
+            # head.left means the start of next level
+            # traverse from 2nd level
+            # this solution is for perfect binary tree only
+            while head and head.left:
+                cur_root = head
+                while cur_root:
+                    cur_root.left.next = cur_root.right
+                    cur_root.right.next = cur_root.next.left if cur_root.next else None
+
+                    cur_root = cur_root.next
+
+                head = head.left
+
+            return root
+          ```
+      * Approach3: Use next pointer, general solution, Time:O(n), Space:O(1)
+        * Python
+          ```python
+          def connect(self, root: 'Node') -> 'Node':
+            if not root:
+                return None
+
+            prev = dummy = Node(0)
+            head = root
+            # traverse from 2nd level
+            while head:
+                cur_root = head
+                while cur_root:
+                    if cur_root.left:
+                        prev.next = cur_root.left
+                        prev = prev.next
+
+                    if cur_root.right:
+                        prev.next = cur_root.right
+                        prev = prev.next
+
+                    cur_root = cur_root.next
+
+                head = dummy.next # dummy.next ponters to the head of next level
+                prev = dummy      # init the dummy and prev again
+                dummy.next = None
+
+            return root
+          ```
   * **Binary Search Tree** (BST)
     * Definition of BST:
       * The **left subtree** of a node contains only nodes with keys **less than** the node's key.
@@ -6890,20 +7649,113 @@ Table of Content
 
             return k_closets
           ```
-     099: Recover Binary Search Tree (H)
-  * **Other**:
-    * 116: Populating Next Right Pointers in Each Node (M)
-    * 117: Populating Next Right Pointers in Each Node II	(M)
-    * 096: Unique Binary Search Trees	(M)
-    * 156: Binary Tree Upside Down (M)
-    * 114: Flatten Binary Tree to Linked List	(M)
+    * 096: **Unique** Binary Search **Trees**	(M)
+      * Approach1: backtracking + memo, Time:O(n^2), Space:O(n^2)
+        * Python
+          ```python
+          def numTrees(self, n: int) -> int:
+            def back_track(left, right):
+                """
+                get cnt according to left and right subtree
+                """
+                if (left, right) not in memo:
+                    # determine the left subtree and right subtree
+                    r = l = 0
+                    if left <= 1:
+                        l = 1
+                    else:
+                        for i in range(left):
+                            l += back_track(i, left-1-i)
+
+                    if right <= 1:
+                        r = 1
+                    else:
+                        for i in range(right):
+                            r += back_track(i, right-1-i)
+
+                    memo[(right, left)] = memo[(left, right)] = l*r
+
+                return memo[(left, right)]
+
+            if n < 1:
+                return 0
+
+            if n == 1:
+                return 1
+
+            cnt = 0
+            memo = dict()
+            memo[(0, 0)] = memo[(0, 1)] = memo[(1, 0)] = memo[(1, 1)] = 1
+
+            # determine the root
+            for i in range(n):
+                cnt += back_track(i, n-1-i)
+            return cnt
+          ```
+      * Approach2: DP, Time:O(n^2), Space:O(n)
+        * g(n): the number of unique BST for a sequence of length n
+          * g(0) = g(1) = 1
+        * f(i, n): the number of unique BST, where the number i is served as the root of BST
+        * Python
+          ```python
+          def numTrees(self, n: int) -> int:
+            memo = [0] * (n + 1)
+            memo[0] = memo[1] = 1
+
+            # i from 2 to n
+            for i in range(2, n+1):
+                # total i nodes, 1 is for root
+                # left + right = i-1
+                left_right_cnt = i-1
+                for left_cnt in range(0 , i):
+                    memo[i] += memo[left_cnt] * memo[left_right_cnt-left_cnt]
+
+            return memo[n]
+          ```
+      * Approach3: Mathematical Deduction, Time:O(n), Space:O(1)
+        * [Catalan number](https://en.wikipedia.org/wiki/Catalan_number)
+        * Python
+          ```python
+          def numTrees(self, n: int) -> int:
+            catalan = 1
+
+            for i in range(0, n):
+                catalan = catalan * 2*(2*i+1)/(i+2)
+
+            return int(catalan)
+          ```
+    * 095: **Unique** Binary Search **Trees** II (M)
     * 255: Verify Preorder Sequence in Binary Search Tree (M)
+      * Ref:
+        * https://leetcode.com/problems/verify-preorder-sequence-in-binary-search-tree/discuss/68185/C%2B%2B-easy-to-understand-solution-with-thought-process-and-detailed-explanation
+      * The key is how to find the lower bound
+      * Preorder sequence: root[left_subtree][right_subtree]
+        * Since left_subtree_val < root < right_subtree_val, when we find the first val which is greater than the root, it means that root should be the current lower bound
+        * stack would be (r1, r2, r3) pop until find the correct root node
+      * Approach1: Stack
+        * Python
+          ```python
+          def verifyPreorder(self, preorder: List[int]) -> bool:
+            lower = float('-inf')
+            stack = []
+            is_bst = True
+            for n in preorder:
+                if n < lower:
+                    is_bst = False
+                    break
+
+                while stack and n > stack[-1]:
+                    # pop until find the current lower bound
+                    lower = stack.pop()
+
+                stack.append(n)
+
+            return is_bst
+          ```
     * 333: Largest BST Subtree (M)
-    * 222: Count Complete Tree Nodes (M)
-    * 105: Construct Binary Tree from Preorder and Inorder Traversal (M)
-    * 106: Construct Binary Tree from Inorder and Postorder Traversal	(M)
-    * 095: Unique Binary Search Trees II (M)
-    * 331: Verify Preorder Serialization of a Binary Tree	(M)
+    * 099: **Recover** Binary Search Tree (H)
+  * **Other**:
+    * 156: Binary Tree Upside Down (M)
 ### Trie (Prefix Tree)
   * 208: Implement Trie (M)
     * Approach1: Iterative
@@ -9001,6 +9853,9 @@ Table of Content
     * PreOrder:
       * 111: **Minimum Depth** of Binary Tree	(E)
       * 298: Binary Tree **Longest Consecutive** Sequence (M)
+    * InOrder:
+      * 105: Construct Binary Tree from **Preorder** and **Inorder** Traversal (M)
+      * 106: Construct Binary Tree from **Inorder** and **Postorder** Traversal	(M)
     * PostOrder:
       * 145: Binary Tree **Postorder** Traversal (H)
       * 110: **Balanced** Binary Tree (E)
@@ -9015,6 +9870,7 @@ Table of Content
       * 314: Binary Tree **Vertical Order** Traversal	(M)
       * 101: **Symmetric** Tree (E)
       * 297: **Serialize** and **Deserialize** Binary Tree (H)
+      * 116 & 117: **Populating Next Right Pointers** in Each Node (M)
     * Binary Search Tree (BST)
       * 098: Validate Binary Search Tree (M)
       * 450: **Delete** Node in a BST (M)
@@ -9024,6 +9880,9 @@ Table of Content
       * 510: **Inorder Successor** in BST II (M)
       * 270: **Closest** Binary Search Tree Value (E)
       * 272: **Closest** Binary Search Tree Value II (H)
+      * 096: **Unique** Binary Search **Trees**	(M)
+        * DP
+      * 255: Verify Preorder Sequence in Binary Search Tree (M)
   * Binary Search:
     * 275: H-Index II (M)
     * 004: Median of Two Sorted Arrays (H)
