@@ -3599,30 +3599,132 @@ Table of Content
         * [Solution](https://leetcode.com/problems/game-of-life/discuss/73217/Infinite-board-solution/201780)
     * 723：Candy Crush (M)
 ### Matrix
- * 054:	Spiral Matrix
- * 059:	Spiral Matrix II
- * 073:	Set Matrix Zeroes
- * 311:	Sparse Matrix Multiplication
- * 329:	Longest Increasing Path in a Matrix
- * 378:	Kth Smallest Element in a Sorted Matrix
- * 074:	Search a 2D Matrix
- * 240:	Search a 2D Matrix II
- * 370:	Range Addition
- * 079:	Word Search
- * 296:	Best Meeting Point
- * 361: Bomb Enemy
- * 317: Shortest Distance from All Buildings
- * 302: Smallest Rectangle Enclosing Black Pixels
- * 036: Valid Sudoku
- * 037: Sudoku Solver
+ * 054:	Spiral Matrix (M)
+ * 059:	Spiral Matrix II (M)
+ * 073:	Set Matrix Zeroes (M)
+ * 311:	Sparse Matrix Multiplication (M)
+ * 329:	Longest Increasing Path in a Matrix (H)
+ * 378:	Kth Smallest Element in a Sorted Matrix (M)
+ * 074:	Search a 2D Matrix (M)
+ * 240:	Search a 2D Matrix II (M)
+ * 370:	Range Addition (M)
+ * 079:	Word Search (M)
+ * 296:	Best Meeting Point (H)
+ * 361: Bomb Enemy (M)
+ * 317: Shortest Distance from All Buildings (H)
+ * 302: Smallest Rectangle Enclosing Black Pixels (H)
+ * 036: Valid Sudoku (M)
+ * 037: Sudoku Solver (H)
 ### Binary Search
+  * Tips:
+    * Identify the definition of the left boundary and right boundary.
+    * Identify the result when the target is not found within the boundaries.
+    * Consider the cases that have one and two elements.
+  * 035: Search Insert Position (E)
+    * Approach1: Linear, Time:O(n), Space:O(1)
+    * Approach2: Binary Search, Time:O(logn), Space:O(1)
+      * Boundaries:
+        * left boundary:
+          * Value before the left boundary are smaller than the target
+        * right boundary:
+          * Value after the right boundary are bigger than the target
+      * If the target not found:
+        * return left
+          * since left is the first position which is greater than the target.
+      * Python
+        ```python
+        def searchInsert(self, nums: List[int], target: int) -> int:
+          if not nums:
+              return 0
+
+          left = 0
+          right = len(nums)-1
+          position = None
+
+          while left <= right:
+
+              mid = (left + right) // 2
+
+              if target == nums[mid]:
+                  position = mid
+                  break
+
+              elif target < nums[mid]:
+                  right = mid - 1
+
+              else:
+                  left = mid + 1
+
+          return position if position is not None else left
+        ```
+  * 278: First Bad Version (E)
+    * Definitions
+      * Assume there exists a bad version
+    * Approach1: linear search, Time:O(n), Space:O(1)
+    * Approach2: binary search, Time:O(logn), Space:O(1)
+      * boundaries:
+        * left boundary:
+          * versions before left are good
+        * right boundary:
+          * versions after right are bad
+        * Python
+          ```python
+          def firstBadVersion(self, n):
+            # assume there exists a bad version
+            if n == 1:
+                return 1
+
+            # if the first version is bad, just return
+            if isBadVersion(1):
+                return 1
+
+            left = 2   # versions before left are good
+            right = n  # versions after right are bad
+            while left <= right:
+                mid = (left + right) // 2
+                if isBadVersion(mid):
+                    right = mid - 1
+                else:
+                    left = mid + 1
+            return left
+          ```
+  * 374: Guess Number Higher or Lower (E)
+    * Approach1: Linear Search, Time:O(n), Space:O(1)
+    * Approach2: Binary Search, Time:O(logn), Space:O(1)
+      * boundaries
+        * left boundary: the value before left boundary are less than the target.
+        * right boundary: the value before left boundary are greater than the target.
+      * when the target is not found:
+        * return -1
+      * Python
+        ```python
+        def guessNumber(self, n):
+          """
+          :type n: int
+          :rtype: int
+          """
+          left = 1
+          right = n
+          res = -1
+          while left <= right:
+              mid = (left + right) // 2
+              if guess(mid) == 0:
+                  res = mid
+                  break
+              elif guess(mid) == 1: # my number is higher
+                  left = mid + 1
+              else:
+                  right = mid - 1
+
+          return res
+          ```
   * 275: H-Index II (M)
     * Approach1: Linear search: O(n)
       * Concept
         * Sort the citations array in **ascending order** (draw it).
         * c = citations[i]. We would know that the number of articles whose citation number is higher than c would be n - i - 1.
         * And together with the current article, **there are n - i articles that are cited at least c times**.
-      * Python Solution
+      * Python
         ```python
         def hIndex(self, citations: List[int]) -> int:
           max_cita = len(citations)
@@ -3635,23 +3737,23 @@ Table of Content
           return h_idx
         ```
     * Approach2: **Binary Search**: O(log(n))
+      * Search algo like 35
       * Ref:
         * https://leetcode.com/problems/h-index-ii/discuss/71063/Standard-binary-search
         * https://leetcode.com/problems/h-index-ii/solution/
-      * About final condition **max_cita - (right + 1)** = max_cita - left
-        * The algorithm will jump out of while loop. We know for binary search, if it cannot find the target, **pointers left and right will be right besides the location which should be the target**.
-            ```text
-                left
-                  v
-            0, 1, 4, 5, 7
-               ^
-            right
-            ```
-        * For the case, (left, **right, new_left**)
-          * Old range can not satisfied the requirement.
-        * For the case, (**new_right, left**, right)
-          * Old range can satisfied the requirement.
-      * Python Solution
+      * Boundaries
+        * Indices after right boundary are accetable.
+        * Indices before left boundary are unaccetable.
+      * When the target is not found in the range
+        * return (max_cita - left)
+        * There are 2 ending cases
+          * case1 (left, **right, new_left**)
+            * Left jumps right, and new_left is greater than the right boundary.
+            * According to the definition, the result should be **new_left**
+          * case2 (**new_right, left**, right)
+            * Right jumps left, and new_right is smaller than the left boundary.
+            * According to the definition, the result should be **left**
+      * Python
         ```python
         def hIndex(self, citations: List[int]) -> int:
           max_cita = len(citations)
@@ -3663,17 +3765,376 @@ Table of Content
               if citations[mid] == (max_cita - mid):
                   return max_cita - mid
 
-              # challenge fail, try to find lower h-index
+              # challenge fail, try to find lower h-index, go right part
               elif citations[mid] < (max_cita - mid):
                   left = mid + 1
 
-              # challenge success, try to find higher h-index
+              # challenge success, try to find higher h-index, go left part
               else:
                   right = mid - 1
-
-          return max_cita - (right+1)
+          #
+          return max_cita - left
         ```
-  * 004: Median of Two Sorted Arrays (H)
+  * 033 & 081: Search in **Rotated Sorted Array** (M)
+    * 033: unique
+    * 081: allow duplicates
+    * For duplicates, the key is how to handle the case like:
+      ```txt
+         nums  [4, 4, 1, 2, 3, 4, 4 ]
+         idx    0  1  2  3  4  5  6
+                l  p           p* r
+         In such case, if we choose a pivot with value 4
+         we can not know the pivot is in the left part (p) or right part (p*)
+         if in the left part, nums[l:p] is ascending order
+         if in the right part, nums[p:r] is ascending order
+         one solution is to move l to right until nums[left] != nums[right]
+      ```
+    * Approach1: Linear Search, Time:O(n), Space:O(1)
+    * Approach2: Get Rotate Index (unique value), Time:O(logn), Space:O(1)
+      * Algo:
+        * step1: Find the rotate index, this index split the array to 2 parts.
+          * **the (rotate index - 1) is the last element in the left part.**
+          * There are 2 cases
+            * case1: [0, 1, 2, 3, 4, 5] -> rotate idx should be 0
+            * case2: [3, 4, 5, 0, 1, 2] -> rotate idx should be 3
+        * step2: Identify which part has to look for target
+        * step3: Binary seach in the part
+      * When the target is not found:
+        * The result should be the first index, since the array is non-rotated.
+      * Python
+        ```python
+        def search(self, nums: List[int], target: int) -> int:
+          def find_rotate_idx(left, right):
+              """
+                * There are 2 cases
+                * case1: [0, 1, 2, 3, 4, 5] -> rotate idx should be 0
+                * case2: [3, 4, 5, 0, 1, 2] -> rotate idx should be 3
+              """
+              right_boundary = right
+              rotate_idx = 0
+
+              while left <= right:
+
+                  mid = (left + right) // 2
+                  # case1
+                  if mid == right_boundary:
+                      rotate_idx = 0
+                      break
+
+                  # case2
+                  if nums[mid] > nums[mid+1]:
+                      rotate_idx = mid + 1
+                      break
+
+                  else:
+                      # mid is in the left part
+                      if nums[mid] >= nums[left]:
+                          left = mid + 1
+                      # mid is in the right part
+                      else:
+                          right = mid - 1
+
+              return rotate_idx
+
+          def binary_search(left, right):
+              res = not_found
+
+              while left <= right:
+                  mid = (left + right) // 2
+
+                  if target == nums[mid]:
+                      res = mid
+                      break
+
+                  elif target < nums[mid]:
+                      right = mid - 1
+                  else:
+                      left = mid + 1
+
+              return res
+
+          not_found = -1
+
+          n = len(nums)
+
+          if n < 1:
+              return not_found
+
+          if n == 1:
+              return 0 if nums[0] == target else not_found
+
+          rotate_idx = find_rotate_idx(0, n-1)
+
+          res = not_found
+          if rotate_idx == 0:
+              res = binary_search(0, n-1)
+          else:
+              # find left part
+              if target >= nums[0]:
+                  res = binary_search(0, rotate_idx-1)
+              # find right part
+              else:
+                  res = binary_search(rotate_idx, n-1)
+
+          return res
+        ```
+    * Approach3: Get Rotate Index (duplicated value), Time:O(logn)~O(n), Space:O(1)
+      * Fix the case [2,2,2,0,1,2,2,2], can not find the correct rotate idx
+      * Python
+        ```python
+        def search(self, nums: List[int], target: int) -> bool:
+          def find_rotate_idx(left, right):
+              """
+              * There are 2 cases
+              * case1: [0, 1, 2, 3, 4, 5] -> rotate idx should be 0
+              * case2: [3, 4, 5, 0, 1, 2] -> rotate idx should be 3
+              """
+              # Previous algorithm can deal with duplicated items
+              # if the head of array is not a duplicated item
+              while left != right and nums[left] == nums[right]:
+                  left += 1
+
+              rotate_idx = left
+              right_boundary = right
+
+              while left <= right:
+                  mid = (left + right)//2
+
+                  # case1:
+                  if mid == right_boundary:
+                      break
+
+                  # case2:
+                  if nums[mid] > nums[mid+1]:
+                      rotate_idx = mid + 1
+                      break
+                  else:
+                      # in the left part
+                      if nums[mid] >= nums[left]:
+                          left = mid + 1
+                      else:
+                          right = mid - 1
+
+              return rotate_idx
+
+          def binary_search(left, right):
+              is_found = False
+
+              while left <= right:
+                  mid = (left + right) // 2
+
+                  if target == nums[mid]:
+                      is_found = True
+                      break
+
+                  elif target <= nums[mid]:
+                      right = mid - 1
+
+                  else:
+                      left = mid + 1
+
+              return is_found
+
+          n = len(nums)
+
+          if n < 1:
+              return False
+
+          if n == 1:
+              return True if nums[0] == target else False
+
+          is_found = False
+
+          rotate_idx = find_rotate_idx(0, n-1)
+
+          if rotate_idx == 0:
+              is_found= binary_search(0, n-1)
+          else:
+              if target >= nums[0]:
+                  is_found = binary_search(0, rotate_idx-1)
+              else:
+                  is_found = binary_search(rotate_idx, n-1)
+
+          return is_found
+        ```
+    * Approach4: One Pass binary Search (unique value), Time:O(logn), Space:O(1)
+      * The key idea is to find the non-roated array
+        * example:
+          * case1: left  pivot rotate_idx right
+            * left to pivot is un-rotated part
+          * case2: left rotate_idx  pivot  right
+            * pivot to right is un-rotated part
+      * Python
+        ```python
+        def search(self, nums: List[int], target: int) -> int:
+          not_found = -1
+          n = len(nums)
+
+          if n < 1:
+              return not_found
+
+          if n == 1:
+              return 0 if nums[0] == target else not_found
+
+          res = not_found
+          left = 0
+          right = n-1
+
+          while left <= right:
+              mid = (left + right) // 2
+              if nums[mid] == target:
+                  res = mid
+                  break
+              else:
+                  # don't forget to add eeuql(=)
+                  if nums[mid] >= nums[left]:
+                      # case1: left to mid is non-roated array
+                      if nums[left] <= target < nums[mid]:
+                          right = mid - 1
+                      else:
+                          left = mid + 1
+                  else:
+                      # case2: mid to right is non-rotated array
+                      if nums[mid] < target <= nums[right]:
+                          left = mid + 1
+                      else:
+                          right = mid - 1
+
+          return res
+        ```
+    * Approach5: One Pass binary Search (duplicated value), Time:O(logn)~O(n), Space:O(1)
+      * Python
+        ```python
+        def search(self, nums: List[int], target: int) -> bool:
+          n = len(nums)
+
+          if n < 1:
+              return False
+
+          if n == 1:
+              return True if nums[0] == target else False
+
+          is_found = False
+          left = 0
+          right = n-1
+
+          # Previous algorithm can deal with duplicated items
+          # if the head of array is not a duplicated item
+          # special case: [4, 4, 1, 2, 3, 4, 4]
+          while left != right and nums[left] == nums[right]:
+              left += 1
+
+            while left <= right:
+
+                mid = (left + right) // 2
+
+                if nums[mid] == target:
+                    is_found = True
+                    break
+
+                else:
+                    if nums[mid] >= nums[left]:
+                        # left to mid is an un-rotated array
+                        if nums[left] <= target < nums[mid]:
+                            right = mid - 1
+                        else:
+                            left = mid + 1
+                    else:
+                        #  mid to right is an un-rotated array
+                        if nums[mid] < target <= nums[right]:
+                            left = mid + 1
+                        else:
+                            right = mid - 1
+
+            return is_found
+        ```
+  * 153 & 154: Find Minimum in **Rotated Sorted Array** (M)
+    * The same concept like 33 and 81.
+    * 153: unique
+    * 154: allow duplicates
+    * Approach1: Linear Search, Time:O(n), Space:O(1)
+    * Approach2: Find Rotate index (unique value), Time:O(logn), Space:O(1)
+      * Python
+        ```python
+        def findMin(self, nums: List[int]) -> int:
+          def find_rotate_idx(left, right):
+              rotate_idx = 0
+              right_boundary = right
+
+              while left <= right:
+                  mid = (left + right) // 2
+
+                  if mid == right_boundary:
+                      break
+
+                  if nums[mid] > nums[mid+1]:
+                      rotate_idx = mid + 1
+                      break
+
+                  else:
+                      if nums[mid] >= nums[left]:
+                          left = mid + 1
+                      else:
+                          right = mid - 1
+
+              return rotate_idx
+
+            n = len(nums)
+
+            if n < 1:
+                return None
+
+            if n == 1:
+                return nums[0]
+
+            rotate_idx = find_rotate_idx(0, n-1)
+
+            return nums[rotate_idx]
+        ```
+    * Approach3: Find Rotate index (duplicated value), Time:O(logn~n), Space:O(1)
+      * Python
+        ```python
+        def findMin(self, nums: List[int]) -> int:
+          def find_rotate_idx(left, right):
+              # Previous algorithm can deal with duplicated items
+              # if the head of array is not a duplicated item
+              while left != right and nums[left] == nums[right]:
+                  left += 1
+
+              rotate_idx = left
+              right_boundary = right
+
+              while left <= right:
+                  mid = (left + right) // 2
+
+                  if mid == right_boundary:
+                      break
+
+                  if nums[mid] > nums[mid+1]:
+                      rotate_idx = mid + 1
+                      break
+
+                  else:
+                      if nums[mid] >= nums[left]:
+                          left = mid + 1
+                      else:
+                          right = mid - 1
+
+              return rotate_idx
+
+          n = len(nums)
+
+          if n < 1:
+              return None
+
+          if n == 1:
+              return nums[0]
+
+          rotate_idx = find_rotate_idx(0, n-1)
+
+          return nums[rotate_idx]
+        ```
+  * 004: **Median** of **Two Sorted Arrays** (H)
     * Approach1: Merge and Find, Time:O(m+n), Space:O(m+n)
       * Time: O(m+n)
         * Merge takes O(m+n)
@@ -3704,9 +4165,8 @@ Table of Content
             n1: all elements are smaller than the median
             ( total n + 1 cases starting from 0 to n )
             """
-            left_b = 0
-            right_b = n1
-
+            left_b = 0    # left boundary
+            right_b = n1  # right boundary
             """
             The half len of merged array (merge nums1 and nums2)
             +1 to let left side of the merged array has more than one element when the length is odd.
@@ -3747,21 +4207,106 @@ Table of Content
                     # shrink n2 left part, that is, increase n1 left part
                     left_b = p_n1 + 1
             ```
-  * 222: Count Complete Tree Nodes (M)
-  * 278: First Bad Version
-  * 035: Search Insert Position
-  * 033: Search in Rotated Sorted Array
-  * 081: Search in Rotated Sorted Array II
-  * 153: Find Minimum in Rotated Sorted Array
-  * 154: Find Minimum in Rotated Sorted Array II
-  * 162: Find Peak Element
-  * 374: Guess Number Higher or Lower
-  * 034: Search for a Range
-  * 349: Intersection of Two Arrays
-  * 350: Intersection of Two Arrays II
-  * 315: Count of Smaller Numbers After Self
-  * 300: Longest Increasing Subsequence
-  * 354: Russian Doll Envelopes
+  * 222: Count **Complete** Tree Nodes (M)
+    * Approach1: Preorder, Time:O(n), Space:O(n)
+      * Python
+        ```python
+        def countNodes(self, root: TreeNode) -> int:
+          if not root:
+              return 0
+
+          node_cnt = 0
+          stack = [root]
+
+          while stack:
+              node = stack.pop()
+              node_cnt += 1
+
+              if node.left:
+                  stack.append(node.left)
+
+              if node.right:
+                  stack.append(node.right)
+
+          return node_cnt
+        ```
+    * Approach2: Binary Search, Time:O(log(n)^2), Space:O(1)
+      * Ref:
+        * https://leetcode.com/articles/count-complete-tree-nodes/
+      * Time:
+        * Find depth: O(d)
+        * Check node cnt in the last level: O(d^2)
+        * Total cost: O(d^2) = O(log(n)^2),
+      * Definitions:
+        * Assume depth starts from 0
+        * Total nodes is 2^d -1 + last_level_node
+        * The maximum node cnt in the last level is 2^d
+      * Boundaries:
+        * left boundary:
+          * The nodes before the left boundary exist.
+        * right boundary:
+          * The are no nodes after the right boundary.
+      * Python
+        ```python
+        def countNodes(self, root: TreeNode) -> int:
+
+          def get_depth(cur):
+              depth = 0
+
+              while cur.left:
+                  depth += 1
+                  cur = cur.left
+
+              return depth
+
+          def check_node_exists(node_idx, d, cur):
+              target = cur
+              # go at most depth level
+              # Last level nodes are enumerated from 0 to 2**d -1
+              left = 0
+              right = 2**d - 1
+              for _ in range(d):
+                  mid = (left + right) // 2
+                  if node_idx <= mid:
+                      target = target.left
+                      right = mid - 1
+                  else:
+                      target = target.right
+                      left = mid + 1
+
+              return target is not None
+
+          if not root:
+              return 0
+
+          d = get_depth(root)
+
+          if d == 0:
+              return 1
+
+          # Last level nodes are enumerated from 0 to 2**d -1
+          # we starts from 2nd node (index 1), since 1st node always exists.
+          left, right = 1, 2**d-1
+          while left <= right:
+              mid = (left + right) // 2
+              if check_node_exists(mid, d, root):
+                  # every nodes before mid exist
+                  left = mid + 1
+              else:
+                  # there are no nodes after mid
+                  right = mid - 1
+
+          # The tree contains 2**d - 1 nodes on the first (d - 1) levels
+          # and left nodes on the last level.
+          return (2**d - 1) + left
+        ```
+  * 349: Intersection of Two Arrays (E)
+  * 350: Intersection of Two Arrays II (E)
+  * 162: Find Peak Element (M)
+  * 034: Search for a Range (M)
+  * 315: Count of Smaller Numbers After Self (H)
+  * 300: Longest Increasing Subsequence (M)
+  * 354: Russian Doll Envelopes (H)
 ### Linked List
 * **Techiniques**:
   * The "**Runner**"
@@ -5708,7 +6253,7 @@ Table of Content
                 else:
                     top = stack[-1]
                     # top.right != prev_traverse means top.right has not traversed yet
-                    if top.right and top.right != prev_traverse:
+                    if top.right and top.right is not prev_traverse:
                         cur = top.right
 
                     else:
@@ -6171,9 +6716,9 @@ Table of Content
 
             return lca
           ```
-    * 114: Flatten Binary Tree to Linked List	(M)
+    * 114: **Flatten** Binary Tree to Linked List	(M)
       * Right->Left->Root
-      * Recursive:
+      * Recursive, Time:O(n), Space:O(n)
         * https://leetcode.com/problems/flatten-binary-tree-to-linked-list/submissions/
         * Python
           ```python
@@ -6196,7 +6741,32 @@ Table of Content
             prev = None
             _flatten(root)
           ```
-      * Iterative:
+      * Iterative, Time:O(n), Space:O(n)
+        * Python
+          ```python
+          def flatten(self, root: TreeNode) -> None:
+            if not root:
+                return
+
+            cur = root
+            stack = []
+            prev_traversed = None
+
+            # right -> left -> root
+            while cur or stack:
+                if cur:
+                    stack.append(cur)
+                    cur = cur.right
+                else:
+                    top = stack[-1]
+                    if top.left and top.left is not prev_traversed:
+                        cur = top.left
+                    else:
+                        node = stack.pop()
+                        node.right = prev_traversed
+                        node.left = None
+                        prev_traversed = node
+          ```
   * **BFS & DFS**
     * 101: **Symmetric** Tree (E)
       * Approach1: DFS Recursive, Time:O(n), Space:O(n)
@@ -9884,8 +10454,12 @@ Table of Content
         * DP
       * 255: Verify Preorder Sequence in Binary Search Tree (M)
   * Binary Search:
+    * 035: Search Insert Position (E)
+    * 278: First Bad Version (E)
     * 275: H-Index II (M)
+    * 033 & 081: Search in Rotated Sorted Array (M)
     * 004: Median of Two Sorted Arrays (H)
+    * 222: Count **Complete** Tree Nodes (M)
   * Cache
     * 146: LRU Cache (M)
   * Heap
