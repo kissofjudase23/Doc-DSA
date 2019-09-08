@@ -3362,6 +3362,70 @@ Table of Content
                 else:  # nums[cur] == 1
                     cur += 1
           ```
+  * Intersection:
+    * 349: Intersection of Two Arrays (E)
+      * Each element in the result must be unique.
+      * Approach1: Use hash Table, Time:O(m+n), Space:O(m)
+        * Python
+          ```python
+          def intersection(self, nums1: List[int], nums2: List[int]) -> List[int]:
+            def get_d(nums):
+                d = dict()
+                for n in nums:
+                    d[n] = True
+                return d
+
+            d1 = get_d(nums1)
+
+            intersection = []
+            for n in nums2:
+                if n in d1 and d1[n]:
+                    intersection.append(n)
+                    d1[n] = False
+
+            return intersection
+          ```
+    * 350: Intersection of Two Arrays II (E)
+      * Each element in the result should appear as many times as it shows in both arrays.
+      * follow up:
+        * What if the given array is already sorted? How would you optimize your algorithm?
+      * Approach1: Hash Table, Time:O(m+n), Space:O(m)
+        * Python
+          ```python
+          def intersect(self, nums1: List[int], nums2: List[int]) -> List[int]:
+            d1 = collections.Counter(nums1)
+            intersection = []
+            for n in nums2:
+                if n in d1 and d1[n] > 0:
+                    intersection.append(n)
+                    d1[n] -= 1
+
+            return intersection
+          ```
+      * Approach2, if the array is already sorted: Time:O(m+n), Space:O(1)
+          * Python
+            ```python
+            def intersect(self, nums1: List[int], nums2: List[int]) -> List[int]:
+              nums1.sort()
+              nums2.sort()
+              p1 = p2 = 0
+              intersection = []
+
+              while p1 < len(nums1) and p2 < len(nums2):
+                  v1, v2 = nums1[p1], nums2[p2]
+                  if v1 == v2:
+                      p1 += 1
+                      p2 += 1
+                      intersection.append(v1)
+
+                  elif v1 < v2:
+                      p1 += 1
+
+                  else:
+                      p2 += 1
+
+              return intersection
+            ```
   * Other:
     * 277: Find the Celebrity (M)
       * Ref:
@@ -3619,7 +3683,37 @@ Table of Content
   * Tips:
     * Identify the definition of the left boundary and right boundary.
     * Identify the result when the target is not found within the boundaries.
-    * Consider the cases that have one and two elements.
+    * Consider the cases that have one element and two elements.
+  * 374: Guess Number Higher or Lower (E)
+    * Approach1: Linear Search, Time:O(n), Space:O(1)
+    * Approach2: Binary Search, Time:O(logn), Space:O(1)
+      * boundaries
+        * left boundary: the value before left boundary are less than the target.
+        * right boundary: the value before left boundary are greater than the target.
+      * when the target is not found:
+        * return -1
+      * Python
+        ```python
+        def guessNumber(self, n):
+          """
+          :type n: int
+          :rtype: int
+          """
+          left = 1
+          right = n
+          res = -1
+          while left <= right:
+              mid = (left + right) // 2
+              if guess(mid) == 0:
+                  res = mid
+                  break
+              elif guess(mid) == 1: # my number is higher
+                  left = mid + 1
+              else:
+                  right = mid - 1
+
+          return res
+          ```
   * 035: Search Insert Position (E)
     * Approach1: Linear, Time:O(n), Space:O(1)
     * Approach2: Binary Search, Time:O(logn), Space:O(1)
@@ -3688,36 +3782,129 @@ Table of Content
                     left = mid + 1
             return left
           ```
-  * 374: Guess Number Higher or Lower (E)
-    * Approach1: Linear Search, Time:O(n), Space:O(1)
-    * Approach2: Binary Search, Time:O(logn), Space:O(1)
-      * boundaries
-        * left boundary: the value before left boundary are less than the target.
-        * right boundary: the value before left boundary are greater than the target.
-      * when the target is not found:
-        * return -1
+  * 034: Find First and Last Position of Element in Sorted Array (M)
+      * Approach1: Linear Search, Time:O(n), Space:O(1)
+        * Python
+          ```python
+          def searchRange(self, nums: List[int], target: int) -> List[int]:
+            not_found = -1
+            start = end = not_found
+            for idx, val in enumerate(nums):
+                if val == target:
+                    if start == not_found:
+                        start = idx
+                    end = idx
+
+            return [start, end]
+          ```
+      * Approach2: Binary Search, Time:O(n), Space:O(1)
+        * Boundaries:
+          * to find start
+            * left: val before left boundary is less than the target
+            * right: val after right boundary is **grater or equal** to the target
+          * to find end
+            * left: val before left boundary is **less or equal** to the target
+            * right vla after right boundary is grater than the target
+        * Python
+          ```python
+          def searchRange(self, nums: List[int], target: int) -> List[int]:
+            def find_start(left, right):
+                start = not_found
+                l, r = left, right
+
+                while l <= r:
+                    mid = (l + r) // 2
+                    if target <= nums[mid]:
+                        r = mid - 1
+                    else:  # target > nums[mid]
+                        l = mid + 1
+
+                if left <= l <= right and nums[l] == target:
+                    start = l
+
+                return start
+
+            def find_end(left, right):
+                end = not_found
+                l, r = left, right
+
+                while l <= r:
+                    mid = (l + r) // 2
+                    if target >= nums[mid]:
+                        l = mid + 1
+                    else:
+                        r = mid - 1
+
+                if left <= r <= right and nums[r] == target:
+                    end = r
+
+                return end
+
+            not_found = -1
+            # find start
+            left = 0
+            right = len(nums) - 1
+
+            s = find_start(left, right)
+            if s == not_found:
+                e = not_found
+            else:
+                e = find_end(s, right)
+
+            return [s, e]
+          ```
+  * 162: Find **Peak Element** (M)
+    * 3 cases:
+      * case1: Peak is the first element
+        * All the number appear in a descending order.
+      * case2: Peak is the last element
+        * All the number appear in a ascending order.
+      * case3: Peak is in the middle of the nums
+    * Approach1: Linear, Time:O(n), Space:O(1)
       * Python
         ```python
-        def guessNumber(self, n):
-          """
-          :type n: int
-          :rtype: int
-          """
-          left = 1
-          right = n
-          res = -1
-          while left <= right:
-              mid = (left + right) // 2
-              if guess(mid) == 0:
-                  res = mid
+        def findPeakElement(self, nums):
+          n = len(nums)
+
+          if n == 1:
+              return 0
+
+          # from 0 to n-2
+          peak = n-1
+          for i in range(0, n-1):
+              if nums[i] > nums[i+1]:
+                  peak = i
                   break
-              elif guess(mid) == 1: # my number is higher
-                  left = mid + 1
-              else:
+
+          return peak
+        ```
+    * Approach2: Binary Search, Time:O(logn), Space:O(1)
+      * Notice tne end condition and check condition
+      * Python
+        ```python
+        def findPeakElement(self, nums):
+          n = len(nums)
+
+          left = 0
+          right = n -1
+
+          while left <= right:
+
+              if left == n-1:
+                  break
+
+              mid = (left + right) // 2
+
+              # descending order, find left part
+              if nums[mid] > nums[mid+1]:
                   right = mid - 1
 
-          return res
-          ```
+              # ascending order, find the right part
+              else:
+                  left = mid + 1
+
+          return left
+        ```
   * 275: H-Index II (M)
     * Approach1: Linear search: O(n)
       * Concept
@@ -3818,7 +4005,6 @@ Table of Content
                   mid = (left + right) // 2
                   # case1
                   if mid == right_boundary:
-                      rotate_idx = 0
                       break
 
                   # case2
@@ -4134,6 +4320,99 @@ Table of Content
 
           return nums[rotate_idx]
         ```
+  * 222: Count **Complete** Tree Nodes (M)
+    * Approach1: Preorder, Time:O(n), Space:O(n)
+      * Python
+        ```python
+        def countNodes(self, root: TreeNode) -> int:
+          if not root:
+              return 0
+
+          node_cnt = 0
+          stack = [root]
+
+          while stack:
+              node = stack.pop()
+              node_cnt += 1
+
+              if node.left:
+                  stack.append(node.left)
+
+              if node.right:
+                  stack.append(node.right)
+
+          return node_cnt
+        ```
+    * Approach2: Binary Search, Time:O(d^2), Space:O(1)
+      * Ref:
+        * https://leetcode.com/articles/count-complete-tree-nodes/
+      * Time:
+        * Find depth: O(d)
+        * Check node cnt in the last level: O(d^2)
+        * Total cost: O(d^2) = O(log(n)^2) (complete binary tree)
+      * Definitions:
+        * Assume depth starts from 0
+        * Total nodes is 2^d -1 + last_level_node
+        * The maximum node cnt in the last level is 2^d
+      * Boundaries:
+        * left boundary:
+          * The nodes before the left boundary exist.
+        * right boundary:
+          * The are no nodes after the right boundary.
+      * Python
+        ```python
+        def countNodes(self, root: TreeNode) -> int:
+
+          def get_depth(cur):
+              depth = 0
+
+              while cur.left:
+                  depth += 1
+                  cur = cur.left
+
+              return depth
+
+          def check_node_exists(node_idx, d, cur):
+              target = cur
+              # go at most depth level
+              # Last level nodes are enumerated from 0 to 2**d -1
+              left = 0
+              right = 2**d - 1
+              for _ in range(d):
+                  mid = (left + right) // 2
+                  if node_idx <= mid:
+                      target = target.left
+                      right = mid - 1
+                  else:
+                      target = target.right
+                      left = mid + 1
+
+              return target is not None
+
+          if not root:
+              return 0
+
+          d = get_depth(root)
+
+          if d == 0:
+              return 1
+
+          # Last level nodes are enumerated from 0 to 2**d -1
+          # we starts from 2nd node (index 1), since 1st node always exists.
+          left, right = 1, 2**d-1
+          while left <= right:
+              mid = (left + right) // 2
+              if check_node_exists(mid, d, root):
+                  # every nodes before mid exist
+                  left = mid + 1
+              else:
+                  # there are no nodes after mid
+                  right = mid - 1
+
+          # The tree contains 2**d - 1 nodes on the first (d - 1) levels
+          # and left nodes on the last level.
+          return (2**d - 1) + left
+        ```
   * 004: **Median** of **Two Sorted Arrays** (H)
     * Approach1: Merge and Find, Time:O(m+n), Space:O(m+n)
       * Time: O(m+n)
@@ -4207,105 +4486,8 @@ Table of Content
                     # shrink n2 left part, that is, increase n1 left part
                     left_b = p_n1 + 1
             ```
-  * 222: Count **Complete** Tree Nodes (M)
-    * Approach1: Preorder, Time:O(n), Space:O(n)
-      * Python
-        ```python
-        def countNodes(self, root: TreeNode) -> int:
-          if not root:
-              return 0
-
-          node_cnt = 0
-          stack = [root]
-
-          while stack:
-              node = stack.pop()
-              node_cnt += 1
-
-              if node.left:
-                  stack.append(node.left)
-
-              if node.right:
-                  stack.append(node.right)
-
-          return node_cnt
-        ```
-    * Approach2: Binary Search, Time:O(log(n)^2), Space:O(1)
-      * Ref:
-        * https://leetcode.com/articles/count-complete-tree-nodes/
-      * Time:
-        * Find depth: O(d)
-        * Check node cnt in the last level: O(d^2)
-        * Total cost: O(d^2) = O(log(n)^2),
-      * Definitions:
-        * Assume depth starts from 0
-        * Total nodes is 2^d -1 + last_level_node
-        * The maximum node cnt in the last level is 2^d
-      * Boundaries:
-        * left boundary:
-          * The nodes before the left boundary exist.
-        * right boundary:
-          * The are no nodes after the right boundary.
-      * Python
-        ```python
-        def countNodes(self, root: TreeNode) -> int:
-
-          def get_depth(cur):
-              depth = 0
-
-              while cur.left:
-                  depth += 1
-                  cur = cur.left
-
-              return depth
-
-          def check_node_exists(node_idx, d, cur):
-              target = cur
-              # go at most depth level
-              # Last level nodes are enumerated from 0 to 2**d -1
-              left = 0
-              right = 2**d - 1
-              for _ in range(d):
-                  mid = (left + right) // 2
-                  if node_idx <= mid:
-                      target = target.left
-                      right = mid - 1
-                  else:
-                      target = target.right
-                      left = mid + 1
-
-              return target is not None
-
-          if not root:
-              return 0
-
-          d = get_depth(root)
-
-          if d == 0:
-              return 1
-
-          # Last level nodes are enumerated from 0 to 2**d -1
-          # we starts from 2nd node (index 1), since 1st node always exists.
-          left, right = 1, 2**d-1
-          while left <= right:
-              mid = (left + right) // 2
-              if check_node_exists(mid, d, root):
-                  # every nodes before mid exist
-                  left = mid + 1
-              else:
-                  # there are no nodes after mid
-                  right = mid - 1
-
-          # The tree contains 2**d - 1 nodes on the first (d - 1) levels
-          # and left nodes on the last level.
-          return (2**d - 1) + left
-        ```
-  * 349: Intersection of Two Arrays (E)
-  * 350: Intersection of Two Arrays II (E)
-  * 162: Find Peak Element (M)
-  * 034: Search for a Range (M)
-  * 315: Count of Smaller Numbers After Self (H)
   * 300: Longest Increasing Subsequence (M)
+  * 315: Count of Smaller Numbers After Self (H)
   * 354: Russian Doll Envelopes (H)
 ### Linked List
 * **Techiniques**:
@@ -10460,6 +10642,7 @@ Table of Content
     * 033 & 081: Search in Rotated Sorted Array (M)
     * 004: Median of Two Sorted Arrays (H)
     * 222: Count **Complete** Tree Nodes (M)
+    * 162: Find Peak Element (M)
   * Cache
     * 146: LRU Cache (M)
   * Heap
