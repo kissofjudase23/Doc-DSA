@@ -557,6 +557,8 @@ Table of Content
             # exactly one edit distance
             return True
           ```
+    * 072: Edit Distance (H)
+      * DP
   * **SubString**
      * 028: Implement **strStr** (E)
        * Find Sub-String
@@ -1335,10 +1337,9 @@ Table of Content
      * 301: Remove Invalid Parentheses (H)
   * **Subsequence**
     * Definition:
-      * A subsequence of a string is a new string which is formed from the original string by deleting some (can be none) of the characters without disturbing the relative positions of the remaining characters.
-    * Longest Common Subsequence (LCS) (DP)
+      * A subsequence of a string is a new string which is **formed from the original string by deleting some (can be none) of the characters without disturbing the relative positions of the remaining characters.**
     * 392: Is Subsequence (E)
-      * Approach1: Iterate subsequence, Time:O(n), Space:O(1)
+      * Approach1: Iterate pattern, Time:O(n), Space:O(1)
         * Python Solution
           ```python
           def isSubsequence(self, s: str, t: str) -> bool:
@@ -1375,6 +1376,110 @@ Table of Content
                           res = True
                           break
               return res
+          ```
+    * Longest Common Subsequence (**LCS**) (DP)
+    * 300: Longest Increasing Subsequence (**LIS**) (M)
+      * Approach1: Top down Recursive, Time:O(n^2), Space:O(n)
+        * 2 cases:
+          * case1: taken the current character if possible (cur > prev)
+          * case2: do not tkaen the current character
+        * Python
+          ```python
+          def lengthOfLIS(self, nums: List[int]) -> int:
+            def get_lis(prev, cur, lis):
+                # end condition
+                if cur == n:
+                    return
+
+                nonlocal max_lis
+
+                # taken the cur character
+                if prev == -1 or nums[cur] > nums[prev]:
+                    taken_lis = 1 + lis
+                    max_lis = max(max_lis, taken_lis)
+                    get_lis(cur, cur+1, taken_lis)
+
+                # not taken
+                get_lis(prev, cur+1, lis)
+
+            if not nums:
+                return 0
+
+            max_lis = 0
+
+            n = len(nums)
+
+            get_lis(prev=-1, cur=0, lis=0)
+
+            return max_lis
+          ```
+      * Approach2: Bottom up iterative + memo, Time:O(n^2), Space:O(n)
+        * Python
+          ```python
+          def lengthOfLIS(self, nums: List[int]) -> int:
+            n = len(nums)
+
+            if n == 0:
+                return 0
+
+            if n == 1:
+                return 1
+
+            memo = [0] * n
+            memo[0] = 1
+            max_lis = 1
+            for cur in range(1, n):
+                lis = 1
+                for prev in range(0, cur):
+                    if nums[cur] > nums[prev]:
+                        lis = max(lis, memo[prev]+1)
+
+                memo[cur] = lis
+                max_lis = max(max_lis, lis)
+
+            return max_lis
+          ```
+      * Approach3: Binary Search, Time:O(nlogn), Space:O(n)
+        * Ref:
+          * https://leetcode.com/problems/longest-increasing-subsequence/discuss/74824/JavaPython-Binary-search-O(nlogn)-time-with-explanation
+          * https://www.youtube.com/watch?v=S9oUiVYEq7E
+        * Use binary search to either
+          * 1. extend increasing sequence with larger numbers
+            * if n is larger than all tails, append it, increase the size by 1
+          * 2. minimize existing values with smaller ones - so we can use smaller numbers to extend it.
+            * if tails[i-1] < x <= tails[i], update tails[i]
+        * Boundaries:
+          * left boundary:
+            * val before left is smaller than the target
+          * right boundary:
+            * val after right is greater or equal to the target (inclusive)
+        * Python
+          ```python
+          def lengthOfLIS(self, nums: List[int]) -> int:
+            tails = [0 for _ in range(len(nums))]
+            size = 0
+
+            for n in nums:
+                left, right = 0, size
+                while left <= right:
+
+                    if left == right:
+                      break
+
+                    mid = (left + right) // 2
+                    """"
+                    if n is larger than all tails, append it, increase the size by 1
+                    if tails[i-1] < n <= tails[i], update tails[i]
+                    """
+                    if n > tails[mid]:
+                        left = mid + 1
+                    else: # n <= tails[mid]
+                        right = mid
+
+                tails[left] = n
+                size = max(left + 1, size)
+
+            return size
           ```
     * 187: Repeated DNA Sequences (M)
     * 115: Distinct Subsequences (H)
@@ -3663,16 +3768,301 @@ Table of Content
         * [Solution](https://leetcode.com/problems/game-of-life/discuss/73217/Infinite-board-solution/201780)
     * 723：Candy Crush (M)
 ### Matrix
- * 054:	Spiral Matrix (M)
- * 059:	Spiral Matrix II (M)
+ * **Rotate**:
+   * Approach1: m*n arryay, Time:O(mn), Space:O(mn)
+     * Python
+      ```python
+      def rotate_v2(a):
+        """
+        non-np version
+
+        Complexity:
+        Time  : O(rc)
+        Space : O(rc)
+        """
+        row_num = len(a)
+        col_num = len(a[0])
+
+        rotated_array = [[None for _ in range(row_num)] for _ in range(col_num)]
+
+        for r in range(row_num):
+            for c in range(col_num):
+                rotated_array[c][row_num-1-r] = a[r][c]
+
+        return rotated_array
+      ```
+   * Approach2: n-n array, Time:O(mn), Space:O(1)
+     * Python
+      ```python
+      def rotate_in_place(a):
+        row_num = len(a)
+        col_num = len(a[0])
+
+        if row_num != col_num:
+            raise ArgError()
+
+        dim = row_num
+
+        layers = row_num // 2
+
+        for layer in range(layers):
+            start = layer
+            end = dim - 1 - layer
+
+            for offset in range(end-start):
+                tmp = a[start][start+offset]
+                a[start][start+offset] = a[end-offset][start]
+                a[end-offset][start] = a[end][end-offset]
+                a[end][end-offset] = a[start+offset][end]
+                a[start+offset][end] = tmp
+
+        return a
+      ```
+ * **Spiral**
+   * 054:	Spiral Matrix (M)
+     * Approach1: Simulation, Time:O(mn), Space:O(mn)
+       * Draw the path that the spiral makes. We know that the path should turn clockwise whenever it would go out of bounds or into a cell that was previously visited.
+       * Python
+        ```python
+        def spiralOrder(self, matrix):
+          if not matrix:
+              return []
+
+          row, col = len(matrix), len(matrix[0])
+          seen = [[False for _ in range(col)] for _ in range(row)]
+
+          res = []
+          r = c = d = 0
+          # top, right, bottom, left
+          directions = ((0, 1), (1, 0), (0,-1), (-1, 0))
+
+          for _ in range(row*col):
+              res.append(matrix[r][c])
+              seen[r][c] = True
+              cr, cc = r + directions[d][0], c + directions[d][1]
+
+              if 0 <= cr < row and 0 <= cc < col and not seen[cr][cc]:
+                  r, c = cr, cc
+              else:
+                  # change direction when out of bounds or into a cell that was
+                  # previously visited
+                  d = (d + 1) % 4
+                  r, c = r + directions[d][0], c + directions[d][1]
+
+          return res
+        ```
+     * Approach2: Layer by Layer, Time:O(mn), Space:O(1)
+       * Ref:
+         * https://leetcode.com/articles/spiral-matrix/
+       * For each layer
+         * 1. Top
+         * 2. Right
+         * 3. Bottom
+         * 4. Left
+         * Notes: need to handle single row, single col and one unit case
+       * Python
+        ```python
+        def spiralOrder(self, matrix):
+          def spiral_coords(r1, c1, r2, c2):
+              # Top, c1 to c2
+              for c in range(c1, c2+1):
+                  yield r1, c
+
+              # Right, r1+1 to r2
+              for r in range(r1 + 1, r2 + 1):
+                  yield r, c2
+
+              # prevent duplicate for single row and single col
+              if r1 < r2 and c1 < c2:
+                  # Bottom, c2-1 to c1
+                  for c in range(c2-1, c1-1, -1):
+                      yield r2, c
+
+                  # Left r2-1 to r1-1
+                  for r in range(r2-1, r1, -1):
+                      yield r, c1
+
+          if not matrix:
+              return []
+
+          row, col = len(matrix), len(matrix[0])
+          # top left corner
+          r1 = c1 = 0
+          # bottom right corner
+          r2, c2 = row-1, col-1
+          res = []
+
+          while r1 <= r2 and c1 <= c2:
+              for r, c in spiral_coords(r1, c1, r2, c2):
+                  res.append(matrix[r][c])
+
+              # move to next layer
+              r1, c1 = r1 + 1, c1 + 1
+              r2, c2 = r2 - 1, c2 - 1
+
+          return res
+        ```
+   * 059:	Spiral Matrix II (M)
+     * Approach1:Simulation, Time:O(mn), Space:O(1)
+       * Python
+        ```python
+        def generateMatrix(self, n: int) -> List[List[int]]:
+          matrix = [[None] * n for _ in range(n)]
+          # top, right, bottom, left
+          directions = ((0, 1), (1, 0), (0, -1), (-1, 0))
+
+          r = c = d = 0
+          val = 1
+          for _ in range(n*n):
+              matrix[r][c] = val
+              val += 1
+
+              cr, cc = r + directions[d][0], c + directions[d][1]
+              if 0 <= cr < n and 0 <= cc < n and matrix[cr][cc] is None:
+                  r, c = cr, cc
+              else:
+                  d = (d + 1) % 4
+                  r, c = r + directions[d][0], c + directions[d][1]
+
+          return matrix
+        ```
+     * Approach2: Layer by Layer, Time:O(mn), Space:O(1)
+       * Python
+        ```python
+        def generateMatrix(self, n: int) -> List[List[int]]:
+
+          def spiral_coords(r1, c1, r2, c2):
+              # top, c1 to c2
+              for c in range(c1, c2 + 1):
+                  yield r1, c
+
+              # right, r1+1 to r2
+              for r in range(r1 + 1, r2 + 1):
+                  yield r, c2
+
+              if r1 < r2 and c1 < c2:
+                  # bottom, c2-1 to c1
+                  for c in range(c2 - 1, c1 - 1, -1):
+                      yield r2, c
+
+                  # left
+                  for r in range(r2 - 1, r1, -1):
+                      yield r, c1
+
+          # top left corner
+          r1 = c1 = 0
+          # bottom right corner
+          r2, c2 = n-1, n-1
+
+          val = 1
+          matrix = [[None] * n for _ in range(n)]
+
+          while r1 <= r2 and c1 <= c2:
+              for r, c in spiral_coords(r1, c1, r2, c2):
+                  matrix[r][c] = val
+                  val += 1
+
+              r1, c1 = r1 + 1, c1 + 1
+              r2, c2 = r2 - 1, c2 - 1
+
+          return matrix
+        ```
+ * Search:
+   * 074:	Search a 2D Matrix (M)
+     * Approach1: Single Binary Search: Time:O(log(mn)), Space:O(1)
+       * matrix indices from 0 to m*n-1
+       * r = idx // n
+       * c = idx % n
+       * Python
+         ```python
+         def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
+            if not matrix:
+                return False
+
+            row, col = len(matrix), len(matrix[0])
+            res = False
+            # step1, determine the row
+            left, right = 0, row * col - 1
+            while left <= right:
+                mid = (left + right) // 2
+
+                r, c = mid // col, mid % col
+
+                if target == matrix[r][c]:
+                    res = True
+                    break
+
+                elif target > matrix[r][c]:
+                    left = mid + 1
+                else:
+                    right = mid - 1
+
+            return res
+         ```
+
+     * Approach2: Two Binary Search, Time:O(log(m)+log(n)), Space:O(1)
+       * Determine the row
+         * Boundaries:
+           * Left Boundary
+             * val before left boundary is smaller than the target
+           * Right Boundary
+             * val after right boundary is greater than the target
+         * If not found:
+           * return right is right is not -1, A[right] < target < A[left]
+       * Determine the col, standard binary search
+       * Python
+          ```python
+          def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
+            def bin_search(row, target):
+                l, r = 0, len(row)-1
+                res = False
+                while l <= r:
+                    mid = (l + r) // 2
+                    if target == row[mid]:
+                        res = True
+                        break
+                    elif target > row[mid]:
+                        l = mid + 1
+                    else:
+                        r = mid - 1
+                return res
+
+            if not matrix:
+                return False
+
+            row = len(matrix)
+            col = len(matrix[0])
+            # special case, only 1 row
+            if row == 1:
+                return bin_search(matrix[0], target)
+
+            res = False
+            # step1, determine the row
+            l, r = 0, row-1
+            while l <= r:
+                mid = (l + r) // 2
+                if target == matrix[mid][0]:
+                    res = True
+                    break
+                elif target > matrix[mid][0]:
+                    l = mid + 1
+                else:
+                    r = mid - 1
+
+            # r == -1 means the target is smaller than the matrix[0][0]
+            if res or r == -1:
+                return res
+
+            # step2, search the row
+            return bin_search(matrix[r], target)
+          ```
+   * 240:	Search a 2D Matrix II (M)
+   * 079:	Word Search (M)
  * 073:	Set Matrix Zeroes (M)
  * 311:	Sparse Matrix Multiplication (M)
  * 329:	Longest Increasing Path in a Matrix (H)
  * 378:	Kth Smallest Element in a Sorted Matrix (M)
- * 074:	Search a 2D Matrix (M)
- * 240:	Search a 2D Matrix II (M)
  * 370:	Range Addition (M)
- * 079:	Word Search (M)
  * 296:	Best Meeting Point (H)
  * 361: Bomb Enemy (M)
  * 317: Shortest Distance from All Buildings (H)
@@ -3687,34 +4077,35 @@ Table of Content
   * 374: Guess Number Higher or Lower (E)
     * Approach1: Linear Search, Time:O(n), Space:O(1)
     * Approach2: Binary Search, Time:O(logn), Space:O(1)
+      * Standard Binary Search
       * boundaries
-        * left boundary: the value before left boundary are less than the target.
-        * right boundary: the value before left boundary are greater than the target.
-      * when the target is not found:
-        * return -1
+        * left boundary: The values before left boundary are less than the target.
+        * right boundary: the values after right boundary are greater than the target.
+      * If the target not found:
+        * return not_found (-1)
       * Python
         ```python
         def guessNumber(self, n):
-          """
-          :type n: int
-          :rtype: int
-          """
-          left = 1
-          right = n
-          res = -1
+          res = not_found = -1
+          left, right = 1, n
+
           while left <= right:
+
               mid = (left + right) // 2
-              if guess(mid) == 0:
+
+              guess_res = guess(mid)
+              if guess_res == 0:    # got it
                   res = mid
                   break
-              elif guess(mid) == 1: # my number is higher
+              elif guess_res == 1:  # guess number is higher, seach right
                   left = mid + 1
-              else:
+              else :                # guess number is lower , seach left
                   right = mid - 1
 
           return res
           ```
   * 035: Search Insert Position (E)
+    * Find the first value >= target
     * Approach1: Linear, Time:O(n), Space:O(1)
     * Approach2: Binary Search, Time:O(logn), Space:O(1)
       * Boundaries:
@@ -3723,33 +4114,33 @@ Table of Content
         * right boundary:
           * Value after the right boundary are bigger than the target
       * If the target not found:
-        * return left
-          * since left is the first position which is greater than the target.
+        * return left, which is the position of the first number > target
       * Python
         ```python
         def searchInsert(self, nums: List[int], target: int) -> int:
           if not nums:
               return 0
 
-          left = 0
-          right = len(nums)-1
-          position = None
+          # find the first value >= target
+          left, right = 0, len(nums)-1
+          res = not_found = -1
 
           while left <= right:
 
               mid = (left + right) // 2
 
               if target == nums[mid]:
-                  position = mid
+                  res = mid
                   break
-
               elif target < nums[mid]:
                   right = mid - 1
-
               else:
                   left = mid + 1
 
-          return position if position is not None else left
+          if res is not_found:
+              res = left
+
+          return res
         ```
   * 278: First Bad Version (E)
     * Definitions
@@ -3758,9 +4149,11 @@ Table of Content
     * Approach2: binary search, Time:O(logn), Space:O(1)
       * boundaries:
         * left boundary:
-          * versions before left are good
+          * Versions before left are good
         * right boundary:
-          * versions after right are bad
+          * Versions after right are bad
+      * If the target is not found:
+        * It's impossible according to the definiton
         * Python
           ```python
           def firstBadVersion(self, n):
@@ -3782,7 +4175,64 @@ Table of Content
                     left = mid + 1
             return left
           ```
-  * 034: Find First and Last Position of Element in Sorted Array (M)
+    * 162: Find **Peak Element** (M)
+      * 3 cases:
+        * case1: Peak is the first element
+          * All the number appear in a descending order.
+        * case2: Peak is the last element
+          * All the number appear in a ascending order.
+        * case3: Peak is in the middle of the nums
+      * Approach1: Linear, Time:O(n), Space:O(1)
+        * Python
+          ```python
+          def findPeakElement(self, nums):
+            n = len(nums)
+
+            if n == 1:
+                return 0
+
+            peak = n - 1
+            # from 0 to n-2
+            for i in range(0, n-1):
+                if nums[i] > nums[i+1]:
+                    peak = i
+                    break
+
+            return peak
+          ```
+      * Approach2: Binary Search, Time:O(logn), Space:O(1)
+        * Peak is not unique, we can return any peak in the nums
+        * Python
+          ```python
+          def findPeakElement(self, nums):
+            n = len(nums)
+
+            if n == 1:
+                return 0
+
+            left = 0
+            right = n-1
+            peak = None
+            while left <= right:
+
+                mid = (left + right) // 2
+
+                if mid == n-1:
+                    peak = n-1
+                    break
+                # descending order, find left part
+                if nums[mid] > nums[mid+1]:
+                    right = mid - 1
+                # ascending order, find the right part
+                else:
+                    left = mid + 1
+
+            if peak is None:
+                peak = left
+
+            return peak
+          ```
+  * 034: Find **First and Last Position of Element** in Sorted Array (M)
       * Approach1: Linear Search, Time:O(n), Space:O(1)
         * Python
           ```python
@@ -3804,7 +4254,7 @@ Table of Content
             * right: val after right boundary is **grater or equal** to the target
           * to find end
             * left: val before left boundary is **less or equal** to the target
-            * right vla after right boundary is grater than the target
+            * right: val after right boundary is grater than the target
         * Python
           ```python
           def searchRange(self, nums: List[int], target: int) -> List[int]:
@@ -3814,9 +4264,11 @@ Table of Content
 
                 while l <= r:
                     mid = (l + r) // 2
+                    # val after right boundary is **grater or equal** to the target
                     if target <= nums[mid]:
                         r = mid - 1
-                    else:  # target > nums[mid]
+                    # target > nums[mid] -> nums[mid] < target
+                    else:
                         l = mid + 1
 
                 if left <= l <= right and nums[l] == target:
@@ -3830,9 +4282,10 @@ Table of Content
 
                 while l <= r:
                     mid = (l + r) // 2
+                    # val before left boundary is **less or equal** to the target
                     if target >= nums[mid]:
                         l = mid + 1
-                    else:
+                    else: # target < nums[mid] -> mid > target
                         r = mid - 1
 
                 if left <= r <= right and nums[r] == target:
@@ -3853,58 +4306,6 @@ Table of Content
 
             return [s, e]
           ```
-  * 162: Find **Peak Element** (M)
-    * 3 cases:
-      * case1: Peak is the first element
-        * All the number appear in a descending order.
-      * case2: Peak is the last element
-        * All the number appear in a ascending order.
-      * case3: Peak is in the middle of the nums
-    * Approach1: Linear, Time:O(n), Space:O(1)
-      * Python
-        ```python
-        def findPeakElement(self, nums):
-          n = len(nums)
-
-          if n == 1:
-              return 0
-
-          # from 0 to n-2
-          peak = n-1
-          for i in range(0, n-1):
-              if nums[i] > nums[i+1]:
-                  peak = i
-                  break
-
-          return peak
-        ```
-    * Approach2: Binary Search, Time:O(logn), Space:O(1)
-      * Notice tne end condition and check condition
-      * Python
-        ```python
-        def findPeakElement(self, nums):
-          n = len(nums)
-
-          left = 0
-          right = n -1
-
-          while left <= right:
-
-              if left == n-1:
-                  break
-
-              mid = (left + right) // 2
-
-              # descending order, find left part
-              if nums[mid] > nums[mid+1]:
-                  right = mid - 1
-
-              # ascending order, find the right part
-              else:
-                  left = mid + 1
-
-          return left
-        ```
   * 275: H-Index II (M)
     * Approach1: Linear search: O(n)
       * Concept
@@ -3931,6 +4332,13 @@ Table of Content
       * Boundaries
         * Indices after right boundary are accetable.
         * Indices before left boundary are unaccetable.
+        * example:
+          ```txt
+          val        3  4  5  6  7
+          idx        0  1  2  3  4
+          max-idx  6 5  4  3  2  1  0
+                     l           r
+          ```
       * When the target is not found in the range
         * return (max_cita - left)
         * There are 2 ending cases
@@ -3949,6 +4357,7 @@ Table of Content
 
           while left <= right:
               mid = (left + right) // 2
+
               if citations[mid] == (max_cita - mid):
                   return max_cita - mid
 
@@ -3959,7 +4368,7 @@ Table of Content
               # challenge success, try to find higher h-index, go left part
               else:
                   right = mid - 1
-          #
+
           return max_cita - left
         ```
   * 033 & 081: Search in **Rotated Sorted Array** (M)
@@ -4007,16 +4416,16 @@ Table of Content
                   if mid == right_boundary:
                       break
 
-                  # case2
+                  # case2, no rotate idx found
                   if nums[mid] > nums[mid+1]:
                       rotate_idx = mid + 1
                       break
 
                   else:
-                      # mid is in the left part
+                      # mid is in the left part, find the last element of the left part
                       if nums[mid] >= nums[left]:
                           left = mid + 1
-                      # mid is in the right part
+                      # mid is in the right part, try to go to left part
                       else:
                           right = mid - 1
 
@@ -4165,7 +4574,6 @@ Table of Content
           res = not_found
           left = 0
           right = n-1
-
           while left <= right:
               mid = (left + right) // 2
               if nums[mid] == target:
@@ -4185,7 +4593,6 @@ Table of Content
                           left = mid + 1
                       else:
                           right = mid - 1
-
           return res
         ```
     * Approach5: One Pass binary Search (duplicated value), Time:O(logn)~O(n), Space:O(1)
@@ -4380,6 +4787,7 @@ Table of Content
               right = 2**d - 1
               for _ in range(d):
                   mid = (left + right) // 2
+                  # mid is inclued in the left part
                   if node_idx <= mid:
                       target = target.left
                       right = mid - 1
@@ -4486,7 +4894,30 @@ Table of Content
                     # shrink n2 left part, that is, increase n1 left part
                     left_b = p_n1 + 1
             ```
-  * 300: Longest Increasing Subsequence (M)
+
+      * memo[i] is the longest increasing subsequece of nums[:i+1]
+        * possible prev indices are from 0 to i
+      * Python
+        ```python
+        def lengthOfLIS(self, nums: List[int]) -> int:
+          if not nums:
+              return 0
+
+          n = len(nums)
+          memo = [0 for _ in range(n)]
+          max_lis = memo[0] = 1
+
+          for cur in range(1, n):
+              cur_lis = 1
+              for prev in range(0, cur):
+                  if nums[cur] > nums[prev]:
+                      cur_lis = max(cur_lis, 1+memo[prev])
+              memo[cur] = cur_lis
+
+              max_lis = max(max_lis, memo[cur])
+
+          return max_lis
+        ```
   * 315: Count of Smaller Numbers After Self (H)
   * 354: Russian Doll Envelopes (H)
 ### Linked List
