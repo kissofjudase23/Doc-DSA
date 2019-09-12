@@ -3967,40 +3967,43 @@ Table of Content
 
           return matrix
         ```
- * Search:
+ * **Search**:
    * 074:	Search a 2D Matrix (M)
-     * Approach1: Single Binary Search: Time:O(log(mn)), Space:O(1)
-       * matrix indices from 0 to m*n-1
-       * r = idx // n
-       * c = idx % n
+     * Definitions:
+       * Integers in each row are sorted from left to right.
+       * **The first integer of each row is greater than the last integer of the previous row.**
+     * Approach1: Brute Force, Time:O(mn), Space:O(1)
+     * Approach2: Search Space Reduction, O(m+n), Space:O(1)
+       * Starting from bottom left of the matrix (or from top right ?)
+         * if the target is greater than the cur val, go right
+         * if the target is smaller than the cur val, go up
        * Python
-         ```python
-         def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
-            if not matrix:
-                return False
+        ```python
+        def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
+          if not matrix:
+              return False
 
-            row, col = len(matrix), len(matrix[0])
-            res = False
-            # step1, determine the row
-            left, right = 0, row * col - 1
-            while left <= right:
-                mid = (left + right) // 2
+          row, col = len(matrix), len(matrix[0])
 
-                r, c = mid // col, mid % col
+          if not col:
+              return False
 
-                if target == matrix[r][c]:
-                    res = True
-                    break
+          found = False
+          r, c = row - 1, 0
 
-                elif target > matrix[r][c]:
-                    left = mid + 1
-                else:
-                    right = mid - 1
+          while r >= 0 and c < col:
+              if target == matrix[r][c]:
+                  found = True
+                  break
+              # truncate the col
+              elif target > matrix[r][c]:
+                  c += 1
+              else:
+                  r -= 1
 
-            return res
-         ```
-
-     * Approach2: Two Binary Search, Time:O(log(m)+log(n)), Space:O(1)
+          return found
+        ```
+     * Approach3: Twice Binary Search, Time:O(log(m)+log(n)) = O(log(mn)) , Space:O(1)
        * Determine the row
          * Boundaries:
            * Left Boundary
@@ -4056,7 +4059,208 @@ Table of Content
             # step2, search the row
             return bin_search(matrix[r], target)
           ```
+     * Approach4: Once Binary Search: Time:O(log(mn)) = O(log(m)+log(n)), Space:O(1)
+       * matrix indices from 0 to m*n-1
+       * transfer index to r, c
+         * r = idx // n
+         * c = idx % n
+       * Python
+         ```python
+         def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
+            if not matrix:
+                return False
+
+            row, col = len(matrix), len(matrix[0])
+            res = False
+            # step1, determine the row
+            left, right = 0, row * col - 1
+            while left <= right:
+                mid = (left + right) // 2
+
+                r, c = mid // col, mid % col
+
+                if target == matrix[r][c]:
+                    res = True
+                    break
+
+                elif target > matrix[r][c]:
+                    left = mid + 1
+                else:
+                    right = mid - 1
+
+            return res
+         ```
    * 240:	Search a 2D Matrix II (M)
+     * Definitions
+       * Integers in each row are sorted in ascending from left to right.
+       * **Integers in each column are sorted in ascending from top to bottom.**
+     * Error Approach: Binary Search, O(logm + logn)
+       * Search in first row to determine the column
+         * Seach the column
+       * Search the first col to determine the row
+         * Search the row
+       * **Error Solution**, consider the case
+       * [ [11,13,15,17,19],
+           [12,14,16,18,20]
+         ], and we want to find 13
+     * Approach1: Brute Force, Time:O(mn), Space:O(1)
+     * Approach2: Binary Search in each row:, Time:O(mlogn), Space:O(1)
+       * Python
+        ```python
+        def searchMatrix(self, matrix, target):
+          def binary_search_row(row):
+
+              left, right = 0, col-1
+              found = False
+
+              while left <= right:
+                  mid = (left + right) // 2
+                  if target == matrix[r][mid]:
+                      found = True
+                      break
+                  elif target > matrix[r][mid]:
+                      left = mid + 1
+                  else:
+                      right = mid - 1
+
+              return found
+
+          if not matrix:
+              return False
+
+          row, col = len(matrix), len(matrix[0])
+
+          if not col:
+              return False
+
+          found = False
+
+          for r in range(row):
+              if target == matrix[r][0]:
+                  found = True
+                  break
+              elif target > matrix[r][0]:
+                  found = binary_search_row(r)
+                  if found:
+                      break
+              else: # target < matrix[r][0]
+                  break
+
+          return found
+        ```
+     * Approach3: Search Space Reduction, Time:O(m+n), Space:O(1)
+       * Starting from bottom left of the matrix (or from top right ?)
+       * if the target is greater than the cur val, go right
+       * if the target is smaller than the cur val, go up
+       * Python
+        ```python
+        def searchMatrix(self, matrix, target):
+          if not matrix:
+              return False
+
+          row, col = len(matrix), len(matrix[0])
+
+          if not col:
+              return False
+
+          found = False
+
+          r = row - 1
+          c = 0
+
+          while r >= 0 and c < col:
+              if target == matrix[r][c]:
+                  found = True
+                  break
+              # truncate the col
+              elif target > matrix[r][c]:
+                  c += 1
+              # truncate the row
+              else:
+                  r -= 1
+
+          return found
+        ```
+     * Approach4: Divide and Conquer, Time:O(nlogn), Space:O(log(n))
+       * Divide the matrix into four parts.
+       * Ref:
+         * https://leetcode.com/articles/search-a-2d-matrix-ii/
+         * https://leetcode.com/problems/search-a-2d-matrix-ii/discuss/66154/Is-there's-a-O(log(m)%2Blog(n))-solution-I-know-O(n%2Bm)-and-O(m*log(n))
+       * Time:
+         * How to Evaluate the time complexity
+       * (r1, c1): top left corner
+       * (r2, c2): bottom right corner
+       * For each matrix
+         * check if the target is in matrix[r1][c1] <= target <= matrix[r1][c1]
+         * Divide the matrix into 4 part
+           * mid rol = c1 + c2 // 2
+           * mid col = the first val in the mid rol which is greater than the target
+         * Separate the matirx into 4 submatrixs:
+           * Left up submatrix can be skipped since the val are smaller than the target
+           * Bottom right submatrix can be skipped since the val are greater than the target
+       * Python
+         ```python
+         def searchMatrix(self, matrix, target):
+            def bin_search_row(col_num, left, right):
+                found = False
+                while left <= right:
+                    mid = (left + right) // 2
+
+                    if target == matrix[mid][col_num]:
+                        found = True
+                        break
+                    elif target > matrix[mid][col_num]:
+                        left = mid + 1
+                    else:
+                        right = mid - 1
+
+                return found, left
+
+          if not matrix:
+              return False
+
+          row, col = len(matrix), len(matrix[0])
+
+          if not col:
+              return False
+
+          found = False
+
+          # top left corner
+          r1 = c1 = 0
+          # bottom right corner
+          r2, c2 = row-1, col-1
+
+          stack = [(r1, c1, r2, c2)]
+
+          found = False
+
+          while stack:
+              r1, c1, r2, c2 = stack.pop()
+
+              # out of boundary
+              if r1 > r2 or c1 > c2:
+                  continue
+
+              # check smallet val and biggest val in this matrix
+              if target < matrix[r1][c1] or taret > matrix[r2][c2]:
+                  continue
+
+              mid_c = (c1 + c2) // 2
+              found, target_row = bin_search_row(mid_c, r1, r2)
+
+              if found:
+                  break
+
+              # left bottom
+              stack.append((target_row, c1, r2, mid_c-1))
+
+              # right up
+              stack.append((r1, mid_c+1, target_row-1, c2))
+
+          return found
+         ```
+
    * 079:	Word Search (M)
  * 073:	Set Matrix Zeroes (M)
  * 311:	Sparse Matrix Multiplication (M)
