@@ -333,6 +333,47 @@ Table of Content
   * Remove Duplicate
     * 316: Remove Duplicate Letters (H)
   * Encode and Decode:
+    * 394: Decode String (M)
+      * Approach1: Use 2 stacks: Time:O(kn), Space:O(kn)
+        * Ref:
+          * https://leetcode.com/problems/decode-string/discuss/87534/Simple-Java-Solution-using-Stack
+        * Python
+          ```python
+          def decodeString(self, s: str) -> str:
+            buf = []
+            cnt_s = []
+            decode_s = []
+            ord_0 = ord('0')
+
+            i = 0
+            while i < len(s):
+                c = s[i]
+                if c.isdigit():
+                    cnt = 0
+                    while s[i].isdigit():
+                        cnt = cnt * 10 + (ord(s[i]) - ord_0)
+                        i+= 1
+                    cnt_s.append(cnt)
+
+                elif c == '[':
+                    decode_s.append(buf)
+                    buf = []
+                    i += 1
+
+                elif c == ']':
+                    repeat_cnt = cnt_s.pop()
+                    repeat_str = "".join(buf)
+                    buf = decode_s.pop()
+                    for _ in range(repeat_cnt):
+                        buf.append(repeat_str)
+                    i += 1
+
+                else:
+                    buf.append(c)
+                    i += 1
+
+              return "".join(buf)
+          ```
     * 271: Encode and Decode Strings (M)
       * Approach1: Non-ASCII Delimiter
       * Approach2: Chunked Transfer Encoding
@@ -364,8 +405,8 @@ Table of Content
             ord_a = ord('A')
 
             while n > 0:
-                pop = (n-1) % 26
-                n = (n-1) // 26
+                pop = (n-1) % 26 # n-1 to get number between 0(A) ~ 25(Z)
+                n = (n-1) // 26  # n-1 to cut the final number completely
                 result.appendleft(chr(pop+ord_a))
 
             return "".join(result)
@@ -3864,21 +3905,21 @@ Table of Content
         ```python
         def spiralOrder(self, matrix):
           def spiral_coords(r1, c1, r2, c2):
-              # Top, c1 to c2
+              # Top, go right, c1 to c2
               for c in range(c1, c2+1):
                   yield r1, c
 
-              # Right, r1+1 to r2
+              # Right, go down , r1+1 to r2
               for r in range(r1 + 1, r2 + 1):
                   yield r, c2
 
               # prevent duplicate for single row and single col
               if r1 < r2 and c1 < c2:
-                  # Bottom, c2-1 to c1
+                  # Bottom, go left, c2-1 to c1
                   for c in range(c2-1, c1-1, -1):
                       yield r2, c
 
-                  # Left r2-1 to r1-1
+                  # Left, go up  r2-1 to r1-1
                   for r in range(r2-1, r1, -1):
                       yield r, c1
 
@@ -3930,23 +3971,23 @@ Table of Content
        * Python
         ```python
         def generateMatrix(self, n: int) -> List[List[int]]:
-
           def spiral_coords(r1, c1, r2, c2):
-              # top, c1 to c2
-              for c in range(c1, c2 + 1):
+              # Top, go right, c1 to c2
+              for c in range(c1, c2+1):
                   yield r1, c
 
-              # right, r1+1 to r2
+              # Right, go down , r1+1 to r2
               for r in range(r1 + 1, r2 + 1):
                   yield r, c2
 
+              # prevent duplicate for single row and single col
               if r1 < r2 and c1 < c2:
-                  # bottom, c2-1 to c1
-                  for c in range(c2 - 1, c1 - 1, -1):
+                  # Bottom, go left, c2-1 to c1
+                  for c in range(c2-1, c1-1, -1):
                       yield r2, c
 
-                  # left
-                  for r in range(r2 - 1, r1, -1):
+                  # Left, go up  r2-1 to r1-1
+                  for r in range(r2-1, r1, -1):
                       yield r, c1
 
           # top left corner
@@ -4181,23 +4222,27 @@ Table of Content
 
           return found
         ```
-     * Approach4: Divide and Conquer, Time:O(nlogn), Space:O(log(n))
+     * Approach4: Divide and Conquer, Time:O(nlogn)(not sure), Space:O(log(n))
        * Divide the matrix into four parts.
        * Ref:
          * https://leetcode.com/articles/search-a-2d-matrix-ii/
          * https://leetcode.com/problems/search-a-2d-matrix-ii/discuss/66154/Is-there's-a-O(log(m)%2Blog(n))-solution-I-know-O(n%2Bm)-and-O(m*log(n))
        * Time:
-         * How to Evaluate the time complexity
+         * How to Evaluate the time complexity ??
        * (r1, c1): top left corner
        * (r2, c2): bottom right corner
        * For each matrix
-         * check if the target is in matrix[r1][c1] <= target <= matrix[r1][c1]
+         * Check if the target is in the boundary of the matrix
+           * matrix[r1][c1] <= target <= matrix[r1][c1]
          * Divide the matrix into 4 part
-           * mid rol = c1 + c2 // 2
+           * mid rol = (c1 + c2) // 2
+             * Why use (c1 + c2) // 2 as middle row ?
+               * This is a proper position to skip half of matrix (left up + bottom right)
            * mid col = the first val in the mid rol which is greater than the target
-         * Separate the matirx into 4 submatrixs:
-           * Left up submatrix can be skipped since the val are smaller than the target
-           * Bottom right submatrix can be skipped since the val are greater than the target
+           * Top-left and bottom-right submatries can be skipped
+             * val in top-left submatrix < target
+             * val in bottom-right submatrix > target
+           * Iterative top-right and bottom-left submatrixes
        * Python
          ```python
          def searchMatrix(self, matrix, target):
@@ -4226,9 +4271,9 @@ Table of Content
 
           found = False
 
-          # top left corner
+          # top-left corner
           r1 = c1 = 0
-          # bottom right corner
+          # bottom-right corner
           r2, c2 = row-1, col-1
 
           stack = [(r1, c1, r2, c2)]
@@ -4242,30 +4287,284 @@ Table of Content
               if r1 > r2 or c1 > c2:
                   continue
 
-              # check smallet val and biggest val in this matrix
+              # check if the target is in the boundary of the matrix
               if target < matrix[r1][c1] or taret > matrix[r2][c2]:
                   continue
 
               mid_c = (c1 + c2) // 2
-              found, target_row = bin_search_row(mid_c, r1, r2)
+              found, mid_r = bin_search_row(mid_c, r1, r2)
 
               if found:
                   break
 
-              # left bottom
-              stack.append((target_row, c1, r2, mid_c-1))
+              # bottom left
+              stack.append((mid_r, c1, r2, mid_c-1))
 
-              # right up
-              stack.append((r1, mid_c+1, target_row-1, c2))
+              # top right
+              stack.append((r1, mid_c+1, mid_r-1, c2))
 
           return found
          ```
-
    * 079:	Word Search (M)
+ * 378:	**Kth Smallest Element** in a Sorted Matrix (M)
+   * Given a n x n matrix where each of the rows and columns are sorted in ascending order, find the kth smallest element in the matrix.
+   * Approach1: Brute Force Max-Heap, Time:O(mn), Space:O(k)
+     * Python
+      ```python
+      class Element(object):
+        def __init__(self, val):
+            self.val = val
+
+        def __lt__(self, other):
+            return self.val > other.val
+
+      def kthSmallest(self, matrix: List[List[int]], k: int) -> int:
+          row, col = len(matrix), len(matrix[0])
+          heap = []
+
+          for r in range(row):
+              for c in range(col):
+                  if len(heap) < k:
+                      heapq.heappush(heap, Element(matrix[r][c]))
+                  elif matrix[r][c] < heap[0].val:
+                      heapq.heapreplace(heap, Element(matrix[r][c]))
+                  else:
+                      break
+
+          return heap[0].val
+      ```
+   * Approach2: Simulation of merge k sorted list, Time:O(klogm), Space:O(m)
+     * Assume that each row is a sorted linked list, val in in first col is the head
+     * Python
+      ```python
+      class Element(object):
+        def __init__(self, r, c, val):
+            self.r = r
+            self.c = c
+            self.val = val
+
+        def __lt__(self, other):
+            return self.val < other.val
+
+        def __repr__(self):
+            return str(self.val)
+
+      def kthSmallest(self, matrix: List[List[int]], k: int) -> int:
+          row, col = len(matrix), len(matrix[0])
+          heap = []
+
+          # reduce complexity of heapify from mlogm to m
+          for r in range(row):
+            heap.append(Element(r, 0, matrix[r][0]))
+          heapq.heapify(heap)
+
+          cnt = 0
+          kth_min = None
+          while heap and cnt < k:
+              r, c, kth_min = heap[0].r, heap[0].c, heap[0].val
+              cnt += 1
+
+              if c + 1 < col:
+                  heapq.heapreplace(heap, Element(r, c+1, matrix[r][c+1]))
+              else:
+                  heapq.heappop(heap)
+
+          return kth_min
+      ```
  * 073:	Set Matrix Zeroes (M)
- * 311:	Sparse Matrix Multiplication (M)
+   * Approach1: Addititionl Memory, Time:O(mn), Space:O(m+n)
+     * Python
+      ```python
+      def setZeroes(self, matrix: List[List[int]]) -> None:
+        def set_row_zero(r):
+            for c in range(col):
+                matrix[r][c] = 0
+
+        def set_col_zero(c):
+            for r in range(row):
+                matrix[r][c] = 0
+
+        if not matrix:
+            return
+
+        row, col = len(matrix), len(matrix[0])
+
+        if not col:
+            return
+
+        zero_r = set()
+        zero_c = set()
+
+        for r in range(row):
+            for c in range(col):
+                if matrix[r][c] == 0:
+                    zero_r.add(r)
+                    zero_c.add(c)
+
+        for r in zero_r:
+            set_row_zero(r)
+
+        for c in zero_c:
+            set_col_zero(c)
+      ```
+   * Approach2: In place, Time:O(mn), Space:O(1)
+     * Python
+        ```python
+        def setZeroes(self, matrix: List[List[int]]) -> None:
+          def set_row_zero(r):
+              for c in range(col):
+                  matrix[r][c] = 0
+
+          def set_col_zero(c):
+              for r in range(row):
+                  matrix[r][c] = 0
+
+          if not matrix:
+              return
+
+          row, col = len(matrix), len(matrix[0])
+
+          if not col:
+              return
+
+          zero_first_row = zero_first_col = False
+
+          # check first row
+          for c in range(col):
+              if matrix[0][c] == 0:
+                  zero_first_row = True
+                  break
+
+          # check first col
+          for r in range(row):
+              if matrix[r][0] == 0:
+                  zero_first_col = True
+                  break
+
+          # use first row and col as memo
+          for r in range(1, row):
+              for c in range(1, col):
+                  if matrix[r][c] == 0:
+                      matrix[0][c] = 0
+                      matrix[r][0] = 0
+
+          # check first col to zero row
+          for r in range(1, row):
+              if matrix[r][0] == 0:
+                  set_row_zero(r)
+
+          # check first row to zero col
+          for c in range(1, col):
+              if matrix[0][c] == 0:
+                  set_col_zero(c)
+
+          if zero_first_col:
+              set_col_zero(0)
+
+          if zero_first_row:
+              set_row_zero(0)
+        ```
+ * 311:	**Sparse** Matrix Multiplication (M)
+   * Approach1: Brute Force, Time:(mnk), Space:O(1)
+     * Python
+      ```python
+      def multiply(self, A: List[List[int]], B: List[List[int]]) -> List[List[int]]:
+
+        def product(row, col, cnt):
+            res = 0
+            for i in range(cnt):
+                res += A[row][i] * B[i][col]
+            return res
+
+        r1, c1 = len(A), len(A[0])
+        r2, c2 = len(B), len(B[0])
+        r3, c3 = r1, c2
+
+        res = [[0 for _ in range(c3)] for _ in range(r3)]
+
+        for r in range(r3):
+            for c in range(c3):
+                res[r][c] = product(r, c, c1)
+        return res
+      ```
+   * Approach2: Keep info of zero row and zero col Time:(mnk), Space:O(m + n)
+     * Python
+      ```python
+      def multiply(self, A: List[List[int]], B: List[List[int]]) -> List[List[int]]:
+        def product(row, col, cnt):
+            if zero_row_a[row] and zero_col_b[col]:
+                return 0
+
+            res = 0
+            for i in range(cnt):
+                res += A[row][i] * B[i][col]
+            return res
+
+        r1, c1 = len(A), len(A[0])
+        r2, c2 = len(B), len(B[0])
+        r3, c3 = r1, c2
+
+        res = [[0 for _ in range(c3)] for _ in range(r3)]
+
+        zero_row_a = [None] * r1
+        zero_col_b = [None] * c2
+
+        for r in range(r1):
+            is_zero_row = True
+            for c in range(c1):
+                if A[r][c] != 0:
+                    is_zero_row = False
+                    break
+            zero_row_a[r] = is_zero_row
+
+        for c in range(c2):
+            is_zero_col = True
+            for r in range(r2):
+                if B[r][c] != 0:
+                    is_zero_col = False
+                    break
+            zero_col_b[c] = is_zero_col
+
+        for r in range(r3):
+            for c in range(c3):
+                res[r][c] = product(r, c, c1)
+
+        return res
+      ```
+   * Approach3: Sum and accumulate, Time:(mnk), Space:O(1)
+     * Ref:
+       * https://leetcode.com/problems/sparse-matrix-multiplication/discuss/76151/54ms-Detailed-Summary-of-Easiest-JAVA-solutions-Beating-99.9
+     * **The key part of smart solution is that: it does not calculate the final result at once, and it takes each value from A, and calculate and partial sum and accumulate it into the final spot**.
+     * For example, for each value A[i][k], if it is not zero, it will be used at most nB times ( n is B[0].length ), which can be illustrated as follow:
+     * Generally for the following equation:
+        ```txt
+        C[i][0] = A[i][0]*B[0][0]  + A[i][1]*B[1][0] + A[i][2]*B[2][0] + ... A[i][k]B[k][0] .... A[i][K]*B[K][0]
+        C[i][1] = A[i][0]*B[0][1]  + A[i][1]*B[1][1] + A[i][2]*B[2][1] + ... A[i][k]B[k][0] .... A[i][K]*B[K][1]
+        ...
+        C[i][nB]= A[i][0]*B[0][nB] + A[i][1]*B[1][nB] + A[i][2]*B[2][nB] + ... A[i][k]B[k][nB] .... A[i][K]*B[K][nB]
+        ```
+      * Python
+        ```python
+        def multiply(self, A: List[List[int]], B: List[List[int]]) -> List[List[int]]:
+          r1, c1 = len(A), len(A[0])
+          r2, c2 = len(B), len(B[0])
+          r3, c3 = r1, c2
+
+          res = [[0 for _ in range(c3)] for _ in range(r3)]
+
+          for i in range(r1):
+              for k in range(c1):
+
+                  if A[i][k] == 0:
+                      continue
+
+                  for j in range(c2):
+                      if B[k][j] != 0:
+                          res[i][j] += A[i][k] * B[k][j]
+
+          return res
+        ```
  * 329:	Longest Increasing Path in a Matrix (H)
- * 378:	Kth Smallest Element in a Sorted Matrix (M)
  * 370:	Range Addition (M)
  * 296:	Best Meeting Point (H)
  * 361: Bomb Enemy (M)
@@ -5603,40 +5902,64 @@ Table of Content
         * total cost would be (2n+3n+...kn)/k = O(kn)
     * Approach3: **Priority Queue**, (min heap), Time:O(nlog(k)), Space:O(k)
       * Time complexity: O(nlog(k))
+        * Generate heap: O(k)
         * Total n operations (n nodes),
           * O(log(k)): put to priority queue
           * O(log(k)): get min from priority queue
       * Space complexity: O(k)
         * quque size
       * Python Solution
-        ```python
-        from queue import PriorityQueue
+        * Use priority Queue
+          ```python
+          from queue import PriorityQueue
 
-        class Event(object):
-            def __init__(self, node):
-                self.node = node
+          class Event(object):
+              def __init__(self, node):
+                  self.node = node
 
-            def __lt__(self, other):
-                return self.node.val < other.node.val
+              def __lt__(self, other):
+                  return self.node.val < other.node.val
 
-          def mergeKLists(lists: List[ListNode]) -> ListNode:
-              cur = dummy = ListNode(0)
-              q = PriorityQueue()
+            def mergeKLists(lists: List[ListNode]) -> ListNode:
+                cur = dummy = ListNode(0)
+                q = PriorityQueue()
 
-              for head in lists:
-                  if head:
-                      q.put(Event(head))
+                for head in lists:
+                    if head:
+                        q.put(Event(head))
 
-              # can not use while q here !
-              while not q.empty():
-                  node = q.get().node
-                  cur.next = node
-                  cur = cur.next
-                  if node.next:
-                      q.put(Event(node.next))
+                # can not use while q here !
+                while not q.empty():
+                    node = q.get().node
+                    cur.next = node
+                    cur = cur.next
+                    if node.next:
+                        q.put(Event(node.next))
 
-              return dummy.next
-        ```
+                return dummy.next
+          ```
+        * Use heapq library
+          ```python
+          def mergeKLists(self, lists: List[ListNode]) -> ListNode:
+            cur = dummy = ListNode(0)
+            heap = []
+
+            for head in lists:
+                if head:
+                    heap.append(Element(head))
+            heapq.heapify(heap)
+
+            while heap:
+                min_node = heap[0].node
+                cur.next = min_node
+                cur = cur.next
+                if min_node.next:
+                    heapq.heapreplace(heap, Element(min_node.next))
+                else:
+                    heapq.heappop(heap)
+
+            return dummy.next
+          ```
     * Approach4: **Merge Sort Iterative**, Time:O(nlog(k)), Space:O(1)
       * Time complexity: O(nlog(k))
         * Total log(k) round:
@@ -6232,10 +6555,87 @@ Table of Content
                 ret.append(heapq.heappop(heap).key)
             return ret[::-1]
         ```
+  * 373: **Find K Pairs** with Smallest Sums (M)
+    * Approach1: Brute Force, Time:O(mn), Space:O(k)
+      * Python
+        ```python
+        class Element(object):
+          def __init__(self, pair):
+              self.pair = pair
+
+          # for max heap
+          def __lt__(self, other):
+              return (self.pair[0] + self.pair[1]) > (other.pair[0] + other.pair[1])
+
+          def __repr__(self):
+              return str(self.pair)
+
+        def kSmallestPairs(self, nums1: List[int], nums2: List[int], k: int) -> List[List[int]]:
+            heap = []
+
+            for n1 in nums1:
+                for n2 in nums2:
+                    n_pair = (n1, n2)
+                    if len(heap) < k:
+                        heapq.heappush(heap, Element(n_pair))
+                        continue
+
+                    cur_max_pair = heap[0].pair
+                    if (n_pair[0] + n_pair[1]) < (cur_max_pair[0] + cur_max_pair[1]):
+                        heapq.heapreplace(heap, Element(n_pair))
+                    else:
+                        break
+
+            return [e.pair for e in heap]
+        ```
+    * Approach2: Use Matrix to simulate merge k sorted list, Time:O(klogm), Space:O(m)
+      * Example:
+        * nums1 = [1,3,5]
+        * nums2 = [2,4,6]
+        * list1: (1,2) -> (1,4) -> (1,6)
+        * list2: (3,2) -> (3,4) -> (3,6)
+        * list3: (5,2) -> (5,4) -> (5,6)
+      * Python:
+        ```python
+        class Element(object):
+          def __init__(self, r, c, val):
+              self.r = r
+              self.c = c
+              self.val = val
+
+          def __lt__(self, other):
+              return self.val < other.val
+
+          def __repr__(self):
+              return str(self.val)
+
+        def kSmallestPairs(self, nums1: List[int], nums2: List[int], k: int) -> List[List[int]]:
+          if not nums1 or not nums2:
+              return []
+
+          heap = []
+          res = []
+
+          # Use matrix to simulate merge k sorted list
+          # push the heads of the lists
+          for r in range(len(nums1)):
+            heap.append(Element(r, 0, nums1[r] + nums2[0]))
+          heapq.heapify(heap)
+
+          while heap and len(res) < k:
+              r, c = heap[0].r, heap[0].c
+              if c + 1 < len(nums2):
+                  heapq.heapreplace(heap, Element(r, c+1, nums1[r]+nums2[c+1]))
+              else:
+                  heapq.heappop(heap)
+
+              res.append((nums1[r], nums2[c]))
+
+          return res
+        ```
   * 295: Find Median from Data Stream (H)
   * 341: Flatten Nested List Iterator (M)
   * 313: Super Ugly Numbe (M)
-  * 373: Find K Pairs with Smallest Sums (M)
   * 218: The Skyline Problem (H)
 ### Cache
   * 146: LRU Cache (M)
