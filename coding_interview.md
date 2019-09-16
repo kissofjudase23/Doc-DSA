@@ -1501,24 +1501,22 @@ Table of Content
             size = 0
 
             for n in nums:
-                left, right = 0, size
+                left, right = 0, size-1
+                need_update = True
+
                 while left <= right:
-
-                    if left == right:
-                      break
-
                     mid = (left + right) // 2
-                    """"
-                    if n is larger than all tails, append it, increase the size by 1
-                    if tails[i-1] < n <= tails[i], update tails[i]
-                    """
-                    if n > tails[mid]:
+                    if n == tails[mid]:
+                        need_update = False
+                        break
+                    elif n > tails[mid]:
                         left = mid + 1
-                    else: # n <= tails[mid]
-                        right = mid
+                    else:   # n < tails
+                        right = mid - 1
 
-                tails[left] = n
-                size = max(left + 1, size)
+                if need_update:
+                    tails[left] = n
+                    size = max(size, left + 1)
 
             return size
           ```
@@ -2045,6 +2043,76 @@ Table of Content
 
           return res
         ```
+    * 287: Find the Duplicate Number (M)
+      * Given an array nums **containing n + 1 integers** where each integer is between 1 and n (inclusive), prove that at least one duplicate number must exist. Assume that there is only one duplicate number, find the duplicate one.
+        * intergers range: 1 ~ n (n)
+        * idx range: 0 ~ n (n+1)
+      * Approach1: Sorting, Time:O(nlogn), Space:O(n)
+        * Python
+          ```python
+          def findDuplicate(self, nums: List[int]) -> int:
+            n = len(nums)
+
+            if n <= 1:
+                return None
+
+            nums = sorted(nums)
+            target = None
+            for i in range(0, n-1):
+                if nums[i] == nums[i+1]:
+                    target = nums[i]
+                    break
+
+            return target
+          ```
+      * Approach2: Hash Table, Time:O(n), Space:O(n)
+        * Python
+          ```python
+          def findDuplicate(self, nums: List[int]) -> int:
+            if len(nums) <= 1:
+                return None
+
+            d = dict()
+            target = None
+            for n in nums:
+                if n in d:
+                    target = n
+                    break
+
+                d[n] = True
+
+            return target
+          ```
+      * Approach3: Floyd's Tortoise and Hare (Cycle Detection), Time:O(n), Space:O(1)
+        * Note
+          * intergers range: 1 ~ n (n)
+          * idx range: 0 ~ n (n+1)
+          * Because each number in nums is between 1 and n, **it will necessarily point to an index that exists**.
+            * **The val is also the idx of next val**
+          * Example:
+            * nums = [1, 2, 3, 2], n = 3
+            * 1 -> 2 nums[1] -> 3 nums[2] -> 2 nums[3] -> 2 nums[1] -> ...
+        * Python
+          ```python
+          def findDuplicate(self, nums):
+            slow = fast = nums[0]
+
+            while True:
+                slow = nums[slow]
+                fast = nums[nums[fast]]
+                if slow == fast:
+                    break
+
+            target = nums[0]
+            while True:
+                # the intersection may be the first element
+                if target == slow:
+                    break
+                target = nums[target]
+                slow = nums[slow]
+
+            return target
+          ```
   * **Remove Duplicate**
     * 027: Remove elements (E)
       * Approach1:
@@ -4208,7 +4276,6 @@ Table of Content
 
           r = row - 1
           c = 0
-
           while r >= 0 and c < col:
               if target == matrix[r][c]:
                   found = True
@@ -4242,7 +4309,7 @@ Table of Content
            * Top-left and bottom-right submatries can be skipped
              * val in top-left submatrix < target
              * val in bottom-right submatrix > target
-           * Iterative top-right and bottom-left submatrixes
+           * Iterative top-right and bottom-left submatrices
        * Python
          ```python
          def searchMatrix(self, matrix, target):
@@ -4308,7 +4375,7 @@ Table of Content
    * 079:	Word Search (M)
  * 378:	**Kth Smallest Element** in a Sorted Matrix (M)
    * Given a n x n matrix where each of the rows and columns are sorted in ascending order, find the kth smallest element in the matrix.
-   * Approach1: Brute Force Max-Heap, Time:O(mn), Space:O(k)
+   * Approach1: Brute Force Max-Heap, Time:O(nm), Space:O(k)
      * Python
       ```python
       class Element(object):
@@ -4333,7 +4400,7 @@ Table of Content
 
           return heap[0].val
       ```
-   * Approach2: Simulation of merge k sorted list, Time:O(klogm), Space:O(m)
+   * Approach2: Simulation of merge k sorted list, Time:O(klog(n)), Space:O(min(k, n))
      * Assume that each row is a sorted linked list, val in in first col is the head
      * Python
       ```python
@@ -4354,7 +4421,9 @@ Table of Content
           heap = []
 
           # reduce complexity of heapify from mlogm to m
-          for r in range(row):
+          # we don't need to push more than 'k' elements in the heap
+          # since the val in those row is greater than matrix[k][0]
+          for r in range(min(k, row)):
             heap.append(Element(r, 0, matrix[r][0]))
           heapq.heapify(heap)
 
@@ -4371,6 +4440,58 @@ Table of Content
 
           return kth_min
       ```
+   * Approach3: Binary Search, Time:O(log(max-min)*(m+n)), Space:O(1)
+     * Ref:
+       * https://leetcode.com/problems/kth-smallest-element-in-a-sorted-matrix/discuss/301357/Simple-to-understand-solutions-using-Heap-and-Binary-Search-JavaPython
+     * Algo
+       * pick a middle
+       * for each row, cnt the value which is smaller than the middle
+         * inner loop should change to binary search as well
+       * if cnt != k, update the middle and try again
+     * Time:
+       * Total: O(mn) iteration, each iteration takes O(nlogn)
+     * Python
+      ```python
+      def kthSmallest(self, matrix: List[List[int]], k: int) -> int:
+        def count_smaller_euqal_val(target):
+            max_smaller = matrix[0][0]
+            min_larger = matrix[row-1][col-1]
+            cnt = 0
+            r, c = row-1, 0
+            # Search Space Reduction
+            while r >= 0 and c < col:
+                if matrix[r][c] <= target:
+                    max_smaller = max(max_smaller, matrix[r][c])
+                    cnt += (r + 1)
+                    c += 1
+                else:
+                    min_larger = min(min_larger, matrix[r][c])
+                    r -= 1
+
+            return cnt, max_smaller, min_larger
+
+        row, col = len(matrix), len(matrix[0])
+        lo = matrix[0][0]
+        hi = matrix[row-1][col-1]
+        while lo <= hi:
+            if lo == hi:
+              break
+
+            mid = (lo + hi) // 2
+            cnt, max_smaller, min_larger = count_smaller_euqal_val(mid)
+            if cnt < k:
+                # min_larger > mid
+                lo = min_larger
+            else:  # cnt >= k
+                # max_smaller <= mid
+                hi = max_smaller
+
+        k_smallest = lo
+        return k_smallest
+      ```
+   * Approach4: Time:O(m)
+     * m is the row
+     * https://leetcode.com/problems/kth-smallest-element-in-a-sorted-matrix/discuss/85170/O(n)-from-paper.-Yes-O(rows).
  * 073:	Set Matrix Zeroes (M)
    * Approach1: Addititionl Memory, Time:O(mn), Space:O(m+n)
      * Python
@@ -5461,7 +5582,25 @@ Table of Content
     * Given a linked list, return the node **where the cycle begins**. If there is no cycle, return null.
     * The length before the cycle beginning: **d**
     * The length of the cycle: **r**
-    * Approach1: The runner: Time:O(n), Space:O(1)
+    * Approach1: Hash Table, Time:O(n), Space:O(1)
+      * Python
+        ```python
+        def detectCycle(self, head: ListNode) -> ListNode:
+          d = dict()
+
+          runner = head
+          target = None
+          while runner:
+              if runner in d:
+                  target = runner
+                  break
+
+              d[runner] = True
+              runner = runner.next
+
+          return target
+        ```
+    * Approach2: Floyd's Tortoise and Hare (Cycle Detection), Time:O(n), Space:O(1)
       * Algo:
         *  Need 3 runners. Fast, slow, target
         * **The intersection of fast and slow** would be **dth node** in the cycle.
@@ -6556,7 +6695,7 @@ Table of Content
             return ret[::-1]
         ```
   * 373: **Find K Pairs** with Smallest Sums (M)
-    * Approach1: Brute Force, Time:O(mn), Space:O(k)
+    * Approach1: Brute Force, Time:O(nm), Space:O(k)
       * Python
         ```python
         class Element(object):
@@ -6588,7 +6727,7 @@ Table of Content
 
             return [e.pair for e in heap]
         ```
-    * Approach2: Use Matrix to simulate merge k sorted list, Time:O(klogm), Space:O(m)
+    * Approach2: Use Matrix to simulate merge k sorted list, Time:O(klogn), Space:O(min(k,n))
       * Example:
         * nums1 = [1,3,5]
         * nums2 = [2,4,6]
@@ -6618,7 +6757,8 @@ Table of Content
 
           # Use matrix to simulate merge k sorted list
           # push the heads of the lists
-          for r in range(len(nums1)):
+          # we don't need to push more than k elements
+          for r in range(min(k, len(nums1))):
             heap.append(Element(r, 0, nums1[r] + nums2[0]))
           heapq.heapify(heap)
 
