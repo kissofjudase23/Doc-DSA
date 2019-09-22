@@ -174,7 +174,7 @@ Table of Content
           * Sorting
           * Left pointer and right pointer to find sum of left + right == target
     * 015: 3Sum (M)
-      * Approach1: Sort and find, Time: **O(n^2)**, Space:O(sorting)
+      * Approach1: Sort and find, Time: O(n^2), Space:O(sorting)
         * Time: O(n^2)
           * **Sort**
             * O(nlog(n))
@@ -194,37 +194,113 @@ Table of Content
         * Python Solution
             ```python
             def threeSum(self, nums: List[int]) -> List[List[int]]:
-              res = list()
-              nums.sort()
-
-              # from 0 to num-3
-              for i in range(0, len(nums)-2):
-                  # skip duplicate
-                  if i > 0 and nums[i] == nums[i-1]:
-                      continue
-
-                  l, r = i+1, len(nums)-1
+              def two_sum(l, r, target, cur):
                   while l < r:
-                      s = nums[i] + nums[l] + nums[r]
-                      if s < 0:
-                          l += 1
+                      s = nums[l] + nums[r]
+                      if s == target:
 
-                      elif s > 0:
-                          r -= 1
+                          results.append(cur + [nums[l], nums[r]])
 
-                      else:  # s == 0
-                          res.append([nums[i], nums[l], nums[r]])
-                          # skip duplicate
                           while l < r and nums[l] == nums[l+1]:
                               l += 1
                           while l < r and nums[r] == nums[r-1]:
                               r -= 1
+                          l += 1
+                          r -= 1
 
-                          l+=1
-                          r-=1
-                return res
+                      elif s < target:
+                          l += 1
+                      else: # s > target
+                          r -= 1
+
+              n = len(nums)
+              nums.sort()
+              results = []
+              cur = []
+              for i in range(n-2):
+                  if i == 0 or nums[i] != nums[i-1]:
+                      cur.append(nums[i])
+                      two_sum(l=i+1,
+                              r=n-1,
+                              target=0-nums[i],
+                              cur=cur)
+                      cur.pop()
+
+              return results
             ```
     * 018: 4Sum (M)
+      * Time Complexity:
+        * 2sum : O(n)
+        * 3sum : O(n^2), O(n) * O(2sum)
+        * 4sum : O(n^3), O(n) * O(3sum)
+        * ksum : O(n^(k-1)), O(n() * O((k-1)sum)
+      * Approach1: Base on 3Sum, Time:O(n^3), Space:O(sorting)
+        * Python
+          ```python
+          def fourSum(self, nums, target):
+            results = []
+            nums.sort()
+            for i in range(len(nums)-3):
+              if i == 0 or nums[i] != nums[i-1]:
+                threeResult = self.threeSum(nums[i+1:], target-nums[i])
+                for item in threeResult:
+                  results.append([nums[i]] + item)
+            return results
+          ```
+      * Approach2: kSum, Time:O(n^(k-1))
+        * Ref:
+          * https://leetcode.com/problems/4sum/discuss/8545/Python-140ms-beats-100-and-works-for-N-sum-(Ngreater2)
+        * Python
+          ```python
+          def fourSum(self, nums: List[int], target: int) -> List[List[int]]:
+            def two_sum(l, r, target, cur):
+                while l < r:
+                    s = nums[l] + nums[r]
+                    if s == target:
+                        results.append(cur + [nums[l], nums[r]])
+                        while l < r and nums[l] == nums[l+1]:
+                            l += 1
+                        while l < r and nums[r] == nums[r-1]:
+                            r -= 1
+                        l += 1
+                        r -= 1
+                    elif s < target:
+                        l += 1
+                    else: # s > target
+                        r -= 1
+
+            def k_sum(l, r, k, target, cur):
+                cnt = r - l + 1
+                if k > cnt:
+                    return
+
+                if k == 2:
+                    two_sum(l, r, target, cur)
+
+                else: # k > 2
+                    # (r+1) - (k-1) = r + 2 - k
+                    # boundary: r+1 (inclusive)
+                    # remain: k-1
+                    for i in range(l, r+2-k):
+                        if i == l or nums[i] != nums[i-1]:
+                            cur.append(nums[i])
+                            k_sum(l=i+1,
+                                  r=r,
+                                  k=k-1,
+                                  target=target-nums[i],
+                                  cur=cur)
+                            cur.pop()
+
+            nums.sort()
+            results = []
+            cur=[]
+            k_sum(l=0,
+                  r=len(nums)-1,
+                  k=4,
+                  target=target,
+                  cur=cur)
+            return results
+          ```
   * **Majority**
     * The majority element is the element that appears more than ⌊ n/2 ⌋ times.
     * 169: Majority Element (E)
@@ -274,8 +350,10 @@ Table of Content
             cnt = 0
             majority = None
             for n in nums:
+
                 if cnt == 0:
                     majority = n
+
                 if n == majority:
                     cnt += 1
                 else:
@@ -329,6 +407,75 @@ Table of Content
           ```
       * Approach2:
     * 119: Pascal's Triangle II (E)
+  * 66: Plus One (E)
+    * Approach1: Time:O(n), Space:O(1):
+      * Python
+        ```python
+        def plusOne(self, digits: List[int]) -> List[int]:
+          n = len(digits)
+          carry = 1
+          for i in range(n-1, -1, -1):
+              val = carry + digits[i]
+              digits[i] = val % 10
+              carry = val // 10
+
+          if carry:
+              digits = [1] + digits
+
+          return digits
+        ```
+  * 202: Happy Number (E)
+      * Example:
+        * end with 1:
+          * 19 -> 82 -> 68 -> 100 -> 1 -> 1 ...
+        * end without 1
+          * 11 -> **4** -> 37 -> 58 -> 89 -> 145 -> 42 -> 20 -> **4**
+      * Approach1: Brute Force, Space:O(n)
+        * Python
+          ```python
+          def isHappy(self, n: int) -> bool:
+            def digit_square_sum(n):
+                s = 0
+                while n:
+                    pop = n % 10
+                    n = n // 10
+                    s += pop ** 2
+                return s
+
+            memo = dict()
+            is_happy = False
+
+            while True:
+                if n in memo:
+                    break
+
+                memo[n] = True
+                n = digit_square_sum(n)
+
+            return n == 1
+          ```
+      * Approach2: Detect Circle: Space:O(1)
+        * Python
+          ```python
+          def isHappy(self, n: int) -> bool:
+            def digit_square_sum(n):
+                s = 0
+                while n:
+                    pop = n % 10
+                    n = n // 10
+                    s += pop ** 2
+                return s
+
+            slow = fast = n
+            while True:
+                slow = digit_square_sum(slow)
+                fast = digit_square_sum(digit_square_sum(fast))
+
+                if slow == fast:
+                    break
+
+            return slow == 1
+          ```
 ### String
   * Remove Duplicate
     * 316: Remove Duplicate Letters (H)
@@ -1488,12 +1635,15 @@ Table of Content
           * 1. extend increasing sequence with larger numbers
             * if n is larger than all tails, append it, increase the size by 1
           * 2. minimize existing values with smaller ones - so we can use smaller numbers to extend it.
-            * if tails[i-1] < x <= tails[i], update tails[i]
+            * if x == tails[mid]
+              * do nothing
+            * else tails[i-1] < x < tails[i]
+              * update tails[i] (the smallest val which is greater than x)
         * Boundaries:
           * left boundary:
             * val before left is smaller than the target
           * right boundary:
-            * val after right is greater or equal to the target (inclusive)
+            * val after right is greater than the target
         * Python
           ```python
           def lengthOfLIS(self, nums: List[int]) -> int:
@@ -1506,14 +1656,16 @@ Table of Content
 
                 while left <= right:
                     mid = (left + right) // 2
+                    # do not need to update
                     if n == tails[mid]:
                         need_update = False
                         break
                     elif n > tails[mid]:
                         left = mid + 1
-                    else:   # n < tails
+                    else:  # n < tails
                         right = mid - 1
 
+                # update the smallest val which is greater than x
                 if need_update:
                     tails[left] = n
                     size = max(size, left + 1)
@@ -2084,6 +2236,7 @@ Table of Content
             return target
           ```
       * Approach3: Floyd's Tortoise and Hare (Cycle Detection), Time:O(n), Space:O(1)
+        * The beginning of the loop if the duplicate number
         * Note
           * intergers range: 1 ~ n (n)
           * idx range: 0 ~ n (n+1)
@@ -3014,7 +3167,385 @@ Table of Content
           ```
     * 239: Sliding Window Maximum (H)
   * **Reorder** and **Sort**
-    * 912. Sort an Array (M)
+    * 189: Rotate Array (E)
+      * Approach1: Time:O(n), Space:O(1)
+        * Use **three reverse** operations can solve this problem.
+        * Python Solution
+          ```python
+          def reverse(nums: List[int], start, end) -> None:
+            while start < end:
+              nums[start], nums[end] = nums[end], nums[start]
+              start +=1
+              end -=1
+
+          def rotate(self, nums: List[int], k: int) -> None:
+            """
+            Do not return anything, modify nums in-place instead.
+            """
+            if not nums or not k:
+                return
+
+            n = len(nums)
+            k = k % n
+            if k == 0:
+                return
+
+            reverse(nums, 0, n-1)
+            reverse(nums, 0, k-1)
+            reverse(nums, k, n-1)
+          ```
+    * 088: Merge Sorted Array (E)
+      * You may **assume that nums1 has enough space** (size that is greater or equal to m + n) to hold additional elements from nums2.
+      * Approach1: Space O(1):
+        * Fill the arrary **from the end to the start**
+        * Python Solution:
+        ```python
+        def merge(self, nums1: List[int], m: int, nums2: List[int], n: int) -> None:
+          """
+          Do not return anything, modify nums1 in-place instead.
+          """
+          merge_runner = len(nums1) - 1
+          runner1 = m - 1
+          runner2 = n - 1
+
+          while runner1 >= 0 and runner2 >= 0:
+              if nums1[runner1] >= nums2[runner2]:
+                  nums1[merge_runner] = nums1[runner1]
+                  runner1 -= 1
+              else:
+                  nums1[merge_runner] = nums2[runner2]
+                  runner2 -= 1
+              merge_runner -= 1
+
+          while runner2 >= 0:
+              nums1[merge_runner] = nums2[runner2]
+              runner2 -= 1
+              merge_runner -=1
+        ```
+    * 283: Move Zeroes (E)
+      * **move all 0's to the end** of it while maintaining the relative order of the non-zero elements.
+      * Approach1
+        * Like the partition step of quick sort
+          * **keep the border pointing to next available position.**
+          * Python Solution
+          ```python
+          def moveZeroes(self, nums: List[int]) -> None:
+            """
+            Do not return anything, modify nums in-place instead.
+            """
+            if len(nums) <= 1:
+                return
+
+            border = 0
+            for i in range(0, len(nums)):
+                if nums[i] == 0:
+                    continue
+                nums[border], nums[i] = nums[i], nums[border]
+                border += 1
+           ```
+  * Intersection:
+    * 349: Intersection of Two Arrays (E)
+      * Each element in the result must be unique.
+      * Approach1: Use hash Table, Time:O(m+n), Space:O(m)
+        * Python
+          ```python
+          def intersection(self, nums1: List[int], nums2: List[int]) -> List[int]:
+            def get_d(nums):
+                d = dict()
+                for n in nums:
+                    d[n] = True
+                return d
+
+            d1 = get_d(nums1)
+
+            intersection = []
+            for n in nums2:
+                if n in d1 and d1[n]:
+                    intersection.append(n)
+                    d1[n] = False
+
+            return intersection
+          ```
+    * 350: Intersection of Two Arrays II (E)
+      * Each element in the result should appear as many times as it shows in both arrays.
+      * follow up:
+        * What if the given array is already sorted? How would you optimize your algorithm?
+      * Approach1: Hash Table, Time:O(m+n), Space:O(m)
+        * Python
+          ```python
+          def intersect(self, nums1: List[int], nums2: List[int]) -> List[int]:
+            d1 = collections.Counter(nums1)
+            intersection = []
+            for n in nums2:
+                if n in d1 and d1[n] > 0:
+                    intersection.append(n)
+                    d1[n] -= 1
+
+            return intersection
+          ```
+      * Approach2, if the array is already sorted: Time:O(m+n), Space:O(1)
+          * Python
+            ```python
+            def intersect(self, nums1: List[int], nums2: List[int]) -> List[int]:
+              nums1.sort()
+              nums2.sort()
+              p1 = p2 = 0
+              intersection = []
+
+              while p1 < len(nums1) and p2 < len(nums2):
+                  v1, v2 = nums1[p1], nums2[p2]
+                  if v1 == v2:
+                      p1 += 1
+                      p2 += 1
+                      intersection.append(v1)
+
+                  elif v1 < v2:
+                      p1 += 1
+
+                  else:
+                      p2 += 1
+
+              return intersection
+            ```
+  * Other:
+    * 277: Find the Celebrity (M)
+      * Ref:
+        * https://pandaforme.github.io/2016/12/09/Celebrity-Problem/
+      * Approach1:
+        1. Find the **celebrity candidate**
+        2. Check if the candidate is the celebrity
+           * Check the people before the celebrity candidate:
+              * The celebrity does not know them but they know the celebrity.
+           * Check the people after the celebrity candidate:
+             * They should know the celebrity
+         * Python Solution
+            ````python
+            # Return True if a knows b
+            def knows(a,  b):
+              pass
+
+            def find_celebrity(self, n):
+                """
+                :type n: int
+                :rtype: int
+                """
+                unknown = -1
+                celebrity = 0
+                # find the celebrity candidate
+                for p in range(1, n):
+                    if not knows(celebrity, p):
+                        continue
+                    celebrity = p
+
+                # check people in the left side
+                for p in range(celebrity):
+                    if knows(p, celebrity) and not knows(celebrity, p):
+                        continue
+                    return unknown
+
+                # # check people in the right side
+                for p in range(celebrity+1, n):
+                    if knows(p, celebrity):
+                        continue
+                    return unknown
+
+                return celebrity
+            ````
+    * 041: First missing positive (H)
+      * Ref
+        * https://leetcode.com/problems/first-missing-positive/discuss/17073/Share-my-O(n)-time-O(1)-space-solution
+        * https://leetcode.com/problems/first-missing-positive/discuss/17071/My-short-c%2B%2B-solution-O(1)-space-and-O(n)-time
+      * The idea is **like you put k balls into k+1 bins**, there must be a bin empty, the empty bin can be viewed as the missing number.
+      * For example:
+        * if length of n is 3:
+          * The ideal case would be: [1, 2, 3], then the first missing is 3+1 = 4
+          * The missing case may be: [1, None, 3]  5, then the first missing is 2
+      * Approach1: Time O(n), Space O(n)
+        * Use extra space to keep the sorted positve numbers.
+        * Python Solution
+          ```python
+          def firstMissingPositive(self, nums: List[int]) -> int:
+            n = len(nums)
+            sorted_nums = [None] * n
+
+            for num in nums:
+                if 0 < num <= n:
+                    sorted_nums[num-1] = n
+
+            res = n + 1 # not found
+            for i in range(0, n):
+                if not sorted_nums[i]:
+                    res = i+1
+                    break
+
+            return res
+          ```
+      * Approach2: Time O(n), Space O(1)
+         1. Each number will be put in its right place at most once after first loop *
+         2. Traverse the array to find the unmatch number
+         * Python Solution
+            ```python
+            def firstMissingPositive(self, nums: List[int]) -> int:
+              n = len(nums)
+
+              for i in range(n):
+                  # We visit each number once, and each number will
+                  # be put in its right place at most once
+                  while 0 < nums[i] <= n and nums[nums[i]-1] != nums[i]:
+                      # the correct position of nums[i] is in
+                      # nums[nums[i]#-1]
+                      correct = nums[i]-1  # need this correct
+                      nums[i], nums[correct] = nums[correct] , nums[i]
+
+              res = n + 1
+              for i in range(n):
+                  if n[i] != i+1:
+                      res i+1
+                      break
+              # not found from 0 to length-1, so the first missing is in length-th
+              return res
+            ```
+    * 299: Bulls and Cows (M)
+      * Bull:
+        * Two characters are the same and having the same index.
+      * Cow
+        * Two characters are the same but do not have the same index.
+      * Approach1: Hash TableTime O(n), Space O(n) and **one pass**
+        * Use **hash Table** to count cows.
+        * Python solution
+          ```python
+          def getHint(self, secret: str, guess: str) -> str:
+            bull, cow = 0, 0
+            d = collections.defaultdict(int)
+
+            for s, g in zip(secret, guess):
+
+                if s == g:
+                    bull += 1
+                else:
+                    if d[s] < 0:
+                        cow += 1
+
+                    if d[g] > 0:
+                        cow += 1
+
+                    d[s] += 1
+                    d[g] -= 1
+
+            return f'{bull}A{cow}B'
+          ```
+    * 134: Gas Station (M)
+        * Time: O(n)
+          * Concept:
+            * rule1:
+              * **If car starts at A and can not reach B. Any station between A and B can not reach B.**
+              * If A can't reach B, and there exists C between A & B which can reach B, then A can reach C first, then reach B from C, which is conflict with our init statement: A can't reach B. so, the assume that such C exists is invalid.
+            * rule2
+              * **If the total number of gas is bigger than the total number of cost, there must be a solution.**
+              * [Proof](https://leetcode.com/problems/gas-station/discuss/287303/Proof%3A-if-the-sum-of-gas-greater-sum-of-cost-there-will-always-be-a-solution)
+          * Python Solution
+            ```python
+            not_found = -1
+            start = 0
+            total_tank = 0
+            cur_tank = 0
+
+            for i in range(len(gas)):
+                remain = gas[i] - cost[i]
+                cur_tank += remain
+                total_tank += remain
+
+                # try another start
+                # rule2
+                if cur_tank < 0:
+                    # rule1
+                    start = i+1
+                    cur_tank = 0
+
+            return start if total_tank >= 0 else not_found
+            ```
+    * 289: Game of Life (M)
+      * Approach1: Time: O(mn), Space: O(mn)
+        * Python Solution
+          ```python
+          def gameOfLife(self, board: List[List[int]]) -> None:
+            # coordinate diff for 8 neighbors
+            neighbors = [(1, 0), (1, -1), (0, -1), (-1, -1),
+                        (-1, 0), (-1,1), (0, 1), (1, 1)]
+
+            rows = len(board)
+            cols = len(board[0])
+            copy_board = [[board[row][col] for col in range(cols)] for row in range(rows)]
+
+            for row in range(rows):
+                for col in range(cols):
+                    # calculate the cnt of live neighbors
+                    live_neighbors = 0
+                    for n in neighbors:
+                        r, c = row + n[0], col + n[1]
+                        if 0 <= r < rows and 0 <= c < cols \
+                          and copy_board[r][c] == 1:
+                            live_neighbors += 1
+
+                    # change status
+                    if copy_board[row][col] == 1:
+                        if live_neighbors < 2 or live_neighbors > 3:
+                            board[row][col] = 0
+
+                    else: # ref_board[row][col] == 0
+                        if live_neighbors == 3:
+                            board[row][col] = 1
+          ```
+      * Approach2: Time: O(mn), Space: O(1)
+        * Use two temp status, live_2_dead and dead_2_live
+        * Python Solution
+          ```python
+          class Status(object):
+            live_2_dead = -1
+            dead = 0
+            live = 1
+            dead_2_live = 2
+
+          def gameOfLife(self, board: List[List[int]]) -> None:
+            # coordinate diff for 8 neighbors
+            neighbors = [(1, 0), (1, -1), (0, -1), (-1, -1),
+                        (-1, 0), (-1,1), (0, 1), (1, 1)]
+
+            rows = len(board)
+            cols = len(board[0])
+
+            for row in range(rows):
+                for col in range(cols):
+                    # calculate the cnt of live neighbors
+                    live_neighbors = 0
+                    for n in neighbors:
+                        r, c = row + n[0], col + n[1]
+                        if 0 <= r < rows and 0 <= c < cols \
+                          and abs(board[r][c]) == 1:  # Status.live and Status.live_2_dead
+                            live_neighbors += 1
+
+                    # change status
+                    if board[row][col] == Status.live:
+                        if live_neighbors < 2 or live_neighbors > 3:
+                            board[row][col] = Status.live_2_dead
+
+                    else: # ref_board[row][col] == 0
+                        if live_neighbors == 3:
+                            board[row][col] = Status.dead_2_live
+
+            for row in range(rows):
+                for col in range(cols):
+                    if board[row][col] > 0: # live and live to dead
+                        board[row][col] = Status.live
+                    else:                   # dead and dead to live
+                        board[row][col] = Status.dead
+          ```
+      * follow up: Infinite array
+        * [Solution](https://leetcode.com/problems/game-of-life/discuss/73217/Infinite-board-solution/201780)
+    * 723：Candy Crush (M)
+### Sorting
+  * Array:
+    * 912: Sort an Array (M)
       * Approach1: **Insertion** Sort, Time:O(n^2), Space:O(1)
         * Insert 1th, 2th, ... n-1th elements to the array
         * Iterative:
@@ -3031,6 +3562,8 @@ Table of Content
                   for compare in range(insert-1, -1, -1):
                       if nums[compare] > nums[compare+1]:
                           nums[compare], nums[compare+1] = nums[compare+1], nums[compare]
+                      else:
+                        break
 
               return nums
             ```
@@ -3047,6 +3580,8 @@ Table of Content
                   for compare in range(insert-1, -1, -1):
                       if nums[compare] > nums[compare+1]:
                           nums[compare], nums[compare+1] = nums[compare+1], nums[compare]
+                      else:
+                         break
 
               n = len(nums)
 
@@ -3407,475 +3942,7 @@ Table of Content
                   max_heapify(cur=0, boundary=i)
 
               return nums
-
             ```
-    * 189: Rotate Array (E)
-      * Approach1: Space: **O(1)**
-        * Use **three reverse** operations can solve this problem.
-        * Python Solution
-          ```python
-          def reverse(nums: List[int], start, end) -> None:
-            while start < end:
-              nums[start], nums[end] = nums[end], nums[start]
-              start +=1
-              end -=1
-
-          def rotate(self, nums: List[int], k: int) -> None:
-            """
-            Do not return anything, modify nums in-place instead.
-            """
-            if not nums or not k:
-                return
-
-            n = len(nums)
-            k = k % n
-            if k == 0:
-                return
-
-            reverse(nums, 0, n-1)
-            reverse(nums, 0, k-1)
-            reverse(nums, k, n-1)
-          ```
-    * 088: Merge Sorted Array (E)
-      * You may **assume that nums1 has enough space** (size that is greater or equal to m + n) to hold additional elements from nums2.
-      * Approach1: Space O(1):
-        * Fill the arrary **from the end to the start**
-        * Python Solution:
-        ```python
-        def merge(self, nums1: List[int], m: int, nums2: List[int], n: int) -> None:
-          """
-          Do not return anything, modify nums1 in-place instead.
-          """
-          merge_runner = len(nums1) - 1
-          runner1 = m - 1
-          runner2 = n - 1
-
-          while runner1 >= 0 and runner2 >= 0:
-              if nums1[runner1] >= nums2[runner2]:
-                  nums1[merge_runner] = nums1[runner1]
-                  runner1 -= 1
-              else:
-                  nums1[merge_runner] = nums2[runner2]
-                  runner2 -= 1
-              merge_runner -= 1
-
-          while runner2 >= 0:
-              nums1[merge_runner] = nums2[runner2]
-              runner2 -= 1
-              merge_runner -=1
-        ```
-    * 283: Move Zeroes (E)
-      * **move all 0's to the end** of it while maintaining the relative order of the non-zero elements.
-      * Approach1
-        * Like the partition step of quick sort
-          * **keep the border pointing to next available position.**
-          * Python Solution
-          ```python
-          def moveZeroes(self, nums: List[int]) -> None:
-            """
-            Do not return anything, modify nums in-place instead.
-            """
-            if len(nums) <= 1:
-                return
-
-            border = 0
-            for i in range(0, len(nums)):
-                if nums[i] == 0:
-                    continue
-                nums[border], nums[i] = nums[i], nums[border]
-                border += 1
-           ```
-    * 280: Wiggle Sort (M) *
-      * Definition
-        * **nums[0] <= nums[1] >= nums[2] <= nums[3]...**
-      * Approach1: sorting, O(log(n))
-        * Sort and then pair swapping
-        * Python Solution
-          ```python
-          def wiggleSort(self, nums: List[int]) -> None:
-            """
-            Do not return anything, modify nums in-place instead.
-            nums[0] <= nums[1] >= nums[2] <= nums[3]
-            """
-            if len(nums) <= 1:
-                return
-
-            nums.sort()
-
-            # 1, 3, 5 .. n-2
-            for i in range(1, len(nums)-1, 2):
-                if nums[i] < nums[i+1]:
-                    nums[i], nums[i+1] = nums[i+1], nums[i]
-          ```
-      * Approach2: greedy, O(n)
-        * Greedy from left to right
-        * Python Solution
-          ```python
-          def wiggleSort(self, nums: List[int]) -> None:
-              less = True
-              for i in range(len(nums)-1):
-                if less:
-                  if nums[i] > nums[i+1]:
-                    nums[i], nums[i+1] = nums[i+1], nums[i]
-                else:
-                  if nums[i] < nums[i+1]:
-                    nums[i], nums[i+1] = nums[i+1], nums[i]
-
-                less = not less
-          ```
-    * 075: Sort Colors (M)
-      * Approach1: Quick sort, Time:O(nlog(n)), Space:O(log(n))
-      * Approach2: **Counting sort**, Time:O(n+k), Space:O(k)
-        * Python Solution:
-        ```python
-        def sortColors(self, nums: List[int]) -> None:
-          """
-          Do not return anything, modify nums in-place instead.
-          """
-          if not nums:
-              return
-
-          # 3 colors only
-          color_num = 3
-          cnt_array = [0] * color_num
-
-          for num in nums:
-              cnt_array[num] += 1
-
-          p = 0
-          for color, cnt in enumerate(cnt_array):
-              for _ in range(cnt):
-                  nums[p] = color
-                  p += 1
-        ```
-      * Approach3: **Dutch National Flag Problem**, Time:O(n), Space:O(1)
-        * Like 2 boundary quick sort
-          * p0: boundary for 0
-          * p2: boundary for 2
-          * cur: runner
-        * Python Solution
-          ```python
-          def sortColors(self, nums: List[int]) -> None:
-            """
-            Do not return anything, modify nums in-place instead.
-            """
-            if not nums:
-                return
-
-            cur = p0 = 0
-            p2 = len(nums)-1
-
-            while cur <= p2:
-                if nums[cur] == 2:
-                    nums[cur], nums[p2] = nums[p2], nums[cur]
-                    p2 -= 1
-                elif nums[cur] == 0:
-                    nums[cur], nums[p0] = nums[p0], nums[cur]
-                    p0 += 1
-                    cur += 1  #p0 only forwards 1, p1 does not need to check again.
-                else:  # nums[cur] == 1
-                    cur += 1
-          ```
-  * Intersection:
-    * 349: Intersection of Two Arrays (E)
-      * Each element in the result must be unique.
-      * Approach1: Use hash Table, Time:O(m+n), Space:O(m)
-        * Python
-          ```python
-          def intersection(self, nums1: List[int], nums2: List[int]) -> List[int]:
-            def get_d(nums):
-                d = dict()
-                for n in nums:
-                    d[n] = True
-                return d
-
-            d1 = get_d(nums1)
-
-            intersection = []
-            for n in nums2:
-                if n in d1 and d1[n]:
-                    intersection.append(n)
-                    d1[n] = False
-
-            return intersection
-          ```
-    * 350: Intersection of Two Arrays II (E)
-      * Each element in the result should appear as many times as it shows in both arrays.
-      * follow up:
-        * What if the given array is already sorted? How would you optimize your algorithm?
-      * Approach1: Hash Table, Time:O(m+n), Space:O(m)
-        * Python
-          ```python
-          def intersect(self, nums1: List[int], nums2: List[int]) -> List[int]:
-            d1 = collections.Counter(nums1)
-            intersection = []
-            for n in nums2:
-                if n in d1 and d1[n] > 0:
-                    intersection.append(n)
-                    d1[n] -= 1
-
-            return intersection
-          ```
-      * Approach2, if the array is already sorted: Time:O(m+n), Space:O(1)
-          * Python
-            ```python
-            def intersect(self, nums1: List[int], nums2: List[int]) -> List[int]:
-              nums1.sort()
-              nums2.sort()
-              p1 = p2 = 0
-              intersection = []
-
-              while p1 < len(nums1) and p2 < len(nums2):
-                  v1, v2 = nums1[p1], nums2[p2]
-                  if v1 == v2:
-                      p1 += 1
-                      p2 += 1
-                      intersection.append(v1)
-
-                  elif v1 < v2:
-                      p1 += 1
-
-                  else:
-                      p2 += 1
-
-              return intersection
-            ```
-  * Other:
-    * 277: Find the Celebrity (M)
-      * Ref:
-        * https://pandaforme.github.io/2016/12/09/Celebrity-Problem/
-      * Approach1:
-        1. Find the **celebrity candidate**
-        2. Check if the candidate is the celebrity
-           * Check the people before the celebrity candidate:
-              * The celebrity does not know them but they know the celebrity.
-           * Check the people after the celebrity candidate:
-             * They should know the celebrity
-         * Python Solution
-            ````python
-            # Return True if a knows b
-            def knows(a,  b):
-              pass
-
-            def find_celebrity(self, n):
-                """
-                :type n: int
-                :rtype: int
-                """
-                unknown = -1
-                celebrity = 0
-                # find the celebrity candidate
-                for p in range(1, n):
-                    if not knows(celebrity, p):
-                        continue
-                    celebrity = p
-
-                # check people in the left side
-                for p in range(celebrity):
-                    if knows(p, celebrity) and not knows(celebrity, p):
-                        continue
-                    return unknown
-
-                # # check people in the right side
-                for p in range(celebrity+1, n):
-                    if knows(p, celebrity):
-                        continue
-                    return unknown
-
-                return celebrity
-            ````
-    * 041: First missing positive (H)
-      * Ref
-        * https://leetcode.com/problems/first-missing-positive/discuss/17073/Share-my-O(n)-time-O(1)-space-solution
-        * https://leetcode.com/problems/first-missing-positive/discuss/17071/My-short-c%2B%2B-solution-O(1)-space-and-O(n)-time
-      * The idea is **like you put k balls into k+1 bins**, there must be a bin empty, the empty bin can be viewed as the missing number.
-      * For example:
-        * if length of n is 3:
-          * The ideal case would be: [1, 2, 3], then the first missing is 3+1 = 4
-          * The missing case may be: [1, None, 3]  5, then the first missing is 2
-      * Approach1: Time O(n), Space O(n)
-        * Use extra space to keep the sorted positve numbers.
-        * Python Solution
-          ```python
-          def firstMissingPositive(self, nums: List[int]) -> int:
-            n = len(nums)
-            sorted_nums = [None] * n
-
-            for num in nums:
-                if 0 < num <= n:
-                    sorted_nums[num-1] = n
-
-            res = n + 1 # not found
-            for i in range(0, n):
-                if not sorted_nums[i]:
-                    res = i+1
-                    break
-
-            return res
-          ```
-      * Approach2: Time O(n), Space O(1)
-         1. Each number will be put in its right place at most once after first loop *
-         2. Traverse the array to find the unmatch number
-         * Python Solution
-            ```python
-            def firstMissingPositive(self, nums: List[int]) -> int:
-              n = len(nums)
-
-              for i in range(n):
-                  # We visit each number once, and each number will
-                  # be put in its right place at most once
-                  while 0 < nums[i] <= n and nums[nums[i]-1] != nums[i]:
-                      # the correct position of nums[i] is in
-                      # nums[nums[i]#-1]
-                      correct = nums[i]-1  # need this correct
-                      nums[i], nums[correct] = nums[correct] , nums[i]
-
-              res = n + 1
-              for i in range(n):
-                  if n[i] != i+1:
-                      res i+1
-                      break
-              # not found from 0 to length-1, so the first missing is in length-th
-              return res
-            ```
-    * 299: Bulls and Cows (M)
-      * Bull:
-        * Two characters are the same and having the same index.
-      * Cow
-        * Two characters are the same but do not have the same index.
-      * Approach1: Hash TableTime O(n), Space O(n) and **one pass**
-        * Use **hash Table** to count cows.
-        * Python solution
-          ```python
-          def getHint(self, secret: str, guess: str) -> str:
-            bull, cow = 0, 0
-            d = collections.defaultdict(int)
-
-            for s, g in zip(secret, guess):
-
-                if s == g:
-                    bull += 1
-                else:
-                    if d[s] < 0:
-                        cow += 1
-
-                    if d[g] > 0:
-                        cow += 1
-
-                    d[s] += 1
-                    d[g] -= 1
-
-            return f'{bull}A{cow}B'
-          ```
-    * 134: Gas Station (M)
-        * Time: O(n)
-          * Concept:
-            * rule1:
-              * **If car starts at A and can not reach B. Any station between A and B can not reach B.**
-              * If A can't reach B, and there exists C between A & B which can reach B, then A can reach C first, then reach B from C, which is conflict with our init statement: A can't reach B. so, the assume that such C exists is invalid.
-            * rule2
-              * **If the total number of gas is bigger than the total number of cost, there must be a solution.**
-              * [Proof](https://leetcode.com/problems/gas-station/discuss/287303/Proof%3A-if-the-sum-of-gas-greater-sum-of-cost-there-will-always-be-a-solution)
-          * Python Solution
-            ```python
-            not_found = -1
-            start = 0
-            total_tank = 0
-            cur_tank = 0
-
-            for i in range(len(gas)):
-                remain = gas[i] - cost[i]
-                cur_tank += remain
-                total_tank += remain
-
-                # try another start
-                # rule2
-                if cur_tank < 0:
-                    # rule1
-                    start = i+1
-                    cur_tank = 0
-
-            return start if total_tank >= 0 else not_found
-            ```
-    * 289: Game of Life (M)
-      * Approach1: Time: O(mn), Space: O(mn)
-        * Python Solution
-          ```python
-          def gameOfLife(self, board: List[List[int]]) -> None:
-            # coordinate diff for 8 neighbors
-            neighbors = [(1, 0), (1, -1), (0, -1), (-1, -1),
-                        (-1, 0), (-1,1), (0, 1), (1, 1)]
-
-            rows = len(board)
-            cols = len(board[0])
-            copy_board = [[board[row][col] for col in range(cols)] for row in range(rows)]
-
-            for row in range(rows):
-                for col in range(cols):
-                    # calculate the cnt of live neighbors
-                    live_neighbors = 0
-                    for n in neighbors:
-                        r, c = row + n[0], col + n[1]
-                        if 0 <= r < rows and 0 <= c < cols \
-                          and copy_board[r][c] == 1:
-                            live_neighbors += 1
-
-                    # change status
-                    if copy_board[row][col] == 1:
-                        if live_neighbors < 2 or live_neighbors > 3:
-                            board[row][col] = 0
-
-                    else: # ref_board[row][col] == 0
-                        if live_neighbors == 3:
-                            board[row][col] = 1
-          ```
-      * Approach2: Time: O(mn), Space: O(1)
-        * Use two temp status, live_2_dead and dead_2_live
-        * Python Solution
-          ```python
-          class Status(object):
-            live_2_dead = -1
-            dead = 0
-            live = 1
-            dead_2_live = 2
-
-          def gameOfLife(self, board: List[List[int]]) -> None:
-            # coordinate diff for 8 neighbors
-            neighbors = [(1, 0), (1, -1), (0, -1), (-1, -1),
-                        (-1, 0), (-1,1), (0, 1), (1, 1)]
-
-            rows = len(board)
-            cols = len(board[0])
-
-            for row in range(rows):
-                for col in range(cols):
-                    # calculate the cnt of live neighbors
-                    live_neighbors = 0
-                    for n in neighbors:
-                        r, c = row + n[0], col + n[1]
-                        if 0 <= r < rows and 0 <= c < cols \
-                          and abs(board[r][c]) == 1:  # Status.live and Status.live_2_dead
-                            live_neighbors += 1
-
-                    # change status
-                    if board[row][col] == Status.live:
-                        if live_neighbors < 2 or live_neighbors > 3:
-                            board[row][col] = Status.live_2_dead
-
-                    else: # ref_board[row][col] == 0
-                        if live_neighbors == 3:
-                            board[row][col] = Status.dead_2_live
-
-            for row in range(rows):
-                for col in range(cols):
-                    if board[row][col] > 0: # live and live to dead
-                        board[row][col] = Status.live
-                    else:                   # dead and dead to live
-                        board[row][col] = Status.dead
-          ```
-      * follow up: Infinite array
-        * [Solution](https://leetcode.com/problems/game-of-life/discuss/73217/Infinite-board-solution/201780)
-    * 723：Candy Crush (M)
 ### Matrix
  * **Rotate**:
    * Approach1: m*n arryay, Time:O(mn), Space:O(mn)
@@ -4372,10 +4439,9 @@ Table of Content
 
           return found
          ```
-   * 079:	Word Search (M)
  * 378:	**Kth Smallest Element** in a Sorted Matrix (M)
    * Given a n x n matrix where each of the rows and columns are sorted in ascending order, find the kth smallest element in the matrix.
-   * Approach1: Brute Force Max-Heap, Time:O(nm), Space:O(k)
+   * Approach1: Brute Force, Time:O(nm), Space:O(k)
      * Python
       ```python
       class Element(object):
@@ -4400,7 +4466,7 @@ Table of Content
 
           return heap[0].val
       ```
-   * Approach2: Simulation of merge k sorted list, Time:O(klog(n)), Space:O(min(k, n))
+   * Approach2: Simulation of merge k sorted list, Time:O(klog((min(k, n))), Space:O(min(k, n))
      * Assume that each row is a sorted linked list, val in in first col is the head
      * Python
       ```python
@@ -4440,7 +4506,7 @@ Table of Content
 
           return kth_min
       ```
-   * Approach3: Binary Search, Time:O(log(max-min)*(m+n)), Space:O(1)
+   * Approach3: Binary Search, Time:O(log(mn)*(m+n)), Space:O(1)
      * Ref:
        * https://leetcode.com/problems/kth-smallest-element-in-a-sorted-matrix/discuss/301357/Simple-to-understand-solutions-using-Heap-and-Binary-Search-JavaPython
      * Algo
@@ -4474,7 +4540,8 @@ Table of Content
         lo = matrix[0][0]
         hi = matrix[row-1][col-1]
         while lo <= hi:
-            if lo == hi:
+
+            if lo == hi: # <--- since hi may be the middle, we need to break here
               break
 
             mid = (lo + hi) // 2
@@ -4483,7 +4550,7 @@ Table of Content
                 # min_larger > mid
                 lo = min_larger
             else:  # cnt >= k
-                # max_smaller <= mid
+                # max_smaller <= mid -> that is, hi may be the mid
                 hi = max_smaller
 
         k_smallest = lo
@@ -4685,7 +4752,6 @@ Table of Content
 
           return res
         ```
- * 329:	Longest Increasing Path in a Matrix (H)
  * 370:	Range Addition (M)
  * 296:	Best Meeting Point (H)
  * 361: Bomb Enemy (M)
@@ -4693,6 +4759,493 @@ Table of Content
  * 302: Smallest Rectangle Enclosing Black Pixels (H)
  * 036: Valid Sudoku (M)
  * 037: Sudoku Solver (H)
+### Sorting
+   * Array:
+   * 912: Sort an Array (M)
+      * Approach1: **Insertion** Sort, Time:O(n^2), Space:O(1)
+        * Insert 1th, 2th, ... n-1th elements to the array
+        * Iterative:
+          * Python
+            ```python
+            def sortArray(self, nums: List[int]) -> List[int]:
+              n = len(nums)
+
+              if n <= 1:
+                  return nums
+
+              # from 1 to n-1
+              for insert in range(1, n):
+                  for compare in range(insert-1, -1, -1):
+                      if nums[compare] > nums[compare+1]:
+                          nums[compare], nums[compare+1] = nums[compare+1], nums[compare]
+
+              return nums
+            ```
+        * Recursive:
+          * Python
+            ```python
+            def sortArray(self, nums: List[int]) -> List[int]:
+              def insertion_sort(insert):
+                  if insert < 1:
+                      return
+
+                  insertion_sort(insert-1)
+
+                  for compare in range(insert-1, -1, -1):
+                      if nums[compare] > nums[compare+1]:
+                          nums[compare], nums[compare+1] = nums[compare+1], nums[compare]
+
+              n = len(nums)
+
+              if n <= 1:
+                  return nums
+
+              insertion_sort(n-1)
+
+              return nums
+            ```
+      * Approach2: **Selection** Sort, Time:O(n^2), Space:O(1)
+        * Select min from 0 to n-2
+        * Iterative:
+          * Python
+            ```python
+            def sortArray(self, nums: List[int]) -> List[int]:
+              n = len(nums)
+              if n <= 1:
+                  return nums
+
+              # from 0 to n-2
+              for select in range(0, n-1):
+                  minimum = select
+                  # from select + 1 to n-1
+                  for compare in range(select+1, n):
+                      if nums[compare] < nums[minimum]:
+                          minimum = compare
+
+                  if minimum != select:
+                      nums[select], nums[minimum] = nums[minimum], nums[select]
+
+              return nums
+            ```
+        * Recursive:
+          * Python
+            ```python
+            def sortArray(self, nums: List[int]) -> List[int]:
+              def selection(select):
+                  if select >= n-1:
+                      return
+
+                  minimum = select
+                  # from select + 1 to n-1
+                  for compare in range(select+1, n):
+                      if nums[compare] < nums[minimum]:
+                          minimum = compare
+
+                  if minimum != select:
+                      nums[select], nums[minimum] = nums[minimum], nums[select]
+
+                  selection(select+1)
+
+              n = len(nums)
+
+              if n <= 1:
+                  return nums
+
+              selection(0)
+
+              return nums
+            ```
+      * Approach3: **Bubble** Sort, Time:O(n^2), Space:O(1)
+        * Bubble max to the end from n-1 to 1
+        * Iterative:
+          * Python
+            ```python
+            def sortArray(self, nums: List[int]) -> List[int]:
+              n = len(nums)
+
+              if n <= 1:
+                  return nums
+
+              is_swap = False
+              for bubble in range(n-1, 1, -1):
+                  for compare in range(0, bubble):
+                      if nums[compare] > nums[compare+1]:
+                          nums[compare], nums[compare+1] = nums[compare+1], nums[compare]
+                          is_swap = True
+
+                  if not is_swap:
+                      break
+
+              return nums
+            ```
+        * Recursive:
+          * Python
+            ```python
+            def sortArray(self, nums: List[int]) -> List[int]:
+              def bubble_sort(bubble):
+                  if bubble >= n:
+                      return
+
+                  bubble_sort(bubble+1)
+
+                  for compare in range(0, bubble):
+                      if nums[compare] > nums[compare+1]:
+                          nums[compare], nums[compare+1] = nums[compare+1], nums[compare]
+                          is_swap = True
+
+              n = len(nums)
+              if n <= 1:
+                  return nums
+
+              bubble_sort(1)
+
+              return nums
+            ```
+      * Approach4: **Quick** Sort, Time:O(nlogn), Space:O(n)
+        * Iterative:
+          * Python
+            ```python
+            def sortArray(self, nums: List[int]) -> List[int]:
+              def get_partition(left, right):
+                  pivot_ran = random.randint(left, right)
+                  pivot = right
+                  nums[pivot], nums[pivot_ran] = nums[pivot_ran], nums[pivot]
+
+                  border = left
+                  pivot_val = nums[pivot]
+
+                  for cur in range(border, right):
+                      if nums[cur] <= pivot_val:
+                          nums[cur], nums[border] = nums[border], nums[cur]
+                          border += 1
+
+                  nums[pivot], nums[border] = nums[border], nums[pivot]
+
+                  return border
+
+              n = len(nums)
+              if n <= 1:
+                  return nums
+
+              stack = [(0, n-1)]
+              while stack:
+                  left, right = stack.pop()
+
+                  partition = get_partition(left, right)
+
+                  if left < partition:
+                      stack.append((left, partition-1))
+
+                  if partition < right:
+                      stack.append((partition+1, right))
+
+              return nums
+            ```
+        * Recursive:
+          * Python
+            ```python
+            def sortArray(self, nums: List[int]) -> List[int]:
+              def get_partition(left, right):
+                  pivot_ran = random.randint(left, right)
+                  pivot = right
+                  nums[pivot], nums[pivot_ran] = nums[pivot_ran], nums[pivot]
+
+                  border = left
+                  pivot_val = nums[pivot]
+
+                  for cur in range(border, right):
+                      if nums[cur] <= pivot_val:
+                          nums[cur], nums[border] = nums[border], nums[cur]
+                          border += 1
+
+                  nums[pivot], nums[border] = nums[border], nums[pivot]
+
+                  return border
+
+              def quick_sort(left, right):
+                  if left >= right:
+                      return
+
+                  partition = get_partition(left, right)
+                  quick_sort(left, partition-1)
+                  quick_sort(partition+1, right)
+
+              if len(nums) <= 1:
+                  return nums
+
+              quick_sort(0, len(nums)-1)
+
+              return nums
+            ```
+      * Approach5: **Merge** Sort, Time:O(nlogn), Space:O(n)
+        * Iterative
+          * Python
+            ```python
+            def sortArray(self, nums: List[int]) -> List[int]:
+              def merge(array,
+                        left_start, left_end,
+                        right_start, right_end):
+
+                  left_window = array[left_start:left_end+1]
+                  right_window = array[right_start:right_end+1]
+                  l = r = 0
+                  cur = left_start
+
+                  while l < len(left_window) and r < len(right_window):
+                      if left_window[l] <= right_window[r]:
+                          array[cur] = left_window[l]
+                          l += 1
+                      else:
+                          array[cur] = right_window[r]
+                          r += 1
+                      cur += 1
+
+                  while l < len(left_window):
+                      array[cur] = left_window[l]
+                      l += 1
+                      cur += 1
+
+              if len(nums) <= 1:
+                  return nums
+
+              windows_size = 1
+              while windows_size < len(nums):
+                  left = 0
+                  while left + windows_size < len(nums):
+                      mid = left + windows_size
+                      right = mid + windows_size
+
+                      merge(nums,
+                          left, mid-1,
+                          mid, right-1)
+
+                      left += (2*windows_size)
+
+                  windows_size *= 2
+
+              return nums
+            ```
+        * Recursice
+          ```python
+          def sortArray(self, nums: List[int]) -> List[int]:
+            def merge(array,
+                      left_start, left_end,
+                      right_start, right_end):
+
+              left_window = array[left_start:left_end+1]
+              right_window = array[right_start:right_end+1]
+              l = r = 0
+              cur = left_start
+
+              while l < len(left_window) and r < len(right_window):
+                  if left_window[l] <= right_window[r]:
+                      array[cur] = left_window[l]
+                      l += 1
+                  else:
+                      array[cur] = right_window[r]
+                      r += 1
+                  cur += 1
+
+              while l < len(left_window):
+                  array[cur] = left_window[l]
+                  l += 1
+                  cur += 1
+
+            def merge_sort(array, left, right):
+                if left >= right:
+                    return
+
+                mid = (left+right)//2
+                merge_sort(array, left, mid)
+                merge_sort(array, mid+1, right)
+
+                merge(array,
+                      left, mid,
+                      mid+1, right)
+
+                merge_sort(nums, 0, len(nums)-1)
+
+                return nums
+          ```
+      * Approach6: **Heap** Sort, Time:O(nlogn), Space:O(n)
+        * Do max heapify (bubble down), and swap the max to the end
+        * Iterative:
+          * Python
+            ```python
+            def max_heapify(cur, boundary):
+              """
+              boundary is exclusive
+              bubble down heapify
+              """
+              while cur < boundary:  # notice the cur may be 0
+                  maximum = cur
+                  left = 2*cur + 1
+                  right = 2*cur + 2
+
+                  if left < boundary and nums[left] > nums[maximum]:
+                      maximum = left
+
+                  if right < boundary and nums[right] > nums[maximum]:
+                      maximum = right
+
+                  if cur == maximum:
+                      break
+
+                  nums[cur], nums[maximum] = nums[maximum], nums[cur]
+                  cur = maximum
+
+              n = len(nums)
+              if n <= 1:
+                  return nums
+
+              # init heapify
+              # from n//2 to 0
+              for start in range(n//2, -1, -1):
+                  max_heapify(start, n)
+
+              # from n-1 to 1
+              for boundary in range(n-1, 0, -1):
+                  # swap the maximum to the end
+                  nums[0], nums[boundary] = nums[boundary], nums[0]
+                  max_heapify(0, boundary)
+
+              return nums
+            ```
+        * Recursive:
+          * Python
+            ```python
+            def sortArray(self, nums: List[int]) -> List[int]:
+              def max_heapify(cur, boundary):
+                  """
+                  boundary is exclusive
+                  bubble down heapify
+                  """
+                  while cur < boundary:
+                      maximum = cur
+                      left = 2*cur + 1
+                      right = 2*cur + 2
+
+                      if left < boundary and nums[left] > nums[maximum]:
+                          maximum = left
+
+                      if right < boundary and nums[right] > nums[maximum]:
+                          maximum = right
+
+                      if cur == maximum:
+                          break
+
+                      nums[cur], nums[maximum] = nums[maximum], nums[cur]
+                      cur = maximum
+
+              n = len(nums)
+
+              if n <= 1:
+                  return nums
+
+              # init heapify
+              # from n//2 to 0
+              for i in range(n//2, -1, -1):
+                  max_heapify(cur=i, boundary=n)
+
+              # from n-1 to 1
+              for i in range(n-1, 0, -1):
+                  # swap the maximum to the end
+                  nums[0], nums[i] = nums[i], nums[0]
+                  max_heapify(cur=0, boundary=i)
+
+              return nums
+            ```
+   * 280: Wiggle Sort (M) *
+     * Definition
+       * **nums[0] <= nums[1] >= nums[2] <= nums[3]...**
+     * Approach1: sorting, O(log(n))
+       * Sort and then pair swapping
+       * Python Solution
+         ```python
+         def wiggleSort(self, nums: List[int]) -> None:
+           """
+           Do not return anything, modify nums in-place instead.
+           nums[0] <= nums[1] >= nums[2] <= nums[3]
+           """
+           if len(nums) <= 1:
+               return
+
+           nums.sort()
+
+           # 1, 3, 5 .. n-2
+           for i in range(1, len(nums)-1, 2):
+               if nums[i] < nums[i+1]:
+                   nums[i], nums[i+1] = nums[i+1], nums[i]
+         ```
+     * Approach2: greedy, O(n)
+       * Greedy from left to right
+       * Python Solution
+         ```python
+         def wiggleSort(self, nums: List[int]) -> None:
+             less = True
+             for i in range(len(nums)-1):
+               if less:
+                 if nums[i] > nums[i+1]:
+                   nums[i], nums[i+1] = nums[i+1], nums[i]
+               else:
+                 if nums[i] < nums[i+1]:
+                   nums[i], nums[i+1] = nums[i+1], nums[i]
+
+               less = not less
+         ```
+   * 075: Sort Colors (M)
+     * Approach1: Quick sort, Time:O(nlog(n)), Space:O(log(n))
+     * Approach2: **Counting sort**, Time:O(n+k), Space:O(k)
+       * Python Solution:
+       ```python
+       def sortColors(self, nums: List[int]) -> None:
+         """
+         Do not return anything, modify nums in-place instead.
+         """
+         if not nums:
+             return
+
+         # 3 colors only
+         color_num = 3
+         cnt_array = [0] * color_num
+
+         for num in nums:
+             cnt_array[num] += 1
+
+         p = 0
+         for color, cnt in enumerate(cnt_array):
+             for _ in range(cnt):
+                 nums[p] = color
+                 p += 1
+       ```
+     * Approach3: **Dutch National Flag Problem**, Time:O(n), Space:O(1)
+       * Like 2 boundary quick sort
+         * p0: boundary for 0
+         * p2: boundary for 2
+         * cur: runner
+       * Python Solution
+         ```python
+         def sortColors(self, nums: List[int]) -> None:
+           """
+           Do not return anything, modify nums in-place instead.
+           """
+           if not nums:
+               return
+
+           cur = p0 = 0
+           p2 = len(nums)-1
+
+           while cur <= p2:
+               if nums[cur] == 2:
+                   nums[cur], nums[p2] = nums[p2], nums[cur]
+                   p2 -= 1
+               elif nums[cur] == 0:
+                   nums[cur], nums[p0] = nums[p0], nums[cur]
+                   p0 += 1
+                   cur += 1  #p0 only forwards 1, p1 does not need to check again.
+               else:  # nums[cur] == 1
+                   cur += 1
+         ```
 ### Binary Search
   * Tips:
     * Identify the definition of the left boundary and right boundary.
@@ -5434,6 +5987,7 @@ Table of Content
           left, right = 1, 2**d-1
           while left <= right:
               mid = (left + right) // 2
+
               if check_node_exists(mid, d, root):
                   # every nodes before mid exist
                   left = mid + 1
@@ -5554,6 +6108,8 @@ Table of Content
     * However, reverse will change the data of the input, use it carefully.
 * **Detect Circle**
   * 141: Linked List **Cycle** (E)
+    * Similar problems:
+      * 202: Happy Number (E)
     * Approach1: The runner: Time:O(n), Space:O(1)
       * Python Solution
           ```python
@@ -5579,6 +6135,8 @@ Table of Content
             return is_found
           ```
   * 142: Linked List Cycle II (M) *
+    * Similar problems:
+      * 287: Find the Duplicate Number (M)
     * Given a linked list, return the node **where the cycle begins**. If there is no cycle, return null.
     * The length before the cycle beginning: **d**
     * The length of the cycle: **r**
@@ -6507,6 +7065,176 @@ Table of Content
         def getMin(self) -> int:
             return self.mins[-1]
       ```
+  * 232: Implement Queue using Stacks (E)
+    * Approach1: Use 2 stacks, push:O(1), pop: average, O(1)
+      * Ref:
+        * https://leetcode.com/articles/implement-queue-using-stacks/
+      * Python
+        ```python
+        class MyQueue:
+          def __init__(self):
+              """
+              Initialize your data structure here.
+              """
+              self.push_stack = []
+              self.pop_stack = []
+
+          def push(self, x: int) -> None:
+              """
+              Push element x to the back of queue.
+              """
+              self.push_stack.append(x)
+
+          def pop(self) -> int:
+              """
+              Removes the element from in front of queue and returns that element.
+              """
+              if self.empty():
+                  return None
+
+              return self.pop_stack.pop()
+
+          def peek(self) -> int:
+              """
+              Get the front element.
+              """
+              if self.empty():
+                  return None
+
+              return self.pop_stack[-1]
+
+          def empty(self) -> bool:
+              """
+              Returns whether the queue is empty.
+              """
+              if len(self.pop_stack) > 0:
+                  return False
+
+              while self.push_stack:
+                  self.pop_stack.append(self.push_stack.pop())
+
+              return len(self.pop_stack) == 0
+        ```
+  * 225: Implement Stack using Queues (E)
+    * Approach1: 1 queues, Push:O(1), Pop:O(n)
+      * Python
+        ```python
+        class MyStack:
+          def __init__(self):
+              """
+              Initialize your data structure here.
+              """
+              self.queue = collections.deque()
+
+          def push(self, x: int) -> None:
+              """
+              Push element x onto stack.
+              """
+              self.queue.append(x)
+
+          def pop(self) -> int:
+              """
+              Removes the element on top of the stack and returns that element.
+              """
+              q_len = len(self.queue)
+              for _ in range(q_len-1):
+                  self.queue.append(self.queue.popleft())
+
+              return self.queue.popleft()
+
+          def top(self) -> int:
+              """
+              Get the top element.
+              """
+              return self.queue[-1]
+
+          def empty(self) -> bool:
+              """
+              Returns whether the stack is empty.
+              """
+              return not len(self.queue)
+        ```
+    * Approach3: 1 queues, Push:O(n), Pop:O(1)
+      * Python
+        ```python
+        class MyStack:
+          def __init__(self):
+              """
+              Initialize your data structure here.
+              """
+              self.queue = collections.deque()
+
+          def push(self, x: int) -> None:
+              """
+              Push element x onto stack.
+              """
+              self.queue.append(x)
+              q_len = len(self.queue)
+              for _ in range(q_len-1):
+                  self.queue.append(self.queue.popleft())
+
+          def pop(self) -> int:
+              """
+              Removes the element on top of the stack and returns that element.
+              """
+              return self.queue.popleft()
+
+          def top(self) -> int:
+              """
+              Get the top element.
+              """
+              return self.queue[0]
+
+          def empty(self) -> bool:
+              """
+              Returns whether the stack is empty.
+              """
+              return not len(self.queue)
+        ```
+  * 341: Flatten Nested List Iterator (M)
+    * Approach1: Use stack
+      * Python
+        ```python
+        class NestedIterator(object):
+          def __init__(self, nestedList):
+              self.stack = nestedList[::-1]
+
+          def next(self):
+              return self.stack.pop().getInteger()
+
+          def hasNext(self):
+              while self.stack:
+                  top = self.stack[-1]
+                  if top.isInteger():
+                      return True
+                  else:
+                      self.stack = self.stack[:-1] + top.getList()[::-1]
+
+              return False
+        ```
+    * Approach2: Use deque
+      * Python
+      ```python
+      class NestedIterator(object):
+
+          def __init__(self, nestedList):
+              self.dq = collections.deque()
+              self.dq.extend(nestedList)
+
+          def next(self):
+              return self.dq.popleft().getInteger()
+
+          def hasNext(self):
+              while self.dq:
+                  top = self.dq[0]
+                  if top.isInteger():
+                      return True
+                  else:
+                      self.dq.popleft()
+                      self.dq.extendleft(top.getList()[::-1])
+
+              return False
+      ```
 ### Heap (Priority Queue)
   * 023: Merge k Sorted Lists (H) (LinkedList)
     * pleaser refer linked list section (use min heap)
@@ -6774,7 +7502,72 @@ Table of Content
           return res
         ```
   * 295: Find Median from Data Stream (H)
-  * 341: Flatten Nested List Iterator (M)
+    * Approach1: Insertion Sort, Time:O(n), Space:O(n)
+      * Time: O(n)
+        * add num: O(n)
+          * search: O(logn), binary search to find correct position takes
+          * insertion: O(n), since elements have to be shifted inside the container
+        * find median: O(1)
+      * Python
+        ```python
+        class MedianFinder:
+          def __init__(self):
+              self.nums = []
+
+          def addNum(self, num: int) -> None:
+              self.nums.append(num)
+              # from insert-1 to 0
+              for i in range(len(self.nums)-2, -1, -1):
+                  if self.nums[i] > self.nums[i+1]:
+                      self.nums[i], self.nums[i+1] = self.nums[i+1], self.nums[i]
+                  else:
+                      break
+
+          def findMedian(self) -> float:
+              n = len(self.nums)
+
+              if n == 0:
+                  return None
+
+              if n % 2: # odd
+                  return self.nums[n//2]
+              else: # even
+                  return (self.nums[n//2] + self.nums[n//2-1]) / 2
+              ```
+    * Approach2: 2 heaps, Time:O(n), Space:O(n)
+      * two heaps:
+        * max heap (lo): A max-heap lo to store the smaller half of the numbers
+        * min heap (hi): A min-heap hi to store the larger half of the numbers
+        * This leads us to a huge point of pain in this approach: **balancing the two heaps**!
+      * The concept is similar to median of 2 sorted array
+      * lo (max heap) is allowed to hold n + 1 elements, while hi can hold n elements
+      * Python
+        ```python
+        class MedianFinder:
+          def __init__(self):
+              self.lo = []  # max-heap, keep the smaller half of the numbers
+              self.hi = []  # min-heap, keep the larger half of the number
+
+          def addNum(self, num: int) -> None:
+              # push to lo
+              if len(self.lo) == len(self.hi):
+                  pop = heapq.heappushpop(self.hi, num)
+                  # revert the number to transfer min-heap to max-heap
+                  heapq.heappush(self.lo, -pop)
+
+              # push to hi
+              else: # len(self.lo) > len(self.hi)
+                  # revert the number to transfer min-heap to max-heap
+                  pop = heapq.heappushpop(self.lo, -num)
+                  heapq.heappush(self.hi, -pop)
+
+          def findMedian(self) -> float:
+
+              if len(self.lo) == len(self.hi):
+                  return  (-self.lo[0] + self.hi[0]) / 2
+              else:
+                  return -self.lo[0]
+        ```
   * 313: Super Ugly Numbe (M)
   * 218: The Skyline Problem (H)
 ### Cache
@@ -10397,6 +11190,233 @@ Table of Content
           ```
       * Approach2: Bidirectional BFS
   * 126: **Word Ladder** II (H)
+  * 079: Word Search (M)
+     * L is the word length
+     * The key issue is how to reset the used infomation.
+     * Approach1: DFS Recursive: Time:O(mn*4^L), Space:O(mn)
+       * Time:
+         * The first character takes O(mn)
+         * Remain characters take O(4^L)
+       * Python
+         ```python
+         def exist(self, board: List[List[str]], word: str) -> bool:
+
+          def dfs(r, c, idx):
+              if idx == w_len:
+                  return True
+
+              # check boundary
+              if not (0 <= r < row and 0 <= c < col):
+                  return False
+
+              if visited[r][c] or board[r][c] != word[idx]:
+                  return False
+
+              # set
+              visited[r][c] = True
+
+              # check next character
+              found = False
+              for d in directions:
+                  found = dfs(r+d[0], c+d[1], idx+1)
+                  if found:
+                      break
+
+            # reset
+            visited[r][c] = False
+
+            return found
+
+          row, col = len(board), len(board[0])
+
+          visited = [[False] * col for _ in range(row)]
+
+          w_len = len(word)
+
+          directions = ((1, 0), (0, 1), (-1, 0), (0, -1))
+
+          found = False
+          # find the first character
+          for r in range(row):
+              for c in range(col):
+                  found = dfs(r, c, 0)
+                  if found:
+                      return found
+
+          return found
+         ```
+     * Approach2: DFS Iterative: Time:O(mn*4^L), Space:O(mn)
+       * Use another stack to track unsed info
+       * Python
+        ```python
+        def exist(self, board: List[List[str]], word: str) -> bool:
+
+          row, col = len(board), len(board[0])
+          w_len = len(word)
+
+          directions = ((1, 0), (0, 1), (-1, 0), (0, -1))
+
+          visited = [[False] * col for _ in range(row)]
+          visited_track = []
+          visited_clean_flag = (-1, -1, -1, True)
+
+          stack = []
+          # find the first character
+          for r in range(row):
+              for c in range(col):
+                  stack.append((r, c, 0, False))
+
+          found = False
+          while stack:
+
+              r, c, idx, clean_visited = stack.pop()
+
+              if clean_visited:
+                  r, c = visited_track.pop()
+                  visited[r][c] = False
+                  continue
+
+              if idx == w_len:
+                  found = True
+                  break
+
+              if not (0 <= r < row and 0 <= c < col) \
+                  or visited[r][c] or board[r][c] != word[idx]:
+                  continue
+
+              visited[r][c] = True
+              # help to reset the visited[r][c]
+              visited_track.append((r, c))
+              stack.append(visited_clean_flag)
+
+              for d in directions:
+                  stack.append((r + d[0], c + d[1],
+                                idx + 1,
+                                False))
+
+          return found
+        ```
+  * 329: Longest Increasing Path in a Matrix (H)
+    * Do not need to keep visitedd ue to the increasing property.
+    * Approach1: Recursive, Time:O(2^(m+n)), Space:O(mn)
+      * Python
+        ```python
+        def longestIncreasingPath(self, matrix: List[List[int]]) -> int:
+          def dfs(r, c, cur_lip):
+              nonlocal lip
+
+              for d in directions:
+                  rc, cc = r + d[0], c + d[1]
+                  if 0 <= rc < row and 0 <= cc < col \
+                      and matrix[rc][cc]  > matrix[r][c]:
+                          lip = max(lip, cur_lip + 1)
+                          dfs(rc, cc, cur_lip + 1)
+
+          row, col = len(matrix), len(matrix[0])
+          directions = ((1, 0), (0, 1), (-1, 0), (0, -1))
+          # longest increasing path
+          lip = 0
+          for r in range(row):
+              for c in range(col):
+                  dfs(r, c, 1)
+
+          return lip
+        ```
+    * Approach2: Recursive, Time:O((mn)), Space:O(mn)
+      * Python
+        ```python
+        def longestIncreasingPath(self, matrix: List[List[int]]) -> int:
+          def dfs(r, c):
+              if memo[r][c]:
+                  return memo[r][c]
+
+              # the base case is 1 and without increasing neighbors.
+              memo[r][c] = 1
+
+              for d in directions:
+                  rc, cc = r + d[0], c + d[1]
+                  if 0 <= rc < row and 0 <= cc < col \
+                      and matrix[rc][cc] > matrix[r][c]:
+                          memo[r][c] = max(memo[r][c], dfs(rc, cc) + 1)
+
+              return memo[r][c]
+
+          if not matrix:
+              return 0
+
+          row, col = len(matrix), len(matrix[0])
+
+          if not col:
+              return 0
+
+          directions = ((1, 0), (0, 1), (-1, 0), (0, -1))
+
+          memo = [[None for _ in range(col)] for _ in range(row)]
+
+          # longest increasing path
+          lip = 0
+          for r in range(row):
+              for c in range(col):
+                  lip = max(lip, dfs(r, c))
+
+          return lip
+        ```
+    * Approach3: Topological Sort, Time:O((mn)), Space:O(mn)
+      * Definition:
+        * If matrix[i][j] < matrix[k][l], path: matrix[i][j] -> matrix[k][l]
+        * indegree:
+          * (i, j): 0
+          * (k, l): 1
+        * outdegree:
+          * (i, j): [(k, l)]
+          * (k, l): []
+          * do not need to keep, we can get from neighbros of matrix
+      * Starting from the nodes with indegree == 0 ( max val in the area)
+      * Python
+        ```python
+        def longestIncreasingPath(self, matrix: List[List[int]]) -> int:
+          if not matrix:
+              return 0
+
+          row, col = len(matrix), len(matrix[0])
+
+          if not col:
+              return 0
+
+          directions = ((1, 0), (0, 1), (-1, 0), (0, -1))
+
+          indegree = [[0 for _ in range(col)] for _ in range(row)]
+          for r in range(row):
+              for c in range(col):
+                  for d in directions:
+                      rc, cc = r + d[0], c + d[1]
+                      if 0 <= rc < row and 0 <= cc < col \
+                          and matrix[r][c] < matrix[rc][cc]:
+                          indegree[rc][cc] += 1
+
+          q = collections.deque()
+          for r in range(row):
+              for c in range(col):
+                  if indegree[r][c] == 0:
+                      q.append((r,c))
+
+          # longest increasing path
+          lip = 0
+          while q:
+              q_len = len(q)
+              lip += 1
+              for _ in range(q_len):
+                  r, c = q.popleft()
+                  for d in directions:
+                      rc, cc = r + d[0], c + d[1]
+                      if 0 <= rc < row and 0 <= cc < col \
+                          and matrix[r][c] < matrix[rc][cc]:
+                              indegree[rc][cc] -= 1
+                              if indegree[rc][cc] == 0:
+                                  q.append((rc,cc))
+
+          return lip
+        ```
   * 051: N-Queens (H)
   * 052: N-Queens II (H)
 ### Dynamic Programming
@@ -11252,18 +12272,24 @@ Table of Content
     * 078: Subsets (M)
       * Ref:
         * [C++ Recursive/Iterative/Bit-Manipulation](https://leetcode.com/problems/subsets/discuss/27278/C%2B%2B-RecursiveIterativeBit-Manipulation)
-      * Approach1: Recursive Time: O(n*2^n), Space:(2^n):
+      * Approach1: Recursive, Time: O(n*2^n), Space:(2^n):
         * DFS Traverse
         * Example:
+          ```txt
+          [1,2,3]
+          [] -> [1] -> [1,2] -> [1,2,3] (backtrack)
+                    -> [1,3] (backtrack)
+
+             -> [2] -> [2,3] (backtrack)
+
+             -> [3] (backtrack)
+          ```
           * []
-          * starts wtih 1: [1], [1,2], [1,2,3], [1,3]
-          * starts wtih 2: [2], [2,3]
-          * starts wtih 3: [3]
         * Time: O(n*2^n)
           * total 2^n subset, each subset need O(n) to copy
         * Space: O(2^n)
           * Total (2^n) subsets
-        * Python Solution
+        * Python
           ```python
           def subsets_rec(nums: List[int]) -> List[List[int]]:
               def _subsets(cur: list, start):
@@ -11298,19 +12324,30 @@ Table of Content
           * s2: [[], [a]] (with a, without a)
           * s3: [[], [a], [b], [a, b]] (with b, without b)
           * s4: [[], [a], [b], [a, b], [c], [a, c], [b, c], [a, b, c]]
-        * Python Solution
+        * Python1
           ```python
           def subsets(self, nums: List[int]) -> List[List[int]]:
-              subs = [[]]
-              for num in nums:
-                  subs_len = len(subs)
-                  for i in range(subs_len):
-                      # copy without num and append to the tail
-                      subs.append(subs[i].copy())
-                      # update with num
-                      subs[i].append(num)
+            subs = [[]]
+            for n in nums:
+                # copy and append n
+                cur = [sub + [n] for sub in subs]
+                subs.extend(cur)
 
-              return subs
+            return subs
+          ```
+        * Python2
+          ```python
+          def subsets(self, nums: List[int]) -> List[List[int]]:
+            subs = [[]]
+
+            for n in nums:
+                sub_len = len(subs)
+                for i in range(sub_len):
+                    sub = subs[i]
+                    subs.append(sub[:])
+                    sub.append(n)
+
+            return subs
           ```
       * Approach3: Iterative, **bit manipulation**, Time: O(n*2^n), Space:(2^n)
         * Time: O(n*2^n)
@@ -11319,16 +12356,18 @@ Table of Content
         * Space: O(2^n)
           * Total (2^n) subsets (only two status for each character)
         * example:
-          * [a, b, c]
-            * set 000: []
-            * set 001: [a]
-            * set 010: [b]
-            * set 011: [a, b]
-            * set 100: [c]
-            * set 101: [a, c]
-            * set 110: [b, c]
-            * set 111  [a, b, c]
-        * Python Solution
+            ```txt
+            [a, b, c]
+            set 000: []
+            set 001: [a]
+            set 010: [b]
+            set 011: [a, b]
+            set 100: [c]
+            set 101: [a, c]
+            set 110: [b, c]
+            set 111  [a, b, c]
+            ```
+        * Python
             ```python
             def subsets_iter_bit(nums: List[int]) -> List[List[int]]:
                 subs = []
@@ -11345,100 +12384,279 @@ Table of Content
                 return subs
             ```
     * 090: Subsets II (M)
+      * Given a collection of integers that might **contain duplicates**, nums, return all possible subsets (the power set).
+      * Approach1: Recursive
+        * Python
+          ```python
+          def subsetsWithDup(self, nums: List[int]) -> List[List[int]]:
+            def backtrack(start, cur):
+                subs.append(cur[:])
+
+                if start == n:
+                    return
+
+                for i in range(start, n):
+                    # skip duplicate in the same position
+                    if i > start and nums[i] == nums[i-1]:
+                        continue
+
+                    num = nums[i]
+                    cur.append(num)
+                    backtrack(i+1, cur)
+                    cur.pop()
+
+            if not nums:
+                return []
+
+            n = len(nums)
+            nums.sort()
+            subs = []
+            cur = []
+            backtrack(0, cur)
+            return subs
+          ```
+      * Approach2: Iterative
+        * Ref:
+          * https://leetcode.com/problems/subsets-ii/discuss/30166/Simple-python-solution-without-extra-space.
+        * Example:
+          ```txt
+          [1, 2, 2]
+
+          init:
+            subs = [[]],
+            cur = []
+
+          step1:
+            subs = [[], [1]],
+            cur = [[1]]
+
+          step2:
+            subs = [[], [1], [2], [1,2]]
+            cur = [[2], [1,2]]
+
+          step3: nums[i] == nums[i-1]
+            subs = [[], [1], [2], [1,2], [2,2], [1,2,2]]
+            cur = [[2,2], [1,2,2]]  # iterative from cur in the step2
+          ```
+        * Python
+          ```python
+          def subsetsWithDup(self, nums: List[int]) -> List[List[int]]:
+            if not nums:
+                return []
+
+            nums.sort()
+            subs = [[]]
+            cur = []
+
+            for i in range(len(nums)):
+                n = nums[i]
+
+                # same idea, we can not insert duplicate val in the same position
+                if i > 0 and nums[i] == nums[i-1]:
+                    cur = [sub + [n] for sub in cur]
+                else:
+                    cur = [sub + [n] for sub in subs]
+
+                subs.extend(cur)
+
+            return subs
+          ```
   * **Combinations**
     * 077: Combinations (M)
+      * Given two integers n and k, return all possible combinations of k numbers out of 1 ... n.
+      * Example:
+        ```txt
+          n = 5, k = 3
+
+          [1] -> [1,2] -> [1,2,3] (len == k, backtrack)
+                       -> [1,2,4] (len == k, backtrack)
+                       -> [1,2,5] (len == k, backtrack)
+                       -> 6 > n, backtrack
+
+              -> [1,3] -> [1,3,4] (len == k, backtrack)
+                       -> [1,3,5] (len == k, backtrack)
+                       -> 6 > n, backtrack
+
+              -> [1,4] -> [1,4,5] (len == k, backtrack)
+                       -> 6 > n, backtrack
+
+              -> [1,5] -> not enough elements, backtrack
+                       ->  6 > n, backtrack
+
+          [2] -> [2,3] -> [2,3,4] (len == k, backtrack)
+                       -> [2,3,5] (len == k, backtrack)
+                       -> 6 > n, backtrack
+
+              -> [2,4] -> [2,4,5] (len == k, backtrack)
+                       -> 6 > n, backtrack
+
+              -> [2,5] -> not enough elements, backtrack
+          ...
+        ```
       * Approach1: Recursive Time: O(k * n!/(n!*(n-k))!), Space: O(n!/(n!*(n-k)!)
         * Time: O(k* n!/(n!*(n-k)!)
           * total n!/(n!*(n-k)! combinations
           * k is the time to pupulate each combinations
         * Space: O(n!/(n!*(n-k)!)
           * Total O(n!/(n!*(n-k)!) combintations
-        * Python Solution
+        * Python
+            ```python
+            def combine(self, n: int, k: int) -> List[List[int]]:
+              def backtrack(start, cur):
+                  if len(cur) == k:
+                      comb.append(cur[:])
+                      return
+
+                  # skip the cases that can not satisfy k == len(cur) in the future
+                  if k - len(cur) > n - start + 1:
+                      return
+
+                  for i in range(start, n+1):
+                      cur.append(i)
+                      backtrack(i+1, cur)
+                      cur.pop()
+
+              if k > n:
+                  return []
+
+              comb = []
+              cur = []
+              backtrack(1, cur)
+              return comb
+            ```
+      * Approach2: Iterative
+        * The same idea like recursive approach, use stack to control backtrack
+        * Python
           ```python
-          def combination_rec(n: int, k: int) -> List[List[int]]:
-          """
-          DFS Traverse
-          Time: O(k* n!/(n!*(n-k)!))
-          Space: O(n!/(n!*(n-k)!))
-          """
-            def _combination(cur: list, start):
-                if len(cur) == k:
+          def combin_iter_v2(n: int, k: int) -> List[List[int]]:
+            """
+            Ref: https://leetcode.com/problems/combinations/discuss/27029/AC-Python-backtracking-iterative-solution-60-ms
+            Time: O(k* n!/(n!*(n-k)!))
+            Space: O(n!/(n!*(n-k)!))   (extra space: O(k))
+            """
+            comb, cur = [], []
+            start = 1
+            while True:
+                l = len(cur)
+
+                if l == k:
                     comb.append(cur[:])
-                    return
-
-                # skip the cases that can not satisfy k == len(cur) in the future
-                if k - len(cur) > n - start + 1:  # included start
-                    return
-
-                # from start to n
-                for i in range(start, n+1):
-                    cur.append(i)
-                    _combination(cur=cur, start=i+1)
-                    cur.pop()
-
-            comb = []
-            cur = []
-            if k > n:
-                return comb
-            _combination(cur=cur, start=1)
+                """
+                k - l > n - start + 1 means that l will not satisfy k in the future
+                in fact, (k - l) > (n - start + 1)  can cover start > n when (l-k) = -1
+                The backtrack condition is the same as recursive approach1:
+                1. len(cur) == k
+                2. can not satisfity in the future: (k - l) > (n - start + 1)
+                3. out of boundary
+                """
+                if l == k or (k - l) > (n - start + 1) or start > n:
+                    if not cur: # done !
+                        break
+                    start = cur.pop() + 1
+                else:
+                    cur.append(start)
+                    start += 1
             return comb
           ```
-      * Approach2 Iterative
-        * Python Solution
-        ```python
-        def combin_iter_v2(n: int, k: int) -> List[List[int]]:
-          """
-          Ref: https://leetcode.com/problems/combinations/discuss/27029/AC-Python-backtracking-iterative-solution-60-ms
-          Time: O(k* n!/(n!*(n-k)!))
-          Space: O(n!/(n!*(n-k)!))   (extra space: O(k))
-          """
-          comb, cur = [], []
-          start = 1
-          while True:
-              l = len(cur)
-              if l == k:
-                  comb.append(cur[:])
-              # k - l > n - start + 1 means that l will not satisfy k in the future
-              # in fact, (k - l) > (n - start + 1)  can cover start > n when (l-k) = -1
-              if l == k or (k - l) > (n - start + 1) or start > n:
-                  if not cur: # done !
-                      break
-                  start = cur.pop() + 1
-              else:
-                  cur.append(start)
-                  start += 1
-          return comb
-        ```
     * 039: Combination Sum (M)
+      * Given a set of candidate numbers (candidates) (**without duplicates**) and a target number (target), **find all unique combinations** in candidates where the candidate numbers sums to target
+      * Time:
+        * https://leetcode.com/problems/combination-sum/discuss/16634/If-asked-to-discuss-the-time-complexity-of-your-solution-what-would-you-say
+      * Approach1: Recursive:
+        * Python
+          ```python
+          def combinationSum(self, candidates: List[int], target: int) -> List[List[int]]:
+            def dfs(start, target, cur):
+                if target < 0:
+                    return
+
+                if target == 0:
+                    results.append(cur[:])
+                    return
+
+                for i in range(start, n):
+                    num = candidates[i]
+                    cur.append(num)
+                    # use start the keep the sequence
+                    dfs(i, target-num, cur)
+                    cur.pop()
+
+            if target < 0:
+                return []
+
+            n = len(candidates)
+            results = []
+            cur = []
+            dfs(0, target, cur)
+            return results
+          ```
+      * Approach2: Iterative + DP
+        * Ref:
+          * https://leetcode.com/problems/combination-sum/discuss/16509/Iterative-Java-DP-solution
     * 040: Combination Sum II (M)
+      * Given a collection of candidate numbers (candidates) and a target number (target), **find all unique combinations** in candidates where the candidate numbers sums to target.
+      * Each number in candidates **may only be used once** in the combination.
+      * Approach1: BackTracking:
+        * Python
+          ```python
+          def combinationSum2(self, candidates: List[int], target: int) -> List[List[int]]:
+            def dfs(start, target, cur):
+                if target < 0:
+                    return
+
+                if target == 0:
+                    results.append(cur[:])
+                    return
+
+                for i in range(start, n):
+
+                    # The val in the same position can be used only once.
+                    if i > start and candidates[i] == candidates[i-1]:
+                        continue
+                    num = candidates[i]
+                    cur.append(num)
+                    dfs(i+1, target-num, cur)
+                    cur.pop()
+
+
+            if target < 0:
+                return []
+
+            candidates.sort()
+            n = len(candidates)
+            results = []
+            cur = []
+            dfs(0, target, cur)
+            return results
+          ```
     * 216: Combination Sum III (M)
     * 377: Combination Sum IV (M)
   * **Permutation**
     * 046: Permutations (M)
+      * Given a collection of **distinct integers**, return all possible permutations.
       * Approach1: Recursive, Time: O(n!), Space: O(n!),
         * Time: O(n!)
           * Total: n * n-1 * n-2..  * 2 * 1  -> n!
-        * Space: O(n!)
-          * n! permutations
-        * Python Solution
+        * Python
           ```python
-          def permute_rec(nums: List[int]) -> List[List[int]]:
-            perms = []
-
-            def _permute(start):
-                if start == len(nums)-1:
+          def permute(self, nums: List[int]) -> List[List[int]]:
+            def backtrack(start):
+                if start == n:
                     perms.append(nums[:])
                     return
 
-                for i in range(start, len(nums)):
+                for i in range(start, n):
                     nums[start], nums[i] = nums[i], nums[start]
-                    _permute(start=start+1)
+                    backtrack(start+1)
                     nums[start], nums[i] = nums[i], nums[start]
 
             if not nums:
-                return perms
+                return []
 
-            _permute(start=0)
+            perms = []
+            n = len(nums)
+            backtrack(0)
+
             return perms
           ```
       * Approach2: Iterative, Time: O(n!), Space: O(n!)
@@ -11450,27 +12668,105 @@ Table of Content
           * s1: [a]
           * s2: [a, b], [b, a]
           * s3: [c, a, b], [a, c, b], [a, b, c], [c, b, a], [b, c, a], [b, a, c]
-        * Python Solution
+        * Python
             ```python
-            def permute_iter(self, nums: List[int]) -> List[List[int]]:
-                if not nums:
-                    return [[]]
+            def permute(self, nums: List[int]) -> List[List[int]]:
+              if not nums:
+                  return []
 
-                perms = [[nums[0]]]
+              perms = [[nums[0]]]
 
-                for i in range(1, len(nums)):
-                    new_num = nums[i]
-                    new_perms = []
-                    for perm in perms:
-                        # n + 1 position for each perm
-                        for b in range(len(perm)+1):
-                            new_perms.append(perm[:b] + new_num + perm[b:])
+              for i in range(1, len(nums)):
+                  num = nums[i]
+                  new_perms = []
 
-                    perms = new_perms
+                  for perm in perms:
+                      for b in range(0, len(perm)+1):
+                          new_perms.append(perm[:b] + [num] + perm[b:])
 
-                return perms
+                  perms = new_perms
+
+              return perms
             ```
     * 047: Permutations II (M)
+      * Given a collection of numbers **that might contain duplicates**, return all possible unique permutations.
+      * Note:
+        * Avoid duplicate val in the same position and use each val only once.
+      * Approach1: Recursive, BackTracking + Counter
+        * Python
+          ```python
+          def permuteUnique(self, nums):
+              def backtrack(counter, cur):
+                  if len(cur) == n:
+                      results.append(cur[:])
+                      return
+
+                  # don't pick duplicates in the same position
+                  for num in counter:
+                      # take only once in each permuation
+                      if counter[num] == 0:
+                          continue
+
+                      cur.append(num)
+                      counter[num] -= 1
+
+                      # pop the key when the number == 0 and append later ??
+                      backtrack(counter, cur)
+
+                      cur.pop()
+                      counter[num] += 1
+
+              n = len(nums)
+              results = []
+              cur = []
+              counter = Counter(nums)
+              backtrack(counter, cur)
+
+              return results
+          ```
+      * Approach2: Iterative bottom up
+        * Ref
+          * https://leetcode.com/problems/permutations-ii/discuss/18602/9-line-python-solution-with-1-line-to-handle-duplication-beat-99-of-others-%3A-)
+        * How to avoid duplicate ?
+          * just avoid inserting a number AFTER any of its duplicates.
+          * Another way to think is that we have symmetry and inserting only towards left of previous 2 or only towards right of previous 2 is all we have to do.
+            * 1. [n]
+            * 2. [n* n] == [n n*]
+          * Example:
+            ```txt
+            [1, 2, 2*]
+
+            step1:
+            [1]
+
+            step2:
+            [1, 2],  [2, 1]
+
+            step3:
+            [2*, 1, 2],  [1, 2*, 2],  x[1, 2, 2*]
+            [2*, 2, 1], x[2, 2*, 1],  x[2, 1, 2*]
+            ``
+        * Python
+          ```python
+          def permuteUnique(self, nums: List[int]) -> List[List[int]]:
+            if not nums:
+                return []
+
+            perms = [[]]
+            for n in nums:
+                new_perms = []
+
+                for perm in perms:
+                    for i in range(len(perm)+1):
+                        new_perms.append(perm[:i]+[n]+perm[i:])
+                        # To handle duplication
+                        # just avoid inserting a number AFTER any of its duplicates.
+                        if i < len(perm) and perm[i] == n:
+                            break
+
+                perms = new_perms
+            return perms
+          ```
     * 031: Next Permutation (M)
     * 060: Permutation Sequence (M)
   * 291: Word Pattern II
@@ -11571,7 +12867,7 @@ Table of Content
       * https://www.youtube.com/watch?v=ddTC4Zovtbc
       * https://leetcode.com/problems/course-schedule-ii/solution/
     * 207: Course Schedule (M)
-      * Approach1: Node Indegree + BFS, Time: O(V+E), Space: O(V+E)
+      * Approach1: Peeling Onion, Time: O(V+E), Space: O(V+E)
         * Time: O(V+E)
           * Build Outdegree List Graph and Indegree Array
             * O(E)
@@ -11626,18 +12922,18 @@ Table of Content
                   if indegree == 0:
                       q.append(course)
 
-              unsheduled_cnt = numCourses
+              sheduled_cnt = 0
               while q:
                   cur = q.popleft()
-                  unsheduled_cnt -= 1
+                  sheduled_cnt += 1
                   # remove outdegree edges of node
-                  for nxt in g_adj[cur]:
-                      a_indegree[nxt] -= 1
+                  for next_course in g_adj[cur]:
+                      a_indegree[next_course] -= 1
                       # indegree == 0 means no prequisites
-                      if a_indegree[nxt] == 0:
-                          q.append(nxt)
+                      if a_indegree[next_course] == 0:
+                          q.append(next_course)
 
-              return unsheduled_cnt == 0
+              return sheduled_cnt == numCourses
           ```
       * Approach2: DFS:
         * Algorithm:
