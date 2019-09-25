@@ -8,6 +8,7 @@ Table of Content
 - [Leetcode](#leetcode)
   - [Classification](#classification)
   - [Math](#math)
+  - [Sorting](#sorting)
   - [String](#string)
   - [Array](#array)
   - [Matrix](#matrix)
@@ -119,7 +120,7 @@ Table of Content
 ## [Leetcode](https://leetcode.com/)
 ### [Classification](https://cspiration.com/leetcodeClassification#103)
 ### Math
-  * Number:
+  * **Number**:
     * 007: Reverse Integer (E)
       * Notice the **boundary** and **negative** value
       * Approach1: Time:O(logn)
@@ -237,7 +238,7 @@ Table of Content
           Z  26     AZ    26+26     BZ  2×26+26     ...     ZZ  26×26+26     AAZ  1×26²+1×26+26
 
           ABCD＝A×26³＋B×26²＋C×26¹＋D＝1×26³＋2×26²＋3×26¹＋4
-          ZZZZ＝Z×26³＋Z×26²＋Z×26¹＋Z＝26×26³＋26×26²＋26×26¹＋26
+          WXYZ＝W×26³＋X×26²＋ZY26¹＋Z, W,X,Y,Z are in range 1~26
           ```
         * Approach1: Time:O(log(n)), Space:O(1)
           * Time:
@@ -881,6 +882,489 @@ Table of Content
 
             return pascal
           ```
+### Sorting
+  * Standard Sorting:
+    * 912: Sort an Array (M)
+      * Approach1: **Insertion** Sort, Time:O(n^2), Space:O(1)
+        * Insert 1th, 2th, ... n-1th elements to the array
+        * Iterative: Time:O(n^2), Space:O(1)
+          * Python
+            ```python
+            def sortArray(self, nums: List[int]) -> List[int]:
+              # 1 to n-1
+              for insert in range(1, len(nums)):
+                  # insert-1 to 0
+                  for i in range(insert-1, -1, -1):
+                      if nums[i] <= nums[i+1]:
+                          break
+
+                      nums[i], nums[i+1] = nums[i+1], nums[i]
+
+              return nums
+            ```
+        * Recursive: Time:O(n^2), Space:O(n)
+          * Python
+            ```python
+            def sortArray(self, nums: List[int]) -> List[int]:
+              def insertion_sort(insert):
+                  if insert < 1:
+                      return
+
+                  # backtrack
+                  insertion_sort(insert-1)
+
+                  for i in range(insert-1, -1, -1):
+                      if nums[i] <= nums[i+1]:
+                          break
+                      nums[i], nums[i+1] = nums[i+1], nums[i]
+
+
+              n = len(nums)
+
+              if n < 2:
+                  return nums
+
+              insertion_sort(n-1)
+
+              return nums
+            ```
+      * Approach2: **Selection** Sort, Time:O(n^2), Space:O(1)
+        * Select min from 0 to n-2
+        * Iterative: Time:O(n^2), Space:O(1)
+          * Python
+            ```python
+            def sortArray(self, nums: List[int]) -> List[int]:
+              n = len(nums)
+              if n <= 1:
+                  return nums
+
+              # from 0 to n-2
+              for select in range(0, n-1):
+                  minimum = select
+                  # from select + 1 to n-1
+                  for compare in range(select+1, n):
+                      if nums[compare] < nums[minimum]:
+                          minimum = compare
+
+                  if minimum != select:
+                      nums[select], nums[minimum] = nums[minimum], nums[select]
+
+              return nums
+            ```
+        * Recursive: Time:O(n^2), Space:O(1)
+          * Python
+            ```python
+            def sortArray(self, nums: List[int]) -> List[int]:
+              def selection_sort(select):
+                  if select >= n-1:
+                      return
+
+                  # from select+1 to n-1
+                  min_idx = select
+                  # from select + 1 to n-1
+                  for i in range(select+1, n):
+                      if nums[i] < nums[min_idx]:
+                          min_idx = i
+
+                  if min_idx != select:
+                      nums[select], nums[min_idx] = nums[min_idx], nums[select]
+
+                  selection_sort(select+1)
+
+              n = len(nums)
+
+              if n < 2:
+                  return nums
+
+              selection_sort(select=0)
+
+              return nums
+            ```
+      * Approach3: **Bubble** Sort, Time:O(n^2), Space:O(1)
+        * Bubble max to the end from n-1 to 1
+        * Iterative: Time:O(n^2), Space:O(1)
+          * Python
+            ```python
+            def sortArray(self, nums: List[int]) -> List[int]:
+              n = len(nums)
+
+              if n < 2:
+                  return nums
+
+              # from n-1 to 1
+              for bubble in range(n-1, 0, -1):
+                  # from 0 to bubble-1
+                  is_swap = False
+                  for i in range(bubble):
+                      if nums[i] > nums[i+1]:
+                          nums[i], nums[i+1] = nums[i+1], nums[i]
+                          is_swap = True
+
+                  if not is_swap:
+                      break
+
+              return nums
+            ```
+        * Recursive: Time:O(n^2), Space:O(n)
+          * Python
+            ```python
+            def sortArray(self, nums: List[int]) -> List[int]:
+              def bubble_sort(bubble):
+                  if bubble < 1:
+                      return
+
+                  is_swap = False
+                  for i in range(bubble):
+                      if nums[i] > nums[i+1]:
+                          nums[i], nums[i+1] = nums[i+1], nums[i]
+                          is_swap = True
+
+                  if not is_swap:
+                      return
+
+                  bubble_sort(bubble-1)
+
+
+              n = len(nums)
+
+              if n < 2:
+                  return nums
+
+              bubble_sort(n-1)
+
+              return nums
+            ```
+      * Approach4: **Quick** Sort, Time:O(nlogn), Space:O(logn~n)
+        * Iterative, Time:O(nlogn), Space:O(logn~n):
+          * Python
+            ```python
+            def sortArray(self, nums: List[int]) -> List[int]:
+              def get_partition(left, right):
+                  pivot = right
+                  ran = random.randint(left, right)
+                  nums[ran], nums[pivot] = nums[pivot], nums[ran]
+                  pivot_val = nums[pivot]
+
+                  border = left
+                  for cur in range(border, pivot):
+                      if nums[cur] <= pivot_val:
+                          nums[border], nums[cur] = nums[cur], nums[border]
+                          border += 1
+
+                  nums[border], nums[pivot] = nums[pivot], nums[border]
+
+                  return border
+
+              if len(nums) < 2:
+                  return nums
+
+              stack = []
+              stack.append((0, len(nums)-1))
+              while stack:
+                  l, r = stack.pop()
+
+                  p = get_partition(l, r)
+
+                  # left partition
+                  if l < p-1:
+                      stack.append((l, p-1))
+
+                  # right partition:
+                  if p + 1 < r:
+                      stack.append((p+1, r))
+
+              return nums
+            ```
+        * Recursive, Time:O(nlogn), Space:O(logn~n):
+          * Python
+            ```python
+            def sortArray(self, nums: List[int]) -> List[int]:
+
+              def get_partition(left, right):
+                  pivot = right
+                  ran = random.randint(left, right)
+                  nums[ran], nums[pivot] = nums[pivot], nums[ran]
+                  pivot_val = nums[pivot]
+
+                  border = left
+                  for cur in range(border, pivot):
+                      if nums[cur] <= pivot_val:
+                          nums[border], nums[cur] = nums[cur], nums[border]
+                          border += 1
+
+                  nums[border], nums[pivot] = nums[pivot], nums[border]
+
+                  return border
+
+
+              def quick_sort(l, r):
+                  if l >= r:
+                      return
+
+                  p = get_partition(l, r)
+                  quick_sort(l, p-1)
+                  quick_sort(p+1, r)
+
+
+              quick_sort(0, len(nums)-1)
+
+              return nums
+            ```
+      * Approach5: **Merge** Sort, Time:O(nlogn), Space:O(n)
+        * Note:
+          * Use indices to prevent extra copy
+          * Copy subarrays before merge
+        * Iterative
+          * Python
+            ```python
+             def sortArray(self, nums: List[int]) -> List[int]:
+              def merge_2_sorted_array(dst_start,
+                                      left_start, left_end,
+                                      right_start, right_end):
+
+                  left = nums[left_start:left_end+1]
+                  right = nums[right_start:right_end+1]
+
+                  d = dst_start
+                  l = r = 0
+                  while l < len(left) and r < len(right):
+                      if left[l] <= right[r]:
+                          nums[d] = left[l]
+                          l += 1
+                      else:
+                          nums[d] = right[r]
+                          r += 1
+
+                      d += 1
+
+                  while l < len(left):
+                      nums[d] = left[l]
+                      l += 1
+                      d += 1
+
+              window_size = 1
+              while window_size < len(nums):
+
+                  left = 0
+                  while left + window_size < len(nums):
+                      mid = left + window_size
+                      right = mid + window_size
+                      merge_2_sorted_array(left,
+                                           left, mid-1,
+                                           mid, right-1)
+                      left = right
+
+                  window_size *= 2
+
+              return nums
+            ```
+        * Recursive
+          ```python
+          def sortArray(self, nums: List[int]) -> List[int]:
+              def merge_2_sorted_array(dst_start,
+                                      left_start, left_end,
+                                      right_start, right_end):
+
+                  left = nums[left_start:left_end+1]
+                  right = nums[right_start:right_end+1]
+
+                  d = dst_start
+                  l = r = 0
+
+                  while l < len(left) and r < len(right):
+                      if left[l] <= right[r]:
+                          nums[d] = left[l]
+                          l += 1
+                      else:
+                          nums[d] = right[r]
+                          r += 1
+
+                      d += 1
+
+                  while l < len(left):
+                      nums[d] = left[l]
+                      l += 1
+                      d += 1
+
+
+              def merge_sort(left, right):
+                  if left >= right:
+                      return
+
+                  mid = (left + right) // 2
+
+                  merge_sort(left, mid)
+                  merge_sort(mid+1, right)
+
+                  merge_2_sorted_array(left,
+                                      left, mid,
+                                      mid+1, right)
+
+
+              merge_sort(0, len(nums)-1)
+
+              return nums
+          ```
+      * Approach6: **Heap** Sort, Time:O(nlogn), Space:O(1)
+        * Note:
+          * Parent to child
+            * left child: 2n + 1
+            * right child: 2n + 1
+          * Child to parent
+            * (n - 1) / 2
+        * Algo
+          * Step1:
+            * heapify the array
+          * Step2:
+            * (n-1) rounds
+              * swap the max to the end of the array, and heapify again
+        * Iterative: Time:O(nlogn), Space:O(1)
+          * Python
+            ```python
+            def sortArray(self, nums: List[int]) -> List[int]:
+              def max_heapify(cur, boundary):
+                  """
+                  bubble down operation
+                  """
+                  while True:
+                      left = cur * 2 + 1
+                      right = cur * 2 + 2
+
+                      cur_max = cur
+
+                      if left < boundary and nums[left] >= nums[cur_max]:
+                          cur_max = left
+
+                      if right < boundary and nums[right] >= nums[cur_max]:
+                          cur_max = right
+
+                      # no need to swap or no children
+                      if cur_max == cur:
+                          break
+
+                      nums[cur], nums[cur_max] = nums[cur_max], nums[cur]
+                      cur = cur_max
+
+
+              n = len(nums)
+              # from n//2 to 0 (bottom up heapify)
+              # takes O(n)
+              for i in range(n//2, -1, -1):
+                  max_heapify(cur=i, boundary=n)
+
+              # from n-1 to 1
+              for i in range(n-1, 0, -1):
+                  nums[0], nums[i] = nums[i], nums[0]
+                  max_heapify(cur=0, boundary=i)
+
+              return nums
+            ```
+        * Recursive: Time:O(nlogn), Space:O(n)
+          * Change for loop to recursive
+          * Cheange max_heapify to recurisive
+  * Others:
+      * 280: Wiggle Sort (M)
+         * Given an unsorted array nums, reorder it in-place such that nums[0] <= nums[1] >= nums[2] <= nums[3]
+         * Approach1: sorting, O(log(n))
+           * Sort and then pair swapping
+           * Python Solution
+             ```python
+             def wiggleSort(self, nums: List[int]) -> None:
+              nums.sort()
+              for i in range(1, len(nums)-1, 2):
+                  nums[i], nums[i+1] = nums[i+1], nums[i]
+             ```
+         * Approach2: greedy, O(n)
+           * Greedy from left to right
+           * Python Solution
+             ```python
+             def wiggleSort(self, nums: List[int]) -> None:
+              should_less = True
+              for i in range(len(nums)-1):
+                  if should_less:
+                      if nums[i] > nums[i+1]:
+                          nums[i], nums[i+1] = nums[i+1], nums[i]
+                  else:
+                      if nums[i] < nums[i+1]:
+                          nums[i], nums[i+1] = nums[i+1], nums[i]
+
+                  should_less = not should_less
+             ```
+      * 324: Wiggle Sort II (M)
+        * Given an unsorted array nums, reorder it such that nums[0] < nums[1] > nums[2] < nums[3]
+        * Error answer:
+          * test case:
+            * [1,2,2,1,2,1,1,1,1,2,2,2]
+          * Python
+          ```python
+          def wiggleSort(self, nums: List[int]) -> None:
+            should_less = True
+            for i in range(len(nums)-1):
+                if should_less:
+                    if nums[i] >= nums[i+1]:
+                        nums[i], nums[i+1] = nums[i+1], nums[i]
+                else:
+                    if nums[i] <= nums[i+1]:
+                        nums[i], nums[i+1] = nums[i+1], nums[i]
+
+                should_less = not should_less
+
+          ```
+      * 075: Sort Colors (M)
+         * Approach1: Quick sort, Time:O(nlog(n)), Space:O(log(n)~n)
+         * Approach2: **Counting sort**, Time:O(n+k), Space:O(k)
+           * Python:
+           ```python
+           def sortColors(self, nums: List[int]) -> None:
+             """
+             Do not return anything, modify nums in-place instead.
+             """
+             if not nums:
+                 return
+
+             # 3 colors only
+             color_num = 3
+             cnt_memo = [0] * color_num
+
+             for num in nums:
+                 cnt_memo[num] += 1
+
+             p = 0
+             for color, cnt in enumerate(cnt_memo):
+                 for _ in range(cnt):
+                     nums[p] = color
+                     p += 1
+           ```
+         * Approach3: **Dutch National Flag Problem**, Time:O(n), Space:O(1)
+           * Like 2 boundary quick sort
+             * p0: boundary for 0
+             * p2: boundary for 2
+             * cur: runner
+           * notice the end condition
+           * Python
+             ```python
+             def sortColors(self, nums: List[int]) -> None:
+               """
+               Do not return anything, modify nums in-place instead.
+               """
+               if not nums:
+                   return
+
+               cur = p0 = 0
+               p2 = len(nums)-1
+
+               while cur <= p2:
+                   if nums[cur] == 2:
+                       nums[cur], nums[p2] = nums[p2], nums[cur]
+                       p2 -= 1
+                   elif nums[cur] == 0:
+                       nums[cur], nums[p0] = nums[p0], nums[cur]
+                       p0 += 1
+                       # p0 only forwards 1, p1 does not need to check again.
+                       cur += 1
+                   else:  # nums[cur] == 1
+                       cur += 1
+             ```
 ### String
   * Remove Duplicate
     * 316: Remove Duplicate Letters (H)
@@ -3469,7 +3953,7 @@ Table of Content
               return output
           ```
     * 239: Sliding Window Maximum (H)
-  * **Reorder** and **Sort**
+  * **Reorder**
     * 189: Rotate Array (E)
       * Approach1: Time:O(n), Space:O(1)
         * Use **three reverse** operations can solve this problem.
@@ -3846,406 +4330,6 @@ Table of Content
       * follow up: Infinite array
         * [Solution](https://leetcode.com/problems/game-of-life/discuss/73217/Infinite-board-solution/201780)
     * 723：Candy Crush (M)
-### Sorting
-  * Array:
-    * 912: Sort an Array (M)
-      * Approach1: **Insertion** Sort, Time:O(n^2), Space:O(1)
-        * Insert 1th, 2th, ... n-1th elements to the array
-        * Iterative:
-          * Python
-            ```python
-            def sortArray(self, nums: List[int]) -> List[int]:
-              n = len(nums)
-
-              if n <= 1:
-                  return nums
-
-              # from 1 to n-1
-              for insert in range(1, n):
-                  for compare in range(insert-1, -1, -1):
-                      if nums[compare] > nums[compare+1]:
-                          nums[compare], nums[compare+1] = nums[compare+1], nums[compare]
-                      else:
-                        break
-
-              return nums
-            ```
-        * Recursive:
-          * Python
-            ```python
-            def sortArray(self, nums: List[int]) -> List[int]:
-              def insertion_sort(insert):
-                  if insert < 1:
-                      return
-
-                  insertion_sort(insert-1)
-
-                  for compare in range(insert-1, -1, -1):
-                      if nums[compare] > nums[compare+1]:
-                          nums[compare], nums[compare+1] = nums[compare+1], nums[compare]
-                      else:
-                         break
-
-              n = len(nums)
-
-              if n <= 1:
-                  return nums
-
-              insertion_sort(n-1)
-
-              return nums
-            ```
-      * Approach2: **Selection** Sort, Time:O(n^2), Space:O(1)
-        * Select min from 0 to n-2
-        * Iterative:
-          * Python
-            ```python
-            def sortArray(self, nums: List[int]) -> List[int]:
-              n = len(nums)
-              if n <= 1:
-                  return nums
-
-              # from 0 to n-2
-              for select in range(0, n-1):
-                  minimum = select
-                  # from select + 1 to n-1
-                  for compare in range(select+1, n):
-                      if nums[compare] < nums[minimum]:
-                          minimum = compare
-
-                  if minimum != select:
-                      nums[select], nums[minimum] = nums[minimum], nums[select]
-
-              return nums
-            ```
-        * Recursive:
-          * Python
-            ```python
-            def sortArray(self, nums: List[int]) -> List[int]:
-              def selection(select):
-                  if select >= n-1:
-                      return
-
-                  minimum = select
-                  # from select + 1 to n-1
-                  for compare in range(select+1, n):
-                      if nums[compare] < nums[minimum]:
-                          minimum = compare
-
-                  if minimum != select:
-                      nums[select], nums[minimum] = nums[minimum], nums[select]
-
-                  selection(select+1)
-
-              n = len(nums)
-
-              if n <= 1:
-                  return nums
-
-              selection(0)
-
-              return nums
-            ```
-      * Approach3: **Bubble** Sort, Time:O(n^2), Space:O(1)
-        * Bubble max to the end from n-1 to 1
-        * Iterative:
-          * Python
-            ```python
-            def sortArray(self, nums: List[int]) -> List[int]:
-              n = len(nums)
-
-              if n <= 1:
-                  return nums
-
-              is_swap = False
-              for bubble in range(n-1, 1, -1):
-                  for compare in range(0, bubble):
-                      if nums[compare] > nums[compare+1]:
-                          nums[compare], nums[compare+1] = nums[compare+1], nums[compare]
-                          is_swap = True
-
-                  if not is_swap:
-                      break
-
-              return nums
-            ```
-        * Recursive:
-          * Python
-            ```python
-            def sortArray(self, nums: List[int]) -> List[int]:
-              def bubble_sort(bubble):
-                  if bubble >= n:
-                      return
-
-                  bubble_sort(bubble+1)
-
-                  for compare in range(0, bubble):
-                      if nums[compare] > nums[compare+1]:
-                          nums[compare], nums[compare+1] = nums[compare+1], nums[compare]
-                          is_swap = True
-
-              n = len(nums)
-              if n <= 1:
-                  return nums
-
-              bubble_sort(1)
-
-              return nums
-            ```
-      * Approach4: **Quick** Sort, Time:O(nlogn), Space:O(n)
-        * Iterative:
-          * Python
-            ```python
-            def sortArray(self, nums: List[int]) -> List[int]:
-              def get_partition(left, right):
-                  pivot_ran = random.randint(left, right)
-                  pivot = right
-                  nums[pivot], nums[pivot_ran] = nums[pivot_ran], nums[pivot]
-
-                  border = left
-                  pivot_val = nums[pivot]
-
-                  for cur in range(border, right):
-                      if nums[cur] <= pivot_val:
-                          nums[cur], nums[border] = nums[border], nums[cur]
-                          border += 1
-
-                  nums[pivot], nums[border] = nums[border], nums[pivot]
-
-                  return border
-
-              n = len(nums)
-              if n <= 1:
-                  return nums
-
-              stack = [(0, n-1)]
-              while stack:
-                  left, right = stack.pop()
-
-                  partition = get_partition(left, right)
-
-                  if left < partition:
-                      stack.append((left, partition-1))
-
-                  if partition < right:
-                      stack.append((partition+1, right))
-
-              return nums
-            ```
-        * Recursive:
-          * Python
-            ```python
-            def sortArray(self, nums: List[int]) -> List[int]:
-              def get_partition(left, right):
-                  pivot_ran = random.randint(left, right)
-                  pivot = right
-                  nums[pivot], nums[pivot_ran] = nums[pivot_ran], nums[pivot]
-
-                  border = left
-                  pivot_val = nums[pivot]
-
-                  for cur in range(border, right):
-                      if nums[cur] <= pivot_val:
-                          nums[cur], nums[border] = nums[border], nums[cur]
-                          border += 1
-
-                  nums[pivot], nums[border] = nums[border], nums[pivot]
-
-                  return border
-
-              def quick_sort(left, right):
-                  if left >= right:
-                      return
-
-                  partition = get_partition(left, right)
-                  quick_sort(left, partition-1)
-                  quick_sort(partition+1, right)
-
-              if len(nums) <= 1:
-                  return nums
-
-              quick_sort(0, len(nums)-1)
-
-              return nums
-            ```
-      * Approach5: **Merge** Sort, Time:O(nlogn), Space:O(n)
-        * Iterative
-          * Python
-            ```python
-            def sortArray(self, nums: List[int]) -> List[int]:
-              def merge(array,
-                        left_start, left_end,
-                        right_start, right_end):
-
-                  left_window = array[left_start:left_end+1]
-                  right_window = array[right_start:right_end+1]
-                  l = r = 0
-                  cur = left_start
-
-                  while l < len(left_window) and r < len(right_window):
-                      if left_window[l] <= right_window[r]:
-                          array[cur] = left_window[l]
-                          l += 1
-                      else:
-                          array[cur] = right_window[r]
-                          r += 1
-                      cur += 1
-
-                  while l < len(left_window):
-                      array[cur] = left_window[l]
-                      l += 1
-                      cur += 1
-
-              if len(nums) <= 1:
-                  return nums
-
-              windows_size = 1
-              while windows_size < len(nums):
-                  left = 0
-                  while left + windows_size < len(nums):
-                      mid = left + windows_size
-                      right = mid + windows_size
-
-                      merge(nums,
-                          left, mid-1,
-                          mid, right-1)
-
-                      left += (2*windows_size)
-
-                  windows_size *= 2
-
-              return nums
-            ```
-        * Recursice
-          ```python
-          def sortArray(self, nums: List[int]) -> List[int]:
-            def merge(array,
-                      left_start, left_end,
-                      right_start, right_end):
-
-              left_window = array[left_start:left_end+1]
-              right_window = array[right_start:right_end+1]
-              l = r = 0
-              cur = left_start
-
-              while l < len(left_window) and r < len(right_window):
-                  if left_window[l] <= right_window[r]:
-                      array[cur] = left_window[l]
-                      l += 1
-                  else:
-                      array[cur] = right_window[r]
-                      r += 1
-                  cur += 1
-
-              while l < len(left_window):
-                  array[cur] = left_window[l]
-                  l += 1
-                  cur += 1
-
-            def merge_sort(array, left, right):
-                if left >= right:
-                    return
-
-                mid = (left+right)//2
-                merge_sort(array, left, mid)
-                merge_sort(array, mid+1, right)
-
-                merge(array,
-                      left, mid,
-                      mid+1, right)
-
-                merge_sort(nums, 0, len(nums)-1)
-
-                return nums
-          ```
-      * Approach6: **Heap** Sort, Time:O(nlogn), Space:O(n)
-        * Do max heapify (bubble down), and swap the max to the end
-        * Iterative:
-          * Python
-            ```python
-            def max_heapify(cur, boundary):
-              """
-              boundary is exclusive
-              bubble down heapify
-              """
-              while cur < boundary:  # notice the cur may be 0
-                  maximum = cur
-                  left = 2*cur + 1
-                  right = 2*cur + 2
-
-                  if left < boundary and nums[left] > nums[maximum]:
-                      maximum = left
-
-                  if right < boundary and nums[right] > nums[maximum]:
-                      maximum = right
-
-                  if cur == maximum:
-                      break
-
-                  nums[cur], nums[maximum] = nums[maximum], nums[cur]
-                  cur = maximum
-
-              n = len(nums)
-              if n <= 1:
-                  return nums
-
-              # init heapify
-              # from n//2 to 0
-              for start in range(n//2, -1, -1):
-                  max_heapify(start, n)
-
-              # from n-1 to 1
-              for boundary in range(n-1, 0, -1):
-                  # swap the maximum to the end
-                  nums[0], nums[boundary] = nums[boundary], nums[0]
-                  max_heapify(0, boundary)
-
-              return nums
-            ```
-        * Recursive:
-          * Python
-            ```python
-            def sortArray(self, nums: List[int]) -> List[int]:
-              def max_heapify(cur, boundary):
-                  """
-                  boundary is exclusive
-                  bubble down heapify
-                  """
-                  while cur < boundary:
-                      maximum = cur
-                      left = 2*cur + 1
-                      right = 2*cur + 2
-
-                      if left < boundary and nums[left] > nums[maximum]:
-                          maximum = left
-
-                      if right < boundary and nums[right] > nums[maximum]:
-                          maximum = right
-
-                      if cur == maximum:
-                          break
-
-                      nums[cur], nums[maximum] = nums[maximum], nums[cur]
-                      cur = maximum
-
-              n = len(nums)
-
-              if n <= 1:
-                  return nums
-
-              # init heapify
-              # from n//2 to 0
-              for i in range(n//2, -1, -1):
-                  max_heapify(cur=i, boundary=n)
-
-              # from n-1 to 1
-              for i in range(n-1, 0, -1):
-                  # swap the maximum to the end
-                  nums[0], nums[i] = nums[i], nums[0]
-                  max_heapify(cur=0, boundary=i)
-
-              return nums
-            ```
 ### Matrix
  * **Rotate**:
    * Approach1: m*n arryay, Time:O(mn), Space:O(mn)
@@ -5062,493 +5146,6 @@ Table of Content
  * 302: Smallest Rectangle Enclosing Black Pixels (H)
  * 036: Valid Sudoku (M)
  * 037: Sudoku Solver (H)
-### Sorting
-   * Array:
-   * 912: Sort an Array (M)
-      * Approach1: **Insertion** Sort, Time:O(n^2), Space:O(1)
-        * Insert 1th, 2th, ... n-1th elements to the array
-        * Iterative:
-          * Python
-            ```python
-            def sortArray(self, nums: List[int]) -> List[int]:
-              n = len(nums)
-
-              if n <= 1:
-                  return nums
-
-              # from 1 to n-1
-              for insert in range(1, n):
-                  for compare in range(insert-1, -1, -1):
-                      if nums[compare] > nums[compare+1]:
-                          nums[compare], nums[compare+1] = nums[compare+1], nums[compare]
-
-              return nums
-            ```
-        * Recursive:
-          * Python
-            ```python
-            def sortArray(self, nums: List[int]) -> List[int]:
-              def insertion_sort(insert):
-                  if insert < 1:
-                      return
-
-                  insertion_sort(insert-1)
-
-                  for compare in range(insert-1, -1, -1):
-                      if nums[compare] > nums[compare+1]:
-                          nums[compare], nums[compare+1] = nums[compare+1], nums[compare]
-
-              n = len(nums)
-
-              if n <= 1:
-                  return nums
-
-              insertion_sort(n-1)
-
-              return nums
-            ```
-      * Approach2: **Selection** Sort, Time:O(n^2), Space:O(1)
-        * Select min from 0 to n-2
-        * Iterative:
-          * Python
-            ```python
-            def sortArray(self, nums: List[int]) -> List[int]:
-              n = len(nums)
-              if n <= 1:
-                  return nums
-
-              # from 0 to n-2
-              for select in range(0, n-1):
-                  minimum = select
-                  # from select + 1 to n-1
-                  for compare in range(select+1, n):
-                      if nums[compare] < nums[minimum]:
-                          minimum = compare
-
-                  if minimum != select:
-                      nums[select], nums[minimum] = nums[minimum], nums[select]
-
-              return nums
-            ```
-        * Recursive:
-          * Python
-            ```python
-            def sortArray(self, nums: List[int]) -> List[int]:
-              def selection(select):
-                  if select >= n-1:
-                      return
-
-                  minimum = select
-                  # from select + 1 to n-1
-                  for compare in range(select+1, n):
-                      if nums[compare] < nums[minimum]:
-                          minimum = compare
-
-                  if minimum != select:
-                      nums[select], nums[minimum] = nums[minimum], nums[select]
-
-                  selection(select+1)
-
-              n = len(nums)
-
-              if n <= 1:
-                  return nums
-
-              selection(0)
-
-              return nums
-            ```
-      * Approach3: **Bubble** Sort, Time:O(n^2), Space:O(1)
-        * Bubble max to the end from n-1 to 1
-        * Iterative:
-          * Python
-            ```python
-            def sortArray(self, nums: List[int]) -> List[int]:
-              n = len(nums)
-
-              if n <= 1:
-                  return nums
-
-              is_swap = False
-              for bubble in range(n-1, 1, -1):
-                  for compare in range(0, bubble):
-                      if nums[compare] > nums[compare+1]:
-                          nums[compare], nums[compare+1] = nums[compare+1], nums[compare]
-                          is_swap = True
-
-                  if not is_swap:
-                      break
-
-              return nums
-            ```
-        * Recursive:
-          * Python
-            ```python
-            def sortArray(self, nums: List[int]) -> List[int]:
-              def bubble_sort(bubble):
-                  if bubble >= n:
-                      return
-
-                  bubble_sort(bubble+1)
-
-                  for compare in range(0, bubble):
-                      if nums[compare] > nums[compare+1]:
-                          nums[compare], nums[compare+1] = nums[compare+1], nums[compare]
-                          is_swap = True
-
-              n = len(nums)
-              if n <= 1:
-                  return nums
-
-              bubble_sort(1)
-
-              return nums
-            ```
-      * Approach4: **Quick** Sort, Time:O(nlogn), Space:O(n)
-        * Iterative:
-          * Python
-            ```python
-            def sortArray(self, nums: List[int]) -> List[int]:
-              def get_partition(left, right):
-                  pivot_ran = random.randint(left, right)
-                  pivot = right
-                  nums[pivot], nums[pivot_ran] = nums[pivot_ran], nums[pivot]
-
-                  border = left
-                  pivot_val = nums[pivot]
-
-                  for cur in range(border, right):
-                      if nums[cur] <= pivot_val:
-                          nums[cur], nums[border] = nums[border], nums[cur]
-                          border += 1
-
-                  nums[pivot], nums[border] = nums[border], nums[pivot]
-
-                  return border
-
-              n = len(nums)
-              if n <= 1:
-                  return nums
-
-              stack = [(0, n-1)]
-              while stack:
-                  left, right = stack.pop()
-
-                  partition = get_partition(left, right)
-
-                  if left < partition:
-                      stack.append((left, partition-1))
-
-                  if partition < right:
-                      stack.append((partition+1, right))
-
-              return nums
-            ```
-        * Recursive:
-          * Python
-            ```python
-            def sortArray(self, nums: List[int]) -> List[int]:
-              def get_partition(left, right):
-                  pivot_ran = random.randint(left, right)
-                  pivot = right
-                  nums[pivot], nums[pivot_ran] = nums[pivot_ran], nums[pivot]
-
-                  border = left
-                  pivot_val = nums[pivot]
-
-                  for cur in range(border, right):
-                      if nums[cur] <= pivot_val:
-                          nums[cur], nums[border] = nums[border], nums[cur]
-                          border += 1
-
-                  nums[pivot], nums[border] = nums[border], nums[pivot]
-
-                  return border
-
-              def quick_sort(left, right):
-                  if left >= right:
-                      return
-
-                  partition = get_partition(left, right)
-                  quick_sort(left, partition-1)
-                  quick_sort(partition+1, right)
-
-              if len(nums) <= 1:
-                  return nums
-
-              quick_sort(0, len(nums)-1)
-
-              return nums
-            ```
-      * Approach5: **Merge** Sort, Time:O(nlogn), Space:O(n)
-        * Iterative
-          * Python
-            ```python
-            def sortArray(self, nums: List[int]) -> List[int]:
-              def merge(array,
-                        left_start, left_end,
-                        right_start, right_end):
-
-                  left_window = array[left_start:left_end+1]
-                  right_window = array[right_start:right_end+1]
-                  l = r = 0
-                  cur = left_start
-
-                  while l < len(left_window) and r < len(right_window):
-                      if left_window[l] <= right_window[r]:
-                          array[cur] = left_window[l]
-                          l += 1
-                      else:
-                          array[cur] = right_window[r]
-                          r += 1
-                      cur += 1
-
-                  while l < len(left_window):
-                      array[cur] = left_window[l]
-                      l += 1
-                      cur += 1
-
-              if len(nums) <= 1:
-                  return nums
-
-              windows_size = 1
-              while windows_size < len(nums):
-                  left = 0
-                  while left + windows_size < len(nums):
-                      mid = left + windows_size
-                      right = mid + windows_size
-
-                      merge(nums,
-                          left, mid-1,
-                          mid, right-1)
-
-                      left += (2*windows_size)
-
-                  windows_size *= 2
-
-              return nums
-            ```
-        * Recursice
-          ```python
-          def sortArray(self, nums: List[int]) -> List[int]:
-            def merge(array,
-                      left_start, left_end,
-                      right_start, right_end):
-
-              left_window = array[left_start:left_end+1]
-              right_window = array[right_start:right_end+1]
-              l = r = 0
-              cur = left_start
-
-              while l < len(left_window) and r < len(right_window):
-                  if left_window[l] <= right_window[r]:
-                      array[cur] = left_window[l]
-                      l += 1
-                  else:
-                      array[cur] = right_window[r]
-                      r += 1
-                  cur += 1
-
-              while l < len(left_window):
-                  array[cur] = left_window[l]
-                  l += 1
-                  cur += 1
-
-            def merge_sort(array, left, right):
-                if left >= right:
-                    return
-
-                mid = (left+right)//2
-                merge_sort(array, left, mid)
-                merge_sort(array, mid+1, right)
-
-                merge(array,
-                      left, mid,
-                      mid+1, right)
-
-                merge_sort(nums, 0, len(nums)-1)
-
-                return nums
-          ```
-      * Approach6: **Heap** Sort, Time:O(nlogn), Space:O(n)
-        * Do max heapify (bubble down), and swap the max to the end
-        * Iterative:
-          * Python
-            ```python
-            def max_heapify(cur, boundary):
-              """
-              boundary is exclusive
-              bubble down heapify
-              """
-              while cur < boundary:  # notice the cur may be 0
-                  maximum = cur
-                  left = 2*cur + 1
-                  right = 2*cur + 2
-
-                  if left < boundary and nums[left] > nums[maximum]:
-                      maximum = left
-
-                  if right < boundary and nums[right] > nums[maximum]:
-                      maximum = right
-
-                  if cur == maximum:
-                      break
-
-                  nums[cur], nums[maximum] = nums[maximum], nums[cur]
-                  cur = maximum
-
-              n = len(nums)
-              if n <= 1:
-                  return nums
-
-              # init heapify
-              # from n//2 to 0
-              for start in range(n//2, -1, -1):
-                  max_heapify(start, n)
-
-              # from n-1 to 1
-              for boundary in range(n-1, 0, -1):
-                  # swap the maximum to the end
-                  nums[0], nums[boundary] = nums[boundary], nums[0]
-                  max_heapify(0, boundary)
-
-              return nums
-            ```
-        * Recursive:
-          * Python
-            ```python
-            def sortArray(self, nums: List[int]) -> List[int]:
-              def max_heapify(cur, boundary):
-                  """
-                  boundary is exclusive
-                  bubble down heapify
-                  """
-                  while cur < boundary:
-                      maximum = cur
-                      left = 2*cur + 1
-                      right = 2*cur + 2
-
-                      if left < boundary and nums[left] > nums[maximum]:
-                          maximum = left
-
-                      if right < boundary and nums[right] > nums[maximum]:
-                          maximum = right
-
-                      if cur == maximum:
-                          break
-
-                      nums[cur], nums[maximum] = nums[maximum], nums[cur]
-                      cur = maximum
-
-              n = len(nums)
-
-              if n <= 1:
-                  return nums
-
-              # init heapify
-              # from n//2 to 0
-              for i in range(n//2, -1, -1):
-                  max_heapify(cur=i, boundary=n)
-
-              # from n-1 to 1
-              for i in range(n-1, 0, -1):
-                  # swap the maximum to the end
-                  nums[0], nums[i] = nums[i], nums[0]
-                  max_heapify(cur=0, boundary=i)
-
-              return nums
-            ```
-   * 280: Wiggle Sort (M) *
-     * Definition
-       * **nums[0] <= nums[1] >= nums[2] <= nums[3]...**
-     * Approach1: sorting, O(log(n))
-       * Sort and then pair swapping
-       * Python Solution
-         ```python
-         def wiggleSort(self, nums: List[int]) -> None:
-           """
-           Do not return anything, modify nums in-place instead.
-           nums[0] <= nums[1] >= nums[2] <= nums[3]
-           """
-           if len(nums) <= 1:
-               return
-
-           nums.sort()
-
-           # 1, 3, 5 .. n-2
-           for i in range(1, len(nums)-1, 2):
-               if nums[i] < nums[i+1]:
-                   nums[i], nums[i+1] = nums[i+1], nums[i]
-         ```
-     * Approach2: greedy, O(n)
-       * Greedy from left to right
-       * Python Solution
-         ```python
-         def wiggleSort(self, nums: List[int]) -> None:
-             less = True
-             for i in range(len(nums)-1):
-               if less:
-                 if nums[i] > nums[i+1]:
-                   nums[i], nums[i+1] = nums[i+1], nums[i]
-               else:
-                 if nums[i] < nums[i+1]:
-                   nums[i], nums[i+1] = nums[i+1], nums[i]
-
-               less = not less
-         ```
-   * 075: Sort Colors (M)
-     * Approach1: Quick sort, Time:O(nlog(n)), Space:O(log(n))
-     * Approach2: **Counting sort**, Time:O(n+k), Space:O(k)
-       * Python Solution:
-       ```python
-       def sortColors(self, nums: List[int]) -> None:
-         """
-         Do not return anything, modify nums in-place instead.
-         """
-         if not nums:
-             return
-
-         # 3 colors only
-         color_num = 3
-         cnt_array = [0] * color_num
-
-         for num in nums:
-             cnt_array[num] += 1
-
-         p = 0
-         for color, cnt in enumerate(cnt_array):
-             for _ in range(cnt):
-                 nums[p] = color
-                 p += 1
-       ```
-     * Approach3: **Dutch National Flag Problem**, Time:O(n), Space:O(1)
-       * Like 2 boundary quick sort
-         * p0: boundary for 0
-         * p2: boundary for 2
-         * cur: runner
-       * Python Solution
-         ```python
-         def sortColors(self, nums: List[int]) -> None:
-           """
-           Do not return anything, modify nums in-place instead.
-           """
-           if not nums:
-               return
-
-           cur = p0 = 0
-           p2 = len(nums)-1
-
-           while cur <= p2:
-               if nums[cur] == 2:
-                   nums[cur], nums[p2] = nums[p2], nums[cur]
-                   p2 -= 1
-               elif nums[cur] == 0:
-                   nums[cur], nums[p0] = nums[p0], nums[cur]
-                   p0 += 1
-                   cur += 1  #p0 only forwards 1, p1 does not need to check again.
-               else:  # nums[cur] == 1
-                   cur += 1
-         ```
 ### Binary Search
   * Tips:
     * Identify the definition of the left boundary and right boundary.
@@ -13344,17 +12941,23 @@ Table of Content
       * 007: Reverse Integer
         * Boundary and negative value
       * 202: Happy Number (E)
+      * Excel Sheet
+        * 168: **Excel Sheet** Column Title
     * Majority
       * Boyer-Moore Voting Algorithm
       * 1150: Check If a Number Is Majority Element in a Sorted Array (E)
       * 229: Majority Element II (M)
     * Pascal's Triangle
       * 119: Pascal's Triangle II (E)
-
     * Sum
       * 015: 3Sum (M)
       * 018: 4Sum (M) and kSum
-
+  * Sorting
+    * merge sort:
+      * using indices in the merge function.
+    * heap sort
+      * Use max heap
+    * 075: Sort Colors (M)
   * String
     * 038: Count and Say (E)
     * 392: Is Subsequence (E)
