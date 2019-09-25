@@ -119,50 +119,323 @@ Table of Content
 ## [Leetcode](https://leetcode.com/)
 ### [Classification](https://cspiration.com/leetcodeClassification#103)
 ### Math
-  * Reorder
-    * 007: Reverse Integer
-      * Notice the boundary and negative value
-      ```python
-      def reverse(self, x: int) -> int:
-        is_positive = True if x >=0 else False
-        reverse = 0
-        boundary = (2 ** 31)//10 # 2147483640
+  * Number:
+    * 007: Reverse Integer (E)
+      * Notice the **boundary** and **negative** value
+      * Approach1: Time:O(logn)
+        * Python
+            ```python
+            def reverse(self, x: int) -> int:
+              is_positive = True if x >=0 else False
+              reverse = 0
 
-        if not is_positive:
-            x = -x
+              # 2 ** 31          = 2147483648
+              # (2 ** 31) // 10  = 214748364
+              boundary = (2 ** 31)//10 # 2147483640
 
-        while x:
-            pop = x % 10
-            x //= 10
-            # boundary = 214748364
-            # boundary * 10 = 2147483640
-            # 2**31 = 2147483648 = 2147483640 + 8 = boundary * 10 + 8
-            if reverse > boundary \
-              or reverse == boundary and pop > 7 :
+              if not is_positive:
+                  x = -x
+
+              while x:
+                  pop = x % 10
+                  x //= 10
+                  """
+                  2 ** 31          = 2147483648
+                  (2 ** 31) // 10  = 214748364 = boundary
+                  2147483648 = 2147483640 + 8 = boundary * 10 + 8
+                  """
+                  if reverse > boundary \
+                    or reverse == boundary and pop > 7 :
+                      return 0
+
+                  reverse = reverse * 10 + pop
+
+              if not is_positive:
+                  reverse = -reverse
+
+              return reverse
+            ```
+    * 066: Plus One (E)
+      * Approach1: Time:O(n), Space:O(1):
+        * Python
+          ```python
+          def plusOne(self, digits: List[int]) -> List[int]:
+            n = len(digits)
+            carry = 1
+
+            for i in range(n-1, -1, -1):
+                val = carry + digits[i]
+                digits[i] = val % 10
+                carry = val // 10
+
+            if carry:
+                digits = [1] + digits
+
+            return digits
+          ```
+    * 202: Happy Number (E)
+        * Example:
+          * end with 1:
+            * 19 -> 82 -> 68 -> 100 -> **1** -> **1** ...
+          * end without 1
+            * 11 -> **4** -> 37 -> 58 -> 89 -> 145 -> 42 -> 20 -> **4**
+        * Approach1: Brute Force, Space:O(n)
+          * Python
+            ```python
+            def isHappy(self, n: int) -> bool:
+              def digit_square_sum(n):
+                  s = 0
+                  while n:
+                      pop = n % 10
+                      n = n // 10
+                      s += pop ** 2
+                  return s
+
+              memo = dict()
+              while True:
+                  if n in memo:
+                      break
+
+                  memo[n] = True
+                  n = digit_square_sum(n)
+
+              return n == 1
+            ```
+        * Approach2: Detect Circle: Space:O(1)
+          * Python
+            ```python
+            def isHappy(self, n: int) -> bool:
+              def digit_square_sum(n):
+                  s = 0
+                  while n:
+                      pop = n % 10
+                      n = n // 10
+                      s += pop ** 2
+                  return s
+
+              slow = fast = n
+              while True:
+                  slow = digit_square_sum(slow)
+                  fast = digit_square_sum(digit_square_sum(fast))
+
+                  if slow == fast:
+                      break
+
+              return slow == 1
+            ```
+    * Excel Sheet
+      * 168: **Excel Sheet** Column Title (E)
+        * Ref:
+          * https://leetcode.com/problems/excel-sheet-column-title/discuss/51404/Python-solution-with-explanation
+        * Example:
+          ```txt
+          A   1     AA    26+ 1     BA  2×26+ 1     ...     ZA  26×26+ 1     AAA  1×26²+1×26+ 1
+          B   2     AB    26+ 2     BB  2×26+ 2     ...     ZB  26×26+ 2     AAB  1×26²+1×26+ 2
+          .   .     ..    .....     ..  .......     ...     ..  ........     ...  .............
+          .   .     ..    .....     ..  .......     ...     ..  ........     ...  .............
+          .   .     ..    .....     ..  .......     ...     ..  ........     ...  .............
+          Z  26     AZ    26+26     BZ  2×26+26     ...     ZZ  26×26+26     AAZ  1×26²+1×26+26
+
+          ABCD＝A×26³＋B×26²＋C×26¹＋D＝1×26³＋2×26²＋3×26¹＋4
+          ZZZZ＝Z×26³＋Z×26²＋Z×26¹＋Z＝26×26³＋26×26²＋26×26¹＋26
+          ```
+        * Approach1: Time:O(log(n)), Space:O(1)
+          * Time:
+            * Total O(log(n)) round
+          * Space:
+            * Each round will increase one character in the deque
+          * Python:
+            ```python
+            def convertToTitle(self, n):
+              title = collections.deque()
+              ord_a = ord('A')
+
+              while n > 0:
+                  # n-1 to get number between 0(A) ~ 25(Z)
+                  pop = (n-1) % 26
+                  # n-1 to cut the final number completely
+                  n = (n-1) // 26
+                  title.appendleft(chr(ord_a + pop))
+
+              return "".join(title)
+            ```
+        * Approach2: Time:O(log(n)), Space:O(k)
+          * Python
+            ```python
+            def convertToTitle(self, n: int) -> str:
+              title = collections.deque()
+              memo = tuple(chr(ord_) for ord_ in range(ord('A'), ord('Z')+1))
+
+              while n:
+                  pop = (n - 1) % 26
+                  n = (n - 1) // 26
+                  title.appendleft(memo[pop])
+
+              return "".join(title)
+
+            ```
+      * 171: **Excel Sheet** Column Number (E)
+        * Approach1: Time:O(n), Space:O(1)
+          * Python
+            ```python
+            def titleToNumber(self, s):
+              ord_a = ord('A')
+              result = 0
+
+              for i in range(len(s)):
+                  """
+                  A -> 1
+                  B -> 2
+                  ..
+                  Z -> 26
+                  """
+                  pop = ord(s[i]) - ord_a + 1
+                  result = result * 26 + pop
+
+              return result
+            ```
+    * Romain
+      * 013: **Romain** to Integer (E)
+        * Approach1: Scan from right to left and keep cur max, Time:O(n), Space:O(1)
+          * Python
+          ```python
+          def romanToInt(self, s):
+            if len(s) < 1:
                 return 0
 
-            reverse = reverse * 10 + pop
+            scores = {'I': 1, 'V': 5, 'X': 10, 'L': 50, 'C': 100, 'D': 500, 'M': 1000}
+            cur_max = 0
 
-        if not is_positive:
-            reverse = -reverse
+            # n-1
+            num = cur_max = scores[s[len(s)-1]]
 
-        return reverse
-      ```
+            # from n-2 to 0
+            for i in range(len(s)-2, -1, -1):
+                symbol = s[i]
+                score = scores[symbol]
+                if score >= cur_max:
+                    cur_max = max(cur_max, score)
+                    num += score
+                else:
+                    num -= score
+
+            return num
+          ```
+      * 012: Integer to **Roman** (M)
+        * Approach1
+          * Time: O(c)
+          * Space: O(c)
+          * FAQ:
+            * Why should I create a list like
+            ```python
+            symbols = [ "M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I" ]
+            values = [ 1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1 ]
+            ```
+          * Python
+            ```python
+            def intToRoman(self, num):
+              symbols = [ "M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I" ]
+              values = [ 1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1 ]
+              res = ""
+              while num:
+                  for symbol, val in zip(symbols, values):
+                      cnt = num//val  # symbol cnt
+                      if not cnt:
+                          continue
+                      res += cnt * symbol
+                      num %= val
+
+              return res
+            ```
+    * Strobogrammatic
+      * Definition:
+        * A strobogrammatic number is a number that looks the same when rotated 180 degrees (looked at upside down).
+        * example:
+          * 69
+          * 88
+          * 00
+          * 11
+      * 246:Strobogrammatic Number (E)
+        * Approach1, Time:O(n), Space:O(1)
+          * Python
+            ```python
+            def isStrobogrammatic(self, num):
+              d = {'6':'9', '9':'6', '8':'8', '1':'1', '0':'0'}
+              start, end = 0, str(num) - 1
+              ret = True
+
+              while left <= right:
+                  # if left == right:
+                  # the valid cases would be '8':'8', '1':'1', '0':'0'
+                  c = num[left]
+                  if c not in d or d[c != num[right]:
+                      ret = False
+                      break
+
+                  left -= 1
+                  right += 1
+
+              return ret
+            ```
+      * 247 Strobogrammatic Number II (M)
+        * Find all strobogrammatic numbers that are of length = n.
+        * Approach1, Bottom up iterative: Time: O(nk^n), Space:O(nk^n)
+          * Time: O(nk^n)
+            * About O(k^n) combinations
+            * each combination cost O(n) to copy
+          * Space: O(nk^n)
+            * About O(k^n) combinations
+            * each combination needs O(n) space
+          * Python:
+            ```python
+            def findStrobogrammatic(self, n: int) -> List[str]:
+              if n < 1:
+                  return []
+
+              d_non_final = {'6':'9', '9':'6', '8':'8', '1':'1', '0':'0'}
+              d_final = {'6':'9', '9':'6', '8':'8', '1':'1'}
+
+              if n % 2:
+                  # odd
+                  combs = ["0" , "1", "8"]
+              else:
+                  combs = [""]
+
+              for i in range(n//2):
+
+                  d = d_non_final
+
+                  if i == n//2-1:
+                      d = d_final
+
+                  next_combs = []
+                  for s in combs:
+                      for l, r in d.items():
+                          next_combs.append(f'{l}{s}{r}')
+
+                  combs = next_combs
+
+              return combs
+            ```
+      * 248 Strobogrammatic Number II (H)
+        * Write a function to count the total strobogrammatic numbers that exist in the range of low <= num <= high.
+    * 273: Integer to **English Words** (H)
+    * 065: Valid Number (H)
   * **Sum**
     * 001: Two Sum (E)
-      * Approach1: Use hash table, Time: O(n), Space: O(n)
-        * Python Solution
+      * Approach1: hash table, Time: O(n), Space: O(n)
+        * Python
           ```python
           def twoSum(self, nums: List[int], target: int) -> List[int]:
             """
             Assume exactly one solution
             """
-            res = None
+            res = []
             d = dict()
             for idx, num in enumerate(nums):
                 diff = target - num
                 if diff in d:
-                    res = [idx, d[diff]]
+                    res += [d[diff], idx]
                     break
 
                 d[num] = idx
@@ -173,6 +446,81 @@ Table of Content
         * O(nlogn)
           * Sorting
           * Left pointer and right pointer to find sum of left + right == target
+        * Python
+          ```python
+          def two_sum(l, r, target, cur):
+            while l < r:
+                s = nums[l] + nums[r]
+                if s == target:
+
+                    results.append(cur + [nums[l], nums[r]])
+
+                    while l < r and nums[l] == nums[l+1]:
+                        l += 1
+                    while l < r and nums[r] == nums[r-1]:
+                        r -= 1
+                    l += 1
+                    r -= 1
+
+                elif s < target:
+                    l += 1
+                else: # s > target
+                    r -= 1
+
+          results = []
+          cur = []
+          nums.sort()
+          two_sum(0, len(nums)-1, target, cur)
+          return results
+          ```
+    * 167: Two Sum II - Input array is sorted (E)
+      * Approach1: Hash Table, See 001, Time:O(n), Space:O(n)
+      * Approach2: Two pointers, Time:O(n), Space:O(n)
+        * Python
+          ```python
+          def twoSum(self, numbers: List[int], target: int) -> List[int]:
+            n = len(numbers)
+            if n < 2:
+                return []
+
+            res = []
+            l = 0
+            r = n - 1
+
+            while l < r:
+                s = numbers[l] + numbers[r]
+                if s == target:
+                    res += [l+1, r+1]
+                    break
+                elif s < target:
+                    l += 1
+                else:
+                    r -= 1
+
+            return res
+          ```
+    * 1099: Two Sum Less Than K (E)
+      * Approach1: Sort, Time:O(nlogn), Space:O(n)
+        * Python
+          ```python
+          def twoSumLessThanK(self, A: List[int], K: int) -> int:
+            nums, target = A, K
+
+            nums.sort()
+            l, r = 0, len(nums) - 1
+            res = -1
+
+            while l < r:
+                s = nums[l] + nums[r]
+
+                if s < target:
+                    res = max(res, s)
+                    l += 1
+                else:  # s >= target
+                    r -= 1
+
+            return res
+          ```
     * 015: 3Sum (M)
       * Approach1: Sort and find, Time: O(n^2), Space:O(sorting)
         * Time: O(n^2)
@@ -198,13 +546,13 @@ Table of Content
                   while l < r:
                       s = nums[l] + nums[r]
                       if s == target:
-
                           results.append(cur + [nums[l], nums[r]])
 
                           while l < r and nums[l] == nums[l+1]:
                               l += 1
                           while l < r and nums[r] == nums[r-1]:
                               r -= 1
+
                           l += 1
                           r -= 1
 
@@ -215,16 +563,18 @@ Table of Content
 
               n = len(nums)
               nums.sort()
-              results = []
-              cur = []
+              results, cur = [], []
               for i in range(n-2):
-                  if i == 0 or nums[i] != nums[i-1]:
-                      cur.append(nums[i])
-                      two_sum(l=i+1,
-                              r=n-1,
-                              target=0-nums[i],
-                              cur=cur)
-                      cur.pop()
+
+                if i > 0 and nums[i] == nums[i-1]:
+                  continue
+
+                cur.append(nums[i])
+                two_sum(l=i+1,
+                        r=n-1,
+                        target=0-nums[i],
+                        cur=cur)
+                cur.pop()
 
               return results
             ```
@@ -250,6 +600,11 @@ Table of Content
       * Approach2: kSum, Time:O(n^(k-1))
         * Ref:
           * https://leetcode.com/problems/4sum/discuss/8545/Python-140ms-beats-100-and-works-for-N-sum-(Ngreater2)
+        * for k sum, notice the dupliate handling:
+            ```python
+            if i > l and nums[i] == nums[i-1]:
+              continue
+            ```
         * Python
           ```python
           def fourSum(self, nums: List[int], target: int) -> List[List[int]]:
@@ -282,18 +637,20 @@ Table of Content
                     # boundary: r+1 (inclusive)
                     # remain: k-1
                     for i in range(l, r+2-k):
-                        if i == l or nums[i] != nums[i-1]:
-                            cur.append(nums[i])
-                            k_sum(l=i+1,
-                                  r=r,
-                                  k=k-1,
-                                  target=target-nums[i],
-                                  cur=cur)
-                            cur.pop()
+                      if i > l and nums[i] == nums[i-1]:
+                        continue
+
+                      cur.append(nums[i])
+                      # get k-1 sum in the nums[i+1:r+1]
+                      k_sum(l=i+1,
+                            r=r,
+                            k=k-1,
+                            target=target-nums[i],
+                            cur=cur)
+                      cur.pop()
 
             nums.sort()
-            results = []
-            cur=[]
+            cur, results = [], []
             k_sum(l=0,
                   r=len(nums)-1,
                   k=4,
@@ -302,29 +659,74 @@ Table of Content
             return results
           ```
   * **Majority**
-    * The majority element is the element that appears more than ⌊ n/2 ⌋ times.
+    * Definition:
+      * The majority element is **the element that appears more than ⌊ n/2 ⌋ times**.
+    * 1150: Check If a Number Is Majority Element in a Sorted Array (E)
+      * This question is similar to 034: Find **First and Last Position of Element** in Sorted Array
+      * Example:
+          ```txt
+          [ x x x x x x x . . . . . . ]        # majority at the beginning
+          [ . . . x x x x x x x . . . ]        # majority at the middle
+          [ . . . . . . x x x x x x x ]        # majority at the ending
+          ```
+      * Approach1: Binary Search, Time:O(logn)
+        * Python
+          ```python
+          def isMajorityElement(self, nums: List[int], target: int) -> bool:
+
+            def binary_search_left(left, right, target):
+                while left <= right:
+                    mid = (left + right) // 2
+                    if target <= nums[mid]:
+                        right = mid - 1
+                    else:
+                        left = mid + 1
+
+                return left
+
+            def binary_search_right(left, right, target):
+                while left <= right:
+                    mid = (left + right) // 2
+                    if target >= nums[mid]:
+                        left = mid + 1
+                    else:
+                        right = mid - 1
+
+                return right
+
+
+            n = len(nums)
+            m_left = binary_search_left(0, n-1, target)
+
+            if m_left >= n-1 or nums[m_left] != target:
+                return False
+
+            m_right = binary_search_right(m_left, n-1, target)
+
+            return (m_right - m_left + 1) > (n // 2)
+
+          ```
     * 169: Majority Element (E)
       * Notice the odd and even cases
-      * Approach1: Sorting, Time:O(nlogn), Space:O(log(n)
-        * Python,
+      * Approach1: Sorting, Time:O(nlogn), Space:O(sorting)
+        * Python
         ```python
-        def majorityElement(self, nums: List[int]) -> int:
-          nums.sort()
-          n = len(nums)
-          return nums[n//2]
+          def majorityElement(self, nums: List[int]) -> int:
+            nums.sort()
+            n = len(nums)
+            return nums[n//2]
         ```
       * Approach2: Hash, Time:O(n), Space:O(n)
         * Python
           ```python
           def majorityElement(self, nums: List[int]) -> int:
-            n = len(nums)
-            majority_cnt = n//2
-
-            majority = None
             d = collections.defaultdict(int)
+            threshold = len(nums) // 2
+
             for n in nums:
                 d[n] += 1
-                if d[n] > majority_cnt:
+
+                if d[n] >= threshold:
                     majority = n
                     break
 
@@ -350,7 +752,6 @@ Table of Content
             cnt = 0
             majority = None
             for n in nums:
-
                 if cnt == 0:
                     majority = n
 
@@ -362,119 +763,123 @@ Table of Content
             return majority
           ```
     * 229: Majority Element II (M)
-      * Given an integer array of size n, find all elements that appear more than ⌊ n/3 ⌋ times.
+      * Definition
+        * Given an integer array of size n, find all elements that appear more than **n/3** times.
+      * Ref:
+        * Boyer-Moore Voting Algorithm
+          * https://gregable.com/2013/10/majority-vote-algorithm-find-majority.html
+          * https://leetcode.com/problems/majority-element-ii/discuss/63537/My-understanding-of-Boyer-Moore-Majority-Vote
       * Approach1: Hash, Time:O(n), Space:O(n)
         * Python
           ```python
           def majorityElement(self, nums: List[int]) -> List[int]:
             d = collections.defaultdict(int)
-            d_out = {}
-            majority_cnt = len(nums) // 3
+            threshold = len(nums) // 3
+            majorities = dict()
 
             for n in nums:
-                if n in d_out:
+                if n in majorities:
                     continue
 
                 d[n] += 1
-                if d[n] > majority_cnt:
-                    d_out[n] = True
+                if d[n] > threshold:
+                    majorities[n] = True
 
-            return d_out.keys()
+            return majorities.keys()
           ```
-      * Approach2: Boyer-Moore Voting Algorithm
+      * Approach2: Boyer-Moore Voting Algorithm, Time:O(n), Space:O(1)
+        * Ref:
+          * https://leetcode.com/problems/majority-element-ii/discuss/63520/Boyer-Moore-Majority-Vote-algorithm-and-my-elaboration
+        *  since the requirement is finding the majority for more than ceiling of [n/3], the answer would **be less than or equal to two numbers**.
+        * **Pair has 3 elements** in this question
+        * Python
+          ```python
+          def majorityElement(self, nums: List[int]) -> List[int]:
+            # candidate
+            c1 = c2 = 0
+            cnt1 = cnt2 = 0
+            threshold = len(nums) // 3
+
+            for n in nums:
+                # notice the condition sequence
+                if n == c1:
+                    cnt1 += 1
+
+                elif n == c2:
+                    cnt2 += 1
+
+                elif cnt1 == 0:
+                    c1, cnt1 = n, 1
+
+                elif cnt2 == 0:
+                    c2, cnt2 = n, 1
+
+                # pair (c1, c2, n)
+                # filtering a set of three elements out
+                else:
+                    cnt1, cnt2 = cnt1-1, cnt2-1
+
+            # check
+            cnt1 = cnt2 = 0
+            for n in nums:
+                if n == c1:
+                    cnt1 += 1
+                elif n == c2:
+                    cnt2 += 1
+
+            majorities = []
+            if cnt1 > threshold:
+                majorities.append(c1)
+            if cnt2 > threshold:
+                majorities.append(c2)
+
+            return majorities
+          ```
   * **Pascal's Triangle**
     * 118: Pascal's Triangle (E)
-      * Approach1: DP: O(n^2), Space:O(n^2)
+      * Approach1: DP: Time:O(n^2), Space:O(n^2)
         * Python
           ```python
           def generate(self, numRows: int) -> List[List[int]]:
-            if numRows < 1:
+            if numRows == 0:
                 return []
 
-            triangle = [[1]]
             if numRows == 1:
-                return triangle
+                return [[1]]
 
-            # index from 1 to numRows - 1
-            for row in range(1, numRows):
-                new_row = [None] * (row+1)
-                new_row[0] = new_row[-1] = 1 # first and last element
-                for i in range(1, row):
-                    new_row[i] = triangle[-1][i-1] + triangle[-1][i]
-                triangle.append(new_row)
+            # layer1
+            pascal = [[1]]
+            # layer2 to layern
+            for layer in range(2, numRows+1):
+                new_layer = [1] * layer
+                prev_layer = pascal[-1]
 
-            return triangle
+                for i in range(1, layer-1):
+                    new_layer[i] = prev_layer[i-1] + prev_layer[i]
+
+                pascal.append(new_layer)
+
+            return pascal
           ```
-      * Approach2:
     * 119: Pascal's Triangle II (E)
-  * 66: Plus One (E)
-    * Approach1: Time:O(n), Space:O(1):
-      * Python
-        ```python
-        def plusOne(self, digits: List[int]) -> List[int]:
-          n = len(digits)
-          carry = 1
-          for i in range(n-1, -1, -1):
-              val = carry + digits[i]
-              digits[i] = val % 10
-              carry = val // 10
-
-          if carry:
-              digits = [1] + digits
-
-          return digits
-        ```
-  * 202: Happy Number (E)
-      * Example:
-        * end with 1:
-          * 19 -> 82 -> 68 -> 100 -> 1 -> 1 ...
-        * end without 1
-          * 11 -> **4** -> 37 -> 58 -> 89 -> 145 -> 42 -> 20 -> **4**
-      * Approach1: Brute Force, Space:O(n)
+      * Get kth Pascal index
+      * Approach1: From end to beginning: Time:O(n^2), Space:O(k)
         * Python
           ```python
-          def isHappy(self, n: int) -> bool:
-            def digit_square_sum(n):
-                s = 0
-                while n:
-                    pop = n % 10
-                    n = n // 10
-                    s += pop ** 2
-                return s
+          def getRow(self, rowIndex: int) -> List[int]:
+            if rowIndex == 0:
+                return [1]
 
-            memo = dict()
-            is_happy = False
+            pascal = [0] * (rowIndex + 1)
+            pascal[0] = 1
 
-            while True:
-                if n in memo:
-                    break
+            # layer 1 to rowIndex
+            for _ in range(1, rowIndex+1):
+                # from end to beginning
+                for i in range(rowIndex, 0, -1):
+                    pascal[i] += pascal[i-1]
 
-                memo[n] = True
-                n = digit_square_sum(n)
-
-            return n == 1
-          ```
-      * Approach2: Detect Circle: Space:O(1)
-        * Python
-          ```python
-          def isHappy(self, n: int) -> bool:
-            def digit_square_sum(n):
-                s = 0
-                while n:
-                    pop = n % 10
-                    n = n // 10
-                    s += pop ** 2
-                return s
-
-            slow = fast = n
-            while True:
-                slow = digit_square_sum(slow)
-                fast = digit_square_sum(digit_square_sum(fast))
-
-                if slow == fast:
-                    break
-
-            return slow == 1
+            return pascal
           ```
 ### String
   * Remove Duplicate
@@ -524,169 +929,6 @@ Table of Content
     * 271: Encode and Decode Strings (M)
       * Approach1: Non-ASCII Delimiter
       * Approach2: Chunked Transfer Encoding
-  * Number:
-    * 168: **Excel Sheet** Column Title (E)
-      * Ref:
-        * https://leetcode.com/problems/excel-sheet-column-title/discuss/51404/Python-solution-with-explanation
-      * Example:
-        ```txt
-        A   1     AA    26+ 1     BA  2×26+ 1     ...     ZA  26×26+ 1     AAA  1×26²+1×26+ 1
-        B   2     AB    26+ 2     BB  2×26+ 2     ...     ZB  26×26+ 2     AAB  1×26²+1×26+ 2
-        .   .     ..    .....     ..  .......     ...     ..  ........     ...  .............
-        .   .     ..    .....     ..  .......     ...     ..  ........     ...  .............
-        .   .     ..    .....     ..  .......     ...     ..  ........     ...  .............
-        Z  26     AZ    26+26     BZ  2×26+26     ...     ZZ  26×26+26     AAZ  1×26²+1×26+26
-
-        ABCD＝A×26³＋B×26²＋C×26¹＋D＝1×26³＋2×26²＋3×26¹＋4
-        ZZZZ＝Z×26³＋Z×26²＋Z×26¹＋Z＝26×26³＋26×26²＋26×26¹＋26
-        ```
-      * Approach1: Time:O(log(n)), Space:O(log(n))
-        * Time:
-          * Total O(log(n)) round
-        * Space:
-          * Each round will increase one character in the deque
-        * Python Solution:
-          ```python
-          def convertToTitle(self, n):
-            result = collections.deque()
-            ord_a = ord('A')
-
-            while n > 0:
-                pop = (n-1) % 26 # n-1 to get number between 0(A) ~ 25(Z)
-                n = (n-1) // 26  # n-1 to cut the final number completely
-                result.appendleft(chr(pop+ord_a))
-
-            return "".join(result)
-          ```
-    * 171: **Excel Sheet** Column Number (E)
-      * Approach1: Time:O(n), Space:O(1)
-        * Python Solution
-          ```python
-          def titleToNumber(self, s):
-            """
-            :type s: str
-            :rtype: int
-            """
-            ord_a = ord('A')
-            result = 0
-
-            # from n-1 to 0
-            for i in range(len(s)):
-                pop = ord(s[i]) - ord_a + 1
-                result = result * 26 + pop
-
-            return result
-          ```
-    * 013: **Romain** to Integer (E)
-      * Approach1: From right to left and keep cur max, Time:O(n), Space:O(1)
-        * Python Solution
-        ```python
-        def romanToInt(self, s):
-          if len(s) < 1:
-              return 0
-
-          scores = {'I': 1, 'V': 5, 'X': 10, 'L': 50, 'C': 100, 'D': 500, 'M': 1000}
-          cur_max = 0
-
-          # n-1
-          num = cur_max = scores[s[len(s)-1]]
-
-          # from n-2 to 0
-          for i in range(len(s)-2, -1, -1):
-              symbol = s[i]
-              score = scores[symbol]
-              if score >= cur_max:
-                  cur_max = max(cur_max, score)
-                  num += score
-              else:
-                  num -= score
-
-          return num
-        ```
-    * 012: Integer to **Roman** (M)
-      * Approach1
-        * Time: ??
-        * Space: ??
-        * Python Solution
-          ```python
-          def intToRoman(self, num):
-            symbols = [ "M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I" ]
-            values = [ 1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1 ]
-            res = ""
-            while num:
-                for symbol, val in zip(symbols, values):
-                    cnt = num//val  # symbol cnt
-                    if not cnt:
-                        continue
-                    res += cnt * symbol
-                    num %= val
-
-            return res
-          ```
-    * 246:**Strobogrammatic** Number (E)
-      * Approach1, Time:O(n), Space:O(1)
-        * Python Solution
-          ```python
-          def isStrobogrammatic(self, num):
-            d = {'6':'9', '9':'6', '8':'8', '1':'1', '0':'0'}
-
-            s = str(num)
-            start, end = 0, len(s) - 1
-            ret = True
-            while start <= end:
-                # if start == end:
-                # the valid cases would be '8':'8', '1':'1', '0':'0'
-                if num[start] not in d or d[num[start]] != num[end]:
-                    ret = False
-                    break
-
-                end -= 1
-                start += 1
-
-            return ret
-          ```
-    * 247 **Strobogrammatic** Number II (M)
-      * Approach1, Bottom up iterative: Time: O(nk^n), Space:O(nk^n)
-        * Time: O(nk^n)
-          * About O(k^n) combinations
-          * each combination cost O(n) to copy
-        * Space: O(nk^n)
-          * About O(k^n) combinations
-          * each combination needs O(n) space
-        * Python Solution:
-          ```python
-            def findStrobogrammatic(self, n):
-            if n < 1:
-                return ['']
-
-            d_non_final = {'6':'9', '9':'6', '8':'8', '1':'1', '0':'0'}
-            d_final = d_non_final.copy()
-            d_final.pop('0') # exclude 0
-
-            if n % 2:
-                comb = ['0', '1', '8']
-            else:
-                comb = ['']  # need to put an empty string
-
-            # 0 to n//2-1
-            for i in range(n//2):
-                d = d_non_final
-                if i == n//2 - 1:
-                    d = d_final
-
-                next_comb = []
-                for s in comb:
-                    for key, val in d.items():
-                        next_comb.append(f'{key}{s}{val}')
-
-                comb = next_comb
-
-            return comb
-          ```
-    * 248 **Strobogrammatic** Number II (H)
-      * Write a function to count the total strobogrammatic numbers that exist in the range of low <= num <= high.
-    * 273: Integer to **English Words** (H)
-    * 065: Valid Number (H)
   * Text
     * 068: Text Justification (H)
   * **Edit Distance**
@@ -1024,54 +1266,53 @@ Table of Content
               * Assume the minimum desired window starting from s1 is s[s1:end+1], if [s2:end+1] is also a desired window, then [s2:end+1] is the minimum window starting with s2
                 * Proof: If [s2:end+1] is not, then [s1:end+1] will not be the minimum one.
               ```
-           * Python Solution
-              ```python
-              def minWindow(self, s, t):
-                if not t or not s:
-                    return ""
+         * Python
+            ```python
+            def minWindow(self, s, t):
+              if not t or not s:
+                  return ""
 
-                # substring length, start and end
-                res = [float('inf'), None, None]
-                counter_t = collections.Counter(t)
+              # substring length, start and end
+              res = [float('inf'), None, None]
+              counter_t = collections.Counter(t)
 
-                """
-                formed is used to keep track of how many unique characters in t are present in the
-                current window in its desired frequency.
-                e.g. if t is "AABC" then the window must have two A's, one B and one C.
-                    Thus formed would be = 3 when all these conditions are met.
-                """
-                cur_formed = 0
-                desired_formed = len(counter_t)
-                counter_s = collections.defaultdict(int)
-                start = end = 0
+              """
+              formed is used to keep track of how many unique characters in t are present in the
+              current window in its desired frequency.
+              e.g. if t is "AABC" then the window must have two A's, one B and one C.
+                  Thus formed would be = 3 when all these conditions are met.
+              """
+              cur_formed = 0
+              desired_formed = len(counter_t)
+              counter_s = collections.defaultdict(int)
+              start = end = 0
 
-                while end < len(s):
-                    c = s[end]
+              while end < len(s):
+                  c = s[end]
 
-                    if c in counter_t:
-                        counter_s[c] += 1
-                        if counter_s[c] == counter_t[c]:
-                            cur_formed += 1
+                  if c in counter_t:
+                      counter_s[c] += 1
+                      if counter_s[c] == counter_t[c]:
+                          cur_formed += 1
 
-                    while start <= end and cur_formed == desired_formed:
-                        c_start = s[start]
+                  # start == end means len == 1
+                  while start <= end and cur_formed == desired_formed:
+                      c_start = s[start]
+                      w_len = end - start + 1
+                      if w_len < res[0]:
+                          res[0], res[1], res[2] = w_len, start, end
 
-                        w_len = end - start + 1
-                        if w_len < res[0]:
-                            res[0], res[1], res[2] = w_len, start, end
+                      if c_start in counter_t:
+                          counter_s[c_start] -= 1
+                          if counter_s[c_start] < counter_t[c_start]:
+                              cur_formed -= 1
+                      start += 1
 
-                        if c_start in counter_t:
-                            counter_s[c_start] -= 1
-                            if counter_s[c_start] < counter_t[c_start]:
-                                cur_formed -= 1
-
-                        start += 1
-
-                    end += 1
+                  end += 1
 
 
-                return "" if res[0] == float('inf') else s[res[1]: res[2]+1]
-              ```
+              return "" if res[0] == float('inf') else s[res[1]: res[2]+1]
+            ```
      * 030: Substring with Concatenation of All Words (H)
      * 395: Longest Substring with **At Least K Repeating** Characters (M)
      * 340: Longest Substring with At Most K Distinct Characters (H)
@@ -2558,37 +2799,40 @@ Table of Content
             ```
   * **H-Index**
     * 274: H-Index (M)
+      * observation:
+        * max_hidx = len(nums)
+        * possible h_idx is between 0 ~ max_hidx
       * Approach1: Use Array to memo, Time O(n), Space O(n)
         * Concept
           * **The max index in the array would be len(array)**, that is we can restrict the number of the buckets.
         * Use array to keep the cnt of citations
-        * Python Solution
+        * Python
             ```python
             def hIndex(self, citations: List[int]) -> int:
-              max_cita = len(citations)
-              citas_acc = [0] * (max_cita+1)
-
+              max_hidx = len(citations)
+              memo = [0] * (max_hidx + 1)
               for cita in citations:
-                citas_acc[min(cita, max_cita)] += 1
+                  memo[min(cita, max_hidx)] += 1
 
               res = 0
               cita_cnt = 0
-              # from n to 0
-              for cita in range(max_cita, -1, -1):
-                  cita_cnt += citas_acc[cita]
-                  if cita_cnt >= cita:
-                      res = cita
+              for h_idx in range(max_hidx, -1, -1):
+                  cita_cnt += memo[h_idx]
+                  if cita_cnt >= h_idx:
+                      res = h_idx
                       break
 
               return res
             ```
-      * Approach2: Use Sort, Time: O(nlog(n)), Space: O(1)
+      * Approach2: Use Sort, Time: O(nlog(n)), Space: O(sorting)
         * Concept:
           * step1:
             * Sorting costs O(nlog(n))
           * step2:
             * Find the H-Index costs O(log(n))
             * please refer 275: H-Index II
+    * H-Index II (M)
+      * Please refer binary search
   * **Best Time to Buy and Sell Stock**
     * Ref:
       * [General solution](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/discuss/108870/Most-consistent-ways-of-dealing-with-the-series-of-stock-problems)
@@ -3038,6 +3282,65 @@ Table of Content
 
               d[acc] += 1
             return cnt
+          ```
+    * 209: Minimum Size Subarray Sum (M)
+      * Approach1: Brute Force, Time:O(n^2), Space:O(1)
+        * Python
+          ```python
+          def minSubArrayLen(self, s: int, nums: List[int]) -> int:
+            if not nums:
+              return 0
+
+            min_len = float('inf')
+            for start in range(len(nums)):
+                acc = 0
+                for i in range(start, len(nums)):
+                    acc += nums[i]
+                    if acc >= s:
+                        min_len = min(min_len, i-start+1)
+                        break
+
+            if min_len == float('inf'):
+              min_len = 0
+
+            return min_len
+          ```
+      * Approach2: Binary Search, Time:O(nlogn), Space:O(n)
+        * binary search:
+          * 1. create a memo, memo[i] = memo[i-1] + nums[i]
+          * 2. for i in range(0, n):
+            * find the minimum j where:
+              * memo[j] - memo[i] >= target
+              * memo[j] >= memo[i] + target
+                * mid >= memo[i] + target
+                  * r = mid - 1
+                * mid < memo[i] + target
+                  * l = mid + 1
+                * return left
+      * Approach3: Sliding Window, Time:O(n), Space:O(1)
+        * Python
+          ```python
+          def minSubArrayLen(self, s: int, nums: List[int]) -> int:
+            if not nums:
+                return 0
+
+            min_len = float('inf')
+            start = end = 0
+            acc = 0
+
+            while end < len(nums):
+                acc += nums[end]
+                while start <= end and acc >= s:
+                    min_len = min(min_len, end-start+1)
+                    acc -= nums[start]
+                    start += 1
+
+                end += 1
+
+            if min_len == float('inf'):
+                min_len = 0
+
+            return min_len
           ```
     * 238: **Product** of Array **Except Self** (M)
       * Approach1: Allow to use Division, Time:O(n)
@@ -5435,7 +5738,7 @@ Table of Content
         * Python
           ```python
           def searchRange(self, nums: List[int], target: int) -> List[int]:
-            def find_start(left, right):
+            def bin_search_left(left, right):
                 start = not_found
                 l, r = left, right
 
@@ -5453,7 +5756,7 @@ Table of Content
 
                 return start
 
-            def find_end(left, right):
+            def bin_search_right(left, right):
                 end = not_found
                 l, r = left, right
 
@@ -5475,14 +5778,15 @@ Table of Content
             left = 0
             right = len(nums) - 1
 
-            s = find_start(left, right)
+            s = bin_search_left(left, right)
             if s == not_found:
                 e = not_found
             else:
-                e = find_end(s, right)
+                e = bin_search_right(s, right)
 
             return [s, e]
           ```
+  * 1150: Check If a Number Is Majority Element in a Sorted Array (E)
   * 275: H-Index II (M)
     * Approach1: Linear search: O(n)
       * Concept
@@ -5492,14 +5796,16 @@ Table of Content
       * Python
         ```python
         def hIndex(self, citations: List[int]) -> int:
-          max_cita = len(citations)
-          h_idx = 0
+          res = 0
+          max_hidx = len(citations)
+
           for idx, cita in enumerate(citations):
-              if cita >= (max_cita - idx):
-                  h_idx = max_cita - idx
+              h_idx = max_hidx - idx
+              if cita >= h_idx:
+                  res = h_idx
                   break
 
-          return h_idx
+          return res
         ```
     * Approach2: **Binary Search**: O(log(n))
       * Search algo like 35
@@ -5528,25 +5834,28 @@ Table of Content
       * Python
         ```python
         def hIndex(self, citations: List[int]) -> int:
-          max_cita = len(citations)
-          left = 0
-          right = max_cita - 1
+          max_hidx = len(citations)
+          left, right = 0, len(citations)-1
 
+          idx = None
           while left <= right:
               mid = (left + right) // 2
+              h_idx = max_hidx - mid
 
-              if citations[mid] == (max_cita - mid):
-                  return max_cita - mid
+              if citations[mid] == h_idx:
+                  idx = mid
+                  break
 
-              # challenge fail, try to find lower h-index, go right part
-              elif citations[mid] < (max_cita - mid):
+              elif citations[mid] < h_idx:
                   left = mid + 1
 
-              # challenge success, try to find higher h-index, go left part
               else:
                   right = mid - 1
 
-          return max_cita - left
+          if idx is None:
+              idx = left
+
+          return max_hidx - idx
         ```
   * 033 & 081: Search in **Rotated Sorted Array** (M)
     * 033: unique
@@ -13031,11 +13340,21 @@ Table of Content
   * 305: Number of Islands II (H)
 ### Error List
   * Math:
-    * 007: Reverse Integer
-    * sum
+    * Number:
+      * 007: Reverse Integer
+        * Boundary and negative value
+      * 202: Happy Number (E)
+    * Majority
+      * Boyer-Moore Voting Algorithm
+      * 1150: Check If a Number Is Majority Element in a Sorted Array (E)
+      * 229: Majority Element II (M)
+    * Pascal's Triangle
+      * 119: Pascal's Triangle II (E)
+
+    * Sum
       * 015: 3Sum (M)
-    * Majority:
-      * 169: Majority Element (E)
+      * 018: 4Sum (M) and kSum
+
   * String
     * 038: Count and Say (E)
     * 392: Is Subsequence (E)
