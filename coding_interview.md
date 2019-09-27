@@ -25,7 +25,7 @@ Table of Content
   - [Graph](#graph)
   - [Bit Manipulation](#bit-manipulation)
   - [Union Field](#union-field)
-  - [Error List](#error-list)
+  - [Retry List](#retry-list)
 
 ## FAQ
   * [What is tail recursion?](https://stackoverflow.com/questions/33923/what-is-tail-recursion)
@@ -666,9 +666,9 @@ Table of Content
       * This question is similar to 034: Find **First and Last Position of Element** in Sorted Array
       * Example:
           ```txt
-          [ x x x x x x x . . . . . . ]        # majority at the beginning
-          [ . . . x x x x x x x . . . ]        # majority at the middle
-          [ . . . . . . x x x x x x x ]        # majority at the ending
+          [ x x x x x x x . . . . . . ]   # majority at the beginning
+          [ . . . x x x x x x x . . . ]   # majority at the middle
+          [ . . . . . . x x x x x x x ]   # majority at the ending
           ```
       * Approach1: Binary Search, Time:O(logn)
         * Python
@@ -748,21 +748,38 @@ Table of Content
             * The cnt of the majority should be greater than 1
             * The cnt of the non-majority should be equal to 0 and will be forgot.
         * Python
-          ```python
-          def majorityElement(self, nums: List[int]) -> int:
-            cnt = 0
-            majority = None
-            for n in nums:
-                if cnt == 0:
-                    majority = n
+          * Implementation1, this implementation can be extended to k majorities.
+            ```python
+            def majorityElement(self, nums: List[int]) -> int:
+              majority = None
+              cnt = 0
+              for n in nums:
+                  if n == majority:
+                      cnt += 1
+                  elif cnt == 0:
+                      majority = n
+                      cnt = 1
+                  else:
+                      cnt -= 1
 
-                if n == majority:
-                    cnt += 1
-                else:
-                    cnt -= 1
+              return majority
+            ```
+          * Implementation2
+            ```python
+            def majorityElement(self, nums: List[int]) -> int:
+              cnt = 0
+              majority = None
+              for n in nums:
+                  if cnt == 0:
+                      majority = n
 
-            return majority
-          ```
+                  if n == majority:
+                      cnt += 1
+                  else:
+                      cnt -= 1
+
+              return majority
+            ```
     * 229: Majority Element II (M)
       * Definition
         * Given an integer array of size n, find all elements that appear more than **n/3** times.
@@ -791,12 +808,15 @@ Table of Content
       * Approach2: Boyer-Moore Voting Algorithm, Time:O(n), Space:O(1)
         * Ref:
           * https://leetcode.com/problems/majority-element-ii/discuss/63520/Boyer-Moore-Majority-Vote-algorithm-and-my-elaboration
-        *  since the requirement is finding the majority for more than ceiling of [n/3], the answer would **be less than or equal to two numbers**.
+        *  Since the requirement is finding the majority for more than ceiling of [n/3], the answer would **be less than or equal to two numbers**.
         * **Pair has 3 elements** in this question
         * Python
           ```python
           def majorityElement(self, nums: List[int]) -> List[int]:
-            # candidate
+            """
+            Since the requirement is finding the majority for more than ceiling of [n/3],
+            the answer would **be less than or equal to two numbers
+            """
             c1 = c2 = 0
             cnt1 = cnt2 = 0
             threshold = len(nums) // 3
@@ -1340,13 +1360,13 @@ Table of Content
              * p0: boundary for 0
              * p2: boundary for 2
              * cur: runner
-           * notice the end condition
+           * Notice the end condition
+             * p0 points to the **next** position 0 can be put.
+             * p2 points to the **next** position 2 can be put.
            * Python
              ```python
              def sortColors(self, nums: List[int]) -> None:
-               """
-               Do not return anything, modify nums in-place instead.
-               """
+
                if not nums:
                    return
 
@@ -1360,7 +1380,7 @@ Table of Content
                    elif nums[cur] == 0:
                        nums[cur], nums[p0] = nums[p0], nums[cur]
                        p0 += 1
-                       # p0 only forwards 1, p1 does not need to check again.
+                       # p0 only forwards 1, cur does not need to check again.
                        cur += 1
                    else:  # nums[cur] == 1
                        cur += 1
@@ -6012,33 +6032,43 @@ Table of Content
     * **dummy.next** alwasy point to the head node, it very useful if the head node in the list will be changed.
   * Use **reverse** instead of **stack** for space complexity reduction.
     * However, reverse will change the data of the input, use it carefully.
-* **Detect Circle**
+* Design:
+  * 707: Design Linked List (E)
+* **Runner** and **Detect Circle**
+  * 876: Middle of the Linked List
+    * Approach1: Runner, Time:O(n), Space:O(1)
+      * Python
+        ```python
+        def middleNode(self, head: ListNode) -> ListNode:
+          if not head:
+              return head
+
+          slow = fast = head
+          while fast and fast.next:
+              fast = fast.next.next
+              slow = slow.next
+
+          return slow
+        ```
   * 141: Linked List **Cycle** (E)
     * Similar problems:
       * 202: Happy Number (E)
     * Approach1: The runner: Time:O(n), Space:O(1)
-      * Python Solution
+      * Python
           ```python
-          def hasCycle(self, head):
-            """
-            :type head: ListNode
-            :rtype: bool
-            """
-            if not head:
-                return False
-
-            slow = fast = head
-            is_found = False
+          def hasCycle(self, head: ListNode) -> bool:
+            has_cycle = False
+            fast = slow = head
 
             while fast and fast.next:
                 fast = fast.next.next
                 slow = slow.next
 
                 if fast is slow:
-                    is_found = True
+                    has_cycle = True
                     break
 
-            return is_found
+            return has_cycle
           ```
   * 142: Linked List Cycle II (M) *
     * Similar problems:
@@ -6071,62 +6101,73 @@ Table of Content
           * THe distance betwwen this intersection and the cycle beginning is **r-d**
         * **The intersection of slow and target** would be the cycle beginning.
         * r-d ≡ d (mod r)
-      * Python Solution
+      * Python
         ```python
         def detectCycle(self, head):
           if not head:
               return None
 
-          fast = slow = target = head
-          find_loop = False
+          fast = slow = head
+          has_cycle = False
 
           while fast and fast.next:
               fast = fast.next.next
               slow = slow.next
-              # the intersection is dth node in the cycle
-              # the diff betwwen the cycle being beginning be r-d
+              # The intersection is dth node in the cycle
+              # The distance between the cycle beginning should be r-d
               if fast is slow:
-                  find_loop = True
+                  has_cycle = True
                   break
 
-          if not find_loop:
+          if not has_cycle:
             return None
 
-          while target and slow:
-              # the intersection is the cycle beginning.
+          cycle_begin = head
+          while true:
               # need to check first for the case d == 0
-              if target is slow:
+              if cycle_begin is slow:
                   break
 
-              target = target.next
+              cycle_begin = target.next
               slow = slow.next
 
-          return target
+          return cycle_begin
         ```
-* **Remove**
+* **Remove Node**
    * 237: Delete Node in a Linked List (E)
+     * waste my time....
+     * Python
+      ```python
+        def deleteNode(self, node):
+          node.val = node.next.val
+          node.next = node.next.next
+      ```
    * 203: Remove Linked List Elements (E)
+     * Remove all elements from a linked list of integers that have value val.
      * Approach1: dummy node, Time:O(n), Space:O(1)
-       * Python Solution
+       * Python
           ```python
           def removeElements(self, head: ListNode, val: int) -> ListNode:
-          cur = dummy = ListNode(0)
-          dummy.next = head
+            if not head:
+                return head
 
-          while cur and cur.next:
-              if cur.next.val == val:
-                  cur.next = cur.next.next
-              else:
-                  cur = cur.next
+            cur = dummy = ListNode(0)
+            dummy.next = head
 
-          return dummy.next
+            while cur.next:
+                if cur.next.val == val:
+                    cur.next = cur.next.next
+                else:
+                    cur = cur.next
+
+            return dummy.next
           ```
    * 019: Remove Nth Node From End of List (M)
+     * Given a linked list, remove the n-th node **from the end** of list and return its head.
      * Approach1: runner + dummy node, Time:O(n), Space:O(1)
-       * Python Solution
+       * Python
           ```python
           def removeNthFromEnd(self, head, n):
-            #
             slow = dummy = ListNode(0)
             fast = dummy.next = head
 
@@ -6136,31 +6177,40 @@ Table of Content
             while fast:
                 slow, fast = slow.next, fast.next
 
-            # delete the node
+            # delete the target
             slow.next = slow.next.next
 
             return dummy.next
           ```
    * 083: Remove Duplicates from **Sorted** List (E)
+     * Example:
+       * Input: 1->1->2->2->3->3
+       * Output: 1->2->3
      * Approach1: Time:O(n), Space:O(1)
-       * Python Solution
+       * Python
         ```python
         def deleteDuplicates(self, head: ListNode) -> ListNode:
-          if not head or not head.next:
-            return head
+          if not head:
+              return None
 
           cur = head
-          while cur and cur.next:
-            if cur.val == cur.next.val:
-                cur.next = cur.next.next
-            else:
-                cur = cur.next
+          while cur.next:
+              if cur.val == cur.next.val:
+                  cur.next = cur.next.next
+              else:
+                  cur = cur.next
 
           return head
         ```
-   * 082: Remove Duplicates from **Sorted** List II (M) *
+   * 082: Remove Duplicates from **Sorted** List II (M)
+     * Given a sorted linked list, delete all nodes that have duplicate numbers, leaving only distinct numbers from the original list.
+     * Example:
+       * Input: 1->2->3->3->4->4->5
+       * Output: 1->2->5
      * Approach1: Dummy node and a flag, Time:O(n), Space:O(1)
-       * Python Solution
+       * note:
+         * don't forget the last delete_from_prev
+       * Python
         ```python
           def deleteDuplicates(self, head: ListNode) -> ListNode:
             if not head:
@@ -6189,7 +6239,7 @@ Table of Content
 * **Reorder**
   * 206: **Reverse** Linked List (E)
     * Approach1: Time:O(n), Space:O(1)
-      * Pythobn Solution
+      * Python
        ```python
        def reverseList(self, head: ListNode) -> ListNode:\
           prev = None
@@ -6204,35 +6254,44 @@ Table of Content
        ```
   * 092: **Reverse** Linked List II (M)
     * From **position m to n**. Do it in **one-pass**.
+    * Example:
+      * Input: 1->2->3->4->5->NULL, m = 2, n = 4
+      * Output: 1->4->3->2->5->NULL
     * Approach1: Dummy Node, Time:O(n), Space:O(1)
       * Algo:
-        * Find the position before start of reverse node (prev_end)
-        * Reverse the node in the demand range
-        * Connect
-      * Python Solution:
+        * 1. ind the position before start of reverse node (prev_end)
+        * 2. Reverse the nodes in the demand range
+        * 3. Connect
+      * Python:
         ```python
           def reverseBetween(self, head: ListNode, m: int, n: int) -> ListNode:
-
             if n - m < 1:
                 return head
 
             prev_end = dummy = ListNode(0)
             dummy.next = head
+            # step1: find prev_end
             for _ in range(0, m-1):
                 prev_end = prev_end.next
 
+            # step2: reverse the nodes in the range
             prev, cur = prev_end, prev_end.next
             for _ in range(0, n-m+1):
                 nxt = cur.next
                 cur.next = prev
                 prev, cur = cur, nxt
 
+            # connect
             prev_end.next.next = cur
             prev_end.next = prev
 
             return dummy.next
         ```
   * 025: **Reverse** Nodes in **k-Group** (H)
+    * Definition:
+      * Given a linked list, reverse the nodes of a linked list k at a time and return its modified list.k is a positive integer and is less than or equal to the length of the linked list.
+      * If the number of nodes is not a multiple of k then left-out nodes in the end should remain as it is.
+      * Do not need to check k
     * Approach1: Two Passes, Time:O(n), Space:O(1)
       * Python Solution
         ```python
@@ -6276,33 +6335,34 @@ Table of Content
 
         prev_end = dummy = ListNode(0)
         runner = dummy.next = head
-        n = 0
+        cnt = 0
 
         while runner:
-            n += 1
-            if n % k == 0:
+            cnt += 1
+            runner = runner.next
+
+            if cnt % k == 0:
+                # reverse
                 prev = prev_end
                 cur = prev_end.next
-
                 for _ in range(k):
                     nxt = cur.next
                     cur.next = prev
                     prev, cur = cur, nxt
 
+                # connect
                 next_prev_end = prev_end.next
                 prev_end.next = prev
-                runner = next_prev_end.next = cur
+                next_prev_end.next = cur
                 prev_end = next_prev_end
-
-            else:  # update runner
-                runner = runner.next
 
         return dummy.next
       ```
   * 024: **Swap** Nodes in **Pair** (M) *
     * Approach1: Dummy Node, Time:O(n), Space:O(1)
       * Use 3 pointers, prev ,current and next.
-        ```python solution
+      * Python
+        ```python
         def swapPairs(self, head: ListNode) -> ListNode:
           if not head:
               return
@@ -6312,7 +6372,6 @@ Table of Content
 
           while cur and cur.next:
               nxt = cur.next
-
               prev.next = nxt
               cur.next = nxt.next
               nxt.next = cur
@@ -6321,296 +6380,16 @@ Table of Content
 
           return dummy.next
         ```
-  * 328: **Odd Even** Linked List (M)
-    * Approach1: Create **two linked lists** and **merge** them. Time:O(n), Space:O(1)
-      * Python Solution
-        ```python
-          def oddEvenList(self, head: ListNode) -> ListNode:
-            odd = dummy_odd = ListNode(0)
-            even = dummy_even = ListNode(0)
-            cur = head
-
-            is_odd = True
-
-            while cur:
-                if is_odd:
-                    odd.next = cur
-                    odd = odd.next
-                else:
-                    even.next = cur
-                    even = even.next
-
-                is_odd = not is_odd
-                cur = cur.next
-
-            odd.next = dummy_even.next
-            even.next = None
-
-            return dummy_odd.next
-      ```
-  * 061: **Rotate** list (M)
-    * The rotate length k may be greater than the length of linked list
-    * Approach1: Split and Connect, Time O(n), Space O(1)
-      * Algo:
-        * old_head -> .. -> new_tail -> new_head -> ... old_tail -> None
-        * s1: find the old_tail and length of linkedlist
-        * s2: find the new_tail and new_head
-        * s3: connect old_tail to old_head
-        * s4: connect new_tail to None
-        * return new_head
-      * Python Solution
-          ```python
-          def rotateRight(self, head: ListNode, k: int) -> ListNode:
-            if not head or not head.next:
-                return head
-
-            """
-            old_head -> .. -> new_tail -> new_head -> ... old_tail -> None
-            """
-
-            n = 1
-            old_tail = head
-            while old_tail.next:
-                length += 1
-                old_tail = old_tail.next
-
-            k = k % n
-            if k == 0:
-                return head
-
-            new_tail = head
-            for _ in range(n-k-1):
-                new_tail = new_tail.next
-
-            new_head = new_tail.next
-            old_tail.next = head
-            new_tail.next = None
-
-            return new_head
-          ```
-* **Sorting and Merge**
-  * 021: Merge Two **Sorted** Lists (E)
-    * Approach1: Time:O(n), Space:O(1)
-      * Python Solution
-        ```python
-        def mergeTwoLists(self, l1: ListNode, l2: ListNode) -> ListNode:
-          cur = dummy = ListNode(0)
-          while l1 and l2:
-              if l1.val <= l2.val:
-                  cur.next = l1
-                  l1 = l1.next
-              else:
-                  cur.next = l2
-                  l2 = l2.next
-              cur = cur.next
-
-          if l1:
-              cur.next = l1
-
-          if l2:
-              cur.next = l2
-
-          return dummy.next
-        ```
-  * 148: Sort list (M)
-      * Approach1: Use the **merge sort** (iterative version), Time: O(nlog(n), Space:O(1)
-        * **Split** the linked with window size 1,2,4,8, etc.
-        * **Merge** the splitted linked lists.
-          * Having to handle **linking issue** between two sorted lists **after merging**.
-        * Python Solution
-          ```python
-          def split_list(self, head, n):
-              first_runner = head
-              second_head = None
-
-              for _ in range(n-1):
-                  if not first_runner:
-                      break
-                  first_runner = first_runner.next
-
-              if not first_runner:
-                  return None
-
-              second_head = first_runner.next
-              first_runner.next = None
-              return second_head
-
-          def merge_two_lists(self, l1, l2, prev_tail):
-              runner1 , runner2 = l1, l2
-              merge_runner = dummy = ListNode(0)
-
-              while runner1 and runner2:
-                  if runner1.val <= runner2.val:
-                      merge_runner.next = runner1
-                      runner1 = runner1.next
-                  else:
-                      merge_runner.next = runner2
-                      runner2 = runner2.next
-                  merge_runner = merge_runner.next
-
-              # we need to return tail
-              while runner1:
-                  merge_runner.next = runner1
-                  runner1 = runner1.next
-                  merge_runner = merge_runner.next
-
-              while runner2:
-                  merge_runner.next = runner2
-                  runner2 = runner2.next
-                  merge_runner = merge_runner.next
-
-              # previous tail
-              prev_tail.next = dummy.next
-
-              # return next tail
-              return merge_runner
-
-          # use merge sort
-          def sortList(self, head: ListNode) -> ListNode:
-              if not head or not head.next:
-                  return head
-
-              n = 0
-              cur = head
-              while cur:
-                  n += 1
-                  cur = cur.next
-
-              window_size = 1
-              dummy = ListNode(0)
-              dummy.next = head
-              while window_size < n:
-                  tail = dummy
-                  left = head
-                  while left:
-                      # left, right, next_left
-                      right = self.split_list(left, window_size)
-                      next_left = self.split_list(right, window_size)
-                      tail = self.merge_two_lists(left, right, tail)
-                      left = next_left
-                  window_size *= 2
-
-              return dummy.next
-          ```
-  * 023: Merge k **Sorted** Lists (H)
-    * Assume total n nodes, k lists
-    * Approach1: Brute Force: Time:O(nlog(n)), Space:O(1)
-      * Push and Sort all the nodes
-      * Push takes: O(n)
-      * Sorintg takes: O(nlog(n))
-    * Approach2: **Insertion Sort**, Time:O(nk), Space:O(1)
-      * Convert merge k lists problem to merge 2 lists k-1 times.
-      * Time Complexity:
-        * Assume node for each list is n/k
-        * total cost would be (2n+3n+...kn)/k = O(kn)
-    * Approach3: **Priority Queue**, (min heap), Time:O(nlog(k)), Space:O(k)
-      * Time complexity: O(nlog(k))
-        * Generate heap: O(k)
-        * Total n operations (n nodes),
-          * O(log(k)): put to priority queue
-          * O(log(k)): get min from priority queue
-      * Space complexity: O(k)
-        * quque size
-      * Python Solution
-        * Use priority Queue
-          ```python
-          from queue import PriorityQueue
-
-          class Event(object):
-              def __init__(self, node):
-                  self.node = node
-
-              def __lt__(self, other):
-                  return self.node.val < other.node.val
-
-            def mergeKLists(lists: List[ListNode]) -> ListNode:
-                cur = dummy = ListNode(0)
-                q = PriorityQueue()
-
-                for head in lists:
-                    if head:
-                        q.put(Event(head))
-
-                # can not use while q here !
-                while not q.empty():
-                    node = q.get().node
-                    cur.next = node
-                    cur = cur.next
-                    if node.next:
-                        q.put(Event(node.next))
-
-                return dummy.next
-          ```
-        * Use heapq library
-          ```python
-          def mergeKLists(self, lists: List[ListNode]) -> ListNode:
-            cur = dummy = ListNode(0)
-            heap = []
-
-            for head in lists:
-                if head:
-                    heap.append(Element(head))
-            heapq.heapify(heap)
-
-            while heap:
-                min_node = heap[0].node
-                cur.next = min_node
-                cur = cur.next
-                if min_node.next:
-                    heapq.heapreplace(heap, Element(min_node.next))
-                else:
-                    heapq.heappop(heap)
-
-            return dummy.next
-          ```
-    * Approach4: **Merge Sort Iterative**, Time:O(nlog(k)), Space:O(1)
-      * Time complexity: O(nlog(k))
-        * Total log(k) round:
-          * each round need to traverse every nodes
-      * Space complexity: O(1)
-      * Python Solution
-        ```python
-        def merge2Lists(self, l1, l2):
-          cur = dummy = ListNode(0)
-          while l1 and l2:
-              if l1.val < l2.val:
-                  cur.next = l1
-                  l1 = l1.next
-              else:
-                  cur.next = l2
-                  l2 = l2.next
-              cur = cur.next
-
-          if l1:
-              cur.next = l1
-
-          if l2:
-              cur.next = l2
-
-          return dummy.next
-
-        def mergeKLists(self, lists: List[ListNode]) -> ListNode:
-            if not lists:
-                return None
-            # bottom up merge lists
-            interval = 1
-            while interval < len(lists):
-                left = 0
-                while left + interval < len(lists):
-                    lists[left] = self.merge2Lists(lists[left], lists[left+interval])
-                    left += (2 * interval)
-                interval *= 2
-
-            return lists[0]
-        ```
-* **Stack vs. Reverse**
   * 143: **Reorder** List (M)
     * Given a singly linked list L: L0→L1→…→Ln-1→Ln, reorder it to: L0→Ln→L1→Ln-1→L2→Ln-2→…
+    * Example
+      * Input: 1->2->3->4->5
+      * Output: 1->5->2->4->3.
     * Approach1: Reverse, Time:O(n), Space O(1):
         1. Using the **"Runner"** Techinique to seprate first half and second half of the linked list.
         2. **Reverse the second half** of the linked list.
         3. Combine the first half and second half by iterative through out the second half linked list.
-      * Python Solution
+      * Python
         ```python
         def reorderList(self, head: ListNode) -> None:
           """
@@ -6647,7 +6426,7 @@ Table of Content
         ```
     * Approach2: Use Stack, Time:O(n), Space O(n):
       * Use a stack to store 2nd part of the linkedlist.
-      * Python Solution
+      * Python
         ```python
         def reorderList(self, head: ListNode) -> None:
           # need at least 3 nodes
@@ -6676,75 +6455,416 @@ Table of Content
               first.next = pop
               first = pop.next
         ```
-  * 234: **Palindrome** Linked List (M)
-    * Approach1: Reverse, Time:O(n), Space: O(1):
-      * Reverse first half of the linked list, but it is not a pratical solution since we should not modify the constant function of the input.
-      * Python Solution
+* **Partition**
+  * 061: Rotate list (M)
+    * Note
+      * The rotate length k may be greater than the length of linked list
+    * Approach1: Split and Connect, Time O(n), Space O(1)
+      * Algo:
+        * old_head -> .. -> new_tail -> new_head -> ... old_tail -> None
+        * 1: find the old_tail and length of linkedlist
+        * 2: find the new_tail and new_head
+        * 3: connect old_tail to old_head
+        * 4: connect new_tail to None
+        * new_head is the head of the new linked list
+      * Python
+          ```python
+          def rotateRight(self, head: ListNode, k: int) -> ListNode:
+            if not head:
+                return head
+            """
+            old_head -> .. -> new_tail -> new_head -> ... old_tail -> None
+            """
+            n = 1
+            old_tail = head
+            while old_tail.next:
+                length += 1
+                old_tail = old_tail.next
+
+            k = k % n
+            if k == 0:
+                return head
+
+            new_tail = head
+            for _ in range(n-k-1):
+                new_tail = new_tail.next
+
+            new_head = new_tail.next
+            new_tail.next = None
+            old_tail.next = head
+
+            return new_head
+          ```
+  * 086: Partition List (M)
+    * Given a linked list and a value x, partition it such that all nodes less than x come before nodes greater than or equal to x.
+    * Approach1: Split and Merge, Time:O(n), Space:O(1)
+      * Python
         ```python
-        def isPalindrome(self, head: ListNode) -> bool:
-          # node <= 1
-          if not head or not head.next:
-              return True
+        def partition(self, head: ListNode, x: int) -> ListNode:
+          if not head:
+              return head
 
-          slow = head
-          fast = head.next # Ensure the 1st part has the same or one more node
-          while fast and fast.next:
-              fast = fast.next.next
-              slow = slow.next
+          d1 = dummy1 = ListNode(0)
+          d2 = dummy2 = ListNode(0)
 
-          cur = slow.next
-          prev = slow.next = None
-
-          # reverse second part
-          while cur:
-              nxt = cur.next
-              cur.next = prev
-              prev, cur = cur, nxt
-
-          is_palindrom = True
-          first = head
-          second = prev
-
-          # compare
-          while second:
-              if second.val != first.val:
-                  is_palindrom = False
-                  break
-              first = first.next
-              second = second.next
-
-          return is_palindrom
-        ```
-    * Approach2: Use Stack, Time:O(n), Space: O(n):
-      * Python Solution
-        ```python
-        def isPalindrome(self, head: ListNode) -> bool:
-          # node <= 1
-          if not head or not head.next:
-              return True
-
-          slow = head
-          fast = head.next # Ensure the 1st part has the same or one more node
-          while fast and fast.next:
-              fast = fast.next.next
-              slow = slow.next
-
-          stack = list()
-          cur = slow.next
-          while cur:
-              stack.append(cur)
-              cur = cur.next
-
-          is_palindrom = True
           cur = head
-          while stack:
-              if cur.val != stack.pop().val:
-                  is_palindrom = False
-                  break
+          while cur:
+              if cur.val < x:
+                  d1.next = cur
+                  d1 = d1.next
+              else:
+                  d2.next = cur
+                  d2 = d2.next
               cur = cur.next
 
-          return is_palindrom
+          d1.next = dummy2.next
+          d2.next = None
+
+          return dummy1.next
         ```
+  * 328: Odd Even Linked List (M)
+    * Given a singly linked list, group all odd nodes together followed by the even nodes. Please note here we are talking about the node number and not the value in the nodes.
+    * Approach1: Split and Merge. Time:O(n), Space:O(1)
+      * Python
+        ```python
+          def oddEvenList(self, head: ListNode) -> ListNode:
+            odd = dummy_odd = ListNode(0)
+            even = dummy_even = ListNode(0)
+            cur = head
+
+            is_odd = True
+
+            while cur:
+                if is_odd:
+                    odd.next = cur
+                    odd = odd.next
+                else:
+                    even.next = cur
+                    even = even.next
+
+                is_odd = not is_odd
+                cur = cur.next
+
+            odd.next = dummy_even.next
+            even.next = None
+
+            return dummy_odd.next
+      ```
+  * 725: Split Linked List in Parts (M)
+    * Approach1: Split input list, Time: O(n), Space:O(1)
+      * Example:
+        * 1.
+          * Input:  [1, 2, 3], k = 5
+          * Output: [[1], [2], [3], None, None]
+        * 2.
+          * Input:  [1, 2, 3, 4, 5, 6, 7], k = 5
+          * Output: [[1,2], [3,4], [5], [6], [7], None, None]
+      * Note:
+        * how to determine the partition size ?
+      * Python
+        ```python
+        def splitListToParts(self, root: ListNode, k: int) -> List[ListNode]:
+          partitions = [None] * k
+          if not root:
+              partitions
+
+          cnt = 0
+          cur = root
+          while cur:
+              cnt += 1
+              cur = cur.next
+
+          size, extra = cnt // k, cnt % k
+          cur = root
+          for p in range(k):
+              # run out of the list
+              # example: 1->2->3, k = 5
+              if not cur:
+                  break
+
+              # determine the size of each partition
+              partitions[p] = cur
+              p_size = size
+              if extra > 0:
+                  p_size += 1
+                  extra -= 1
+              for _ in range(p_size-1):
+                  cur = cur.next
+              cur.next, cur = None, cur.next
+
+          return partitions
+        ```
+* **Sorting and Merge**
+  * 021: Merge Two **Sorted** Lists (E)
+    * Approach1: Time:O(n), Space:O(1)
+      * Python
+        ```python
+        def mergeTwoLists(self, l1: ListNode, l2: ListNode) -> ListNode:
+          cur = dummy = ListNode(0)
+          while l1 and l2:
+              if l1.val <= l2.val:
+                  cur.next = l1
+                  l1 = l1.next
+              else:
+                  cur.next = l2
+                  l2 = l2.next
+              cur = cur.next
+
+          if l1:
+              cur.next = l1
+
+          if l2:
+              cur.next = l2
+
+          return dummy.next
+        ```
+  * 148: Sort list (M)
+      * Approach1: Top down merge sort , Time: O(nlog(n), Space:O(logn)
+        * Python
+          ```python
+          def sortList(self, head: ListNode) -> ListNode:
+            def merge_2_sorted_lists(l1, l2):
+                cur = dummy = ListNode(0)
+                while l1 and l2:
+                    if l1.val <= l2.val:
+                        cur.next = l1
+                        l1 = l1.next
+                    else:
+                        cur.next = l2
+                        l2 = l2.next
+
+                    cur = cur.next
+
+                if l1:
+                    cur.next = l1
+
+                if l2:
+                    cur.next = l2
+
+                return dummy.next
+
+            if not head or not head.next:
+                return head
+
+            slow = head
+            fast = head.next
+            while fast and fast.next:
+                fast = fast.next.next
+                slow = slow.next
+
+            right = slow.next
+            slow.next = None
+            # left part
+            left = self.sortList(head)
+            # right part
+            right = self.sortList(right)
+            head = merge_2_sorted_lists(left, right)
+
+            return head
+          ```
+      * Approach2: bottom up merge sort , Time: O(nlog(n), Space:O(1)
+        * **Split** the linked with window size 1,2,4,8, etc.
+        * **Merge** the splitted linked lists.
+          * Having to handle **linking issue** between two sorted lists **after merging**.
+        * Python
+          ```python
+          def sortList(self, head: ListNode) -> ListNode:
+            def merge_2_sorted_lists(prev_end, l1, l2):
+                cur = prev_end
+                cur.next = None
+
+                while l1 and l2:
+                    if l1.val <= l2.val:
+                        cur.next = l1
+                        l1 = l1.next
+                    else:
+                        cur.next = l2
+                        l2 = l2.next
+
+                    cur = cur.next
+
+                if l1:
+                    cur.next = l1
+
+                if l2:
+                    cur.next = l2
+
+                # move cur to the end
+                while cur.next:
+                    cur = cur.next
+
+                return cur
+
+            def split_list_with_size(cur, size):
+                """
+                Divide the linked list into two lists,
+                while the first list contains first n ndoes
+              return the second list's head
+                """
+                for _ in range(size-1):
+                    if not cur:
+                        break
+                    cur = cur.next
+
+                if not cur:
+                    # second list's head is None
+                    return None
+
+                second_head = cur.next
+                cur.next = None
+                return second_head
+
+            if not head or not head.next:
+                return head
+
+            n = 0
+            cur = head
+            while cur:
+                n += 1
+                cur = cur.next
+
+            dummy = ListNode(0)
+            dummy.next = head
+            window_size = 1
+
+            while window_size < n:
+                prev_end = dummy
+                left = prev_end.next
+                while left:
+                    right = split_list_with_size(left, window_size)
+                    next_left = split_list_with_size(right, window_size)
+                    prev_end = merge_2_sorted_lists(prev_end, left, right)
+                    left = next_left
+
+                window_size *= 2
+
+            return dummy.next
+          ```
+  * 023: Merge k **Sorted** Lists (H)
+    * Similar Problems:
+      * 378:	**Kth Smallest Element** in a Sorted Matrix (M)
+    * Assume total n nodes, k lists
+    * Approach1: Brute Force: Time:O(nlog(n)), Space:O(sorting)
+      * Push and Sort all the nodes
+      * Push takes: O(n)
+      * Sorintg takes: O(nlog(n))
+    * Approach2: **Insertion Sort**, Time:O(nk), Space:O(1)
+      * Convert merge k lists problem to merge 2 lists k-1 times.
+      * Time Complexity:
+        * Assume node for each list is n/k
+        * total cost would be (2n+3n+...kn)/k = O(kn)
+    * Approach3: **Priority Queue**, (min heap), Time:O(nlog(k)), Space:O(k)
+      * Time complexity: O(nlog(k))
+        * Generate heap: O(k)
+        * Total n operations (n nodes),
+          * O(log(k)): put to priority queue
+          * O(log(k)): get min from priority queue
+      * Space complexity: O(k)
+        * quque size
+      * Python
+        * Implementation1: Use priority Queue
+          ```python
+          from queue import PriorityQueue
+
+          class Event(object):
+              def __init__(self, node):
+                  self.node = node
+
+              def __lt__(self, other):
+                  return self.node.val < other.node.val
+
+            def mergeKLists(lists: List[ListNode]) -> ListNode:
+                cur = dummy = ListNode(0)
+                q = PriorityQueue()
+
+                for head in lists:
+                    if head:
+                        q.put(Event(head))
+
+                # can not use while q here !
+                while not q.empty():
+                    node = q.get().node
+                    cur.next = node
+                    cur = cur.next
+                    if node.next:
+                        q.put(Event(node.next))
+
+                return dummy.next
+          ```
+        * Implementation2: Use min heap
+          ```python
+          class Element(object):
+            def __init__(self, node):
+                self.node = node
+
+            def __lt__(self, other):
+              return self.node.val < other.node.val
+
+
+          def mergeKLists(self, lists: List[ListNode]) -> ListNode:
+              # heapify: O(k)
+              heap = []
+              for head in lists:
+                  if head:
+                      heap.append(Element(head))
+              heapq.heapify(heap)
+
+              cur = dummy = ListNode(0)
+              # O(nlogk)
+              while heap:
+                  pop_min = heap[0].node
+                  cur.next = pop_min
+                  cur = cur.next
+                  if pop_min.next:
+                      heapq.heapreplace(heap, Element(pop_min.next))
+                  else:
+                      heapq.heappop(heap)
+
+              return dummy.next
+          ```
+    * Approach4: **bottom up Merge Sort**, Time:O(nlog(k)), Space:O(1)
+      * Time complexity: O(nlog(k))
+        * Total log(k) round:
+          * each round need to traverse every nodes
+      * Space complexity: O(1)
+      * Python
+        ```python
+        def merge_2_sorted_Lists(self, l1, l2):
+          cur = dummy = ListNode(0)
+          while l1 and l2:
+              if l1.val < l2.val:
+                  cur.next = l1
+                  l1 = l1.next
+              else:
+                  cur.next = l2
+                  l2 = l2.next
+              cur = cur.next
+
+          if l1:
+              cur.next = l1
+
+          if l2:
+              cur.next = l2
+
+          return dummy.next
+
+        def mergeKLists(self, lists: List[ListNode]) -> ListNode:
+            if not lists:
+                return None
+
+            # bottom up merge lists
+            interval = 1
+            while interval < len(lists):
+                left = 0
+                while left + interval < len(lists):
+                    right = left+interval
+                    lists[left] = self.merge_2_sorted_Lists(lists[left], lists[left+right])
+                    left += (2 * interval)
+                interval *= 2
+
+            return lists[0]
+        ```
+  * 147: Insertion Sort List (M)
 * Add numbers:
   * 002: Add Two Numbers (M)
     * Input:
@@ -6933,9 +7053,77 @@ Table of Content
 
             return res
         ```
+  * 234: **Palindrome** Linked List (M)
+    * Approach1: Reverse, Time:O(n), Space: O(1):
+      * Reverse first half of the linked list, but it is not a pratical solution since we should not modify the constant function of the input.
+      * Python
+        ```python
+        def isPalindrome(self, head: ListNode) -> bool:
+          # node <= 1
+          if not head or not head.next:
+              return True
+
+          slow = head
+          fast = head.next # Ensure the 1st part has the same or one more node
+          while fast and fast.next:
+              fast = fast.next.next
+              slow = slow.next
+
+          cur = slow.next
+          prev = slow.next = None
+
+          # reverse second part
+          while cur:
+              nxt = cur.next
+              cur.next = prev
+              prev, cur = cur, nxt
+
+          is_palindrom = True
+          first = head
+          second = prev
+
+          # compare
+          while second:
+              if second.val != first.val:
+                  is_palindrom = False
+                  break
+              first = first.next
+              second = second.next
+
+          return is_palindrom
+        ```
+    * Approach2: Use Stack, Time:O(n), Space: O(n):
+      * Python
+        ```python
+        def isPalindrome(self, head: ListNode) -> bool:
+          # node <= 1
+          if not head or not head.next:
+              return True
+
+          slow = head
+          fast = head.next # Ensure the 1st part has the same or one more node
+          while fast and fast.next:
+              fast = fast.next.next
+              slow = slow.next
+
+          stack = list()
+          cur = slow.next
+          while cur:
+              stack.append(cur)
+              cur = cur.next
+
+          is_palindrom = True
+          cur = head
+          while stack:
+              if cur.val != stack.pop().val:
+                  is_palindrom = False
+                  break
+              cur = cur.next
+
+          return is_palindrom
+        ```
 * TODO
-  * 086	Partition List (M)
-  * 147	Insertion Sort List (M)
+  * 1171: Remove Zero Sum Consecutive Nodes from Linked List
 ### Stack and Queue
   * 155: Min Stack (E)
     * Space (n)
@@ -7142,8 +7330,10 @@ Table of Content
               return False
       ```
 ### Heap (Priority Queue)
+  * Note:
+    * For Python, heapq is min-heap
   * 023: Merge k Sorted Lists (H) (LinkedList)
-    * pleaser refer linked list section (use min heap)
+    * Ｐleaser refer linked list section (use min heap)
   * 253: Meeting Rooms II (M) (Array)
     * Please refer array section, use min heap
   * 703. **Kth Largest** Element in a Stream (E)
@@ -7447,6 +7637,9 @@ Table of Content
         * This leads us to a huge point of pain in this approach: **balancing the two heaps**!
       * The concept is similar to median of 2 sorted array
       * lo (max heap) is allowed to hold n + 1 elements, while hi can hold n elements
+        * example:
+          * for 2n element, lo holds n, hi hold n as well.
+          * for 2n+1 elements, lo hold n+1, hi hold n.
       * Python
         ```python
         class MedianFinder:
@@ -12678,6 +12871,7 @@ Table of Content
   * 291: Word Pattern II
 ### Graph
   * Eulerian trail
+    * A finite graph that **visits every edge** exactly once.
     * 332: Reconstruct Itinerary (M)
       * This is the problem of Eulerian trail
         * vertex: airport
@@ -12764,9 +12958,13 @@ Table of Content
             return route
           ```
   * Eulerian circuit
+    * An **Eulerian trail** that **starts and ends on the same vertex**.
   * Hamilton path
+    * A finite graph that **visits every vertex** exactly once.
   * Hamilton cycle
+    * An Hamilton path that **starts and ends on the same vertex**.
   * Minimum Spanning Tree
+    * A minimum spanning tree (MST) or minimum weight spanning tree is **a subset of the edges of a connected, edge-weighted undirected graph that connects all the vertices together, without any cycles and with the minimum possible total edge weight**.
   * Shortest Path
   * Topological Sort
     * Ref:
@@ -12933,9 +13131,10 @@ Table of Content
     * 269: Alien Dictionary (H)
 ### Bit Manipulation
 ### Union Field
+  * 1135: Connecting Cities With Minimum Cost
   * 200: Number of Islands (M)
   * 305: Number of Islands II (H)
-### Error List
+### Retry List
   * Math:
     * Number:
       * 007: Reverse Integer
@@ -12944,7 +13143,8 @@ Table of Content
       * Excel Sheet
         * 168: **Excel Sheet** Column Title
     * Majority
-      * Boyer-Moore Voting Algorithm
+      * Boyer-Moore Voting Algorithm:
+        * notice the concpet and implementation.
       * 1150: Check If a Number Is Majority Element in a Sorted Array (E)
       * 229: Majority Element II (M)
     * Pascal's Triangle
@@ -12953,11 +13153,13 @@ Table of Content
       * 015: 3Sum (M)
       * 018: 4Sum (M) and kSum
   * Sorting
-    * merge sort:
+    * quick sort recursiv + iterative
+    * merge sort recursiv + iterative:
       * using indices in the merge function.
     * heap sort
       * Use max heap
     * 075: Sort Colors (M)
+      * Notice the end conditino of Dutch National Flag Problem
   * String
     * 038: Count and Say (E)
     * 392: Is Subsequence (E)
@@ -12987,12 +13189,23 @@ Table of Content
     * 152: Maximum **Product** Subarray (M)
     * 134: Gas Station (M)
   * LinkedList
-    * 025: **Reverse** Nodes in **k-Group** (H)
-    * 148: Sort list (M)
-    * 023: Merge k Sorted Lists (H)
-    * 143: **Reorder** List (M)
-    * 061: **Rotate** list (M)
-      * old_head, new_tail, new_head, old_tail
+    * **Runner** and **Detect Circle**
+      * 142: Linked List Cycle II (M)
+    * Remove node:
+      * 082: Remove Duplicates from **Sorted** List II (M)
+        * don't forget the last delete_from_prev
+    * **Reorder**:
+      * 092: **Reverse** Linked List II (M)
+      * 025: **Reverse** Nodes in **k-Group** (H)
+      * 024: **Swap** Nodes in **Pair** (M)
+      * 143: **Reorder** List (M)
+    * Partition:
+      * 061: **Rotate** list (M)
+      * 328: Odd Even Linked List (M)
+      * 725: Split Linked List in Parts (M)
+    * **Sorting and Merge**
+      * 023: Merge k **Sorted** Lists (H)
+      * 148: Sort list (M)
     * 445: Add Two Numbers II (M)
   * Tree:
     * PreOrder:
