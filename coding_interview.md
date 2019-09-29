@@ -2150,121 +2150,7 @@ Table of Content
                return len(stack) == 0
            ```
      * 022: Generate Parentheses (M)
-       * Approach1-1: Brute Force, Recursive, Time:O(n*n^(2n))
-         * f(n) = f(n-1) + '('  or f(n-1) + ')'
-         * Time Complexity:
-           * total n^(2n) combination
-         * Space Complexity:
-         * Python Solution:
-          ```python
-          def generateParenthesis(self, n: int) -> List[str]:
-            def valid(cur):
-                bal = 0
-                for bracket in cur:
-                    if bracket == '(':
-                        bal += 1
-                    else:
-                        bal -= 1
-                        if bal < 0:
-                            return False
-                return bal == 0
-
-            def backtrack(cur):
-                if len(cur) == 2*n:
-                    if valid(cur):
-                        res.append("".join(cur))
-                    return
-
-                # case1: f(n) = f(n-1) + '('
-                cur.append('(')
-                backtrack(cur)
-                cur.pop()
-                # case2 : f(n) = f(n-1) + ')'
-                cur.append(')')
-                backtrack(cur)
-                cur.pop()
-
-            res = []
-            cur = []
-            backtrack(cur)
-            return res
-          ```
-       * Approach1-2: Brute Force, Iterative: Time:O(n*n^(2n))
-         * Python Solution
-         ```python
-         def generateParenthesis(self, n: int) -> List[str]:
-            def valid(cur):
-                bal = 0
-                for bracket in cur:
-                    if bracket == '(':
-                        bal += 1
-                    else:
-                        bal -= 1
-                        if bal < 0:
-                            return False
-
-                return bal == 0
-
-            combos = [[]]
-            res = []
-            for _ in range(2*n):
-                combo_len = len(combos)
-                for j in range(combo_len):
-                    combo = combos[j]
-                    copy=combo.copy()
-                    copy.append('(')
-                    combos.append(copy)
-                    combo.append(')')
-
-            for combo in combos:
-                if valid(combo):
-                    res.append("".join(combo))
-
-            return res
-         ```
-       * Approach2-1: Control the left and right, Recursive:
-         * Add them only when we know it will remain a valid sequence (cut off the tree)
-         * Python Solution:
-          ```python
-          def generateParenthesis(self, n: int) -> List[str]:
-              def backtrack(s, left, right):
-                  if len(s) == 2*n:
-                      res.append(s)
-                      return
-
-                  # cut off the tree
-                  if left < n:
-                      backtrack(s+'(', left+1, right)
-
-                  if right < left:
-                      backtrack(s+')', left, right+1)
-
-              res = []
-              backtrack(s="", left=0, right=0)
-              return res
-          ```
-       * Approach2-2: Control the left and right, Iterative:
-         * Python Solution:
-          ```python
-          def generateParenthesis(self, n: int) -> List[str]:
-            res = []
-            stack = []
-            # s, left ,right
-            stack.append(('(', 1, 0))
-            while stack:
-                s, left, right = stack.pop()
-                if len(s) == 2*n:
-                    res.append(s)
-                    continue
-
-                if left < n:
-                    stack.append((s+'(', left+1, right))
-
-                if right < left:
-                    stack.append((s+')', left, right+1))
-
-            return res
-          ```
+       * See backtracking
      * 241: Different Ways to Add Parentheses (M)
      * 032:	Longest Valid Parentheses (H)
      * 301: Remove Invalid Parentheses (H)
@@ -6652,26 +6538,47 @@ Table of Content
                 fast = fast.next.next
                 slow = slow.next
 
+            left = head
             right = slow.next
-            slow.next = None
+            slow.next = None  # set tail of left to None
             # left part
             left = self.sortList(head)
             # right part
             right = self.sortList(right)
+
             head = merge_2_sorted_lists(left, right)
 
             return head
           ```
-      * Approach2: bottom up merge sort , Time: O(nlog(n), Space:O(1)
-        * **Split** the linked with window size 1,2,4,8, etc.
-        * **Merge** the splitted linked lists.
-          * Having to handle **linking issue** between two sorted lists **after merging**.
+      * Approach2: Bottom up merge sort , Time: O(nlog(n), Space:O(1)
+        * Algo:
+        * Like traditional bottom up sorting algorithm:
+          * Start from window size 1 to n-1
+          * Scanning from left to right
+            * **Split** the linked with window size .
+            * **Merge** the splitted linked lists.
+          * Note:
+            * Need to handle **linking issue** between two sorted lists **after merging**.
+          * example:
+              ```txt
+              window_size = 3
+               O->O->O  O->O->O-> O->O->O-> O->O->O->
+              prev_end  left      right     next_left
+              ```
         * Python
           ```python
           def sortList(self, head: ListNode) -> ListNode:
+
+            def get_len(head):
+                cur = head
+                n = 0
+                while cur:
+                    n += 1
+                    cur = cur.next
+                return n
+
             def merge_2_sorted_lists(prev_end, l1, l2):
                 cur = prev_end
-                cur.next = None
 
                 while l1 and l2:
                     if l1.val <= l2.val:
@@ -6693,46 +6600,47 @@ Table of Content
                 while cur.next:
                     cur = cur.next
 
+                # cur is tail of the merged list
                 return cur
 
-            def split_list_with_size(cur, size):
+            def split_list_with_k_len(head, k):
                 """
                 Divide the linked list into two lists,
-                while the first list contains first n ndoes
-              return the second list's head
+                while the first list contains first k ndoes
+                return the second list's head
                 """
-                for _ in range(size-1):
+                cur = head
+                second = None
+
+                for _ in range(k-1):
                     if not cur:
                         break
                     cur = cur.next
 
                 if not cur:
-                    # second list's head is None
-                    return None
+                    return second
 
-                second_head = cur.next
+                second = cur.next
                 cur.next = None
-                return second_head
+
+                return second
 
             if not head or not head.next:
                 return head
 
-            n = 0
-            cur = head
-            while cur:
-                n += 1
-                cur = cur.next
-
             dummy = ListNode(0)
             dummy.next = head
+
+            n = get_len(head)
             window_size = 1
 
             while window_size < n:
                 prev_end = dummy
-                left = prev_end.next
+                left = dummy.next
+
                 while left:
-                    right = split_list_with_size(left, window_size)
-                    next_left = split_list_with_size(right, window_size)
+                    right = split_list_with_k_len(left, window_size)
+                    next_left = split_list_with_k_len(right, window_size)
                     prev_end = merge_2_sorted_lists(prev_end, left, right)
                     left = next_left
 
@@ -6867,30 +6775,29 @@ Table of Content
   * 147: Insertion Sort List (M)
 * Add numbers:
   * 002: Add Two Numbers (M)
-    * Input:
-      * (2 -> 4 -> 3) + (5 -> 6 -> 4)
-    * Output:
-      * 7 -> 0 -> 8
+    * Example:
+      * From left to right
+      * Input:
+        * (2 -> 4 -> 3) + (5 -> 6 -> 4)
+      * Output:
+        * 7 -> 0 -> 8
     * Approach1: one pass, Time:O(n), Space:O(1)
       * Don't forget the **last carry**.
-      * Python Solution
+      * Python
         ```python
         def addTwoNumbers(self, l1: ListNode, l2: ListNode) -> ListNode:
-          l1_runner, l2_runner = l1, l2
           cur = dummy = ListNode(0)
           carry = 0
 
-          # Don't forget the last carry
-          while l1_runner or l2_runner or carry:
+          while l1 or l2 or carry:
               val = carry
 
-              if l1_runner:
-                  val += l1_runner.val
-                  l1_runner = l1_runner.next
-
-              if l2_runner:
-                  val += l2_runner.val
-                  l2_runner = l2_runner.next
+              if l1:
+                  val += l1.val
+                  l1 = l1.next
+              if l2:
+                  val += l2.val
+                  l2 = l2.next
 
               cur.next = ListNode(val % 10)
               carry = val // 10
@@ -6899,8 +6806,14 @@ Table of Content
           return dummy.next
         ```
   * 445: Add Two Numbers II (M)
+    * Example:
+      * From right to left
+      * Input:
+        * (7 -> 2 -> 4 -> 3) + (5 -> 6 -> 4)
+      * Output:
+        * 7 -> 8 -> 0 -> 7
     * Approach1: Reverse and Add, Time:O(n), Space:O(1)
-      * Python Solution
+      * Python
         ```python
         def reverse(self, head):
             prev = None
@@ -6928,15 +6841,15 @@ Table of Content
                     val += l2.val
                     l2 = l2.next
 
-                 # insert the new node to the head
                  new = ListNode(val%10)
                  new.next = head
                  head = new
                  carry = val // 10
+
             return self.reverse(dummy.next)
         ```
-    * Approach2: Use Stack Time:O(n), Space:O(1)
-      * Python Solution
+    * Approach2: Use Stack, Time:O(n), Space:O(1)
+      * Python
         ```python
         def push_to_stack(self, head):
           stack = list()
@@ -6961,7 +6874,6 @@ Table of Content
               if s2:
                   val += s2.pop().val
 
-              # insert the new node to the head
               new = ListNode(val%10)
               new.next = head
               head = new
@@ -6981,40 +6893,41 @@ Table of Content
         * 3. **Reverse** modified linked list and return head.
       * Python Solution
         ```python
-          def reverse(self, head):
-            prev = None
-            cur = head
-
-            while cur:
-                nxt = cur.next
-                cur.next = prev
-                prev, cur = cur, nxt
-
-            return prev
-
-          def plusOne(self, head: ListNode) -> ListNode:
-              # 1. reverse
-              head = self.reverse(head)
-
-              # 2. plus one
-              carry = 1
-              cur = head
+        def plusOne(self, head: ListNode) -> ListNode:
+          def reverse(cur):
+              prev = None
               while cur:
-                  val = cur.val + carry
-                  cur.val = val % 10
-                  carry = val // 10
+                  nxt = cur.next
+                  cur.next = prev
+                  prev, cur = cur, nxt
 
-                  # have to create a new node for carry
-                  if cur.next is None and carry:
-                      cur.next = ListNode(carry)
-                      break
+              return prev
 
-                  cur = cur.next
-
-              # 3. reverse back
-              head = self.reverse(head)
-
+          if not head:
               return head
+
+          # 1. reverse
+          head = reverse(head)
+
+          # 2. plus one
+          cur = head
+          carry = 1
+          while cur:
+              val = carry + cur.val
+              cur.val = val % 10
+              carry = val // 10
+
+              # create one
+              if carry and not cur.next:
+                  cur.next = ListNode(carry)
+                  break
+
+              cur = cur.next
+
+          # 3. reverse back
+          head = reverse(head)
+
+          return head
         ```
 * Others
   * 160: Intersection of Two Linked Lists (E)
@@ -7096,12 +7009,13 @@ Table of Content
       * Python
         ```python
         def isPalindrome(self, head: ListNode) -> bool:
-          # node <= 1
           if not head or not head.next:
               return True
 
-          slow = head
-          fast = head.next # Ensure the 1st part has the same or one more node
+          """
+          Ensure the 1st part has the same or one more node
+          """
+          slow, fast = head, head.next
           while fast and fast.next:
               fast = fast.next.next
               slow = slow.next
@@ -12367,6 +12281,126 @@ Table of Content
 ### Backtracking
   * 294: Flip Game II (M)
   * 022: Generate Parentheses (M)
+     * Approach1-1: Brute Force, Recursive, Time:O(n*n^(2n))
+       * f(n) = f(n-1) + '('  or f(n-1) + ')'
+       * Time Complexity:
+         * total n^(2n) combination
+       * Space Complexity:
+       * Python Solution:
+        ```python
+        def generateParenthesis(self, n: int) -> List[str]:
+          def valid(cur):
+              bal = 0
+              for bracket in cur:
+                  if bracket == '(':
+                      bal += 1
+                  else:
+                      bal -= 1
+                      if bal < 0:
+                          return False
+              return bal == 0
+
+          def backtrack(cur):
+              if len(cur) == 2*n:
+                  if valid(cur):
+                      res.append("".join(cur))
+                  return
+
+              # case1: f(n) = f(n-1) + '('
+              cur.append('(')
+              backtrack(cur)
+              cur.pop()
+              # case2 : f(n) = f(n-1) + ')'
+              cur.append(')')
+              backtrack(cur)
+              cur.pop()
+
+          res = []
+          cur = []
+          backtrack(cur)
+          return res
+        ```
+     * Approach1-2: Brute Force, Iterative: Time:O(n*n^(2n))
+       * Python Solution
+       ```python
+       def generateParenthesis(self, n: int) -> List[str]:
+          def valid(cur):
+              bal = 0
+              for bracket in cur:
+                  if bracket == '(':
+                      bal += 1
+                  else:
+                      bal -= 1
+                      if bal < 0:
+                          return False
+
+              return bal == 0
+
+          combos = [[]]
+          res = []
+          for _ in range(2*n):
+              combo_len = len(combos)
+              for j in range(combo_len):
+                  combo = combos[j]
+                  copy=combo.copy()
+                  copy.append('(')
+                  combos.append(copy)
+                  combo.append(')')
+
+          for combo in combos:
+              if valid(combo):
+                  res.append("".join(combo))
+
+          return res
+       ```
+     * Approach2-1: Control the left and right, Recursive:
+       * Add them only when we know it will remain a valid sequence (cut off the tree)
+       * Python Solution:
+        ```python
+        def generateParenthesis(self, n: int) -> List[str]:
+          def backtrack(cur, left, right):
+              if left == right == n:
+                  partheneses.append(''.join(cur))
+                  return
+
+              if left < n:
+                  cur.append('(')
+                  backtrack(cur, left+1, right)
+                  cur.pop()
+
+              if right < left:
+                  cur.append(')')
+                  backtrack(cur, left, right+1)
+                  cur.pop()
+
+          cur = []
+          partheneses = []
+          backtrack(cur, left=0, right=0)
+
+          return partheneses
+        ```
+     * Approach2-2: Control the left and right, Iterative:
+       * Python Solution:
+        ```python
+        def generateParenthesis(self, n: int) -> List[str]:
+          res = []
+          stack = []
+          # s, left ,right
+          stack.append(('(', 1, 0))
+          while stack:
+              s, left, right = stack.pop()
+              if left == right == n:
+                  res.append(s)
+                  continue
+
+              if left < n:
+                  stack.append((s+'(', left+1, right))
+
+              if right < left:
+                  stack.append((s+')', left, right+1))
+
+          return res
+        ```
   * **Subset**
     * 078: Subsets (M)
       * Ref:
@@ -12676,7 +12710,10 @@ Table of Content
                 for i in range(start, n):
                     num = candidates[i]
                     cur.append(num)
-                    # use start the keep the sequence
+
+                    """
+                    use start the keep the sequence
+                    """
                     dfs(i, target-num, cur)
                     cur.pop()
 
@@ -12790,8 +12827,14 @@ Table of Content
     * 047: Permutations II (M)
       * Given a collection of numbers **that might contain duplicates**, return all possible unique permutations.
       * Note:
-        * Avoid duplicate val in the same position and use each val only once.
+        * How to avoid duplicate val in the same position?
+        * Length of Permutation should be n.
       * Approach1: Recursive, BackTracking + Counter
+        * Note:
+          * How to avoid duplicate val in the same position?
+          * Length of Permutation should be n.
+          * answer:
+            * Use Counter to Control recursive call.
         * Python
           ```python
           def permuteUnique(self, nums):
@@ -12854,7 +12897,6 @@ Table of Content
             perms = [[]]
             for n in nums:
                 new_perms = []
-
                 for perm in perms:
                     for i in range(len(perm)+1):
                         new_perms.append(perm[:i]+[n]+perm[i:])
@@ -13206,7 +13248,9 @@ Table of Content
     * **Sorting and Merge**
       * 023: Merge k **Sorted** Lists (H)
       * 148: Sort list (M)
-    * 445: Add Two Numbers II (M)
+    * Add numbers
+      * 002: Add Two Numbers (M)
+      * 369: Plus One Linked List (M)
   * Tree:
     * PreOrder:
       * 111: **Minimum Depth** of Binary Tree	(E)
