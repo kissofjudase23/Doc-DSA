@@ -1390,46 +1390,7 @@ Table of Content
     * 316: Remove Duplicate Letters (H)
   * Encode and Decode:
     * 394: Decode String (M)
-      * Approach1: Use 2 stacks: Time:O(kn), Space:O(kn)
-        * Ref:
-          * https://leetcode.com/problems/decode-string/discuss/87534/Simple-Java-Solution-using-Stack
-        * Python
-          ```python
-          def decodeString(self, s: str) -> str:
-            buf = []
-            cnt_s = []
-            decode_s = []
-            ord_0 = ord('0')
-
-            i = 0
-            while i < len(s):
-                c = s[i]
-                if c.isdigit():
-                    cnt = 0
-                    while s[i].isdigit():
-                        cnt = cnt * 10 + (ord(s[i]) - ord_0)
-                        i+= 1
-                    cnt_s.append(cnt)
-
-                elif c == '[':
-                    decode_s.append(buf)
-                    buf = []
-                    i += 1
-
-                elif c == ']':
-                    repeat_cnt = cnt_s.pop()
-                    repeat_str = "".join(buf)
-                    buf = decode_s.pop()
-                    for _ in range(repeat_cnt):
-                        buf.append(repeat_str)
-                    i += 1
-
-                else:
-                    buf.append(c)
-                    i += 1
-
-              return "".join(buf)
-          ```
+      * See Queue and Stack Section
     * 271: Encode and Decode Strings (M)
       * Approach1: Non-ASCII Delimiter
       * Approach2: Chunked Transfer Encoding
@@ -6505,6 +6466,8 @@ Table of Content
           return dummy.next
         ```
   * 148: Sort list (M)
+      * Ref:
+        * https://stackoverflow.com/questions/1525117/whats-the-fastest-algorithm-for-sorting-a-linked-list/1525419#1525419
       * Approach1: Top down merge sort , Time: O(nlog(n), Space:O(logn)
         * Python
           ```python
@@ -6773,7 +6736,40 @@ Table of Content
             return lists[0]
         ```
   * 147: Insertion Sort List (M)
-* Add numbers:
+    * Approach1: standard insertion sort, Time:O(n^2), Space:O(1)
+      * create a new dummy to store sorted list
+      * handle the insert val properly
+      * Python
+      ```python
+        def insertionSortList(self, head: ListNode) -> ListNode:
+
+          if not head or not head.next:
+              return head
+
+          # new head to store sored list
+          prev = dummy = ListNode(0)
+          cur = head
+          while cur:
+
+              nxt = cur.next
+              # Should we move the "prev" back to the dummy (head of the sorted list)
+              if prev.val > cur.val:
+                  prev = dummy
+
+              # find the correct position
+              while prev.next and prev.next.val < cur.val:
+                  prev = prev.next
+
+
+              cur.next = prev.next
+              prev.next = cur
+
+              cur = nxt
+
+
+          return dummy.next
+      ```
+* **Add numbers**:
   * 002: Add Two Numbers (M)
     * Example:
       * From left to right
@@ -7198,6 +7194,74 @@ Table of Content
               Returns whether the stack is empty.
               """
               return not len(self.queue)
+        ```
+  * 394: Decode String (M)
+    * Approach1: Use 2 stacks: Time:O(kn), Space:O(kn)
+      * Ref:
+        * https://leetcode.com/problems/decode-string/discuss/87534/Simple-Java-Solution-using-Stack
+      * Python
+        ```python
+        def decodeString(self, s: str) -> str:
+          buf = []
+          cnt_s = []
+          decode_s = []
+          ord_0 = ord('0')
+
+          i = 0
+          while i < len(s):
+              c = s[i]
+              if c.isdigit():
+                  cnt = 0
+                  while s[i].isdigit():
+                      cnt = cnt * 10 + (ord(s[i]) - ord_0)
+                      i+= 1
+                  cnt_s.append(cnt)
+
+              elif c == '[':
+                  decode_s.append(buf)
+                  buf = []
+                  i += 1
+
+              elif c == ']':
+                  repeat_cnt = cnt_s.pop()
+                  repeat_str = "".join(buf)
+                  buf = decode_s.pop()
+                  for _ in range(repeat_cnt):
+                      buf.append(repeat_str)
+                  i += 1
+
+              else:
+                  buf.append(c)
+                  i += 1
+
+            return "".join(buf)
+          ```
+  * 255: Verify Preorder Sequence in Binary Search Tree (M)
+    * Ref:
+      * https://leetcode.com/problems/verify-preorder-sequence-in-binary-search-tree/discuss/68185/C%2B%2B-easy-to-understand-solution-with-thought-process-and-detailed-explanation
+    * The key is how to find the lower bound
+    * Preorder sequence: root[left_subtree][right_subtree]
+      * Since left_subtree_val < root < right_subtree_val, when we find the first val which is greater than the root, it means that root should be the current lower bound
+      * stack would be (r1, r2, r3) pop until find the correct root node
+    * Approach1: Stack
+      * Python
+        ```python
+        def verifyPreorder(self, preorder: List[int]) -> bool:
+          lower = float('-inf')
+          stack = []
+          is_bst = True
+          for n in preorder:
+              if n < lower:
+                  is_bst = False
+                  break
+
+              while stack and n > stack[-1]:
+                  # pop until find the current lower bound
+                  lower = stack.pop()
+
+              stack.append(n)
+
+          return is_bst
         ```
   * 341: Flatten Nested List Iterator (M)
     * Approach1: Use stack
@@ -10459,32 +10523,7 @@ Table of Content
           ```
     * 095: **Unique** Binary Search **Trees** II (M)
     * 255: Verify Preorder Sequence in Binary Search Tree (M)
-      * Ref:
-        * https://leetcode.com/problems/verify-preorder-sequence-in-binary-search-tree/discuss/68185/C%2B%2B-easy-to-understand-solution-with-thought-process-and-detailed-explanation
-      * The key is how to find the lower bound
-      * Preorder sequence: root[left_subtree][right_subtree]
-        * Since left_subtree_val < root < right_subtree_val, when we find the first val which is greater than the root, it means that root should be the current lower bound
-        * stack would be (r1, r2, r3) pop until find the correct root node
-      * Approach1: Stack
-        * Python
-          ```python
-          def verifyPreorder(self, preorder: List[int]) -> bool:
-            lower = float('-inf')
-            stack = []
-            is_bst = True
-            for n in preorder:
-                if n < lower:
-                    is_bst = False
-                    break
-
-                while stack and n > stack[-1]:
-                    # pop until find the current lower bound
-                    lower = stack.pop()
-
-                stack.append(n)
-
-            return is_bst
-          ```
+      * See Stack and Queue
     * 333: Largest BST Subtree (M)
     * 099: **Recover** Binary Search Tree (H)
   * **Other**:
@@ -13248,6 +13287,7 @@ Table of Content
     * **Sorting and Merge**
       * 023: Merge k **Sorted** Lists (H)
       * 148: Sort list (M)
+      * 147: Insertion Sort List (M)
     * Add numbers
       * 002: Add Two Numbers (M)
       * 369: Plus One Linked List (M)
