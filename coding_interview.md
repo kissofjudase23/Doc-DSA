@@ -903,7 +903,7 @@ Table of Content
             return pascal
           ```
 ### Sorting
-  * Standard Sorting:
+  * Array Sorting:
     * 912: Sort an Array (M)
       * Approach1: **Insertion** Sort, Time:O(n^2), Space:O(1)
         * Insert 1th, 2th, ... n-1th elements to the array
@@ -1282,6 +1282,9 @@ Table of Content
         * Recursive: Time:O(nlogn), Space:O(n)
           * Change for loop to recursive
           * Cheange max_heapify to recurisive
+  * Linked List Sorting:
+    * 147: Insertion Sort List (M)
+    * 148: Sort list (M)
   * Others:
       * 280: Wiggle Sort (M)
          * Given an unsorted array nums, reorder it in-place such that nums[0] <= nums[1] >= nums[2] <= nums[3]
@@ -7649,8 +7652,10 @@ Table of Content
   * 218: The Skyline Problem (H)
 ### Cache
   * 146: LRU Cache (M)
-    * Approach1: Use ordered dict
-    * Approach2: Use dict and doubly linked list
+    * Note:
+      * Don't forget to update val of key in put operation.
+    * Approach1: ordered dict
+    * Approach2: dict + doubly linked list
       * Put
         * new record
           * insert_head
@@ -7661,88 +7666,226 @@ Table of Content
         * move_to_head
       * For Doubly linked list
         * Use dummy nodes for head and tail
-      * Python Solution
+      * Python
         ```python
         class DLinkedNode(object):
-          def __init__(self):
-              self.key = None   # key is necessary for key pop operation of hash
-              self.val = None
-              self.prev = None
-              self.next = None
+            def __init__(self, key=None, val=None):
+                # key is necessary for key pop operation
+                self.key = key
+                self.val = val
+                self.prev = None
+                self.next = None
+
 
         class DLinkedList(object):
+
             def __init__(self):
-                self.head = DLinkedNode()
-                self.tail = DLinkedNode()
+                self.head = DLinkedNode(0)
+                self.tail = DLinkedNode(0)
 
                 self.head.next = self.tail
                 self.tail.prev = self.head
 
-            def insert_to_head(self, node):
+            def insert_to_head(self, node) -> None:
                 node.prev = self.head
                 node.next = self.head.next
+
                 self.head.next.prev = node
                 self.head.next = node
 
-            def remove_node(self, node):
+            def remove_node(self, node) -> None:
                 node.prev.next = node.next
                 node.next.prev = node.prev
 
-            def pop_tail(self):
-                """ O(1)
-                """
-                pop = self.tail.prev
-                if pop is self.head:
+            def pop_tail(self) -> DLinkedNode:
+                if self.tail.prev is self.head:
                     return None
 
+                pop = self.tail.prev
                 self.remove_node(pop)
                 return pop
 
-            def move_to_head(self, node):
-                """ O(1)
-                """
+            def move_to_head(self, node) -> None:
                 self.remove_node(node)
                 self.insert_to_head(node)
 
 
-        class LRUCache(object):
+        class LRUCache:
             def __init__(self, capacity: int):
-                self.dll = DLinkedList()
-                self.d = dict()
-                self.len = 0
+                self.nodes = dict()
+                self.list = DLinkedList()
                 self.cap = capacity
+                self.len = 0
 
             def get(self, key: int) -> int:
-                """ O(1)
-                """
-                if key not in self.d:
+                if key not in self.nodes:
                     return -1
 
-                node = self.d[key]
-                self.dll.move_to_head(node)
+                node = self.nodes[key]
+                self.list.move_to_head(node)
                 return node.val
 
             def put(self, key: int, value: int) -> None:
-                """ O(1)
-                """
-                if key not in self.d:
-                    new_node = DLinkedNode()
-                    new_node.key = key
-                    new_node.val = value
-                    self.d[key] = new_node
-                    self.dll.insert_to_head(new_node)
-
-                    if self.len + 1 > self.cap:
-                        pop_node = self.dll.pop_tail()
-                        self.d.pop(pop_node.key)
-                    else:
-                        self.len += 1
-                else:
-                    node = self.d[key]
+                if key in self.nodes:
+                    node = self.nodes[key]
                     node.val = value
-                    self.dll.move_to_head(node)
+                    self.list.move_to_head(node)
+                else:
+                    if self.len == self.cap:
+                        pop = self.list.pop_tail()
+                        self.nodes.pop(pop.key)
+                        self.len -= 1
+
+                    new = DLinkedNode(key, value)
+                    self.nodes[key] = new
+                    self.list.insert_to_head(new)
+                    self.len += 1
         ```
   * 460: LFU Cache (H)
+    * Example:
+      ```txt
+      LFUCache cache = new LFUCache( 2 /* capacity */ );
+      cache.put(1, 1);
+      cache.put(2, 2);
+      cache.get(1);       // returns 1
+      cache.put(3, 3);    // evicts key 2
+      cache.get(2);       // returns -1 (not found)
+      cache.get(3);       // returns 3.
+      cache.put(4, 4);    // evicts key 1.
+      cache.get(1);       // returns -1 (not found)
+      cache.get(3);       // returns 3
+      cache.get(4);       // returns 4
+      ```
+    * Note:
+      * How to keep the sequence ?? (frequency)
+    * Approach1: 2 dictionaries + Doubly LinkedList
+      * Ref:
+        * https://leetcode.com/problems/lfu-cache/discuss/207673/Python-concise-solution-**detailed**-explanation%3A-Two-dict-%2B-Doubly-linked-list
+      * Data Structures
+        * **self.nodes**
+          * Each key is mapping to the corresponding node, where we can retrieve the node in O(1) time.
+        * **self.freq_lists**
+          * Each frequency freq is mapped to a Doubly Linked List (), where all nodes in the DLinkedList have the same frequency, freq. Moreover, each node will be always inserted in the head (indicating most recently used).
+        * **self.min_freq**
+          * A minimum frequency is maintained to keep track of the minimum frequency of across all nodes in this cache, such that the DLinkedList with the min frequency can always be retrieved in O(1) time.
+      * Operations:
+        * get:
+          * query the node by calling self._node[key]
+          * find the frequency by checking node.freq, assigned as f, and query the DLinkedList that this node is in, through calling self._freq[f]
+          * pop this node
+          * update node's frequence, append the node to the new DLinkedList with frequency f+1
+          * if the DLinkedList is empty and self._minfreq == f, update self._minfreq to f+1.
+          * return node.val
+        * put:
+          * If key is already in cache, do the same thing as get(key), and update node.val as value
+          * Otherwise:
+            * if the cache is full, pop the least frequenly used element (*)
+            * add new node to self._node
+            * add new node to self._freq[1]
+            * reset self._minfreq to 1
+      * Python
+        ```python
+        class DLinkedNode(object):
+          def __init__(self, key=None, val=None, freq=0):
+              # key is necessary for key pop operation
+              self.key = key
+              self.val = val
+              self.freq = freq
+              self.prev = None
+              self.next = None
+
+
+        class DLinkedList(object):
+
+            def __init__(self):
+                self.head = DLinkedNode(0)
+                self.tail = DLinkedNode(0)
+                self.head.next = self.tail
+                self.tail.prev = self.head
+                self.len = 0
+
+            def __len__(self) -> int:
+                return self.len
+
+            def insert_to_head(self, node) -> None:
+                node.prev = self.head
+                node.next = self.head.next
+
+                self.head.next.prev = node
+                self.head.next = node
+                self.len += 1
+
+            def remove_node(self, node) -> None:
+                node.prev.next = node.next
+                node.next.prev = node.prev
+                self.len -= 1
+
+            def pop_tail(self) -> DLinkedNode:
+                if not self.len:
+                    return None
+
+                pop = self.tail.prev
+                self.remove_node(pop)
+                return pop
+
+
+        class LFUCache:
+
+            def __init__(self, capacity: int):
+                self.nodes = dict()
+                self.freq_lists = collections.defaultdict(DLinkedList)
+                self.min_freq = 0
+                self.cap = capacity
+                self.len = 0
+
+            def _update(self, node) -> None:
+                # 1. remove node from old linked list
+                prev_list = self.freq_lists[node.freq]
+                prev_list.remove_node(node)
+
+                # 2. update min_freq if lengh of prev_list is 0
+                if self.min_freq == node.freq and not prev_list:
+                    self.min_freq += 1
+
+                # 3. increase freq and append the node to the new list
+                node.freq += 1
+                self.freq_lists[node.freq].insert_to_head(node)
+
+            def get(self, key: int) -> int:
+                if key not in self.nodes:
+                    return -1
+
+                node = self.nodes[key]
+                self._update(node)
+                return node.val
+
+            def put(self, key: int, value: int) -> None:
+
+                if self.cap <= 0:
+                    return
+
+                if key in self.nodes:
+                    node = self.nodes[key]
+                    self._update(node)
+                    node.val = value
+
+                else:
+                    # 1. pop node from linked list with min frequency if necessary
+                    if self.len == self.cap:
+                        pop = self.freq_lists[self.min_freq].pop_tail()
+                        self.nodes.pop(pop.key)
+                        self.len -= 1
+
+                    # 2. add new node
+                    freq = 1
+                    new = DLinkedNode(key, value, freq)
+                    self.nodes[key] = new
+                    pop = self.freq_lists[freq].insert_to_head(new)
+
+                    # 3. update freq and len
+                    self.min_freq = freq
+                    self.len += 1
+        ```
 ### Tree
   * **Preorder**
     * 144: Binary Tree Preorder **Traversal** (M)
