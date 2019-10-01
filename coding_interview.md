@@ -7656,16 +7656,11 @@ Table of Content
       * Don't forget to update val of key in put operation.
     * Approach1: ordered dict
     * Approach2: dict + doubly linked list
-      * Put
-        * new record
-          * insert_head
-          * pop_tail if necessary
-        * already existing
-          * move_to_head
-      * Get
-        * move_to_head
-      * For Doubly linked list
-        * Use dummy nodes for head and tail
+      * Data Structures
+        * **self.nodes**
+          * Each key is mapping to the corresponding node, where we can retrieve the node in O(1) time.
+        * **self.list**
+          * DLinkedList keeps the nodes with LRU order (head node is the most recently used)
       * Python
         ```python
         class DLinkedNode(object):
@@ -7765,9 +7760,11 @@ Table of Content
         * **self.nodes**
           * Each key is mapping to the corresponding node, where we can retrieve the node in O(1) time.
         * **self.freq_lists**
-          * Each frequency freq is mapped to a Doubly Linked List (), where all nodes in the DLinkedList have the same frequency, freq. Moreover, each node will be always inserted in the head (indicating most recently used).
+          * Each frequency is mapped to a DLinkedList.
+          * All nodes in the DLinkedList have the same frequency, freq.
+          * Each * DLinkedList keeps the nodes with LRU order (head node is the most recently used)
         * **self.min_freq**
-          * A minimum frequency is maintained to keep track of the minimum frequency of across all nodes in this cache, such that the DLinkedList with the min frequency can always be retrieved in O(1) time.
+          * A minimum frequency is maintained to keep track of the minimum frequency of across all nodes in this cache, such that **the DLinkedList with the min frequency can always be retrieved in O(1) time**.
       * Operations:
         * get:
           * query the node by calling self._node[key]
