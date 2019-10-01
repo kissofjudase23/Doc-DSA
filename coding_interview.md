@@ -10670,151 +10670,152 @@ Table of Content
     * 156: Binary Tree Upside Down (M)
 ### Trie (Prefix Tree)
   * 208: Implement Trie (M)
-    * Approach1: Iterative
-      * Insert: O(k)
-      * Search: O(k)
-      * Python Solution:
+    * Approach1: Iterative, Inert:O(k), Search:O(k)
+      * Python:
         ```python
-        class Node(object):
+        class TrieNode(object):
           def __init__(self):
-              self.children = collections.defaultdict(Node)
+              self.children = collections.defaultdict(TrieNode)
               self.end_of_word = False
 
         class Trie:
-          def __init__(self):
-              """
-              Initialize your data structure here.
-              """
-              self.root = Node()
+            def __init__(self):
+                """
+                Initialize your data structure here.
+                """
+                self.root = TrieNode()
 
-          def insert(self, word: str) -> None:
-              """
-              Inserts a word into the trie.
-              """
-              cur = self.root
-              for c in word:
-                  child = cur.children[c]
-                  cur = child
+            def insert(self, word: str) -> None:
+                """
+                Inserts a word into the trie.
+                """
+                if not word:
+                    return
 
-              cur.end_of_word = True
+                cur = self.root
+                for c in word:
+                    child = cur.children[c]
+                    cur = child
+                cur.end_of_word = True
 
-          def search(self, word: str) -> bool:
-              """
-              Returns if the word is in the trie.
-              """
-              cur = self.root
-              for c in word:
-                  if c not in cur.children:
-                      return False
-                  cur = cur.children[c]
+            def search(self, word: str) -> bool:
+                """
+                Returns if the word is in the trie.
+                """
+                cur = self.root
+                for c in word:
+                    if c not in cur.children:
+                        return False
 
-              return cur.end_of_word
+                    cur = cur.children[c]
 
-          def startsWith(self, prefix: str) -> bool:
-              """
-              Returns if there is any word in the trie that starts with the given prefix.
-              """
-              cur = self.root
-              for c in prefix:
-                  if c not in cur.children:
-                      return False
-                  cur = cur.children[c]
+                return cur.end_of_word
 
-              return True
+            def startsWith(self, prefix: str) -> bool:
+                """
+                Returns if there is any word in the trie that starts with the given prefix.
+                """
+                cur = self.root
+                for c in prefix:
+                    if c not in cur.children:
+                        return False
+
+                    cur = cur.children[c]
+
+                return True
         ```
     * Approach2: Recurisve:
-      ```python
-      import collections
-
-      class Node(object):
-          def __init__(self):
-              self.children = collections.defaultdict(Node)
-              self.end_of_word = False
-
-      class Trie:
-
-          def __init__(self):
-              """
-              Initialize your data structure here.
-              """
-              self.root = Node()
-
-          def insert(self, word: str) -> None:
-              """
-              Inserts a word into the trie.
-              """
-              def insert_with_idx(cur, idx):
-                  if idx == w_len:
-                      cur.end_of_word = True
-                      return
-
-                  insert_with_idx(cur.children[word[idx]], idx+1)
-
-              w_len = len(word)
-              insert_with_idx(self.root, 0)
-
-
-          def search(self, word: str) -> bool:
-              """
-              Returns if the word is in the trie.
-              """
-              def search_with_idx(cur, idx):
-                  if idx == w_len:
-                      return cur.end_of_word
-
-                  c = word[idx]
-                  if c not in cur.children:
-                      return False
-                  return search_with_idx(cur.children[c], idx+1)
-
-              w_len = len(word)
-              return search_with_idx(self.root, 0)
-
-
-          def startsWith(self, prefix: str) -> bool:
-              """
-              Returns if there is any word in the trie that starts with the given prefix.
-              """
-              def search_with_idx(cur, idx):
-                  if idx == w_len:
-                      return True
-
-                  c = prefix[idx]
-                  if c not in cur.children:
-                      return False
-                  return search_with_idx(cur.children[c], idx+1)
-
-              w_len = len(prefix)
-              return search_with_idx(self.root, 0)
-      ```
-  * 211: Add and Search Word - Data structure design (M)
-    * search word (**support wildcard**)
-    * Approach1: Iterative:
-      * Python Solution
+      * Python
         ```python
-        class Node(object):
-          def __init__(self):
-              self.children = collections.defaultdict(Node)
-              self.end_of_word = False
+        class TrieNode(object):
+            def __init__(self):
+                self.children = collections.defaultdict(TrieNode)
+                self.end_of_word = False
 
-        class WordDictionary:
+        class Trie:
 
             def __init__(self):
                 """
                 Initialize your data structure here.
                 """
-                self.root = Node()
+                self.root = TrieNode()
 
+            def insert(self, word: str) -> None:
+                """
+                Inserts a word into the trie.
+                """
+                def insert_with_idx(cur, idx):
+                    if idx == w_len:
+                        cur.end_of_word = True
+                        return
+
+                    insert_with_idx(cur.children[word[idx]], idx+1)
+
+                if not word:
+                    return
+
+                w_len = len(word)
+                insert_with_idx(self.root, 0)
+
+
+            def search(self, word: str) -> bool:
+                """
+                Returns if the word is in the trie.
+                """
+                def search_with_idx(cur, idx):
+                    if idx == w_len:
+                        return cur.end_of_word
+
+                    c = word[idx]
+                    if c not in cur.children:
+                        return False
+
+                    return search_with_idx(cur.children[c], idx+1)
+
+                w_len = len(word)
+                return search_with_idx(self.root, 0)
+
+            def startsWith(self, prefix: str) -> bool:
+                """
+                Returns if there is any word in the trie that starts with the given prefix.
+                """
+                def search_with_idx(cur, idx):
+                    if idx == p_len:
+                        return True
+
+                    c = prefix[idx]
+                    if c not in cur.children:
+                        return False
+
+                    return search_with_idx(cur.children[c], idx+1)
+
+                p_len = len(prefix)
+                return search_with_idx(self.root, 0)
+        ```
+  * 211: Add and Search Word - Data structure design (M)
+    * search word (**support wildcard**)
+    * Approach1: Iterative:
+      * Python
+        ```python
+        class TrieNode(object):
+          def __init__(self):
+              self.children = collections.defaultdict(Node)
+              self.end_of_word = False
+
+        class WordDictionary:
+            def __init__(self):
+                """
+                Initialize your data structure here.
+                """
+                self.root = TrieNode()
 
             def addWord(self, word: str) -> None:
                 """
                 Adds a word into the data structure.
                 """
                 cur = self.root
-
                 for c in word:
                     cur = cur.children[c]
-
                 cur.end_of_word = True
 
             def search(self, word: str) -> bool:
@@ -10831,17 +10832,16 @@ Table of Content
                     cur, idx = stack.pop()
                     # final node
                     if idx == w_len:
-                        if cur.end_of_word:
-                            found = True
-                            break
-                        else:
-                            continue
+                        if not cur.end_of_word:
+                          continue
+
+                        found = True
+                        break
 
                     c = word[idx]
                     if c == '.':
                         for child in cur.children.values():
                             stack.append((child, idx+1))
-
                     else:
                         if c in cur.children:
                             stack.append((cur.children[c], idx+1))
@@ -10849,31 +10849,27 @@ Table of Content
                 return found
         ```
     * Approach2: Recursive:
-      * Python Solution
+      * Python
         ```python
-        class Node(object):
-
+        class TrieNode(object):
           def __init__(self):
               self.children = collections.defaultdict(Node)
               self.end_of_word = False
 
         class WordDictionary:
-
             def __init__(self):
                 """
                 Initialize your data structure here.
                 """
-                self.root = Node()
+                self.root = TrieNode()
 
             def addWord(self, word: str) -> None:
                 """
                 Adds a word into the data structure.
                 """
                 cur = self.root
-
                 for c in word:
                     cur = cur.children[c]
-
                 cur.end_of_word = True
 
             def search(self, word: str) -> bool:
@@ -10894,15 +10890,17 @@ Table of Content
                                 break
                         return res
                     else:
+                        res = False
                         if c in cur.children:
-                            return search_with_idx(cur.children[c], idx+1)
-                        return False
+                            res = search_with_idx(cur.children[c], idx+1)
+                        return res
 
                 w_len = len(word)
                 return search_with_idx(self.root, 0)
         ```
   * 212: Word Search II (H)
   * 642: Design Search Autocomplete System (H)
+  * 745: Prefix and Suffix Search (H)
 ### BFS & DFS
   * 200: Number of Islands (M)
     * Approach1: BFS, Time: O(mn), Space: O(mn)
@@ -11620,7 +11618,7 @@ Table of Content
     * Recursive + memo (top-down)
     * Iterative + memo (bottom-up)
     * Iterative + N variables (bottom-up)
-  * Fibonacci sequence:
+  * **Fibonacci sequence**:
     * 509: Fibonacci Number (E)
       * Recursive relation
         * n == 0
@@ -13475,6 +13473,9 @@ Table of Content
     * 162: Find Peak Element (M)
   * Cache
     * 146: LRU Cache (M)
+    * 460: LFU Cache (H)
+  * Trie (Prefix Tree)
+    * 211: Add and Search Word - Data structure design (M)
   * Heap
     * 692: Top K Frequent Words (M)
   * BackTracking
