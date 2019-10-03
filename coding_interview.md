@@ -1405,7 +1405,7 @@ Table of Content
        * Approach1: Time O(n+m), Space (1):
          * Merge the insert and remove cases (find the short one)
          * Use short and long string pointers to traverse and compare
-         * Python Solution
+         * Python
           ```python
           def isOneEditDistance(self, s: str, t: str) -> bool:
             """
@@ -1456,7 +1456,7 @@ Table of Content
             return True
           ```
     * 072: Edit Distance (H)
-      * DP
+      * See DP
   * **SubString**
      * 028: Implement **strStr** (E)
        * Find Sub-String
@@ -2160,113 +2160,10 @@ Table of Content
                           break
               return res
           ```
-    * Longest Common Subsequence (**LCS**) (DP)
+    * 1143: Longest Common Subsequence (M)
+      * See DP
     * 300: Longest Increasing Subsequence (**LIS**) (M)
-      * Approach1: Top down Recursive, Time:O(n^2), Space:O(n)
-        * 2 cases:
-          * case1: taken the current character if possible (cur > prev)
-          * case2: do not tkaen the current character
-        * Python
-          ```python
-          def lengthOfLIS(self, nums: List[int]) -> int:
-            def get_lis(prev, cur, lis):
-                # end condition
-                if cur == n:
-                    return
-
-                nonlocal max_lis
-
-                # taken the cur character
-                if prev == -1 or nums[cur] > nums[prev]:
-                    taken_lis = 1 + lis
-                    max_lis = max(max_lis, taken_lis)
-                    get_lis(cur, cur+1, taken_lis)
-
-                # not taken
-                get_lis(prev, cur+1, lis)
-
-            if not nums:
-                return 0
-
-            max_lis = 0
-
-            n = len(nums)
-
-            get_lis(prev=-1, cur=0, lis=0)
-
-            return max_lis
-          ```
-      * Approach2: Bottom up iterative + memo, Time:O(n^2), Space:O(n)
-        * Python
-          ```python
-          def lengthOfLIS(self, nums: List[int]) -> int:
-            n = len(nums)
-
-            if n == 0:
-                return 0
-
-            if n == 1:
-                return 1
-
-            memo = [0] * n
-            memo[0] = 1
-            max_lis = 1
-            for cur in range(1, n):
-                lis = 1
-                for prev in range(0, cur):
-                    if nums[cur] > nums[prev]:
-                        lis = max(lis, memo[prev]+1)
-
-                memo[cur] = lis
-                max_lis = max(max_lis, lis)
-
-            return max_lis
-          ```
-      * Approach3: Binary Search, Time:O(nlogn), Space:O(n)
-        * Ref:
-          * https://leetcode.com/problems/longest-increasing-subsequence/discuss/74824/JavaPython-Binary-search-O(nlogn)-time-with-explanation
-          * https://www.youtube.com/watch?v=S9oUiVYEq7E
-        * Use binary search to either
-          * 1. extend increasing sequence with larger numbers
-            * if n is larger than all tails, append it, increase the size by 1
-          * 2. minimize existing values with smaller ones - so we can use smaller numbers to extend it.
-            * if x == tails[mid]
-              * do nothing
-            * else tails[i-1] < x < tails[i]
-              * update tails[i] (the smallest val which is greater than x)
-        * Boundaries:
-          * left boundary:
-            * val before left is smaller than the target
-          * right boundary:
-            * val after right is greater than the target
-        * Python
-          ```python
-          def lengthOfLIS(self, nums: List[int]) -> int:
-            tails = [0 for _ in range(len(nums))]
-            size = 0
-
-            for n in nums:
-                left, right = 0, size-1
-                need_update = True
-
-                while left <= right:
-                    mid = (left + right) // 2
-                    # do not need to update
-                    if n == tails[mid]:
-                        need_update = False
-                        break
-                    elif n > tails[mid]:
-                        left = mid + 1
-                    else:  # n < tails
-                        right = mid - 1
-
-                # update the smallest val which is greater than x
-                if need_update:
-                    tails[left] = n
-                    size = max(size, left + 1)
-
-            return size
-          ```
+      * See Binary Search
     * 187: Repeated DNA Sequences (M)
     * 115: Distinct Subsequences (H)
   * **Reorder**
@@ -5872,6 +5769,113 @@ Table of Content
 
           return max_lis
         ```
+  * 300: Longest Increasing Subsequence (**LIS**) (M)
+    * Approach1: Top down Recursive, Time:O(n^2), Space:O(n)
+      * 2 cases:
+        * case1: taken the current character if possible (cur > prev)
+        * case2: do not tkaen the current character
+      * Python
+        ```python
+        def lengthOfLIS(self, nums: List[int]) -> int:
+          def get_lis(prev, cur, lis):
+              # end condition
+              if cur == n:
+                  return
+
+              nonlocal max_lis
+
+              # taken the cur character
+              if prev == -1 or nums[cur] > nums[prev]:
+                  taken_lis = 1 + lis
+                  max_lis = max(max_lis, taken_lis)
+                  get_lis(cur, cur+1, taken_lis)
+
+              # not taken
+              get_lis(prev, cur+1, lis)
+
+          if not nums:
+              return 0
+
+          max_lis = 0
+
+          n = len(nums)
+
+          get_lis(prev=-1, cur=0, lis=0)
+
+          return max_lis
+        ```
+    * Approach2: Bottom up iterative + memo, Time:O(n^2), Space:O(n)
+      * Python
+        ```python
+        def lengthOfLIS(self, nums: List[int]) -> int:
+          n = len(nums)
+
+          if n == 0:
+              return 0
+
+          if n == 1:
+              return 1
+
+          memo = [0] * n
+          memo[0] = 1
+          max_lis = 1
+          for cur in range(1, n):
+              lis = 1
+              for prev in range(0, cur):
+                  if nums[cur] > nums[prev]:
+                      lis = max(lis, memo[prev]+1)
+
+              memo[cur] = lis
+              max_lis = max(max_lis, lis)
+
+          return max_lis
+        ```
+    * Approach3: Binary Search, Time:O(nlogn), Space:O(n)
+      * Ref:
+        * https://leetcode.com/problems/longest-increasing-subsequence/discuss/74824/JavaPython-Binary-search-O(nlogn)-time-with-explanation
+        * https://www.youtube.com/watch?v=S9oUiVYEq7E
+      * Use binary search to either
+        * 1. extend increasing sequence with larger numbers
+          * if n is larger than all tails, append it, increase the size by 1
+        * 2. minimize existing values with smaller ones - so we can use smaller numbers to extend it.
+          * if x == tails[mid]
+            * do nothing
+          * else tails[i-1] < x < tails[i]
+            * update tails[i] (the smallest val which is greater than x)
+      * Boundaries:
+        * left boundary:
+          * val before left is smaller than the target
+        * right boundary:
+          * val after right is greater than the target
+      * Python
+        ```python
+        def lengthOfLIS(self, nums: List[int]) -> int:
+          tails = [0 for _ in range(len(nums))]
+          size = 0
+
+          for n in nums:
+              left, right = 0, size-1
+              need_update = True
+
+              while left <= right:
+                  mid = (left + right) // 2
+                  # do not need to update
+                  if n == tails[mid]:
+                      need_update = False
+                      break
+                  elif n > tails[mid]:
+                      left = mid + 1
+                  else:  # n < tails
+                      right = mid - 1
+
+              # update the smallest val which is greater than x
+              if need_update:
+                  tails[left] = n
+                  size = max(size, left + 1)
+
+          return size
+        ```
+  * 187: Repeated DNA Sequences (M)
   * 315: Count of Smaller Numbers After Self (H)
   * 354: Russian Doll Envelopes (H)
 ### Linked List
@@ -11317,67 +11321,74 @@ Table of Content
                             _flip_surround_region(r, c)
         ```
   * 127: **Word Ladder** (M)
-      * Assume length of words is k and number of words is n
-      * Approach1: BFS, Time:O(nk), Space:O(n*k^2)
-        * Time: O(n*d)
-          * Build transformation dict cost: O(n*d)
-          * Find the target word in the transformation dict cost: O(n*d)
-        * Space: O(n*k^2)
-          * Transformatino dict cost: O(n*k^2)
-            * Total d transformation for n words, each word cost nd
-          * Max queue size: O(n*k)
-        * Python Solution
-          ```python
-          def ladderLength(self, beginWord, endWord, wordList):
-            if not wordList:
-                return 0
+    * Example:
+      * Input:
+        * beginWord = "hit",
+        * endWord = "cog",
+        * wordList = ["hot","dot","dog","lot","log","cog"]
+      * Output:
+        * As one shortest transformation is "hit" -> "hot" -> "dot" -> "dog" -> "cog",
+    * Assume length of word is k and number of words is n
+    * Approach1: BFS, Time:O(nk), Space:O(n*k^2)
+      * Time: O(n*k)
+        * Build transformation dict cost: O(n*k)
+        * Find the target word in the transformation dict cost: O(n*k)
+      * Space: O(n*k^2)
+        * Transformatino dict cost: O(n*k^2)
+          *  Each word has k transformations, each transformation cost k
+        * Max queue size: O(n*k)
+      * Python Solution
+        ```python
+        def ladderLength(self, beginWord, endWord, wordList):
+          if not wordList:
+              return 0
 
-            if beginWord ==  endWord:
-                return 1
+          if beginWord ==  endWord:
+              return 1
 
-            '''
-            generate word dictionary,
-            hit -> *it, h*t, hi*
-            '''
-            w_combo_d = collections.defaultdict(list)
-            for w in wordList:
-                for i in range(len(w)):
-                    w_key = f'{w[:i]}*{w[i+1:]}'
-                    w_combo_d[w_key].append(w)
+          '''
+          generate word dictionary,
+          hit -> *it, h*t, hi*
+          '''
+          w_combo_d = collections.defaultdict(list)
+          for w in wordList:
+              for i in range(len(w)):
+                  w_key = f'{w[:i]}*{w[i+1:]}'
+                  w_combo_d[w_key].append(w)
 
-            q = collections.deque()
-            q.append(beginWord)
-            visited = {beginWord: True}
-            level = 1
-            '''
-            BFS to find the shorted transformation
-            '''
-            while q:
-                q_len = len(q)
-                level += 1
-                for _ in range(q_len):
-                    w = q.popleft()
-                    for i in range(len(w)):
-                        # transfrom key
-                        w_key = f'{w[:i]}*{w[i+1:]}'
+          q = collections.deque()
+          q.append(beginWord)
+          visited = {beginWord: True}
+          level = 1
+          '''
+          BFS to find the shorted transformation
+          '''
+          while q:
+              q_len = len(q)
+              level += 1
+              for _ in range(q_len):
+                  w = q.popleft()
+                  for i in range(len(w)):
+                      # transfrom key
+                      w_key = f'{w[:i]}*{w[i+1:]}'
 
-                        if w_key not in w_combo_d:
-                            continue
+                      if w_key not in w_combo_d:
+                          continue
 
-                        for next_transform_w in w_combo_d[w_key]:
-                            if next_transform_w in visited:
-                                continue
+                      for next_transform_w in w_combo_d[w_key]:
+                          if next_transform_w in visited:
+                              continue
 
-                            visited[next_transform_w] = True
+                          visited[next_transform_w] = True
 
-                            if endWord == next_transform_w:
-                                return level
+                          if endWord == next_transform_w:
+                              return level
 
-                            q.append(next_transform_w)
+                          q.append(next_transform_w)
 
-                        w_combo_d.pop(w_key)
-            return 0
-          ```
+                      w_combo_d.pop(w_key)
+          return 0
+        ```
       * Approach2: Bidirectional BFS
   * 126: **Word Ladder** II (H)
   * 079: Word Search (M)
@@ -11612,15 +11623,15 @@ Table of Content
 ### Dynamic Programming
   * Ref:
     * [From good to great. How to approach most of DP problems](https://leetcode.com/problems/house-robber/discuss/156523/From-good-to-great.-How-to-approach-most-of-DP-problems.)
-  * This particular problem and most of others can be approached using the following sequence:
-    * Recursive relation
+  * DP problems can be approached using the following sequence:
+    * Recursive Relation
     * Recursive (top-down)
     * Recursive + memo (top-down)
     * Iterative + memo (bottom-up)
     * Iterative + N variables (bottom-up)
   * **Fibonacci sequence**:
     * 509: Fibonacci Number (E)
-      * Recursive relation
+      * Recursive Relation
         * n == 0
         * n == 1
         * n > 1
@@ -11684,6 +11695,7 @@ Table of Content
           return cur
         ```
     * 070: Climbing Stairs (E)
+      * Given n will be a positive integer, each time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?
       * Recursive relation
         * n <= 2:
           * n == 0 or n == 1
@@ -11696,52 +11708,54 @@ Table of Content
             * f(n-1) + 1 step
       * Approach1: Recursive + memo (top-down), Time:O(n), Space:O(n)
       * Approach2: Iterative + memo (bottom-up), Time:O(n), Space:O(n)
-        * Python Solutino
-        ```python
-        def climbStairs(self, n: int) -> int:
-          """
-          Each time you can either climb 1 or 2 steps.
-          In how many distinct ways can you climb to the top?
-          """
-          if n == 0 or n == 1:
-              return 1
+        * Python
+          ```python
+          def climbStairs(self, n: int) -> int:
+            """
+            Each time you can either climb 1 or 2 steps.
+            In how many distinct ways can you climb to the top?
+            """
+            if n == 0 or n == 1:
+                return 1
 
-          if n == 2:
-              return 2
+            if n == 2:
+                return 2
 
-          # n >= 3
-          memo = [None] * (n + 1)
-          memo[0] = memo[1]= 1
-          memo[2] = 2
+            # n >= 3
+            memo = [None] * (n + 1)
+            memo[0] = memo[1]= 1
+            memo[2] = 2
 
-          # 3 ~ n
-          for i in range(3, n+1):
-              memo[i] = memo[i-1] + memo[i-2]
+            # 3 ~ n
+            for i in range(3, n+1):
+                memo[i] = memo[i-1] + memo[i-2]
 
-          return memo[n]
-        ```
+            return memo[n]
+          ```
       * Approach3: Iterative + N variables (bottom-up), Time:O(n), Space:O(1)
-        * Python Solution
-        ```python
-        def climbStairs(self, n: int) -> int:
-          """
-          Each time you can either climb 1 or 2 steps.
-          In how many distinct ways can you climb to the top?
-          """
-          if n == 0 or n == 1:
-              return 1
+        * Python
+          ```python
+          def climbStairs(self, n: int) -> int:
+            """
+            Each time you can either climb 1 or 2 steps.
+            In how many distinct ways can you climb to the top?
+            """
+            if n == 0 or n == 1:
+                return 1
 
-          if n == 2:
-              return 2
+            if n == 2:
+                return 2
 
-          prev = 1
-          cur = 2
-          for _ in range(3, n+1):
-              prev, cur = cur, prev + cur
+            prev = 1
+            cur = 2
+            for _ in range(3, n+1):
+                prev, cur = cur, prev + cur
 
-          return cur
-        ```
-      * Approach4: [Log(n) Solution](https://leetcode.com/problems/climbing-stairs/solution/)
+            return cur
+          ```
+      * Approach4: Fibonacci Formula, Time:O(logn), Space:O(1)
+        * Ref:
+          * https://leetcode.com/problems/climbing-stairs/solution/
     * 091: **Decode Ways** (M)
       * Recursive relation
         * Check conditions
@@ -11858,23 +11872,168 @@ Table of Content
 
             return cur
         ```
+  * Triangle:
+    * 118: Pascal's Triangle (E)
+      * Relation
+        * if i == 0 or layer_num-1:
+          * memo[k][i] = 1
+        * else
+          * memo[k][i] = memo[k-1][i] + memo[k-1][i-1]
+      * Approach1: DP: Time:O(n^2), Space:O(n^2)
+        * Python
+          ```python
+          def generate(self, numRows: int) -> List[List[int]]:
+            if numRows == 0:
+                return []
+
+            if numRows == 1:
+                return [[1]]
+
+            # layer1
+            pascal = [[1]]
+            # layer2 to layern
+            for layer in range(2, numRows+1):
+                new_layer = [1] * layer
+                prev_layer = pascal[-1]
+
+                for i in range(1, layer-1):
+                    new_layer[i] = prev_layer[i-1] + prev_layer[i]
+
+                pascal.append(new_layer)
+
+            return pascal
+          ```
+    * 119: Pascal's Triangle II (E)
+      * Get kth Pascal index
+      * Relation
+        * if i == 0 or layer_num-1:
+          * memo[k][i] = 1
+        * else
+          * memo[k][i] = memo[k-1][i] + memo[k-1][i-1]
+      * Approach1: From end to beginning: Time:O(n^2), Space:O(k)
+        * Python
+          ```python
+          def getRow(self, rowIndex: int) -> List[int]:
+            if rowIndex == 0:
+                return [1]
+
+            pascal = [0] * (rowIndex + 1)
+            pascal[0] = 1
+
+            # layer 1 to rowIndex
+            for _ in range(1, rowIndex+1):
+                # from end to beginning
+                for i in range(rowIndex, 0, -1):
+                    """
+                    pascal[r][i] = pascal[r-1][i-1] + pascal[r-1][i]
+                    """
+                    pascal[i] += pascal[i-1]
+
+            return pascal
+          ```
+    * 120: Triangle (M)
+      * Relation
+        * Starting from top layer
+          * if i == 0 or i == layer_num - 1:
+            * memo[k][i] = 1
+          * else
+            * memo[k][i] = triangle[k][i] + memo[k-1][i-1]
+        * Starting from bottom layer
+          * Ref:
+            * https://leetcode.com/problems/triangle/discuss/38730/DP-Solution-for-Triangle
+          * memo[k][i] = triangle[k+1][i] + memo[k+1][i+1]
+      * Approahc1: Starting from Top layer, Time:O(mn), Space:O(mn)
+        * Python
+          ```python
+          def minimumTotal(self, triangle: List[List[int]]) -> int:
+            layer = len(triangle)
+
+            if layer == 1:
+                return triangle[0][0]
+
+            memo = []
+
+            # init first row
+            memo.append(triangle[0])
+
+            # starting from 2nd row
+            for l in range(1, layer):
+                cnt = l + 1
+                new_layer = [0] * cnt
+                new_layer[0] =  triangle[l][0] + memo[-1][0]
+                new_layer[-1] = triangle[l][-1] + memo[-1][-1]
+                for i in range(1, cnt-1):
+                    new_layer[i] = triangle[l][i] + min(memo[-1][i], memo[-1][i-1])
+
+                memo.append(new_layer)
+
+            return min(*memo[-1])
+          ```
+      * Approach2: Starting from Top layer, Time:O(mn), Space:O(n)
+        * Python
+          ```python
+          def minimumTotal(self, triangle: List[List[int]]) -> int:
+            layer = len(triangle)
+
+            if layer == 1:
+                return triangle[0][0]
+
+            memo = [0] * layer
+
+            # init first row
+            memo[0] = triangle[0][0]
+
+            # starting from 2nd row
+            for l in range(1, layer):
+
+                # for each row, process from end to beginning
+                cnt = l + 1
+
+                # cnt - 1
+                memo[cnt-1] = triangle[l][cnt-1] + memo[cnt-2]
+                # fron cnt-2 to 1
+                for i in range(cnt-2, 0, -1):
+                    memo[i] = triangle[l][i] + min(memo[i], memo[i-1])
+                # 0
+                memo[0] += triangle[l][0]
+
+            return min(*memo)
+          ```
+      * Approach3: Starting from bottom layer, Time:O(mn), Space:O(n)
+        * Python
+          ```python
+          def minimumTotal(self, triangle: List[List[int]]) -> int:
+            layer = len(triangle)
+
+            # copy the bottom layer
+            memo = triangle[-1][:]
+
+            # from layer-2 to 0
+            for l in range(layer-2, -1, -1):
+                cnt = l + 1
+                for i in range(cnt):
+                    memo[i] = triangle[l][i] + min(memo[i], memo[i+1])
+
+            return memo[0]
+          ```
   * **One Dimensional**:
     * 062: Unique Paths (M)
+      * The robot **can only move either down or right** at any point in time.
       * Approach1: Combination:
         * total m-1 down steps and n-1 right steps
         * (m+n)!/m!n!
-        * Python Solution
+        * Python
         ```python
-        from math import factorial as f
-        def uniquePaths(self, m: int, n: int) -> int:
-          if not m and not n:
-              return 0
+          from math import factorial as f
+          def uniquePaths(self, m: int, n: int) -> int:
+            if not m and not n:
+                return 0
 
-          if m == 1 or n == 1:
-              return 1
+            if m == 1 or n == 1:
+                return 1
 
-          return int(f(m+n-2) /(f(m-1) * f(n-1)))
-        ```
+            return int(f(m+n-2) /(f(m-1) * f(n-1)))
+          ```
       * Approach2: DP, Time:O(mn), Space:O(mn)
         * Recursive relation
         * for r == 0
@@ -11883,129 +12042,658 @@ Table of Content
           * f(r, 0) = 1
         * For r > 0 and c > 0
           * f(r,c) = f(r-1) + f(c-1)
-        * Python Solution
+        * Python
           ```python
           def uniquePaths(self, m: int, n: int) -> int:
-            if not m and not n:
-                return 0
-
-            if m == 1 or n == 1:
-                return 1
-
-            memo = [[0 for _ in range(n)] for _ in range(m)]
-
-            # init the first row
-            for c in range(n):
-                memo[0][c] = 1
-
-            # init the first column
-            for r in range(m):
-                memo[r][0] = 1
+            memo = [ [1 for _ in range(n)] for _ in range(m)]
 
             for r in range(1, m):
                 for c in range(1, n):
-                    memo[r][c] = memo[r-1][c] + memo[r][c-1]
+                    memo[r][c] = memo[r][c-1]  + memo[r-1][c]
 
-            return memo[m-1][n-1]
+            return memo[-1][-1]
           ```
       * Approach3: DP, Time:O(mn), Space:O(n)
         * In fact, keep one row is enough
-        * Python Solution
-        ```python
-        def uniquePaths(self, m: int, n: int) -> int:
-          if not m and not n:
-              return 0
+        * Python
+          ```python
+          def uniquePaths(self, m: int, n: int) -> int:
+            if not m or not n:
+                return 0
 
-          if m == 1 or n == 1:
-              return 1
+            memo = [1 for _ in range(n)]
+            for _ in range(1, m):
+                for c in range(1, n):
+                    """
+                    memo[r][c] = memo[r-1][c] + memo[r][c-1]
+                    memo[c]    = memo[c]      + memo[c-1]
+                    """
+                    memo[c] += memo[c-1]
 
-          # init first row
-          memo = [1 for _ in range(n)]
-
-          # 1 to m-1 rows
-          for _ in range(1, m):
-              for c in range(1, n):
-                  # memo[c] = memo[c] (from up) + memo[c-1] (from left)
-                  memo[c] += memo[c-1]
-
-          return memo[n-1]
-        ```
+            return memo[-1]
+          ```
     * 063: Unique Paths II (M)
-    * 120: Triangle (M)
-    * 279: Perfect Squares (M)
+      * Now consider if some obstacles are added to the grids. How many unique paths would there be?
+      * Approach1: Time:O(mn), Space:O(mn)
+        * Python
+          ```python
+          def uniquePathsWithObstacles(self, obstacleGrid: List[List[int]]) -> int:
+            if obstacleGrid[0][0]:
+                return 0
+
+            row = len(obstacleGrid)
+            col = len(obstacleGrid[0])
+
+            memo = [[0 for _ in range(col)] for _ in range(row)]
+
+            # init first row
+            memo[0][0] = 1
+            for c in range(1, col):
+                if obstacleGrid[0][c]:
+                    break
+                memo[0][c] = 1
+
+            # init first col
+            for r in range(1, row):
+                if obstacleGrid[r][0]:
+                    break
+                memo[r][0] = 1
+
+            for r in range(1, row):
+                for c in range(1, col):
+                    if not obstacleGrid[r][c]:
+                        memo[r][c] = memo[r-1][c] + memo[r][c-1]
+
+            return memo[-1][-1]
+          ```
+      * Approach2: Time:O(mn), Space:O(n)
+        * Python
+          ```python
+          def uniquePathsWithObstacles(self, obstacleGrid: List[List[int]]) -> int:
+            if obstacleGrid[0][0]:
+                return 0
+
+            row = len(obstacleGrid)
+            col = len(obstacleGrid[0])
+
+            memo = [0 for _ in range(col)]
+
+            # init first row
+            memo[0] = 1
+            for c in range(1, col):
+                if obstacleGrid[0][c]:
+                    break
+                memo[c] = 1
+
+            for r in range(1, row):
+
+                if obstacleGrid[r][0]:
+                    memo[0] = 0
+
+                for c in range(1, col):
+                    if obstacleGrid[r][c]:
+                        memo[c] = 0
+                    else:
+                        """
+                        memo[r][c] = memo[r-1][c] + memo[r][c-1]
+                        memo[c]    = memo[c]      + memo[c-1]
+                        """
+                        memo[c] += memo[c-1]
+
+            return memo[-1]
+          ```
     * 139: Word Break (M)
+      * Example1:
+        * intput:
+          *  s = "leetcode", wordDict = ["leet", "code"]
+        * output:
+          * true
+      * Example2:
+        * input:
+          * s = "applepenapple", wordDict = ["apple", "pen"]
+        * output:
+          * true
+      * Note:
+        * The same word in the dictionary may be reused multiple times in the segmentation.
+        * You may assume the dictionary does not contain duplicate words.
+      * Complexity Analysis
+        * Assume the complexity for substring comparison is O(1)
+      * Approach1: Recursive + memo, Time:O(n^2), Space:O(n)
+        * algo:
+          * check every possible prefix of that string in the dictionary of words, if it is found in the dictionary, then the recursive function is called for the remaining portion of that string.
+        * complexity:
+          * Time:O(n^2)
+            * total n positions in the memo, and each postion needs (n + 1 to end) time substring comparison
+          * Space: O(n)
+        * Python
+          ```python
+          def wordBreak(self, s: str, wordDict: List[str]) -> bool:
+
+            def backtrack(start):
+                if start == len(s):
+                    return True
+
+                if memo[start] is not None:
+                    return memo[start]
+
+                memo[start] = False
+                for end in range(start, len(s)):
+                    if (end - start + 1) > max_word_len:
+                        break
+
+                    prefix = s[start:end+1]
+                    if prefix in word_d and backtrack(start=end+1):
+                      memo[start] = True
+                      break
+
+                return memo[start]
+
+
+            max_word_len = 0
+            word_d = dict()
+            for w in wordDict:
+                word_d[w] = True
+                max_word_len = max(max_word_len, len(w))
+
+            memo = [None] * len(s)
+
+            backtrack(start=0)
+
+            return memo[0]
+          ```
+      * Approach2: Iterative + memo, Time:O(n^2), Space:O(n)
+        * Same idea as approach1
+        * Python
+          ```python
+          def wordBreak(self, s: str, wordDict: List[str]) -> bool:
+
+            max_word_len = 0
+            word_d = dict()
+            for w in wordDict:
+                word_d[w] = True
+                max_word_len = max(max_word_len, len(w))
+
+            visited = [False] * len(s)
+
+            stack = []
+            stack.append(0)
+            res = False
+
+            while stack:
+                start = stack.pop()
+
+                if start == len(s):
+                    res = True
+                    break
+
+                if visited[start]:
+                    continue
+
+                visited[start] = True
+
+                for end in range(start, len(s)):
+                    # check word len first
+                    if (end - start + 1) > max_word_len:
+                        break
+                    prefix = s[start:end+1]
+                    if prefix in word_d:
+                        stack.append(end+1)
+
+            return res
+          ```
+      * Approach3: DP, Time:O(n^2), Space:O(n)
+        * Python
+          * Space:n + 1 implementation
+            ```python
+            def wordBreak(self, s: str, wordDict: List[str]) -> bool:
+              if not s:
+                  return True
+
+              max_word_len = 0
+              word_d = dict()
+              for w in wordDict:
+                  word_d[w] = True
+                  max_word_len = max(max_word_len, len(w))
+
+              """
+              memo[i] means s[0:i] can be composed by words in word_d.
+              """
+              memo = [False] * (len(s) + 1)
+              memo[0] = True
+
+              for end in range(1, len(s)+1):
+                  memo[end] = False
+                  for start in range(0, end):
+                      """
+                      handleing the substring from 0 to end
+                      each string is separated two parts prefix and suffix
+                      since memo[0] is True, we can do whole suffix matching
+                      """
+                      # check prefix in memo first
+                      #
+                      if memo[start]:
+                          # check suffix string start + 1 to end
+                          # end - (start + 1) + 1
+                          if (end - start) > max_word_len:
+                            continue
+
+                          # transform index s[start+1: end+1] to s[start: end]
+                          suffix = s[start: end]
+                          if suffix in word_d:
+                              memo[end] = True
+                              break
+
+              return memo[-1]
+            ```
+          * Space n implementation:
+            ```python
+            def wordBreak(self, s: str, wordDict: List[str]) -> bool:
+
+              def is_in_word_d(start, end):
+                  if (end - start + 1) > max_word_len:
+                      return False
+
+                  sub_str = s[start:end+1]
+                  return True if sub_str in word_d else False
+
+              if not s:
+                  return True
+
+              max_word_len = 0
+              word_d = dict()
+              for w in wordDict:
+                  word_d[w] = True
+                  max_word_len = max(max_word_len, len(w))
+
+              """
+              memo[i] means s[0:i+1] can be composed by words in word_d.
+              """
+              memo = [False] * len(s)
+              if s[0] in word_d:
+                  memo[0] = True
+
+
+              for end in range(1, len(s)):
+                  """
+                  handleing the substring from 0 to end
+                  1. check whole substring
+                  2. separate substring to prefix and suffix
+                  """
+                  # 1.
+                  memo[end] = is_in_word_d(0, end)
+                  if memo[end]:
+                      continue
+
+                  # 2.
+                  for start in range(0, end):
+                      # check prefix in memo first
+                      if memo[start]:
+                          # check suffix, start + 1 to end
+                          memo[end] = is_in_word_d(start+1, end)
+                          if memo[end]:
+                              break
+
+              return memo[-1]
+            ```
+    * 279: Perfect Squares (M)
     * 375: Guess Number Higher or Lower II (M)
     * 322: Coin Change (H)
     * 312: Burst Balloons (H)
   * **Two Dimensional**:
-    * Longest Common Subsequence:
+    * 1143: Longest Common Subsequence, LCS (M)
       * Ref:
          * https://www.youtube.com/watch?v=NnD96abizww
-      * Approach1: DP: Time: O(n^2), Space: O(n^2)
-        * Python Solution
-         ```python
-          @staticmethod
-          def traverse_lcs_memo(s1, s1_idx, s2, s2_idx, memo):
-              """ traverse the memo array to find lcs
-              """
-              lcs_len = memo[s1_idx][s2_idx]
-              lcs = [None] * lcs_len
-              i, j = s1_idx, s2_idx
+         * https://leetcode.com/problems/longest-common-subsequence/discuss/348884/C%2B%2B-with-picture-O(nm)
+      * Relation
+        * definition:
+          * memo[i][j] is LCS between s1[0:i+1] and s2:[0:j+1]
+        * if s1[i] == s2[j]
+          * memo[i][j] = memo[i-1][j-1] + 1
+        * else (s1[i] != s2[j])
+          * memo[i][j] = max(memo[i][j-1], memo[i-1][j])
+      * DP Example:
+        ```txt
+        # x is dummy
+          x a c e
+        x 0 0 0 0
+        a 0 1 1 1
+        b 0 1 1 1
+        c 0 1 2 2
+        d 0 1 2 2
+        e 0 1 2 3
+        ```
+      * Traverse Back Function:
+        * Python
+          ```python
+            @staticmethod
+            def traverse_lcs_memo(s1, s1_idx, s2, s2_idx, memo):
+                """ traverse the memo array to find lcs
+                """
+                lcs_len = memo[s1_idx][s2_idx]
+                lcs = [None] * lcs_len
+                i, j = s1_idx, s2_idx
 
-              while lcs_len:
-                  if s1[i] == s2[j]:
-                      lcs_len -= 1
-                      lcs[lcs_len] = s1[i]
-                      i -= 1
-                      j -= 1
-                  else:
-                      if memo[i][j] == memo[i-1][j]:
-                          i -= 1
-                      else:  # memo[i][j] == memo[i][j-1]
-                          j -= 1
+                while lcs_len:
+                    if s1[i] == s2[j]:
+                        lcs_len -= 1
+                        lcs[lcs_len] = s1[i]
+                        i -= 1
+                        j -= 1
+                    else:
+                        if memo[i][j] == memo[i-1][j]:
+                            i -= 1
+                        else:  # memo[i][j] == memo[i][j-1]
+                            j -= 1
 
-              return "".join(lcs)
+                return "".join(lcs)
+          ```
+      * Approach1: DP: Time: O(mn), Space: O(mn)
+        * Python
+          * Implementation1:
+            ```python
+            def longestCommonSubsequence(self, text1: str, text2: str) -> int:
 
-          @staticmethod
-          def lcs(s1, s2):
-              """
-              Longest common sequence
-              Time: O(n^2), Space: O(n^2)
-              Ref: https://www.youtube.com/watch?v=NnD96abizww
-              """
-              if not s1 or not s2:
-                  return ""
+              s1, s2 = text1, text2
+              l1, l2 = len(text1), len(text2)
+              row, col = l1, l2
 
-              l1, l2 = len(s1), len(s2)
+              if not l1 or not l2:
+                  return 0
 
-              memo = [[0 for _ in range(l2)] for _ in range(l1)]
+              memo = [[0 for _ in range(col)] for _ in range(row)]
 
+              # init start
               if s1[0] == s2[0]:
                   memo[0][0] = 1
 
               # init first row
-              for j in range(1, l2):
-                  if memo[0][j-1] or s2[j] == s1[0]:
-                      memo[0][j] = 1
+              for c in range(1, col):
+                  if memo[0][c-1] or s2[c] == s1[0]:
+                      memo[0][c] = 1
 
-              # init first column
-              for i in range(1, l1):
-                  if memo[i-1][0] or s1[i] == s2[0]:
-                      memo[i][0] = 1
+              # init first col
+              for r in range(1, row):
+                  if memo[r-1][0] or s1[r] == s2[0]:
+                      memo[r][0] = 1
 
               # complete the memo
-              for i in range(1, l1):
-                  for j in range(1, l2):
-                      if s1[i] == s2[j]:
-                          memo[i][j] = memo[i-1][j-1] + 1
+              for r in range(1, row):
+                  for c in range(1, col):
+                      if s1[r] == s2[c]:
+                          memo[r][c] = memo[r-1][c-1] + 1
                       else:
-                          memo[i][j] = max(memo[i-1][j], memo[i][j-1])
+                          memo[r][c] = max(memo[r][c-1], memo[r-1][c])
 
-              return StrUtils.traverse_lcs_memo(s1, l1-1,
-                                                s2, l2-1,
-                                                memo)
-         ```
-    * 256: Paint House (E)
+              return memo[row-1][col-1]
+            ```
+          * Implementation2 (waste some space but is more clear):
+            ```python
+            def longestCommonSubsequence(self, text1: str, text2: str) -> int:
+              s1, s2 = text1, text2
+              l1, l2 = len(text1), len(text2)
+              row, col = l1+1, l2+1
+
+              if not l1 or not l2:
+                  return 0
+
+              memo = [[0 for _ in range(col)] for _ in range(row)]
+
+              # complete the memo
+              for r in range(1, row):
+                  for c in range(1, col):
+                      if s1[r-1] == s2[c-1]:
+                          memo[r][c] = memo[r-1][c-1] + 1
+                      else:
+                          memo[r][c] = max(memo[r][c-1], memo[r-1][c])
+
+              return memo[row-1][col-1]
+            ```
+      * Approach2: DP + mem optimization1: O(mn), Space:O(n)
+        * Ref:
+          * https://leetcode.com/problems/longest-common-subsequence/discuss/348884/C%2B%2B-with-picture-O(nm)
+        * Python
+          ```python
+          def longestCommonSubsequence(self, text1: str, text2: str) -> int:
+            s1, s2 = text1, text2
+            l1, l2 = len(text1), len(text2)
+            row, col = l1 + 1, l2 + 1
+
+            if not l1 or not l2:
+                return 0
+
+            # memory optimization, use two rows
+            memo = [[0 for _ in range(col)] for _ in range(2)]
+
+            for r in range(1, row):
+                prev_r = (r - 1) % 2
+                cur_r = r % 2
+                for c in range(1, col):
+                    if s1[r-1] == s2[c-1]:
+                        memo[cur_r][c] = memo[prev_r][c-1] + 1
+                    else:
+                        memo[cur_r][c] = max(memo[cur_r][c-1], memo[prev_r][c])
+
+            return memo[(row-1) % 2][-1]
+          ```
+      * Approach3: DP + mem optimization2: O(mn), Space:O(n)
+        ```python
+        def longestCommonSubsequence(self, text1: str, text2: str) -> int:
+          s1, s2 = text1, text2
+          l1, l2 = len(text1), len(text2)
+          row, col = l1+1, l2+1
+
+          if not l1 or not l2:
+              return 0
+
+          memo = [0 for _ in range(col)]
+
+          # complete the memo
+          for r in range(1, row):
+              # use prev to keep memo[r-1][c-1]
+              prev = memo[0]
+              for c in range(1, col):
+                  tmp = memo[c]
+                  if s1[r-1] == s2[c-1]:
+                      # memo[r][c] = memo[r-1][c-1]
+                      memo[c] = prev + 1
+                  else:
+                      # memo[r][c] = max(memo[r][c-1], memo[r-1][c])
+                      memo[c] = max(memo[c-1], memo[c])
+                  prev = tmp
+
+          return memo[-1]
+        ```
+    * 072: Edit Distance (H)
+      * Ref:
+        * https://leetcode.com/problems/edit-distance/discuss/159295/Python-solutions-and-intuition
+        * https://leetcode.com/problems/edit-distance/discuss/25846/C%2B%2B-O(n)-space-DP
+      * Recursive relation
+        * if word1[i] == word[j]  # no edit
+          * memo[i][j] = memo[i-1][j-1]
+        * elif word1[i] =! word[j]:
+          * memo[i][j] = minimum of
+            * case1: replace a character in word1
+              * 1 + memo[i-1][j-1]
+            * case2: delete a character from word1
+              * 1 + memo[i-1][j]
+            * case3: delete a character from word2 (insert a charactr into word1)
+              * 1 + memo[i][j-1]
+      * Note:
+        * insert a dummy character will not affect the minimum edit distance.
+          * example:
+            * (#horse, #ros) == (horse, ros)
+      * DP Example:
+        ```txt
+        # x is dummy
+          x r o s
+        x 0 1 2 3
+        h 1 1 2 3
+        o 2 2 1 2
+        r 3 2 2 2
+        s 4 3 3 2
+        e 5 4 4 3
+        ```
+      * Approach1: Recursive (top-down)
+        * Python
+          ```python
+            def minDistance(self, word1: str, word2: str) -> int:
+              def min_distance_idx(idx1, idx2):
+                  # run out both string
+                  if idx1 == -1 and idx2 == -1:
+                      return 0
+
+                  if idx1 == -1:
+                      return idx2 + 1
+
+                  if idx2 == -1:
+                      return idx1 + 1
+
+                  if word1[idx1] == word2[idx2]:
+                      return  min_distance_idx(idx1-1, idx2-1)
+                  else:
+                      replace = min_distance_idx(idx1-1, idx2-1)
+                      insert = min_distance_idx(idx1, idx2-1)
+                      delete = min_distance_idx(idx1-1, idx2)
+                      return 1 + min(replace, insert, delete)
+
+                return min_distance_idx(len(word1)-1, len(word2)-1)
+          ```
+      * Approach2: DP, Time:O(mn), Space:O(mn)
+        * Python
+          ```python
+          def minDistance(self, word1: str, word2: str) -> int:
+            s1, s2 = word1, word2
+            l1, l2 = len(word1), len(word2)
+            row, col = l1 + 1, l2 + 1
+
+            if not l1 and not l2:
+                return 0
+
+            if not l2:
+                return l1
+
+            if not l1:
+                return l2
+
+            memo = [[0 for _ in range(col)] for _ in range(row)]
+
+            # init first row
+            # assume there is a dummy character before word1 and word2
+            for c in range(col):
+                memo[0][c] = c
+
+            # init first col
+            for r in range(row):
+                memo[r][0] = r
+
+            for r in range(1, row):
+                for c in range(1, col):
+                    if word1[r-1] == word2[c-1]:
+                        memo[r][c] = memo[r-1][c-1]
+                    else:
+                        """
+                        1. edit:    memo[r-1][c-1]
+                        2. delete:  memo[r-1][c]
+                        3. insert:  memo[r][c-1]
+                        """
+                        memo[r][c] = 1 + min(memo[r-1][c-1],
+                                            memo[r-1][c],
+                                            memo[r][c-1])
+
+            return memo[row-1][col-1]
+          ```
+      * Approach3: DP + mem optimization1, Time:O(mn), Space:O(n)
+        * Python
+          ```python
+          def minDistance(self, word1: str, word2: str) -> int:
+            s1, s2 = word1, word2
+            l1, l2 = len(word1), len(word2)
+            row, col = l1 + 1, l2 + 1
+
+            if not l1 and not l2:
+                return 0
+
+            if not l2:
+                return l1
+
+            if not l1:
+                return l2
+
+            memo = [[0 for _ in range(col)] for _ in range(2)]
+
+            # init first row
+            # assume there is a dummy character before word1 and word2
+            for c in range(col):
+                memo[0][c] = c
+
+            for r in range(1, row):
+                prev_r = (r -1) % 2
+                cur_r = r % 2
+                memo[cur_r][0] = r
+                for c in range(1, col):
+                    if word1[r-1] == word2[c-1]:
+                        memo[cur_r][c] = memo[prev_r][c-1]
+                    else:
+                        """
+                        1. edit:    memo[r-1][c-1]
+                        2. delete:  memo[r-1][c]
+                        3. insert:  memo[r][c-1]
+                        """
+                        memo[cur_r][c] = 1 + min(memo[prev_r][c-1],
+                                                memo[prev_r][c],
+                                                memo[cur_r][c-1])
+
+            return memo[(row-1)%2][col-1]
+          ```
+      * Approach4: DP + mem optimization1, Time:O(mn), Space:O(n)
+        * Python
+          ```python
+          def minDistance(self, word1: str, word2: str) -> int:
+            s1, s2 = word1, word2
+            l1, l2 = len(word1), len(word2)
+            row, col = l1 + 1, l2 + 1
+
+            if not l1 and not l2:
+                return 0
+
+            if not l2:
+                return l1
+
+            if not l1:
+                return l2
+
+            memo = [0 for _ in range(col)]
+
+            # init first row
+            # assume there is a dummy character before word1 and word2
+            for c in range(col):
+                memo[c] = c
+
+            for r in range(1, row):
+                prev = memo[0]
+                memo[0] = r
+                for c in range(1, col):
+
+                    tmp = memo[c]
+
+                    if word1[r-1] == word2[c-1]:
+                        # memo[c] = memo[r-1][c-1]
+                        memo[c] = prev
+                    else:
+                        """
+                        1. edit:    memo[r-1][c-1] = prev
+                        2. delete:  memo[r-1][c]   = memo[c]
+                        3. insert:  memo[r][c-1]   = memo[c-1]
+                        """
+                        memo[c] = 1 + min(prev,
+                                          memo[c],
+                                          memo[c-1])
+
+                    prev = tmp
+
+            return memo[-1]
+          ```
+    * 256: Paint House (E) (L)
       * There are a row of n houses, each house can be painted with one of the three colors: red, blue or green. The cost of painting each house with a certain color is different. You have to paint all the houses such that no two adjacent houses have the same color.
       * Recursive relation
         * n == 0: (first house)
@@ -12020,7 +12708,7 @@ Table of Content
         * and the minimum price if we painted to nth house would be
           * min(f_color[n][red], f_color[n][blue], f_color[n][green])
       * Approach1: Iterative + memo (bottom-up), Time:O(nk), Space:(nk)
-        * Python Solution
+        * Python
           ```python
           def minCost(self, costs: List[List[int]]) -> int:
             """
@@ -12050,7 +12738,7 @@ Table of Content
             return min(*acc_cost[house_cnt-1])
           ```
       * Approach2: Iterative + N variables (bottom-up), Time:O(nk), Space:(n)
-        * Python Solution:
+        * Python:
           ```python
           def minCost(self, costs: List[List[int]]) -> int:
             """
@@ -12079,88 +12767,58 @@ Table of Content
             ```
     * 265: Paint House II (H) (L)
     * 064: Minimum Path Sum (M)
-    * 072: Edit Distance (H)
-      * Ref:
-        * https://leetcode.com/problems/edit-distance/discuss/159295/Python-solutions-and-intuition
-      * Recursive relation
-        * if word1[i] == word[j]  # no edit
-          * memo[i][j] = memo[i-1][j-1]
-        * elif word1[i] =! word[j]:
-          * memo[i][j] = minimum of
-            * 1 + memo[i][j-1]    # insert
-            * 1 + memo[i-1][j]    # delete
-            * 1 + memo[i-1][j-1]  # replacement
-      * Recursive (top-down)
-        * Python Solution
-        ```python
-          def minDistance(self, word1: str, word2: str) -> int:
-            def min_distance_idx(idx1, idx2):
-                # run out both string
-                if idx1 == -1 and idx2 == -1:
-                    return 0
-
-                if idx1 == -1:
-                    return idx2 + 1
-
-                if idx2 == -1:
-                    return idx1 + 1
-
-                if word1[idx1] == word2[idx2]:
-                    return  min_distance_idx(idx1-1, idx2-1)
-                else:
-                    replace = min_distance_idx(idx1-1, idx2-1)
-                    insert = min_distance_idx(idx1, idx2-1)
-                    delete = min_distance_idx(idx1-1, idx2)
-                    return 1 + min(replace, insert, delete)
-
-              return min_distance_idx(len(word1)-1, len(word2)-1)
-        ```
-      * Iterative + memo (bottom-up)
-        * Python Solution
+      * Approach1: DP, Time:O(mn), Space:O(mn)
+        * Python
           ```python
-          def minDistance(self, word1: str, word2: str) -> int:
+          def minPathSum(self, grid: List[List[int]]) -> int:
+            row, col = len(grid), len(grid[0])
+            memo = [[0 for _ in range(col)] for _ in range(row)]
+            memo[0][0] = grid[0][0]
 
-            if not word1 and not word2:
-                return 0
-
-            if not word1:
-                return len(word2)
-
-            if not word2:
-                return len(word1)
-
-            n1, n2 = len(word1), len(word2)
-            row, col = n1 + 1, n2 + 1
-
-            memo = [[None for _ in range(col)] for _ in range(row)]
-
-            # init first row,
-            # assume there is a dummy character before word1 and word2
-            for c in range(col):
-                # insert operation
-                memo[0][c] = c
+            # init first row
+            for c in range(1, col):
+                memo[0][c] = memo[0][c-1] + grid[0][c]
 
             # init first col
-            for r in range(row):
-                # insert operation
-                memo[r][0] = r
+            for r in range(1, row):
+                memo[r][0] = memo[r-1][0] + grid[r][0]
 
-            for i in range(1, row):
-                for j in range(1, col):
-                    if word1[i-1] == word2[j-1]:
-                        memo[i][j] = memo[i-1][j-1]
-                    else:
-                        memo[i][j] = 1 + min(memo[i-1][j-1],
-                                             memo[i][j-1],
-                                             memo[i-1][j])
+            # complete the memo
+            for r in range(1, row):
+                for c in range(1, col):
+                    memo[r][c] = grid[r][c] + min(memo[r-1][c], memo[r][c-1])
 
-            return memo[row-1][col-1]
+            return memo[-1][-1]
+          ```
+      * Approach2: DP with mem optimization, Time:O(mn), Space:O(n)
+        * Python
+          ```python
+          def minPathSum(self, grid: List[List[int]]) -> int:
+            row, col = len(grid), len(grid[0])
+            memo = [0 for _ in range(col)]
+            memo[0] = grid[0][0]
+
+            # init first row
+            for c in range(1, col):
+                memo[c] = grid[0][c] + memo[c-1]
+
+            # complete the memo
+            for r in range(1, row):
+                # memo[r][0] = grid[r][0] + memo[r-1][0]
+                memo[0] += grid[r][0]
+
+                for c in range(1, col):
+                    # memo[r][c] = grid[r][c] + min(memo[r-1][c], memo[r][c-1])
+                    memo[c] = grid[r][c] + min(memo[c], memo[c-1])
+
+            return memo[-1]
           ```
     * 097: Interleaving String (H)
     * 174: Dungeon Game (H)
     * 221: Maximal Square (M)
     * 085: Maximal Rectangle (H)
-    * 363: Max Sum of Rectangle No Larger Than K	TreeSe (H)
+    * 363: Max Sum of Rectangle No Larger Than KTreeSe (H)
+    * 741: Cherry Pickup (H)
   * **Deduction**:
     * 714: Best Time to Buy and Sell Stock with Transaction Fee (M) (Array)
     * 276: Paint Fence (E)
@@ -13498,10 +14156,19 @@ Table of Content
     * Fibonacci sequence
       * 070: Climbing Stairs
       * 091: **Decode Ways**
+    * Triangle:
+      * 120: Triangle (M)
     * **One Dimensional**
+      * 062: Unique Paths (M)
+      * 139: Word Break (M)
     * **Two Dimensional**
-      * 256: Paint House (E)
+      * 1143: Longest Common Subsequence (M)
+        * Memory Optimizatino version Space:O(n)
       * 072: Edit Distance (H)
+        * Notice the init condition
+        * Memory Optimizatino version Space:O(n)
+      * 256: Paint House (E)
+      * 064: Minimum Path Sum (M)
     * **Deduction**
       * 276: Paint Fence (E)
       * 198: House Robber (E)
