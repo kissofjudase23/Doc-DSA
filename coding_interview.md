@@ -3183,26 +3183,31 @@ Table of Content
               *  **cash[i]** - price[i]
             * hold[i]
               * max(case1, case2, case3) = max(hold[i-1], **cash[i]-price[i]**)
-        * Python Solution
+        * Python
             ```python
-            def max_profit(self, prices: List[int], fee: int) -> int:
+            def maxProfit(self, prices: List[int], fee: int) -> int:
               cash = 0
               hold = -prices[0]
+
               for i in range(1, len(prices)):
+                  price = prices[i]
+
                   """
                   cash[i] = max(case1, case2)
-                  case1: cash[i-1]
+                  case1 : cash[i-1]
                   case2:  hold[i-1] + prices[i] - fee
+                  case3:  cash[i-1] - prices[i] - fee + prices[i] (skip this case)
                   """
-                  cash = max(cash, hold+prices[i]-fee)
+                  cash = max(cash, hold+price-fee)
                   """
-                  hold[i] = max(case1, case4)
-                  case1: hold[i-1]
-                  case2: case[i-1] - prices[i-1]
-                  case3: hold[i-1] + prices[i-1] - fee -prices[i-1]
+                  hold[i] = max(case1, case2, case3) = max(case1, case4)
+                  case1: hold[i]
+                  case2: hold[i] + prices[i] - fee - prices[i]
+                  case3: cash[i-1] - prices[i]
                   case4: cash[i] - prices[i-1]  (come from case2 and case3)
                   """
-                  hold = max(hold, cash-prices[i])
+                  hold = max(hold, cash-price)
+
               return cash
             ```
     * 123: Best Time to Buy and Sell Stock III (H)
@@ -11523,7 +11528,7 @@ Table of Content
 
           return lip
         ```
-    * Approach2: Recursive, Time:O((mn)), Space:O(mn)
+    * Approach2: Recursive with memo, Time:O((mn)), Space:O(mn)
       * Python
         ```python
         def longestIncreasingPath(self, matrix: List[List[int]]) -> int:
@@ -12337,7 +12342,6 @@ Table of Content
             ```
     * 279: Perfect Squares (M)
     * 375: Guess Number Higher or Lower II (M)
-    * 322: Coin Change (H)
     * 312: Burst Balloons (H)
   * **Two Dimensional**:
     * 1143: Longest Common Subsequence, LCS (M)
@@ -12512,11 +12516,11 @@ Table of Content
           * memo[i][j] = memo[i-1][j-1]
         * elif word1[i] =! word[j]:
           * memo[i][j] = minimum of
-            * case1: replace a character in word1
+            * case1: **R**eplace a character in word1
               * 1 + memo[i-1][j-1]
-            * case2: delete a character from word1
+            * case2: **D**elete a character from word1 (insert a character into word2)
               * 1 + memo[i-1][j]
-            * case3: delete a character from word2 (insert a charactr into word1)
+            * case3: **I**nsert a character into word1 (delete a character from word2)
               * 1 + memo[i][j-1]
       * Note:
         * insert a dummy character will not affect the minimum edit distance.
@@ -12525,13 +12529,12 @@ Table of Content
       * DP Example:
         ```txt
         # x is dummy
-          x r o s
-        x 0 1 2 3
-        h 1 1 2 3
-        o 2 2 1 2
-        r 3 2 2 2
-        s 4 3 3 2
-        e 5 4 4 3
+          x   a         b          d
+        x 0   1         2          3
+        a 1   0(a)      1(Ib, ab)  2(Id, abd)
+        b 2   1(Db, a)  0(ab)      1(Id, abd)
+        c 3   2(Dc, a)  1(Dc, ab)  1(Ec, abd or abc)
+        c 4   3(Dc, a)  2(Ib, abb) 2(Dc, abd) or (Ec, abd)
         ```
       * Approach1: Recursive (top-down)
         * Python
@@ -12645,7 +12648,7 @@ Table of Content
 
             return memo[(row-1)%2][col-1]
           ```
-      * Approach4: DP + mem optimization1, Time:O(mn), Space:O(n)
+      * Approach4: DP + mem optimization2, Time:O(mn), Space:O(n)
         * Python
           ```python
           def minDistance(self, word1: str, word2: str) -> int:
@@ -12820,10 +12823,12 @@ Table of Content
     * 363: Max Sum of Rectangle No Larger Than KTreeSe (H)
     * 741: Cherry Pickup (H)
   * **Deduction**:
-    * 714: Best Time to Buy and Sell Stock with Transaction Fee (M) (Array)
-    * 276: Paint Fence (E)
-      * There is a fence with n posts, each post can be painted with one of the k colors.
-      * You have to paint all the posts such that no more than two adjacent fence posts have the same color.
+    * 714: Best Time to Buy and Sell Stock with Transaction Fee (M)
+    * 276: Paint Fence (E) (L)
+      * Description
+        * There is a fence with **n posts**, each post can be painted with one of the **k colors**.
+        * You have to paint all the posts such **that no more than two adjacent fence posts have the same color**.
+        * Return the total number of ways you can paint the fence.
       * Recursive relation
         * n <= 2:
           * n == 0:
@@ -12840,7 +12845,7 @@ Table of Content
           * return f_same(i) + f_diff(i)
       * Approach1: Recursive + memo (top-down)
       * Approach2: Iterative + memo (bottom-up), Time: O(n), Space: O(n)
-        * Python Solution
+        * Python
           ```python
           def numWays(self, n: int, k: int) -> int:
             """
@@ -12870,7 +12875,7 @@ Table of Content
             return memo_same[n-1] + memo_diff[n-1]
           ```
       * Approach3: Iterative + N variables (bottom-up), Time: O(n), Space: O(1)
-        * Python Solution
+        * Python
           ```python
           def numWays(self, n: int, k: int) -> int:
             """
@@ -12889,41 +12894,74 @@ Table of Content
 
             # for adding post==3 to post==n
             for _ in range(3, n+1):
-                tmp = diff
-
-                # diff[i] = same[i-1] * (k-1) + diff[i-1] * (k-1)
-                diff = (diff + same) * (k-1)
-
-                # same[i] = diff[i-1] * 1
-                same = tmp
+                """
+                same[i] = diff[i-1]
+                diff[i] = (diff[i-1] + same[i-1]) * (k-1)
+                """
+                same, diff = diff, (same + diff) * (k-1)
 
             return diff + same
-    * 198: House Robber (E)
-      * Recursive relation
-        * For n < 2
-          * f(0) = nums[0]
-          * f(1) = max(nums[0], nums[1])
-        * For n >= 2
-          * f(n) = max(f(n-2)+monery(n), F(n-1))
-      * Recursive + memo (top-down), Time:O(n), Space:(n)
-        * Python Solution
+    * House Robber
+      * 198: House Robber (E)
+        * Description:
+          * You are a professional robber planning to rob houses along a street. Each house has a certain amount of money stashed
+          * The only constraint stopping you from robbing each of them is that **adjacent houses have security system connected and it will automatically contact the police if two adjacent houses were broken into on the same night**.
+        * Recursive relation:
+          * version1
+            * For n <= 2
+              * f(0) = 0
+              * f(1) = nums[0]
+              * f(2) = max(nums[0], nums[1])
+            * For n > 2
+              * f(n) = max(case1, case2)
+              * case1: rob house n: monery(n) + f(n-2)
+              * case2: do not rob house n: f(n-1)
+          * version2:
+            * For n < 1:
+              * f(0) = 0
+              * f(1): rob, not_rob = nums[0], 0
+            * For n > 1:
+              * f(n)
+                * rob[n] = nums[n] + not_rob[n-1]
+                * not_rob[n = max(rob[n-1], not_bod[n-1])
+        * Recursive + memo (top-down), Time:O(n), Space:(n)
+          * Python Solution
+            ```python
+            def rob(self, nums: List[int]) -> int:
+            """
+            It will automatically contact the police if two adjacent houses were broken
+            into on the same night.
+            """
+              # R(n) = max(R(n-2)+monery(n), R(n-1))
+              def _rob(n):
+                  if n == 0:
+                      return memo[0]
+                  elif n == 1:
+                      return memo[1]
+                  else:  # n >= 2
+                      if not memo[n]:
+                          memo[n] = max(_rob(n-2)+nums[n], _rob(n-1))
+                      return memo[n]
+
+              if not nums:
+                  return 0
+
+              if len(nums) == 1:
+                  return nums[0]
+
+              memo = [None] * len(nums)
+              memo[0] = nums[0]               # 1 house
+              memo[1] = max(nums[0], nums[1]) # 2 houses
+              return _rob(len(nums)-1)
+            ```
+        * Iterative + memo (bottom-up), Time:O(n), Space:(1)
+          * Python Solution
           ```python
           def rob(self, nums: List[int]) -> int:
-          """
-          It will automatically contact the police if two adjacent houses were broken
-          into on the same night.
-          """
-            # R(n) = max(R(n-2)+monery(n), R(n-1))
-            def _rob(n):
-                if n == 0:
-                    return memo[0]
-                elif n == 1:
-                    return memo[1]
-                else:  # n >= 2
-                    if not memo[n]:
-                        memo[n] = max(_rob(n-2)+nums[n], _rob(n-1))
-                    return memo[n]
-
+            """
+            It will automatically contact the police if two adjacent houses were broken
+            into on the same night.
+            """
             if not nums:
                 return 0
 
@@ -12933,77 +12971,80 @@ Table of Content
             memo = [None] * len(nums)
             memo[0] = nums[0]               # 1 house
             memo[1] = max(nums[0], nums[1]) # 2 houses
-            return _rob(len(nums)-1)
+
+            for i in range(2, len(nums)):
+                memo[i] = max(memo[i-2]+nums[i], memo[i-1])
+
+            return memo[len(nums)-1]
           ```
-      * Iterative + memo (bottom-up), Time:O(n), Space:(1)
-        * Python Solution
-        ```python
-        def rob(self, nums: List[int]) -> int:
-          """
-          It will automatically contact the police if two adjacent houses were broken
-          into on the same night.
-          """
-          if not nums:
-              return 0
+        * Iterative + N variables (bottom-up) v1, Time:O(n), Space:(1)
+          * Python
+          ```python
+          def rob(self, nums: List[int]) -> int:
+            n = len(nums)
 
-          if len(nums) == 1:
-              return nums[0]
+            if n == 0:
+                return 0
 
-          memo = [None] * len(nums)
-          memo[0] = nums[0]               # 1 house
-          memo[1] = max(nums[0], nums[1]) # 2 houses
+            if n == 1:
+                return nums[0]
 
-          for i in range(2, len(nums)):
-              memo[i] = max(memo[i-2]+nums[i], memo[i-1])
+            # n == 2 (2th house)
+            prev, cur = nums[0], max(nums[0], nums[1])
 
-          return memo[len(nums)-1]
-        ```
-      * Iterative + N variables (bottom-up), Time:O(n), Space:(1)
-        * Python Solution
-        ```python
-        def rob(self, nums: List[int]) -> int:
-        """
-        It will automatically contact the police if two adjacent houses were broken
-        into on the same night.
-        """
-        if not nums:
-            return 0
+            # starting from 3th house
+            for i in range(2, n):
+                prev, cur = cur, max(nums[i] + prev, cur)
 
-        if len(nums) == 1:
-            return nums[0]
+            return cur
+            ```
+        * Iterative + N variables (bottom-up) v2, Time:O(n), Space:(1)
+          * Python
+            ```python
+            def rob(self, nums: List[int]) -> int:
+              n = len(nums)
 
-        prev_max = nums[0]
-        cur_max = max(nums[0], nums[1])
+              if n == 0:
+                  return 0
 
-        for i in range(2, len(nums)):
-            prev_max, cur_max = cur_max, max(prev_max+nums[i], cur_max)
+              rob = nums[0]
+              not_rob = 0
+              if n == 1:
+                  return nums[0]
 
-        return cur_max
-        ```
-    * 213: House Robber II (M)
-      * All houses at this place are arranged **in a circle**.
-      * How to break the circle ?
-        * (1) i not robbed
-        * (2) i robbed
-        * (3) pick the bigger one.
-      * Python
-        ```python
-        def rob(snums: List[int]) -> int:
+              # starting from 2th house
+              for i in range(1, n):
+                  """
+                  rob[i] = nums[i] + not_rob[i-1]
+                  not_rob[i] = max(not_rob[i-1], rob[i-1])
+                  """
+                  rob, not_rob = nums[i] + not_rob, max(rob, not_rob)
+
+              return max(rob, not_rob)
+            ```
+      * 213: House Robber II (M)
+        * Description
+          * All houses at this place are arranged **in a circle**.
+        * How to break the circle ?
+          * (1) i not robbed
+          * (2) i robbed
+          * (3) pick the bigger one.
+        * Python
+          ```python
+          def rob(self, nums: List[int]) -> int:
             def rob_non_cycle(start, end):
-                n = end - start + 1
-                if n == 1:
-                    return nums[start]
-                if n == 2:
-                    return max(nums[start], nums[start+1])
+                """
+                198: House Robber
+                """
+                rob, not_rob = nums[start], 0
+                for i in range(start+1, end+1):
+                    rob, not_rob = nums[i] + not_rob, max(rob, not_rob)
 
-                prev_max = nums[start]
-                cur_max = max(nums[start], nums[start+1])
-                for i in range(start+2, end+1):
-                    prev_max, cur_max = cur_max, max(nums[i]+prev_max, cur_max)
+                return max(rob, not_rob)
 
-                return cur_max
 
             n = len(nums)
+
             if n == 0:
                 return 0
             if n == 1:
@@ -13013,106 +13054,200 @@ Table of Content
             if n == 3:
                 return max(nums[0], nums[1], nums[2])
 
-            # rob the 0th house and skip 1th hourse and (n-1)th house
+            """
+            n >= 4
+            case1: rob the 0th house and skip 1th hourse and (n-1)th house
+            case2: do not rob the 0th
+            """
             rob_first = nums[0] + rob_non_cycle(2, n-2)
-            # do not rob the 0th
             do_not_rob_first = rob_non_cycle(1, n-1)
 
-            return max(rob_first, do_not_rob_first)`
-        ```
-    * 337: House Robber III (M)
-      * Ref:
-        * https://leetcode.com/problems/house-robber-iii/discuss/79330/Step-by-step-tackling-of-the-problem
-      * Recursive Relation1:
-        * terminate case: when tree is empty, return 0
-        * case1: Rob node: f(n) = node.val
-                                 + f(n.left.left) + f(n.left.right)
-                                 + f(n.right.left) + f(n.right.right)
-        * case2: Do not rob node: f(n) = f(n.left) + f(n.right)
-      * Approach1: Recursive + memo (top-down), Time:O(n), Space:O(n)
-        * Python,
-          ```python
-          def rob(self, root: TreeNode) -> int:
-            def dfs(node):
-                if not node:
-                    return 0
-
-                if node not in memo:
-                    rob = node.val
-                    if node.left:
-                        rob += (dfs(node.left.left) + dfs(node.left.right))
-                    if node.right:
-                        rob += (dfs(node.right.left) + dfs(node.right.right))
-
-                    do_not_rob = dfs(node.left)+dfs(node.right)
-
-                    memo[node] = max(rob, do_not_rob)
-
-                return memo[node]
-
-            memo = dict()
-            return dfs(root)
+            return max(rob_first, do_not_rob_first)
           ```
-      * Recursive Relation2:
-          * terminate case: when tree is empty, return 0, 0 (rob and not rob)
-          * case1: Rob node: f(n) = node.val + f(n.left)[left_not_rob] + f(n.right)[right_not_rob]
-          * case2: Do not rob node: f(n) = max(f(n.left)) + max(f(n.right))
-      * Approach2: Recursive without memo (top-down), Time:O(n), Space:O(n)
-        * Every node return two values, rob the node and do not rob the node
-        * Python
-          ```python
-          def rob(self, root: TreeNode) -> int:
-            def dfs(node):
-                if not node:
-                    return 0, 0
+      * 337: House Robber III (M)
+        * Ref:
+          * https://leetcode.com/problems/house-robber-iii/discuss/79330/Step-by-step-tackling-of-the-problem
+        * Recursive Relation1:
+          * terminate case: when tree is empty, return 0
+          * case1: Rob node: f(n) = node.val
+                                   + f(n.left.left) + f(n.left.right)
+                                   + f(n.right.left) + f(n.right.right)
+          * case2: Do not rob node: f(n) = f(n.left) + f(n.right)
+        * Approach1: Recursive + memo (top-down), Time:O(n), Space:O(n)
+          * Python,
+            ```python
+            def rob(self, root: TreeNode) -> int:
+              def dfs(node):
+                  if not node:
+                      return 0
 
-                l_rob, l_not_rob = dfs(node.left)
-                r_rob, r_not_rob = dfs(node.right)
+                  if node not in memo:
+                      rob = node.val
+                      if node.left:
+                          rob += (dfs(node.left.left) + dfs(node.left.right))
+                      if node.right:
+                          rob += (dfs(node.right.left) + dfs(node.right.right))
 
-                rob = node.val + l_not_rob + r_not_rob
-                do_not_rob = max(l_rob, l_not_rob) + max(r_rob, r_not_rob)
+                      do_not_rob = dfs(node.left)+dfs(node.right)
 
-                return rob, do_not_rob
+                      memo[node] = max(rob, do_not_rob)
 
-            return max(dfs(root))
-          ```
-      * Approach3: Iterative, postorder, Time:O(n), Space:O(n)
-        * Python
-          ```python
-          def rob(self, root: TreeNode) -> int:
-            if not root:
-                return 0
+                  return memo[node]
 
-            stack = [root]
-            post_order = collections.deque()
-            while stack:
-                node = stack.pop()
-                post_order.appendleft(node)
+              memo = dict()
+              return dfs(root)
+            ```
+        * Recursive Relation2:
+            * terminate case: when tree is empty, return 0, 0 (rob and not rob)
+            * case1: Rob node: f(n) = node.val + f(n.left)[left_not_rob] + f(n.right)[right_not_rob]
+            * case2: Do not rob node: f(n) = max(f(n.left)) + max(f(n.right))
+        * Approach2: Recursive without memo (top-down), Time:O(n), Space:O(n)
+          * Every node return two values, rob the node and do not rob the node
+          * Python
+            ```python
+            def rob(self, root: TreeNode) -> int:
+              def dfs(node):
+                  if not node:
+                      return 0, 0
 
-                if node.left:
-                    stack.append(node.left)
-                if node.right:
-                    stack.append(node.right)
+                  l_rob, l_not_rob = dfs(node.left)
+                  r_rob, r_not_rob = dfs(node.right)
 
-            memo = dict()
-            for node in post_order:
-                l_rob = l_not_rob = 0
-                if node.left:
-                    l_rob, l_not_rob = memo[node.left]
+                  rob = node.val + l_not_rob + r_not_rob
+                  do_not_rob = max(l_rob, l_not_rob) + max(r_rob, r_not_rob)
 
-                r_rob = r_not_rob = 0
-                if node.right:
-                    r_rob, r_not_rob = memo[node.right]
+                  return rob, do_not_rob
 
-                rob = node.val + l_not_rob + r_not_rob
-                not_rob = max(l_rob, l_not_rob) + max(r_rob, r_not_rob)
+              return max(dfs(root))
+            ```
+        * Approach3: Iterative, postorder, Time:O(n), Space:O(n)
+          * Python
+            ```python
+            def rob(self, root: TreeNode) -> int:
+              if not root:
+                  return 0
 
-                memo[node] = (rob, not_rob)
+              stack = [root]
+              post_order = collections.deque()
+              while stack:
+                  node = stack.pop()
+                  post_order.appendleft(node)
 
-            return max(memo[root])
-          ```
+                  if node.left:
+                      stack.append(node.left)
+                  if node.right:
+                      stack.append(node.right)
+
+              memo = dict()
+              for node in post_order:
+                  l_rob = l_not_rob = 0
+                  if node.left:
+                      l_rob, l_not_rob = memo[node.left]
+
+                  r_rob = r_not_rob = 0
+                  if node.right:
+                      r_rob, r_not_rob = memo[node.right]
+
+                  rob = node.val + l_not_rob + r_not_rob
+                  not_rob = max(l_rob, l_not_rob) + max(r_rob, r_not_rob)
+
+                  memo[node] = (rob, not_rob)
+
+              return max(memo[root])
+            ```
     * 010: **Regular Expression** Matching (H)
     * 044: **Wildcard** Matching (H)
+  * Knapsack problem:
+      * 322: Coin Change (M)
+        * Ref:
+          * https://leetcode.com/problems/coin-change/discuss/77368/*Java*-Both-iterative-and-recursive-solutions-with-explanations
+        * Example:
+          * 1
+            * Input: coins = [1, 2, 5], amount = 11
+            * Output: 3
+          * 2
+            * Input: coins = [2], amount = 3
+            * Output: -1
+        * Approach1: backtracking:
+          * Python
+            ```python
+            def coinChange(self, coins: List[int], amount: int) -> int:
+              def backtrack(target, start, cur_num):
+                  nonlocal min_num
+
+                  if target < 0:
+                      return
+
+                  if target == 0:
+                      min_num = min(cur_num, min_num)
+                      return
+
+                  # combination, prevent duplicated
+                  for i in range(start, len(coins)):
+                      backtrack(target-coins[i], i, cur_num+1)
+
+              min_num = float('inf')
+              backtrack(amount, 0, 0)
+
+              if min_num == float('inf'):
+                  min_num = -1
+
+              return min_num
+            ```
+        * Approach2: Top down + memo, Time:O(S*n), Space:O(S)
+          * Python
+            ```python
+            def coinChange(self, coins: List[int], amount: int) -> int:
+              def coin_change(target):
+                  if memo[target] != None:
+                      return memo[target]
+
+                  min_cnt = float('inf')
+                  for coin in coins:
+                      if coin > target:
+                        continue
+                      cnt = coin_change(target-coin)
+                      if cnt != not_found:
+                          min_cnt = min(min_cnt, 1 + cnt)
+
+                  if min_cnt == float('inf'):
+                      memo[target] = not_found
+                  else:
+                      memo[target] = min_cnt
+
+                  return memo[target]
+
+              not_found = -1
+              memo = [None] * (amount + 1)
+              memo[0] = 0
+              coin_change(target=amount)
+              return memo[-1]
+            ```
+        * Approach3: Bottom up DP, Time:O(S*n), Space:O(S)
+          * Python
+            ```python
+            def coinChange(self, coins: List[int], amount: int) -> int:
+              not_found = -1
+              memo = [-1] * (amount + 1)
+              memo[0] = 0
+
+              for target in range(1, amount + 1):
+                  min_cnt = float('inf')
+                  for coin in coins:
+                      if coin > target:
+                          continue
+                      cnt = memo[target-coin]
+                      if cnt != not_found:
+                          min_cnt = min(min_cnt, 1 + cnt)
+
+                  if min_cnt != float('inf'):
+                      memo[target] = min_cnt
+
+              return memo[-1]
+            ```
+      * 039. Combination Sum
+        * see backtracking
+      * 416. Partition Equal Subset Sum
 ### Backtracking
   * 294: Flip Game II (M)
   * 022: Generate Parentheses (M)
@@ -13431,7 +13566,8 @@ Table of Content
           ```
   * **Combinations**
     * 077: Combinations (M)
-      * Given two integers n and k, return all possible combinations of k numbers out of 1 ... n.
+      * Description
+        * Given two integers n and k, return all possible **combinations of k numbers out of 1 ... n**.
       * Example:
         ```txt
           n = 5, k = 3
@@ -14169,6 +14305,8 @@ Table of Content
         * Memory Optimizatino version Space:O(n)
       * 256: Paint House (E)
       * 064: Minimum Path Sum (M)
+    * Knapsack problem
+      * 322: Coin Change (M)
     * **Deduction**
       * 276: Paint Fence (E)
       * 198: House Robber (E)
