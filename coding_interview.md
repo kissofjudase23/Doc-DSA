@@ -1646,20 +1646,22 @@ Table of Content
           * **Note**:
              * Dnd does not need to be move backwarded, since the window size will be smaller than the current max
              * So the key concept is how to forward the start.
-          Python Solution:
+         * Python:
             ```python
             def lengthOfLongestSubstring(self, s: str) -> int:
-              max_len = start = 0
+              start = end = 0
               d = dict()
+              max_len = 0
 
-              for end, c in enumerate(s):
-                  # backward does not make sense
-                  # for example: axxbxxbxxa, backward to first a cause error
+              while end < len(s):
+                  c = s[end]
+
                   if c in d and d[c] >= start:
                       start = d[c] + 1
 
                   max_len = max(max_len, end-start+1)
                   d[c] = end
+                  end += 1
 
               return max_len
             ```
@@ -1767,6 +1769,7 @@ Table of Content
                   while start <= end and cur_formed == desired_formed:
                       c_start = s[start]
                       w_len = end - start + 1
+                      # update
                       if w_len < res[0]:
                           res[0], res[1], res[2] = w_len, start, end
 
@@ -1777,7 +1780,6 @@ Table of Content
                       start += 1
 
                   end += 1
-
 
               return "" if res[0] == float('inf') else s[res[1]: res[2]+1]
             ```
@@ -3356,36 +3358,7 @@ Table of Content
             return can_attend
           ```
     * 253: Meeting Rooms II (M)
-      * Find the minimum requirement of the meeting rooms.
-      * Approach1: Brute Force, Time: O(n^2), Space: O(1)
-      * Approach2: Min Heap: O(nlog(n)), Space: O(n)
-        * Check after sorting
-        * Algo
-          * Sort the intervals by start time
-          * For every meeting room check if the minimum element of the heap is free or not.
-            * If the room is free, then we extract the topmost element and add it back with the ending time of the current meeting we are processing.
-            * If not, then we allocate a new room and add it to the heap.
-        * Python Solution
-            ```python
-            def minMeetingRooms(self, intervals: List[List[int]]) -> int:
-              if not intervals:
-                  return 0
-
-              start, end = 0, 1
-              intervals.sort(key=lambda interval: interval[start])
-              heap = [intervals[0][end]]
-
-              for i in range(1, len(intervals)):
-                  # heap[0] is current minimum end time
-                  # need a new room
-                  if heap[0] > intervals[i][start]:
-                      heapq.heappush(heap, intervals[i][end])
-                  # reuse the room
-                  else:
-                      heapq.heapreplace(heap, intervals[i][end])
-
-              return len(heap)
-            ```
+      * see heap (Priority Queue) section
     * 056: Merge Intervals (M)
       * Approach1: Sorting and check, Time: O(nlogn), Space: O(n)
         * Sort the intervals by start time,
@@ -4023,86 +3996,86 @@ Table of Content
 
             return start if total_tank >= 0 else not_found
             ```
-    * 289: Game of Life (M)
-      * Approach1: Time: O(mn), Space: O(mn)
-        * Python Solution
-          ```python
-          def gameOfLife(self, board: List[List[int]]) -> None:
-            # coordinate diff for 8 neighbors
-            neighbors = [(1, 0), (1, -1), (0, -1), (-1, -1),
-                        (-1, 0), (-1,1), (0, 1), (1, 1)]
-
-            rows = len(board)
-            cols = len(board[0])
-            copy_board = [[board[row][col] for col in range(cols)] for row in range(rows)]
-
-            for row in range(rows):
-                for col in range(cols):
-                    # calculate the cnt of live neighbors
-                    live_neighbors = 0
-                    for n in neighbors:
-                        r, c = row + n[0], col + n[1]
-                        if 0 <= r < rows and 0 <= c < cols \
-                          and copy_board[r][c] == 1:
-                            live_neighbors += 1
-
-                    # change status
-                    if copy_board[row][col] == 1:
-                        if live_neighbors < 2 or live_neighbors > 3:
-                            board[row][col] = 0
-
-                    else: # ref_board[row][col] == 0
-                        if live_neighbors == 3:
-                            board[row][col] = 1
-          ```
-      * Approach2: Time: O(mn), Space: O(1)
-        * Use two temp status, live_2_dead and dead_2_live
-        * Python Solution
-          ```python
-          class Status(object):
-            live_2_dead = -1
-            dead = 0
-            live = 1
-            dead_2_live = 2
-
-          def gameOfLife(self, board: List[List[int]]) -> None:
-            # coordinate diff for 8 neighbors
-            neighbors = [(1, 0), (1, -1), (0, -1), (-1, -1),
-                        (-1, 0), (-1,1), (0, 1), (1, 1)]
-
-            rows = len(board)
-            cols = len(board[0])
-
-            for row in range(rows):
-                for col in range(cols):
-                    # calculate the cnt of live neighbors
-                    live_neighbors = 0
-                    for n in neighbors:
-                        r, c = row + n[0], col + n[1]
-                        if 0 <= r < rows and 0 <= c < cols \
-                          and abs(board[r][c]) == 1:  # Status.live and Status.live_2_dead
-                            live_neighbors += 1
-
-                    # change status
-                    if board[row][col] == Status.live:
-                        if live_neighbors < 2 or live_neighbors > 3:
-                            board[row][col] = Status.live_2_dead
-
-                    else: # ref_board[row][col] == 0
-                        if live_neighbors == 3:
-                            board[row][col] = Status.dead_2_live
-
-            for row in range(rows):
-                for col in range(cols):
-                    if board[row][col] > 0: # live and live to dead
-                        board[row][col] = Status.live
-                    else:                   # dead and dead to live
-                        board[row][col] = Status.dead
-          ```
-      * follow up: Infinite array
-        * [Solution](https://leetcode.com/problems/game-of-life/discuss/73217/Infinite-board-solution/201780)
     * 723：Candy Crush (M)
 ### Matrix
+ * 289: Game of Life (M)
+    * Approach1: Time: O(mn), Space: O(mn)
+      * Python Solution
+        ```python
+        def gameOfLife(self, board: List[List[int]]) -> None:
+          # coordinate diff for 8 neighbors
+          neighbors = [(1, 0), (1, -1), (0, -1), (-1, -1),
+                      (-1, 0), (-1,1), (0, 1), (1, 1)]
+
+          rows = len(board)
+          cols = len(board[0])
+          copy_board = [[board[row][col] for col in range(cols)] for row in range(rows)]
+
+          for row in range(rows):
+              for col in range(cols):
+                  # calculate the cnt of live neighbors
+                  live_neighbors = 0
+                  for n in neighbors:
+                      r, c = row + n[0], col + n[1]
+                      if 0 <= r < rows and 0 <= c < cols \
+                        and copy_board[r][c] == 1:
+                          live_neighbors += 1
+
+                  # change status
+                  if copy_board[row][col] == 1:
+                      if live_neighbors < 2 or live_neighbors > 3:
+                          board[row][col] = 0
+
+                  else: # ref_board[row][col] == 0
+                      if live_neighbors == 3:
+                          board[row][col] = 1
+        ```
+    * Approach2: Time: O(mn), Space: O(1)
+      * Use two temp status, live_2_dead and dead_2_live
+      * Python Solution
+        ```python
+        class Status(object):
+          live_2_dead = -1
+          dead = 0
+          live = 1
+          dead_2_live = 2
+
+        def gameOfLife(self, board: List[List[int]]) -> None:
+          # coordinate diff for 8 neighbors
+          neighbors = [(1, 0), (1, -1), (0, -1), (-1, -1),
+                      (-1, 0), (-1,1), (0, 1), (1, 1)]
+
+          rows = len(board)
+          cols = len(board[0])
+
+          for row in range(rows):
+              for col in range(cols):
+                  # calculate the cnt of live neighbors
+                  live_neighbors = 0
+                  for n in neighbors:
+                      r, c = row + n[0], col + n[1]
+                      if 0 <= r < rows and 0 <= c < cols \
+                        and abs(board[r][c]) == 1:  # Status.live and Status.live_2_dead
+                          live_neighbors += 1
+
+                  # change status
+                  if board[row][col] == Status.live:
+                      if live_neighbors < 2 or live_neighbors > 3:
+                          board[row][col] = Status.live_2_dead
+
+                  else: # ref_board[row][col] == 0
+                      if live_neighbors == 3:
+                          board[row][col] = Status.dead_2_live
+
+          for row in range(rows):
+              for col in range(cols):
+                  if board[row][col] > 0: # live and live to dead
+                      board[row][col] = Status.live
+                  else:                   # dead and dead to live
+                      board[row][col] = Status.dead
+        ```
+    * follow up: Infinite array
+      * [Solution](https://leetcode.com/problems/game-of-life/discuss/73217/Infinite-board-solution/201780)
  * **Rotate**:
    * Approach1: m*n arryay, Time:O(mn), Space:O(mn)
      * Python
@@ -4910,6 +4883,117 @@ Table of Content
                           res[i][j] += A[i][k] * B[k][j]
 
           return res
+        ```
+ * 329: Longest Increasing Path in a Matrix (H)
+    * Do not need to keep visitedd ue to the increasing property.
+    * Approach1: Recursive with memo, Time:O((mn)), Space:O(mn)
+      * Python
+        ```python
+        DIRECTIONS = ((1, 0), (0, 1), (-1, 0), (0, -1))
+        def longestIncreasingPath(self, matrix: List[List[int]]) -> int:
+            def neighbors(r, c):
+                for d in DIRECTIONS:
+                    nr, nc = r + d[0], c + d[1]
+                    if not (0 <= nr < row and 0 <= nc < col):
+                        continue
+
+                    yield nr, nc
+
+            def dfs(r, c):
+                if memo[r][c] != None:
+                    return memo[r][c]
+
+                lip = 1
+                for nr, nc in neighbors(r, c):
+                    if matrix[nr][nc] > matrix[r][c]:
+                        lip = max(lip, 1 + dfs(nr, nc))
+
+                memo[r][c] = lip
+                return memo[r][c]
+
+
+            if not matrix:
+                return 0
+
+            row, col = len(matrix), len(matrix[0])
+
+            if not col:
+                return 0
+
+            memo = [[None for _ in range(col)] for _ in range(row)]
+
+            max_lip = 1
+            for r in range(row):
+                for c in range(col):
+                    max_lip = max(max_lip, dfs(r, c))
+
+            return max_lip
+        ```
+    * Approach2: Topological Sort, Time:O((mn)), Space:O(mn)
+      * Definition:
+        * If matrix[i][j] < matrix[k][l], path: matrix[i][j] -> matrix[k][l]
+        * indegree:
+          * (i, j): 0
+          * (k, l): 1
+        * outdegree:
+          * (i, j): [(k, l)]
+          * (k, l): []
+          * do not need to keep, we can get from neighbros of matrix
+      * Starting from the nodes with indegree == 0 ( max val in the area)
+      * Python
+        ```python
+        import collections
+        DIRECTIONS = ((1, 0), (0, 1), (-1, 0), (0, -1))
+
+        class Solution:
+            def longestIncreasingPath(self, matrix: List[List[int]]) -> int:
+
+                def neighbors(r, c):
+                    for d in DIRECTIONS:
+                        nr, nc = r + d[0], c + d[1]
+                        if not (0 <= nr < row and 0 <= nc < col):
+                            continue
+
+                        yield nr, nc
+
+                if not matrix:
+                    return 0
+
+                row, col = len(matrix), len(matrix[0])
+
+                if not col:
+                    return 0
+
+                indegree = [[0 for _ in range(col)] for _ in range(row)]
+
+                for r in range(row):
+                    for c in range(col):
+                        for nr, nc in neighbors(r, c):
+                            if matrix[nr][nc] > matrix[r][c]:
+                                indegree[nr][nc] += 1
+
+                # topological sorting
+                q = collections.deque()
+                for r in range(row):
+                    for c in range(col):
+                        if indegree[r][c] == 0:
+                            q.append((r, c))
+
+
+                max_lip = 0
+                while q:
+                    q_len = len(q)
+                    max_lip += 1
+                    for _ in range(q_len):
+                        r, c = q.popleft()
+                        for nr, nc in neighbors(r, c):
+                            if matrix[nr][nc] > matrix[r][c]:
+                                indegree[nr][nc] -= 1
+                                if indegree[nr][nc] == 0:
+                                    q.append((nr, nc))
+
+
+                return max_lip
         ```
  * 370:	Range Addition (M)
  * 296:	Best Meeting Point (H)
@@ -5778,7 +5862,7 @@ Table of Content
     * Approach1: Top down Recursive, Time:O(n^2), Space:O(n)
       * 2 cases:
         * case1: taken the current character if possible (cur > prev)
-        * case2: do not tkaen the current character
+        * case2: do not taken the current character
       * Python
         ```python
         def lengthOfLIS(self, nums: List[int]) -> int:
@@ -7324,8 +7408,37 @@ Table of Content
     * For Python, heapq is min-heap
   * 023: Merge k Sorted Lists (H) (LinkedList)
     * Ｐleaser refer linked list section (use min heap)
-  * 253: Meeting Rooms II (M) (Array)
-    * Please refer array section, use min heap
+  * 253: Meeting Rooms II (M)
+      * Find the minimum requirement of the meeting rooms.
+      * Approach1: Brute Force, Time: O(n^2), Space: O(1)
+      * Approach2: Min Heap: O(nlog(n)), Space: O(n)
+        * Check after sorting
+        * Algo
+          * Sort the intervals by start time
+          * For every meeting room check if the minimum element of the heap is free or not.
+            * If the room is free, then we extract the topmost element and add it back with the ending time of the current meeting we are processing.
+            * If not, then we allocate a new room and add it to the heap.
+        * Python
+            ```python
+            def minMeetingRooms(self, intervals: List[List[int]]) -> int:
+              if not intervals:
+                  return 0
+
+              start, end = 0, 1
+              intervals.sort(key=lambda interval: interval[start])
+              heap = [intervals[0][end]]
+
+              for i in range(1, len(intervals)):
+                  # heap[0] is current minimum end time
+                  # need a new room
+                  if heap[0] > intervals[i][start]:
+                      heapq.heappush(heap, intervals[i][end])
+                  # reuse the room
+                  else:
+                      heapq.heapreplace(heap, intervals[i][end])
+
+              return len(heap)
+            ```
   * 703. **Kth Largest** Element in a Stream (E)
     * Approach1: min heap, Time: O(log(k)), Space: O(k)
       * Time: O(log(k))
@@ -7657,6 +7770,9 @@ Table of Content
               else:
                   return -self.lo[0]
         ```
+  * 630. Course Schedule III (H)
+    * Ref:
+      * https://leetcode.com/problems/course-schedule-iii/discuss/104847/Python-Straightforward-with-Explanation
   * 313: Super Ugly Numbe (M)
   * 218: The Skyline Problem (H)
 ### Cache
@@ -10911,258 +11027,491 @@ Table of Content
   * 642: Design Search Autocomplete System (H)
   * 745: Prefix and Suffix Search (H)
 ### BFS & DFS
-  * 200: Number of Islands (M)
-    * Approach1: BFS, Time: O(mn), Space: O(mn)
-      * Set visits to True before append to the queue to **reduce unnecessary iterations.**
-      * Python Solution
-        ```python
-        class NumberOfIsland(object):
+  * **Islands**
+    * 200: Number of Islands (M)
+      * Description:
+        * Given a 2d grid map of '1's (land) and '0's (water), count the number of islands.
+      * Approach1: BFS, Time: O(mn), Space: O(mn)
+        * Set visits to True before append to the queue to **reduce unnecessary iterations.**
+        * Python
+          ```python
+          class NumberOfIsland(object):
 
-          LAND, WATER = '1', '0'
+            LAND, WATER = '1', '0'
+            NEIGHBORS = ((1, 0), (0, -1), (-1, 0), (0, 1))
+
+            @classmethod
+            def bfs(cls, grid: List[List[str]]) -> int:
+                def _bfs(r, c):
+                  if grid[r][c] == cls.WATER or visits[r][c]:
+                    return 0
+
+                  visits[r][c] = True
+                  q = collections.deque()
+                  q.append((r, c))
+
+                  while q:
+                      r, c = q.popleft()
+                      for neigbor in cls.NEIGHBORS:
+                          nr, nc = r+neigbor[0], c+neigbor[1]
+
+                          # out of range
+                          if nr < 0 or nr >= row or nc < 0 or nc >= col:
+                              continue
+
+                          if grid[nr][nc] == cls.WATER or visits[nr][nc]:
+                              continue
+
+                          visits[nr][nc] = True
+                          q.append((nr, nc))
+
+                  return 1
+
+                if not grid or not grid[0]:
+                    return 0
+
+                row, col = len(grid), len(grid[0])
+                area_cnt = 0
+                visits = [[False for _ in range(col)] for _ in range(row)]
+                for r in range(row):
+                    for c in range(col):
+                        area_cnt += _bfs(r, c)
+                return area_cnt
+          ```
+      * Approach2: DFS recursive,
+        * Python
+          ```python
           NEIGHBORS = ((1, 0), (0, -1), (-1, 0), (0, 1))
 
-          @classmethod
-          def bfs(cls, grid: List[List[str]]) -> int:
-              """
-              Time: O(m*n)
-              Space: O(m*n)
-              """
-              def _bfs(r, c):
-                if grid[r][c] == cls.WATER or visits[r][c]:
-                  return 0
+          WATER = '0'
+          LAND = '1'
 
-                visits[r][c] = True
-                q = collections.deque()
-                q.append((r, c))
+          class Solution:
+              def numIslands(self, grid: List[List[str]]) -> int:
+                  def dfs(r, c):
+                      if not 0 <= r < row or not 0 <= c < col:
+                          return
 
-                while q:
-                    r, c = q.popleft()
-                    for neigbor in cls.NEIGHBORS:
-                        nr, nc = r+neigbor[0], c+neigbor[1]
+                      if grid[r][c] == WATER or visits[r][c]:
+                          return
 
-                        # out of range
-                        if nr < 0 or nr >= row or nc < 0 or nc >= col:
-                            continue
+                      visits[r][c] = True
+                      for n in NEIGHBORS:
+                          nr, nc = r + n[0], c + n[1]
+                          dfs(nr, nc)
 
-                        if grid[nr][nc] == cls.WATER or visits[nr][nc]:
-                            continue
 
-                        visits[nr][nc] = True
-                        q.append((nr, nc))
+                  if not grid:
+                      return 0
 
-                return 1
+                  row, col = len(grid), len(grid[0])
+                  visits = [[False for _ in range(col)] for _ in range(row)]
+                  island_cnt = 0
+                  for r in range(row):
+                      for c in range(col):
+                          if grid[r][c] == LAND and not visits[r][c]:
+                              dfs(r, c)
+                              island_cnt += 1
 
-              if not grid or not grid[0]:
+                  return island_cnt
+          ```
+      * Approach3: Union Find (Disjoint Set)
+    * 695: Max Area of Island (M)
+      * Approach1, BFS, Time:O(mn), Space:O(mn)
+        * Python
+          ```python
+          NEIGHBORS = ((1, 0), (0, -1), (-1, 0), (0, 1))
+          WATER = 0
+          LAND = 1
+
+          def maxAreaOfIsland(self, grid: List[List[int]]) -> int:
+              def bfs(r, c):
+                  visits[r][c] = True
+                  area = 1
+                  q = collections.deque([(r, c)])
+
+                  while q:
+                      r, c = q.popleft()
+                      for n in NEIGHBORS:
+                          nr, nc = r + n[0], c + n[1]
+
+                          if not 0 <= nr < row or not 0 <= nc < col:
+                              continue
+
+                          if grid[nr][nc] == WATER or visits[nr][nc]:
+                              continue
+
+                          visits[nr][nc] = True
+                          area += 1
+                          q.append((nr, nc))
+
+                  return area
+
+              if not grid:
                   return 0
 
               row, col = len(grid), len(grid[0])
-              area_cnt = 0
               visits = [[False for _ in range(col)] for _ in range(row)]
+              max_area = 0
               for r in range(row):
                   for c in range(col):
-                      area_cnt += _bfs(r, c)
-              return area_cnt
-        ```
-    * Approach2: DFS, Time: O(mn), Space: O(mn)
-      * Implementation is just like BFS, but use stack instead
-      * Set visits to True before append to the queue to reduce unnecessary iterations.
-    * Approach3: DFS recursive,
-      * Python Solution
-        ```python
-        class NumberOfIsland(object):
-          LAND, WATER = '1', '0'
+                      if grid[r][c] == LAND and not visits[r][c]:
+                          max_area = max(max_area, bfs(r, c))
+
+              return max_area
+          ```
+      * Approach2, DFS, Time:O(mn), Space:O(mn)
+        * Python
+          ```python
           NEIGHBORS = ((1, 0), (0, -1), (-1, 0), (0, 1))
+          WATER = 0
+          LAND = 1
 
-          @classmethod
-          def dfs(cls, grid: List[List[str]]) -> int:
-              """
-              Time: O(m*n)
-              Space: O(m*n)
-              """
-            def _dfs(r, c):
-              # check if outouf boundary
-              if r < 0 or r >= row or c < 0 or c >= col:
+          def maxAreaOfIsland(self, grid: List[List[int]]) -> int:
+
+              def dfs(r, c):
+                  if not 0 <= r < row or not 0 <= c < col:
+                      return 0
+
+                  if grid[r][c] == WATER or visits[r][c]:
+                      return 0
+
+                  visits[r][c] = True
+                  area = 1
+                  for n in NEIGHBORS:
+                      nr, nc = r + n[0], c + n[1]
+                      area += dfs(nr, nc)
+
+                  return area
+
+              if not grid:
                   return 0
 
-              if grid[r][c] == cls.WATER or visits[r][c]:
+              row, col = len(grid), len(grid[0])
+              visits = [[False for _ in range(col)] for _ in range(row)]
+              max_area = 0
+              for r in range(row):
+                  for c in range(col):
+                      if grid[r][c] == LAND and not visits[r][c]:
+                          max_area = max(max_area, dfs(r, c))
+
+              return max_area
+          ```
+    * 694: Number of Distinct Islands (M) (L)
+      * Description:
+        * Count the number of distinct islands.
+        * An island is considered to be the same as another if and only if one island can be translated (and not rotated or reflected) to equal the other.
+      * How to determine the shape ??
+      * Approach1: BFS, Hash by Coordinates, Time:O(mn), Space:O(mn)
+        * Python
+          ```python
+          NEIGHBORS = ((1, 0), (0, -1), (-1, 0), (0, 1))
+          WATER = 0
+          LAND = 1
+
+          def numDistinctIslands(self, grid: List[List[int]]) -> int:
+              def bfs(r0, c0):
+                  visits[r0][c0] = True
+                  shape = [(0, 0)]
+                  q = collections.deque([(r0, c0)])
+
+                  while q:
+                      r, c = q.popleft()
+                      for n in NEIGHBORS:
+                          nr, nc = r + n[0], c + n[1]
+
+                          if not 0 <= nr < row or not 0 <= nc < col:
+                              continue
+
+                          if grid[nr][nc] == WATER or visits[nr][nc]:
+                              continue
+
+                          visits[nr][nc] = True
+                          shape.append((nr-r0, nc-c0))
+                          q.append((nr, nc))
+
+                  return shape
+
+                if not grid:
+                    return 0
+
+                row, col = len(grid), len(grid[0])
+                visits = [[False for _ in range(col)] for _ in range(row)]
+                shapes = set()
+                for r in range(row):
+                    for c in range(col):
+                        if grid[r][c] == LAND and not visits[r][c]:
+                            shapes.add(tuple(bfs(r, c)))
+
+                return len(shapes)
+          ```
+      * Approach1: DFS, Hash by Coordinates, Time:O(mn), Space:O(mn)
+        * Python
+          ```python
+          NEIGHBORS = ((1, 0), (0, -1), (-1, 0), (0, 1))
+          WATER = 0
+          LAND = 1
+
+          def numDistinctIslands(self, grid: List[List[int]]) -> int:
+              def dfs(r, c, r0, c0, shape):
+                  if not 0 <= r < row or not 0 <= c < col:
+                      return
+
+                  if grid[r][c] == WATER or visits[r][c]:
+                      return
+
+                  visits[r][c] = True
+                  shape.append((r-r0, c-c0))
+                  for n in NEIGHBORS:
+                      nr, nc = r + n[0], c + n[1]
+                      dfs(nr, nc, r0, c0, shape)
+
+              if not grid:
                   return 0
 
-              visits[r][c] = True
+              row, col = len(grid), len(grid[0])
+              visits = [[False for _ in range(col)] for _ in range(row)]
+              shapes = set()
+              for r in range(row):
+                  for c in range(col):
+                      if grid[r][c] == LAND and not visits[r][c]:
+                          shape = []
+                          dfs(r, c, r, c, shape)
+                          shapes.add(tuple(shape))
 
-              for neigbor in cls.NEIGHBORS:
-                  _dfs(r+neigbor[0], c+neigbor[1])
+              return len(shapes)
+          ```
+  * **Nested**
+    * 339: Nested List Weight Sum (E)
+      * Description
+        * The weight is defined from top down.
+        * n: total number of nested elements
+        * d: maximum level of nesting in the input
+        * example:
+          * Input: [[1,1],2,[1,1]]
+          * Output: 10 = 1 * 2 + 2 * 4
+      * Approach1: BFS, Time: O(n), Space: O(n)
+        * Python:
+          ```python
+          def depthSum(self, nestedList: List[NestedInteger]) -> int:
+            if not nestedList:
+                return 0
 
-              return 1
+            q = collections.deque()
 
-            if not grid or not grid[0]:
-              return 0
+            """
+            type(nestedList): list
+            type(n): NestedInteger
+            """
+            for n in nestedList:
+                q.append(n)
 
-            row, col = len(grid), len(grid[0])
-            area_cnt = 0
-            visits = [[False for _ in range(col)] for _ in range(row)]
-            for r in range(row):
-                for c in range(col):
-                    area_cnt += _dfs(r, c)
+            sum_depth = 0
+            depth = 1
+            while q:
+                q_len = len(q)
+                for _ in range(q_len):
+                    n = q.popleft()
+                    if n.isInteger():
+                        sum_depth += (depth * n.getInteger())
+                    else:
+                        for nxt_n in n.getList():
+                            q.append(nxt_n)
 
-            return area_cnt
-        ```
-    * Approach4: Union Find (Disjoint Set)
-  * 339: **Nested List** Weight Sum (E)
-    * The weight is defined from top down.
-    * n: total number of nested elements
-    * d: maximum level of nesting in the input
-    * Approach1: BFS, Time: O(n), Space: O(n)
-      * Python Solution:
+                depth += 1
+
+            return sum_depth
+          ```
+      * Approach2: DFS Recursice, Time: O(n), Space: O(n)
+        * Python Solution
+          ```python
+          def depthSum(self, nestedList: List[NestedInteger]) -> int:
+            def dfs(n, d):
+                sum_depth = 0
+
+                if n.isInteger():
+                    sum_depth += (d * n.getInteger())
+                else:
+                    for nxt_n in n.getList():
+                        sum_depth += dfs(nxt_n, d+1)
+
+                return sum_depth
+
+            if not nestedList:
+                return 0
+
+            """
+            type(nestedList): list
+            type(n): NestedInteger
+            """
+            sum_depth = 0
+            for n in nestedList:
+              sum_depth += dfs(n, 1)
+
+            return sum_depth
+          ```
+      * Approach3: DFS Iteraitve, Time: O(n), Space: O(d)
+        * Python
+          ```python
+          def depthSum(self, nestedList: List[NestedInteger]) -> int:
+            if not nestedList:
+                return 0
+
+            sum_depth = 0
+            stack = list()
+            for n in nestedList:
+                stack.append((n, 1))
+
+            while stack:
+                item, d = stack.pop()
+                if item.isInteger():
+                    sum_depth += (d * item.getInteger())
+                else:
+                    for n in item.getList():
+                        stack.append((n, d+1))
+
+            return sum_depth
+          ```
+    * 364: Nested List Weight Sum II (M)
+      * Description:
+        * The weight is defined from bottom up.
+        * n: total number of nested elements
+        * d: maximum level of nesting in the input
+        * example:
+          * Input: [1,[4,[6]]]
+          * Output: 17 = 1 * 3 + 4 * 2 + 6 * 1
+      * Approach1: BFS, Time: O(n), Space: O(n)
+        * Without depth variable
+        * For example:
+          * [1, [2, [3]]]
+            * The result is 1 * 3 + 2 * 2 + 3 * 1 = 10
+            * iter1:
+              * acc = 1
+              * depth_sum = 1
+            * iter2:
+              * acc = 1 + 2
+              * depth sum = 1 + 1 + 2
+            * iter3:
+              * acc = 1 + 2 + 3
+              * depth sum = 1 + 2 + 3
+        * Python Solution
         ```python
-        def depthSum(self, nestedList: List[NestedInteger]) -> int:
+          def depthSumInverse(self, nestedList: List[NestedInteger]) -> int:
+            if not nestedList:
+                return 0
+
+            q = collections.deque()
+            depth_sum = 0
+            acc = 0
+
+            for n in nestedList:
+                q.append(n)
+
+            while q:
+                q_len = len(q)
+                for _ in range(q_len):
+                    item = q.popleft()
+                    if item.isInteger():
+                        acc += item.getInteger()
+                    else:
+                        for n in item.getList():
+                            q.append(n)
+                depth_sum += acc
+
+            return  depth_sum
+        ```
+      * Approach2: DFS recursive, Time: O(n), Space: O(d)
+        * Use hash table to store acc val for each level
+        * Post process to get the result
+        * Python
+          ```python
+          def depthSumInverse(self, nestedList: List[NestedInteger]) -> int:
+            def _dfs(nestedList, depth):
+                for n in nestedList:
+                    if n.isInteger():
+                        d[depth] += n.getInteger()
+                    else:
+                        _dfs(n.getList(), depth+1)
+
           if not nestedList:
               return 0
 
-          q = collections.deque()
-          for n in nestedList:
-              q.append(n)
+          d = collections.defaultdict(int)
 
-          depth_sum = 0
-          depth_level = 1
-          while q:
-              q_len = len(q)
-              for _ in range(q_len):
-                  item = q.popleft()
-                  # integer
-                  if item.isInteger():
-                      depth_sum += (depth_level * item.getInteger())
-                  # nested list
-                  else:
-                      # unpack ths list for next level
-                      for n in item:
-                          q.append(n_)
-              depth_level += 1
+          _dfs(nestedList, 1)
 
-          return depth_sum
-        ```
-    * Approach2: DFS Recursice, Time: O(n), Space: O(n)
-      * Python Solution
-        ```python
-        def depthSum(self, nestedList: List[NestedInteger]) -> int:
-          def _dfs(nlist, depth):
-              sum_depth = 0
-              for n in nlist:
-                  if n.isInteger():
-                      sum_depth += (n.getInteger() * depth)
-                  else:
-                      sum_depth += _dfs(n.getList(), depth+1)
-
-              return sum_depth
-
-          return _dfs(nlist=nestedList, depth=1)
-        ```
-    * Approach3: DFS Iteraitve, Time: O(n), Space: O(d)
-      * Python Solution
-        ```python
-        def depthSum(self, nestedList: List[NestedInteger]) -> int:
-          if not nestedList:
-              return 0
+          # post process to calculate sum_depth
+          max_depth = 1
+          for depth in d.keys():
+              max_depth = max(max_depth, depth)
 
           sum_depth = 0
-          stack = list()
-          for n in nestedList:
-              stack.append((n, 1))
-
-          while stack:
-              item, d = stack.pop()
-              if item.isInteger():
-                  sum_depth += d * item.getInteger()
-              else:
-                  for n in item.getList():
-                      stack.append((n, d+1))
+          for depth, val in d.items():
+              sum_depth += (val *(max_depth-depth+1))
 
           return sum_depth
-        ```
-  * 364: **Nested List** Weight Sum II (M)
-    * The weight is defined from bottom up.
-    * n: total number of nested elements
-    * d: maximum level of nesting in the input
-    * Approach1: BFS, Time: O(n), Space: O(n)
-      * Without depth variable
-      * For example:
-        * [1, [2, [3]]]
-          * The result is 1 * 3 + 2 * 2 + 3 * 1 = 10
-          * iter1:
-            * acc = 1
-            * depth_sum = 1
-          * iter2:
-            * acc = 1 + 2
-            * depth sum = 1 + 1 + 2
-          * iter3:
-            * acc = 1 + 2 + 3
-            * depth sum = 1 + 2 + 3
-      * Python Solution
-      ```python
-        def depthSumInverse(self, nestedList: List[NestedInteger]) -> int:
-          if not nestedList:
-              return 0
+          ```
+    * 565: Array Nesting (M)
+      * Description:
+        * A zero-indexed array A of **length N** contains all integers from **0 to N-1**.
+        * N is an integer within the range [1, 20,000].
+        * The elements of A are all distinct.
+        * Each element of A is an integer within the range [0, N-1].
+        * Example:
+          * Input:
+            * A = [5,4,0,3,1,6,2]
+          * Output:
+            * One of the longest S[K]:
+              * S[0] = {A[0], A[5], A[6], A[2]} = {5, 6, 2, 0}
+      * Approach1:
+        * DFS + memo, Time:O(n), Space:O(n)
+          * Python
+            ```python
+            def arrayNesting(self, nums: List[int]) -> int:
+              def get_circle_len(start):
+                  cur = start
+                  circle_len = 0
+                  while True:
+                      if visited[cur]:
+                          break
 
-          q = collections.deque()
-          depth_sum = 0
-          acc = 0
+                      # new node
+                      visited[cur] = True
+                      circle_len += 1
 
-          for n in nestedList:
-              q.append(n)
+                      # go to next node
+                      cur = nums[cur]
 
-          while q:
-              q_len = len(q)
-              for _ in range(q_len):
-                  item = q.popleft()
-                  if item.isInteger():
-                      acc += item.getInteger()
-                  else:
-                      for n in item.getList():
-                          q.append(n)
-              depth_sum += acc
+                  return circle_len
 
-          return  depth_sum
-      ```
-    * Approach2: DFS recursive, Time: O(n), Space: O(d)
-      * Use hash table to store acc val for each level
-      * Post process to get the result
-      * Python Solution
-        ```python
-        def depthSumInverse(self, nestedList: List[NestedInteger]) -> int:
+              """
+              The elements of A are all distinct.
+              Each element of A is an integer within the range [0, N-1].
+              """
+              if not nums:
+                  return 0
 
-          def _dfs(nestedList, depth):
-              for n in nestedList:
-                  if n.isInteger():
-                      d[depth] += n.getInteger()
-                  else:
-                      _dfs(n.getList(), depth+1)
+              visited = [False] * len(nums)
+              max_circle_len = 0
 
-        if not nestedList:
-            return 0
+              for i in range(len(nums)):
+                  if not visited[i]:
+                      max_circle_len = max(max_circle_len,
+                                           get_circle_len(start=i))
 
-        d = collections.defaultdict(int)
-
-        _dfs(nestedList, 1)
-
-        # post process to calculate sum_depth
-        sum_depth = 0
-        max_depth = 1
-        for depth in d.keys():
-            max_depth = max(max_depth, depth)
-
-        for depth, val in d.items():
-            sum_depth += (val *(max_depth-depth+1))
-
-        return sum_depth
-
-        ```
-  * 286: Walls and Gates (M)
-    * r: number of rows
-    * c: number of columns
-    * Approach1: BFS, search from **EMPTY**, Time: O(**(rc)^2**), Space: O(rc))
+              return max_circle_len
+            ```
+  * 286: Walls and Gates (M) (L)
+    * Description:
+      * -1: A wall or an obstacle.
+      * 0: A gate.
+      * INF: Infinity means an empty room. We use the value 2^31 - 1 = 2147483647 to represent INF as you may assume that the distance to a gate is less than 2147483647.
+      * Fill each empty room with the distance to its nearest gate. If it is impossible to reach a gate, it should be filled with INF.
+    * Approach1: BFS, search from **EMPTY**, Time: O((mn)^2), Space: O(mn))
       * This approach can not reuse the calculation info.
       * Time: O(**(rc)^2**)
       * Space: O(rc))
-      * Python Solution:
+      * Python:
         ```python
         def wallsAndGates(self, rooms: List[List[int]]) -> None:
             """
@@ -11218,57 +11567,60 @@ Table of Content
                     if rooms[r][c] == EMPTY:
                         rooms[r][c] = _bfs(r, c)
         ```
-    * Approach2: BFS, search from **GATE**, Time: O((rc)), Space: O(rc))
+    * Approach2: BFS, search from **GATE**, Time: O((mn)), Space: O(mn))
       * This approach **can avoid recalculation**.
       * Time: O((rc))
       * Space: O(rc))
         * Queue Size
-      * Python Solution:
+      * Python:
         ```python
-        def wallsAndGates(rooms: List[List[int]]) -> None:
+        WALL = -1
+        GATE = 0
+        EMPTY = 2147483647
+        NEIGHBORS = ((1, 0), (0, -1), (-1, 0), (0, 1))
+
+        def wallsAndGates(self, rooms: List[List[int]]) -> None:
             """
             Do not return anything, modify rooms in-place instead.
             """
             if not rooms:
                 return
 
-            row = len(rooms)
-            col = len(rooms[0])
-
-            WALL, GATE, EMPTY = -1, 0, 2147483647
-            NEIGHBORS = ((1, 0), (0, -1), (-1, 0), (0, 1))
+            row, col = len(rooms), len(rooms[0])
 
             q = collections.deque()
             for r in range(row):
                 for c in range(col):
-                    # search from the gate
                     if rooms[r][c] == GATE:
-                        q.append((r, c))
+                        q.append((r,c))
 
-            distance = 0
+            d = 0
             while q:
                 q_len = len(q)
-                distance += 1
+                d += 1
                 for _ in range(q_len):
                     r, c = q.popleft()
-                    for neigbor in NEIGHBORS:
-                        nr, nc = r+neigbor[0], c+neigbor[1]
 
-                        if nr < 0 or nr >= row or nc < 0 or nc >= col:
+                    # for each neighbor
+                    for n in NEIGHBORS:
+                        nr, nc = r + n[0], c + n[1]
+
+                        # check boundary
+                        if not 0 <= nr < row or not 0 <= nc < col:
                             continue
 
-                        if rooms[nr][nc] != EMPTY: # WALL or GATE
+                        if rooms[nr][nc] != EMPTY:
                             continue
 
-                        rooms[nr][nc] = distance
+                        rooms[nr][nc] = d
                         q.append((nr, nc))
-        ```
-    * DFS
+          ```
   * 130: Surrounded Regions (M)
-    * A region is captured by flipping all 'O's into 'X's in that surrounded region.
+    * Description
+      * A region is captured by flipping all 'O's into 'X's in that surrounded region.
     * BFS: Time:O(rc), Space:O(rc)
       * Try to Group region
-      * Python Solution
+      * Python
         ```python
         NEIGHBORS = ((1, 0), (0, -1), (-1, 0), (0, 1))
         START, END = 'O', 'X'
@@ -11284,356 +11636,932 @@ Table of Content
                     while q:
                         r, c = q.popleft()
 
-                        for neighbor in NEIGHBORS:
+                        for n in NEIGHBORS:
+                            nr, nc = r + n[0], c + n[1]
 
-                            nr, nc = r + neighbor[0], c + neighbor[1]
-                            # check boundary
-                            if nr < 0 or nr >= row or nc < 0 or nc >= col:
-                                # do not break here since we try to extend the max regino as possible
+                            if not 0 <= nr < row or not 0 <= nc < col:
+                                """
+                                do not break here since we try to extend the max regino as possible
+                                """
                                 should_flip = False
                                 continue
 
-                            # correct border
-                            if board[nr][nc] == END or visits[nr][nc]:
+                            if board[nr][nc] == 'X' or visits[nr][nc]:
                                 continue
 
                             # group region
-                            if board[nr][nc] == START:
+                            if board[nr][nc] == 'O':
                                 visits[nr][nc] = True
                                 flip_regions.append((nr, nc))
                                 q.append((nr, nc))
 
-                    if not should_flip:
-                        return
+                    if should_flip:
+                      while flip_regions:
+                          r, c = flip_regions.pop()
+                          board[r][c] = 'X'
 
-                    while flip_regions:
-                        r, c = flip_regions.pop()
-                        board[r][c] = END
 
-                """
-                Do not return anything, modify board in-place instead.
-                """
                 if not board:
                     return
 
-                row = len(board)
-                col = len(board[0])
+                row, col = len(board), len(board[0])
                 visits = [[False for _ in range(col)] for _ in range(row)]
 
                 for r in range(row):
                     for c in range(col):
-                        if board[r][c] == START and not visits[r][c]:
+                        if board[r][c] == 'O' and not visits[r][c]:
                             _flip_surround_region(r, c)
         ```
   * 127: **Word Ladder** (M)
-    * Example:
-      * Input:
-        * beginWord = "hit",
-        * endWord = "cog",
-        * wordList = ["hot","dot","dog","lot","log","cog"]
-      * Output:
-        * As one shortest transformation is "hit" -> "hot" -> "dot" -> "dog" -> "cog",
-    * Assume length of word is k and number of words is n
-    * Approach1: BFS, Time:O(nk), Space:O(n*k^2)
+    * Description:
+        * n: length of wordList
+        * k: length of beginWord
+        * Example:
+          * Input:
+            * beginWord = "hit",
+            * endWord = "cog",
+            * wordList = ["hot","dot","dog","lot","log","cog"]
+          * Output:
+            * As one shortest transformation is "hit" -> "hot" -> "dot" -> "dog" -> "cog"
+    * Approach1: BFS, Time:O(nk), Space:O((n * k)*k)
       * Time: O(n*k)
         * Build transformation dict cost: O(n*k)
         * Find the target word in the transformation dict cost: O(n*k)
       * Space: O(n*k^2)
-        * Transformatino dict cost: O(n*k^2)
-          *  Each word has k transformations, each transformation cost k
+        * Transformatino dict cost: O((n * k)*k)
+          * Each word has k transformations, each transformation cost k
         * Max queue size: O(n*k)
-      * Python Solution
+      * Python
         ```python
-        def ladderLength(self, beginWord, endWord, wordList):
+        def ladderLength(self, beginWord: str, endWord: str, wordList: List[str]) -> int:
+
           if not wordList:
               return 0
 
-          if beginWord ==  endWord:
+          if beginWord == endWord:
               return 1
 
-          '''
-          generate word dictionary,
+          """
+          Generate word dictionary,
           hit -> *it, h*t, hi*
-          '''
-          w_combo_d = collections.defaultdict(list)
+          """
+          # generate dict
+          w_dict = collections.defaultdict(list)
           for w in wordList:
               for i in range(len(w)):
-                  w_key = f'{w[:i]}*{w[i+1:]}'
-                  w_combo_d[w_key].append(w)
+                  pattern = f'{w[:i]}*{w[i+1:]}'
+                  w_dict[pattern].append(w)
 
-          q = collections.deque()
-          q.append(beginWord)
-          visited = {beginWord: True}
-          level = 1
-          '''
-          BFS to find the shorted transformation
-          '''
+
+          transformd_cnt = 1
+          memo = dict()
+          q = collections.deque([beginWord])
+
           while q:
               q_len = len(q)
-              level += 1
+              transformd_cnt += 1
               for _ in range(q_len):
                   w = q.popleft()
-                  for i in range(len(w)):
-                      # transfrom key
-                      w_key = f'{w[:i]}*{w[i+1:]}'
 
-                      if w_key not in w_combo_d:
+                  for i in range(len(w)):
+                      pattern = f'{w[:i]}*{w[i+1:]}'
+
+                      if pattern not in w_dict:
                           continue
 
-                      for next_transform_w in w_combo_d[w_key]:
-                          if next_transform_w in visited:
+                      for transform in w_dict[pattern]:
+                          if transform == endWord:
+                              return transformd_cnt
+
+                          if transform in memo:
                               continue
 
-                          visited[next_transform_w] = True
+                          memo[transform] = True
+                          q.append(transform)
 
-                          if endWord == next_transform_w:
-                              return level
+                      w_dict.pop(pattern)
 
-                          q.append(next_transform_w)
-
-                      w_combo_d.pop(w_key)
           return 0
         ```
       * Approach2: Bidirectional BFS
   * 126: **Word Ladder** II (H)
   * 079: Word Search (M)
+    * Description:
      * L is the word length
-     * The key issue is how to reset the used infomation.
-     * Approach1: DFS Recursive: Time:O(mn*4^L), Space:O(mn)
+     * The word can be constructed from letters of sequentially adjacent cell, where "adjacent" cells are those **horizontally** or **vertically** neighboring. The same letter cell **can not be used more than once**.
+     * The key concept is that we need to clean the visited infomation.
+    * Approach1: DFS Recursive: Time:O(mn*4^L), Space:O(mn)
        * Time:
          * The first character takes O(mn)
          * Remain characters take O(4^L)
        * Python
          ```python
-         def exist(self, board: List[List[str]], word: str) -> bool:
+          def exist(self, board: List[List[str]], word: str) -> bool:
+            def dfs(w_idx, r, c):
 
-          def dfs(r, c, idx):
-              if idx == w_len:
-                  return True
+                if w_idx == len(word):
+                    return True
 
-              # check boundary
-              if not (0 <= r < row and 0 <= c < col):
-                  return False
+                if not (0 <= r < row and 0 <= c < col):
+                    return False
 
-              if visited[r][c] or board[r][c] != word[idx]:
-                  return False
+                """
+                The same letter cell can not be used more than once
+                """
+                if visits[r][c] or board[r][c] != word[w_idx]:
+                    return False
 
-              # set
-              visited[r][c] = True
+                visits[r][c] = True
+                found = False
+                for n in NEIGHBORS:
+                    nr, nc = r + n[0], c + n[1]
+                    found = dfs(w_idx+1, nr, nc)
+                    if found:
+                        break
 
-              # check next character
-              found = False
-              for d in directions:
-                  found = dfs(r+d[0], c+d[1], idx+1)
-                  if found:
-                      break
+                """
+                Clean the visited info
+                """
+                visits[r][c] = False
+                return found
 
-            # reset
-            visited[r][c] = False
+
+            row, col = len(board), len(board[0])
+
+            NEIGHBORS = ((1, 0), (0, -1), (-1, 0), (0, 1))
+
+            visits = [[False] * col for _ in range(row)]
+
+            found = False
+            for r in range(row):
+                for c in range(col):
+                    found = dfs(0, r, c)
+                    if found:
+                        break
+                else:
+                    continue
+
+                # break if inner loop break
+                break
 
             return found
-
-          row, col = len(board), len(board[0])
-
-          visited = [[False] * col for _ in range(row)]
-
-          w_len = len(word)
-
-          directions = ((1, 0), (0, 1), (-1, 0), (0, -1))
-
-          found = False
-          # find the first character
-          for r in range(row):
-              for c in range(col):
-                  found = dfs(r, c, 0)
-                  if found:
-                      return found
-
-          return found
          ```
-     * Approach2: DFS Iterative: Time:O(mn*4^L), Space:O(mn)
+    * Approach2: DFS Iterative: Time:O(mn*4^L), Space:O(mn)
        * Use another stack to track unsed info
        * Python
-        ```python
-        def exist(self, board: List[List[str]], word: str) -> bool:
+         * Implementation1
+            ```python
+            def exist(self, board: List[List[str]], word: str) -> bool:
 
-          row, col = len(board), len(board[0])
-          w_len = len(word)
+              def dfs(w_idx, r, c):
+                  s = [(w_idx, r, c, False)]
+                  found = False
+                  while s:
 
-          directions = ((1, 0), (0, 1), (-1, 0), (0, -1))
+                      w_idx, r, c, backtrack = s.pop()
 
-          visited = [[False] * col for _ in range(row)]
-          visited_track = []
-          visited_clean_flag = (-1, -1, -1, True)
+                      if backtrack:
+                          visits[r][c] = False
+                          continue
 
-          stack = []
-          # find the first character
-          for r in range(row):
-              for c in range(col):
-                  stack.append((r, c, 0, False))
+                      if w_idx == len(word):
+                          found = True
+                          break
 
-          found = False
-          while stack:
+                      if not (0 <= r < row and 0 <= c < col):
+                          continue
 
-              r, c, idx, clean_visited = stack.pop()
+                      if visits[r][c] or board[r][c] != word[w_idx]:
+                          continue
 
-              if clean_visited:
-                  r, c = visited_track.pop()
-                  visited[r][c] = False
-                  continue
+                      visits[r][c] = True
+                      # clean visited info
+                      s.append((-1, r, c, True))
+                      for n in NEIGHBORS:
+                          nr, nc = r + n[0], c + n[1]
+                          s.append((w_idx+1, nr, nc, False))
 
-              if idx == w_len:
-                  found = True
+
+                  return found
+
+
+              row, col = len(board), len(board[0])
+              NEIGHBORS = ((1, 0), (0, -1), (-1, 0), (0, 1))
+              visits = [[False] * col for _ in range(row)]
+
+              found = False
+              for r in range(row):
+                  for c in range(col):
+                      if word[0] == board[r][c]:
+                          found = dfs(0, r, c)
+                          if found:
+                              break
+                  else:
+                      continue
+
+                  # break if inner loop break
                   break
 
-              if not (0 <= r < row and 0 <= c < col) \
-                  or visited[r][c] or board[r][c] != word[idx]:
-                  continue
+              return found
+            ```
+         * Implementation2
+            ```python
+            class Solution(object):
 
-              visited[r][c] = True
-              # help to reset the visited[r][c]
-              visited_track.append((r, c))
-              stack.append(visited_clean_flag)
+              Directions = [(1, 0), (0, 1), (-1, 0), (0, -1)]
 
-              for d in directions:
-                  stack.append((r + d[0], c + d[1],
-                                idx + 1,
-                                False))
+              @classmethod
+              def neighbors(cls, board, r, c):
+                  for d in cls.Directions:
+                      nr = r + d[0]
+                      nc = c + d[1]
+                      if (0 <= nr < len(board)) and (0 <= nc < len(board[nr])):
+                          yield nr, nc
 
-          return found
-        ```
-  * 329: Longest Increasing Path in a Matrix (H)
-    * Do not need to keep visitedd ue to the increasing property.
-    * Approach1: Recursive, Time:O(2^(m+n)), Space:O(mn)
-      * Python
-        ```python
-        def longestIncreasingPath(self, matrix: List[List[int]]) -> int:
-          def dfs(r, c, cur_lip):
-              nonlocal lip
+              def exist(self, board, word):
+                  """
+                  :type board: List[List[str]]
+                  :type word: str
+                  :rtype: bool
+                  """
+                  q = list()
 
-              for d in directions:
-                  rc, cc = r + d[0], c + d[1]
-                  if 0 <= rc < row and 0 <= cc < col \
-                      and matrix[rc][cc]  > matrix[r][c]:
-                          lip = max(lip, cur_lip + 1)
-                          dfs(rc, cc, cur_lip + 1)
+                  for r in range(len(board)): # find starting points
+                      for c in range(len(board[r])):
+                          if board[r][c] == word[0]:
+                              q.append((r, c))
 
-          row, col = len(matrix), len(matrix[0])
-          directions = ((1, 0), (0, 1), (-1, 0), (0, -1))
-          # longest increasing path
-          lip = 0
-          for r in range(row):
-              for c in range(col):
-                  dfs(r, c, 1)
+                  for (r, c) in q:
+                      visited = set()
+                      stack = list()
+                      stack.append((r, c, 0, False)) # regular forward moving node
+                      while stack:
+                          cr, cc, i, backtrack = stack.pop()
+                          if backtrack:
+                              visited.remove((cr, cc))
+                              continue
 
-          return lip
-        ```
-    * Approach2: Recursive with memo, Time:O((mn)), Space:O(mn)
-      * Python
-        ```python
-        def longestIncreasingPath(self, matrix: List[List[int]]) -> int:
-          def dfs(r, c):
-              if memo[r][c]:
-                  return memo[r][c]
+                          visited.add((cr, cc))
+                          stack.append((cr, cc, i, True)) # add backtracking node
+                          if i == (len(word) - 1):
+                              return True
 
-              # the base case is 1 and without increasing neighbors.
-              memo[r][c] = 1
+                          for nr, nc in self.neighbors(board, cr, cc):
+                              if (nr, nc) in visited:
+                                  continue
+                              if board[nr][nc] == word[i + 1]:
+                                  stack.append((nr, nc, i + 1, False)) # forward-moving node
 
-              for d in directions:
-                  rc, cc = r + d[0], c + d[1]
-                  if 0 <= rc < row and 0 <= cc < col \
-                      and matrix[rc][cc] > matrix[r][c]:
-                          memo[r][c] = max(memo[r][c], dfs(rc, cc) + 1)
-
-              return memo[r][c]
-
-          if not matrix:
-              return 0
-
-          row, col = len(matrix), len(matrix[0])
-
-          if not col:
-              return 0
-
-          directions = ((1, 0), (0, 1), (-1, 0), (0, -1))
-
-          memo = [[None for _ in range(col)] for _ in range(row)]
-
-          # longest increasing path
-          lip = 0
-          for r in range(row):
-              for c in range(col):
-                  lip = max(lip, dfs(r, c))
-
-          return lip
-        ```
-    * Approach3: Topological Sort, Time:O((mn)), Space:O(mn)
-      * Definition:
-        * If matrix[i][j] < matrix[k][l], path: matrix[i][j] -> matrix[k][l]
-        * indegree:
-          * (i, j): 0
-          * (k, l): 1
-        * outdegree:
-          * (i, j): [(k, l)]
-          * (k, l): []
-          * do not need to keep, we can get from neighbros of matrix
-      * Starting from the nodes with indegree == 0 ( max val in the area)
-      * Python
-        ```python
-        def longestIncreasingPath(self, matrix: List[List[int]]) -> int:
-          if not matrix:
-              return 0
-
-          row, col = len(matrix), len(matrix[0])
-
-          if not col:
-              return 0
-
-          directions = ((1, 0), (0, 1), (-1, 0), (0, -1))
-
-          indegree = [[0 for _ in range(col)] for _ in range(row)]
-          for r in range(row):
-              for c in range(col):
-                  for d in directions:
-                      rc, cc = r + d[0], c + d[1]
-                      if 0 <= rc < row and 0 <= cc < col \
-                          and matrix[r][c] < matrix[rc][cc]:
-                          indegree[rc][cc] += 1
-
-          q = collections.deque()
-          for r in range(row):
-              for c in range(col):
-                  if indegree[r][c] == 0:
-                      q.append((r,c))
-
-          # longest increasing path
-          lip = 0
-          while q:
-              q_len = len(q)
-              lip += 1
-              for _ in range(q_len):
-                  r, c = q.popleft()
-                  for d in directions:
-                      rc, cc = r + d[0], c + d[1]
-                      if 0 <= rc < row and 0 <= cc < col \
-                          and matrix[r][c] < matrix[rc][cc]:
-                              indegree[rc][cc] -= 1
-                              if indegree[rc][cc] == 0:
-                                  q.append((rc,cc))
-
-          return lip
-        ```
+                  return False
+            ```
   * 051: N-Queens (H)
   * 052: N-Queens II (H)
+  * 317: Shortest Distance from All Buildings
+### Backtracking
+  * 294: Flip Game II (M)
+  * 022: Generate Parentheses (M)
+     * Approach1-1: Brute Force, Recursive, Time:O(n*n^(2n))
+       * f(n) = f(n-1) + '('  or f(n-1) + ')'
+       * Time Complexity:
+         * total n^(2n) combination
+       * Space Complexity:
+       * Python Solution:
+        ```python
+        def generateParenthesis(self, n: int) -> List[str]:
+          def valid(cur):
+              bal = 0
+              for bracket in cur:
+                  if bracket == '(':
+                      bal += 1
+                  else:
+                      bal -= 1
+                      if bal < 0:
+                          return False
+              return bal == 0
+
+          def backtrack(cur):
+              if len(cur) == 2*n:
+                  if valid(cur):
+                      res.append("".join(cur))
+                  return
+
+              # case1: f(n) = f(n-1) + '('
+              cur.append('(')
+              backtrack(cur)
+              cur.pop()
+              # case2 : f(n) = f(n-1) + ')'
+              cur.append(')')
+              backtrack(cur)
+              cur.pop()
+
+          res = []
+          cur = []
+          backtrack(cur)
+          return res
+        ```
+     * Approach1-2: Brute Force, Iterative: Time:O(n*n^(2n))
+       * Python Solution
+       ```python
+       def generateParenthesis(self, n: int) -> List[str]:
+          def valid(cur):
+              bal = 0
+              for bracket in cur:
+                  if bracket == '(':
+                      bal += 1
+                  else:
+                      bal -= 1
+                      if bal < 0:
+                          return False
+
+              return bal == 0
+
+          combos = [[]]
+          res = []
+          for _ in range(2*n):
+              combo_len = len(combos)
+              for j in range(combo_len):
+                  combo = combos[j]
+                  copy=combo.copy()
+                  copy.append('(')
+                  combos.append(copy)
+                  combo.append(')')
+
+          for combo in combos:
+              if valid(combo):
+                  res.append("".join(combo))
+
+          return res
+       ```
+     * Approach2-1: Control the left and right, Recursive:
+       * Add them only when we know it will remain a valid sequence (cut off the tree)
+       * Python Solution:
+        ```python
+        def generateParenthesis(self, n: int) -> List[str]:
+          def backtrack(cur, left, right):
+              if left == right == n:
+                  partheneses.append(''.join(cur))
+                  return
+
+              if left < n:
+                  cur.append('(')
+                  backtrack(cur, left+1, right)
+                  cur.pop()
+
+              if right < left:
+                  cur.append(')')
+                  backtrack(cur, left, right+1)
+                  cur.pop()
+
+          cur = []
+          partheneses = []
+          backtrack(cur, left=0, right=0)
+
+          return partheneses
+        ```
+     * Approach2-2: Control the left and right, Iterative:
+       * Python Solution:
+        ```python
+        def generateParenthesis(self, n: int) -> List[str]:
+          res = []
+          stack = []
+          # s, left ,right
+          stack.append(('(', 1, 0))
+          while stack:
+              s, left, right = stack.pop()
+              if left == right == n:
+                  res.append(s)
+                  continue
+
+              if left < n:
+                  stack.append((s+'(', left+1, right))
+
+              if right < left:
+                  stack.append((s+')', left, right+1))
+
+          return res
+        ```
+  * **Subset**
+    * 078: Subsets (M)
+      * Ref:
+        * [C++ Recursive/Iterative/Bit-Manipulation](https://leetcode.com/problems/subsets/discuss/27278/C%2B%2B-RecursiveIterativeBit-Manipulation)
+      * Approach1: Recursive, Time: O(n*2^n), Space:(2^n):
+        * DFS Traverse
+        * Example:
+          ```txt
+          [1,2,3]
+          [] -> [1] -> [1,2] -> [1,2,3] (backtrack)
+                    -> [1,3] (backtrack)
+
+             -> [2] -> [2,3] (backtrack)
+
+             -> [3] (backtrack)
+          ```
+          * []
+        * Time: O(n*2^n)
+          * total 2^n subset, each subset need O(n) to copy
+        * Space: O(2^n)
+          * Total (2^n) subsets
+        * Python
+          ```python
+          def subsets_rec(nums: List[int]) -> List[List[int]]:
+              def _subsets(cur: list, start):
+                # make a copy, append subs cur len(nums)-1
+                subs.append(cur[:])
+
+                if start == len(nums):
+                    return
+
+                for i in range(start, len(nums)):
+                    cur.append(nums[i])
+                    # !!! start = i =1 rather than start + 1
+                    _subsets(cur, start=i+1)
+                    cur.pop()
+
+              subs = []
+              cur = []
+              if not nums:
+                  return []
+
+              _subsets(cur, 0)
+              return subs
+          ```
+      * Approach2: Iterative, Time: O(n*2^n), Space:(2^n)
+        * Time: O(n*2^n)
+          * total:1 + 2 + 4 + 8 ...2^n = O(2^n) round
+            * in each round needs O(n) to copy list
+        * Space: O(2^n)
+          * Total (2^n) subsets (only two status for each character)
+        * example: [a, b, c]
+          * s1: [[]]
+          * s2: [[], [a]] (with a, without a)
+          * s3: [[], [a], [b], [a, b]] (with b, without b)
+          * s4: [[], [a], [b], [a, b], [c], [a, c], [b, c], [a, b, c]]
+        * Python1
+          ```python
+          def subsets(self, nums: List[int]) -> List[List[int]]:
+            subs = [[]]
+            for n in nums:
+                # copy and append n
+                cur = [sub + [n] for sub in subs]
+                subs.extend(cur)
+
+            return subs
+          ```
+        * Python2
+          ```python
+          def subsets(self, nums: List[int]) -> List[List[int]]:
+            subs = [[]]
+
+            for n in nums:
+                sub_len = len(subs)
+                for i in range(sub_len):
+                    sub = subs[i]
+                    subs.append(sub[:])
+                    sub.append(n)
+
+            return subs
+          ```
+      * Approach3: Iterative, **bit manipulation**, Time: O(n*2^n), Space:(2^n)
+        * Time: O(n*2^n)
+          * Total (2^n) round
+            * For each round need to populate the new set taking O(n) time
+        * Space: O(2^n)
+          * Total (2^n) subsets (only two status for each character)
+        * example:
+            ```txt
+            [a, b, c]
+            set 000: []
+            set 001: [a]
+            set 010: [b]
+            set 011: [a, b]
+            set 100: [c]
+            set 101: [a, c]
+            set 110: [b, c]
+            set 111  [a, b, c]
+            ```
+        * Python
+            ```python
+            def subsets_iter_bit(nums: List[int]) -> List[List[int]]:
+                subs = []
+                subs_len = 2 ** len(nums)
+                num_len = len(nums)
+
+                for sub_idx in range(subs_len):
+                    new_sub = []
+                    for num_idx in range(num_len):
+                        if sub_idx & (1 << num_idx):
+                            new_sub.append(nums[num_idx])
+                    subs.append(new_sub)
+
+                return subs
+            ```
+    * 090: Subsets II (M)
+      * Given a collection of integers that might **contain duplicates**, nums, return all possible subsets (the power set).
+      * Approach1: Recursive
+        * Python
+          ```python
+          def subsetsWithDup(self, nums: List[int]) -> List[List[int]]:
+            def backtrack(start, cur):
+                subs.append(cur[:])
+
+                if start == n:
+                    return
+
+                for i in range(start, n):
+                    # skip duplicate in the same position
+                    if i > start and nums[i] == nums[i-1]:
+                        continue
+
+                    num = nums[i]
+                    cur.append(num)
+                    backtrack(i+1, cur)
+                    cur.pop()
+
+            if not nums:
+                return []
+
+            n = len(nums)
+            nums.sort()
+            subs = []
+            cur = []
+            backtrack(0, cur)
+            return subs
+          ```
+      * Approach2: Iterative
+        * Ref:
+          * https://leetcode.com/problems/subsets-ii/discuss/30166/Simple-python-solution-without-extra-space.
+        * Example:
+          ```txt
+          [1, 2, 2]
+
+          init:
+            subs = [[]],
+            cur = []
+
+          step1:
+            subs = [[], [1]],
+            cur = [[1]]
+
+          step2:
+            subs = [[], [1], [2], [1,2]]
+            cur = [[2], [1,2]]
+
+          step3: nums[i] == nums[i-1]
+            subs = [[], [1], [2], [1,2], [2,2], [1,2,2]]
+            cur = [[2,2], [1,2,2]]  # iterative from cur in the step2
+          ```
+        * Python
+          ```python
+          def subsetsWithDup(self, nums: List[int]) -> List[List[int]]:
+            if not nums:
+                return []
+
+            nums.sort()
+            subs = [[]]
+            cur = []
+
+            for i in range(len(nums)):
+                n = nums[i]
+
+                # same idea, we can not insert duplicate val in the same position
+                if i > 0 and nums[i] == nums[i-1]:
+                    cur = [sub + [n] for sub in cur]
+                else:
+                    cur = [sub + [n] for sub in subs]
+
+                subs.extend(cur)
+
+            return subs
+          ```
+  * **Combinations**
+    * 077: Combinations (M)
+      * Description
+        * Given two integers n and k, return all possible **combinations of k numbers out of 1 ... n**.
+      * Example:
+        ```txt
+          n = 5, k = 3
+
+          [1] -> [1,2] -> [1,2,3] (len == k, backtrack)
+                       -> [1,2,4] (len == k, backtrack)
+                       -> [1,2,5] (len == k, backtrack)
+                       -> 6 > n, backtrack
+
+              -> [1,3] -> [1,3,4] (len == k, backtrack)
+                       -> [1,3,5] (len == k, backtrack)
+                       -> 6 > n, backtrack
+
+              -> [1,4] -> [1,4,5] (len == k, backtrack)
+                       -> 6 > n, backtrack
+
+              -> [1,5] -> not enough elements, backtrack
+                       ->  6 > n, backtrack
+
+          [2] -> [2,3] -> [2,3,4] (len == k, backtrack)
+                       -> [2,3,5] (len == k, backtrack)
+                       -> 6 > n, backtrack
+
+              -> [2,4] -> [2,4,5] (len == k, backtrack)
+                       -> 6 > n, backtrack
+
+              -> [2,5] -> not enough elements, backtrack
+          ...
+        ```
+      * Approach1: Recursive Time: O(k * n!/(n!*(n-k))!), Space: O(n!/(n!*(n-k)!)
+        * Time: O(k* n!/(n!*(n-k)!)
+          * total n!/(n!*(n-k)! combinations
+          * k is the time to pupulate each combinations
+        * Space: O(n!/(n!*(n-k)!)
+          * Total O(n!/(n!*(n-k)!) combintations
+        * Python
+            ```python
+            def combine(self, n: int, k: int) -> List[List[int]]:
+              def backtrack(start, cur):
+                  if len(cur) == k:
+                      comb.append(cur[:])
+                      return
+
+                  # skip the cases that can not satisfy k == len(cur) in the future
+                  if k - len(cur) > n - start + 1:
+                      return
+
+                  for i in range(start, n+1):
+                      cur.append(i)
+                      backtrack(i+1, cur)
+                      cur.pop()
+
+              if k > n:
+                  return []
+
+              comb = []
+              cur = []
+              backtrack(1, cur)
+              return comb
+            ```
+      * Approach2: Iterative
+        * The same idea like recursive approach, use stack to control backtrack
+        * Python
+          ```python
+          def combin_iter_v2(n: int, k: int) -> List[List[int]]:
+            """
+            Ref: https://leetcode.com/problems/combinations/discuss/27029/AC-Python-backtracking-iterative-solution-60-ms
+            Time: O(k* n!/(n!*(n-k)!))
+            Space: O(n!/(n!*(n-k)!))   (extra space: O(k))
+            """
+            comb, cur = [], []
+            start = 1
+            while True:
+                l = len(cur)
+
+                if l == k:
+                    comb.append(cur[:])
+                """
+                k - l > n - start + 1 means that l will not satisfy k in the future
+                in fact, (k - l) > (n - start + 1)  can cover start > n when (l-k) = -1
+                The backtrack condition is the same as recursive approach1:
+                1. len(cur) == k
+                2. can not satisfity in the future: (k - l) > (n - start + 1)
+                3. out of boundary
+                """
+                if l == k or (k - l) > (n - start + 1) or start > n:
+                    if not cur: # done !
+                        break
+                    start = cur.pop() + 1
+                else:
+                    cur.append(start)
+                    start += 1
+            return comb
+          ```
+    * 039: Combination Sum (M)
+      * Given a set of candidate numbers (candidates) (**without duplicates**) and a target number (target), **find all unique combinations** in candidates where the candidate numbers sums to target
+      * Time:
+        * https://leetcode.com/problems/combination-sum/discuss/16634/If-asked-to-discuss-the-time-complexity-of-your-solution-what-would-you-say
+      * Approach1: Recursive:
+        * Python
+          ```python
+          def combinationSum(self, candidates: List[int], target: int) -> List[List[int]]:
+            def dfs(start, target, cur):
+                if target < 0:
+                    return
+
+                if target == 0:
+                    results.append(cur[:])
+                    return
+
+                for i in range(start, n):
+                    num = candidates[i]
+                    cur.append(num)
+
+                    """
+                    use start the keep the sequence
+                    """
+                    dfs(i, target-num, cur)
+                    cur.pop()
+
+            if target < 0:
+                return []
+
+            n = len(candidates)
+            results = []
+            cur = []
+            dfs(0, target, cur)
+            return results
+          ```
+      * Approach2: Iterative + DP
+        * Ref:
+          * https://leetcode.com/problems/combination-sum/discuss/16509/Iterative-Java-DP-solution
+    * 040: Combination Sum II (M)
+      * Given a collection of candidate numbers (candidates) and a target number (target), **find all unique combinations** in candidates where the candidate numbers sums to target.
+      * Each number in candidates **may only be used once** in the combination.
+      * Approach1: BackTracking:
+        * Python
+          ```python
+          def combinationSum2(self, candidates: List[int], target: int) -> List[List[int]]:
+            def dfs(start, target, cur):
+                if target < 0:
+                    return
+
+                if target == 0:
+                    results.append(cur[:])
+                    return
+
+                for i in range(start, n):
+
+                    # The val in the same position can be used only once.
+                    if i > start and candidates[i] == candidates[i-1]:
+                        continue
+                    num = candidates[i]
+                    cur.append(num)
+                    dfs(i+1, target-num, cur)
+                    cur.pop()
+
+
+            if target < 0:
+                return []
+
+            candidates.sort()
+            n = len(candidates)
+            results = []
+            cur = []
+            dfs(0, target, cur)
+            return results
+          ```
+    * 216: Combination Sum III (M)
+    * 377: Combination Sum IV (M)
+  * **Permutation**
+    * 046: Permutations (M)
+      * Given a collection of **distinct integers**, return all possible permutations.
+      * Approach1: Recursive, Time: O(n!), Space: O(n!),
+        * Time: O(n!)
+          * Total: n * n-1 * n-2..  * 2 * 1  -> n!
+        * Python
+          ```python
+          def permute(self, nums: List[int]) -> List[List[int]]:
+            def backtrack(start):
+                if start == n:
+                    perms.append(nums[:])
+                    return
+
+                for i in range(start, n):
+                    nums[start], nums[i] = nums[i], nums[start]
+                    backtrack(start+1)
+                    nums[start], nums[i] = nums[i], nums[start]
+
+            if not nums:
+                return []
+
+            perms = []
+            n = len(nums)
+            backtrack(0)
+
+            return perms
+          ```
+      * Approach2: Iterative, Time: O(n!), Space: O(n!)
+        * Time: O(n!)
+          * Total: 1 * 2 * 3 * ... (n-1) * n operation -> n!
+        * Space: O(n!)
+          * n! permutations
+        * example: [a, b, c]
+          * s1: [a]
+          * s2: [a, b], [b, a]
+          * s3: [c, a, b], [a, c, b], [a, b, c], [c, b, a], [b, c, a], [b, a, c]
+        * Python
+            ```python
+            def permute(self, nums: List[int]) -> List[List[int]]:
+              if not nums:
+                  return []
+
+              perms = [[nums[0]]]
+
+              for i in range(1, len(nums)):
+                  num = nums[i]
+                  new_perms = []
+
+                  for perm in perms:
+                      for b in range(0, len(perm)+1):
+                          new_perms.append(perm[:b] + [num] + perm[b:])
+
+                  perms = new_perms
+
+              return perms
+            ```
+    * 047: Permutations II (M)
+      * Given a collection of numbers **that might contain duplicates**, return all possible unique permutations.
+      * Note:
+        * How to avoid duplicate val in the same position?
+        * Length of Permutation should be n.
+      * Approach1: Recursive, BackTracking + Counter
+        * Note:
+          * How to avoid duplicate val in the same position?
+          * Length of Permutation should be n.
+          * answer:
+            * Use Counter to Control recursive call.
+        * Python
+          ```python
+          def permuteUnique(self, nums):
+              def backtrack(counter, cur):
+                  if len(cur) == n:
+                      results.append(cur[:])
+                      return
+
+                  # don't pick duplicates in the same position
+                  for num in counter:
+                      # take only once in each permuation
+                      if counter[num] == 0:
+                          continue
+
+                      cur.append(num)
+                      counter[num] -= 1
+
+                      # pop the key when the number == 0 and append later ??
+                      backtrack(counter, cur)
+
+                      cur.pop()
+                      counter[num] += 1
+
+              n = len(nums)
+              results = []
+              cur = []
+              counter = Counter(nums)
+              backtrack(counter, cur)
+
+              return results
+          ```
+      * Approach2: Iterative bottom up
+        * Ref
+          * https://leetcode.com/problems/permutations-ii/discuss/18602/9-line-python-solution-with-1-line-to-handle-duplication-beat-99-of-others-%3A-)
+        * How to avoid duplicate ?
+          * just avoid inserting a number AFTER any of its duplicates.
+          * Another way to think is that we have symmetry and inserting only towards left of previous 2 or only towards right of previous 2 is all we have to do.
+            * 1. [n]
+            * 2. [n* n] == [n n*]
+          * Example:
+            ```txt
+            [1, 2, 2*]
+
+            step1:
+            [1]
+
+            step2:
+            [1, 2],  [2, 1]
+
+            step3:
+            [2*, 1, 2],  [1, 2*, 2],  x[1, 2, 2*]
+            [2*, 2, 1], x[2, 2*, 1],  x[2, 1, 2*]
+            ``
+        * Python
+          ```python
+          def permuteUnique(self, nums: List[int]) -> List[List[int]]:
+            if not nums:
+                return []
+
+            perms = [[]]
+            for n in nums:
+                new_perms = []
+                for perm in perms:
+                    for i in range(len(perm)+1):
+                        new_perms.append(perm[:i]+[n]+perm[i:])
+                        # To handle duplication
+                        # just avoid inserting a number AFTER any of its duplicates.
+                        if i < len(perm) and perm[i] == n:
+                            break
+
+                perms = new_perms
+            return perms
+          ```
+    * 031: Next Permutation (M)
+    * 060: Permutation Sequence (M)
+  * 291: Word Pattern II
 ### Dynamic Programming
   * Ref:
     * [From good to great. How to approach most of DP problems](https://leetcode.com/problems/house-robber/discuss/156523/From-good-to-great.-How-to-approach-most-of-DP-problems.)
-  * DP problems can be approached using the following sequence:
-    * Recursive Relation
-    * Recursive (top-down)
-    * Recursive + memo (top-down)
-    * Iterative + memo (bottom-up)
-    * Iterative + N variables (bottom-up)
+  * Note:
+    * DP problems can be approached using the following sequence:
+      * Recursive Relation
+      * Recursive (top-down)
+      * Recursive + memo (top-down)
+      * Iterative + memo (bottom-up)
+      * Iterative + N variables (bottom-up)
+    * When handling DP problem, you should only focus current i when processing.
   * **Fibonacci sequence**:
     * 509: Fibonacci Number (E)
       * Recursive Relation
@@ -11877,7 +12805,7 @@ Table of Content
 
             return cur
         ```
-  * Triangle:
+  * **Triangle**:
     * 118: Pascal's Triangle (E)
       * Relation
         * if i == 0 or layer_num-1:
@@ -13157,735 +14085,174 @@ Table of Content
             ```
     * 010: **Regular Expression** Matching (H)
     * 044: **Wildcard** Matching (H)
-  * Knapsack problem:
-      * 322: Coin Change (M)
-        * Ref:
-          * https://leetcode.com/problems/coin-change/discuss/77368/*Java*-Both-iterative-and-recursive-solutions-with-explanations
-        * Example:
-          * 1
-            * Input: coins = [1, 2, 5], amount = 11
-            * Output: 3
-          * 2
-            * Input: coins = [2], amount = 3
-            * Output: -1
-        * Approach1: backtracking:
-          * Python
-            ```python
-            def coinChange(self, coins: List[int], amount: int) -> int:
-              def backtrack(target, start, cur_num):
-                  nonlocal min_num
-
-                  if target < 0:
-                      return
-
-                  if target == 0:
-                      min_num = min(cur_num, min_num)
-                      return
-
-                  # combination, prevent duplicated
-                  for i in range(start, len(coins)):
-                      backtrack(target-coins[i], i, cur_num+1)
-
-              min_num = float('inf')
-              backtrack(amount, 0, 0)
-
-              if min_num == float('inf'):
-                  min_num = -1
-
-              return min_num
-            ```
-        * Approach2: Top down + memo, Time:O(S*n), Space:O(S)
-          * Python
-            ```python
-            def coinChange(self, coins: List[int], amount: int) -> int:
-              def coin_change(target):
-                  if memo[target] != None:
-                      return memo[target]
-
-                  min_cnt = float('inf')
-                  for coin in coins:
-                      if coin > target:
-                        continue
-                      cnt = coin_change(target-coin)
-                      if cnt != not_found:
-                          min_cnt = min(min_cnt, 1 + cnt)
-
-                  if min_cnt == float('inf'):
-                      memo[target] = not_found
-                  else:
-                      memo[target] = min_cnt
-
-                  return memo[target]
-
-              not_found = -1
-              memo = [None] * (amount + 1)
-              memo[0] = 0
-              coin_change(target=amount)
-              return memo[-1]
-            ```
-        * Approach3: Bottom up DP, Time:O(S*n), Space:O(S)
-          * Python
-            ```python
-            def coinChange(self, coins: List[int], amount: int) -> int:
-              not_found = -1
-              memo = [-1] * (amount + 1)
-              memo[0] = 0
-
-              for target in range(1, amount + 1):
-                  min_cnt = float('inf')
-                  for coin in coins:
-                      if coin > target:
-                          continue
-                      cnt = memo[target-coin]
-                      if cnt != not_found:
-                          min_cnt = min(min_cnt, 1 + cnt)
-
-                  if min_cnt != float('inf'):
-                      memo[target] = min_cnt
-
-              return memo[-1]
-            ```
-      * 039. Combination Sum
-        * see backtracking
-      * 416. Partition Equal Subset Sum
-### Backtracking
-  * 294: Flip Game II (M)
-  * 022: Generate Parentheses (M)
-     * Approach1-1: Brute Force, Recursive, Time:O(n*n^(2n))
-       * f(n) = f(n-1) + '('  or f(n-1) + ')'
-       * Time Complexity:
-         * total n^(2n) combination
-       * Space Complexity:
-       * Python Solution:
-        ```python
-        def generateParenthesis(self, n: int) -> List[str]:
-          def valid(cur):
-              bal = 0
-              for bracket in cur:
-                  if bracket == '(':
-                      bal += 1
-                  else:
-                      bal -= 1
-                      if bal < 0:
-                          return False
-              return bal == 0
-
-          def backtrack(cur):
-              if len(cur) == 2*n:
-                  if valid(cur):
-                      res.append("".join(cur))
-                  return
-
-              # case1: f(n) = f(n-1) + '('
-              cur.append('(')
-              backtrack(cur)
-              cur.pop()
-              # case2 : f(n) = f(n-1) + ')'
-              cur.append(')')
-              backtrack(cur)
-              cur.pop()
-
-          res = []
-          cur = []
-          backtrack(cur)
-          return res
-        ```
-     * Approach1-2: Brute Force, Iterative: Time:O(n*n^(2n))
-       * Python Solution
-       ```python
-       def generateParenthesis(self, n: int) -> List[str]:
-          def valid(cur):
-              bal = 0
-              for bracket in cur:
-                  if bracket == '(':
-                      bal += 1
-                  else:
-                      bal -= 1
-                      if bal < 0:
-                          return False
-
-              return bal == 0
-
-          combos = [[]]
-          res = []
-          for _ in range(2*n):
-              combo_len = len(combos)
-              for j in range(combo_len):
-                  combo = combos[j]
-                  copy=combo.copy()
-                  copy.append('(')
-                  combos.append(copy)
-                  combo.append(')')
-
-          for combo in combos:
-              if valid(combo):
-                  res.append("".join(combo))
-
-          return res
-       ```
-     * Approach2-1: Control the left and right, Recursive:
-       * Add them only when we know it will remain a valid sequence (cut off the tree)
-       * Python Solution:
-        ```python
-        def generateParenthesis(self, n: int) -> List[str]:
-          def backtrack(cur, left, right):
-              if left == right == n:
-                  partheneses.append(''.join(cur))
-                  return
-
-              if left < n:
-                  cur.append('(')
-                  backtrack(cur, left+1, right)
-                  cur.pop()
-
-              if right < left:
-                  cur.append(')')
-                  backtrack(cur, left, right+1)
-                  cur.pop()
-
-          cur = []
-          partheneses = []
-          backtrack(cur, left=0, right=0)
-
-          return partheneses
-        ```
-     * Approach2-2: Control the left and right, Iterative:
-       * Python Solution:
-        ```python
-        def generateParenthesis(self, n: int) -> List[str]:
-          res = []
-          stack = []
-          # s, left ,right
-          stack.append(('(', 1, 0))
-          while stack:
-              s, left, right = stack.pop()
-              if left == right == n:
-                  res.append(s)
-                  continue
-
-              if left < n:
-                  stack.append((s+'(', left+1, right))
-
-              if right < left:
-                  stack.append((s+')', left, right+1))
-
-          return res
-        ```
-  * **Subset**
-    * 078: Subsets (M)
+  * **Knapsack Problem:**
+    * 322: Coin Change (M)
+      * Description:
+        * Write a function to compute the **fewest number of coins that you need to make up that amount**.
       * Ref:
-        * [C++ Recursive/Iterative/Bit-Manipulation](https://leetcode.com/problems/subsets/discuss/27278/C%2B%2B-RecursiveIterativeBit-Manipulation)
-      * Approach1: Recursive, Time: O(n*2^n), Space:(2^n):
-        * DFS Traverse
-        * Example:
-          ```txt
-          [1,2,3]
-          [] -> [1] -> [1,2] -> [1,2,3] (backtrack)
-                    -> [1,3] (backtrack)
-
-             -> [2] -> [2,3] (backtrack)
-
-             -> [3] (backtrack)
-          ```
-          * []
-        * Time: O(n*2^n)
-          * total 2^n subset, each subset need O(n) to copy
-        * Space: O(2^n)
-          * Total (2^n) subsets
-        * Python
-          ```python
-          def subsets_rec(nums: List[int]) -> List[List[int]]:
-              def _subsets(cur: list, start):
-                # make a copy, append subs cur len(nums)-1
-                subs.append(cur[:])
-
-                if start == len(nums):
-                    return
-
-                for i in range(start, len(nums)):
-                    cur.append(nums[i])
-                    # !!! start = i =1 rather than start + 1
-                    _subsets(cur, start=i+1)
-                    cur.pop()
-
-              subs = []
-              cur = []
-              if not nums:
-                  return []
-
-              _subsets(cur, 0)
-              return subs
-          ```
-      * Approach2: Iterative, Time: O(n*2^n), Space:(2^n)
-        * Time: O(n*2^n)
-          * total:1 + 2 + 4 + 8 ...2^n = O(2^n) round
-            * in each round needs O(n) to copy list
-        * Space: O(2^n)
-          * Total (2^n) subsets (only two status for each character)
-        * example: [a, b, c]
-          * s1: [[]]
-          * s2: [[], [a]] (with a, without a)
-          * s3: [[], [a], [b], [a, b]] (with b, without b)
-          * s4: [[], [a], [b], [a, b], [c], [a, c], [b, c], [a, b, c]]
-        * Python1
-          ```python
-          def subsets(self, nums: List[int]) -> List[List[int]]:
-            subs = [[]]
-            for n in nums:
-                # copy and append n
-                cur = [sub + [n] for sub in subs]
-                subs.extend(cur)
-
-            return subs
-          ```
-        * Python2
-          ```python
-          def subsets(self, nums: List[int]) -> List[List[int]]:
-            subs = [[]]
-
-            for n in nums:
-                sub_len = len(subs)
-                for i in range(sub_len):
-                    sub = subs[i]
-                    subs.append(sub[:])
-                    sub.append(n)
-
-            return subs
-          ```
-      * Approach3: Iterative, **bit manipulation**, Time: O(n*2^n), Space:(2^n)
-        * Time: O(n*2^n)
-          * Total (2^n) round
-            * For each round need to populate the new set taking O(n) time
-        * Space: O(2^n)
-          * Total (2^n) subsets (only two status for each character)
-        * example:
-            ```txt
-            [a, b, c]
-            set 000: []
-            set 001: [a]
-            set 010: [b]
-            set 011: [a, b]
-            set 100: [c]
-            set 101: [a, c]
-            set 110: [b, c]
-            set 111  [a, b, c]
-            ```
-        * Python
-            ```python
-            def subsets_iter_bit(nums: List[int]) -> List[List[int]]:
-                subs = []
-                subs_len = 2 ** len(nums)
-                num_len = len(nums)
-
-                for sub_idx in range(subs_len):
-                    new_sub = []
-                    for num_idx in range(num_len):
-                        if sub_idx & (1 << num_idx):
-                            new_sub.append(nums[num_idx])
-                    subs.append(new_sub)
-
-                return subs
-            ```
-    * 090: Subsets II (M)
-      * Given a collection of integers that might **contain duplicates**, nums, return all possible subsets (the power set).
-      * Approach1: Recursive
-        * Python
-          ```python
-          def subsetsWithDup(self, nums: List[int]) -> List[List[int]]:
-            def backtrack(start, cur):
-                subs.append(cur[:])
-
-                if start == n:
-                    return
-
-                for i in range(start, n):
-                    # skip duplicate in the same position
-                    if i > start and nums[i] == nums[i-1]:
-                        continue
-
-                    num = nums[i]
-                    cur.append(num)
-                    backtrack(i+1, cur)
-                    cur.pop()
-
-            if not nums:
-                return []
-
-            n = len(nums)
-            nums.sort()
-            subs = []
-            cur = []
-            backtrack(0, cur)
-            return subs
-          ```
-      * Approach2: Iterative
-        * Ref:
-          * https://leetcode.com/problems/subsets-ii/discuss/30166/Simple-python-solution-without-extra-space.
-        * Example:
-          ```txt
-          [1, 2, 2]
-
-          init:
-            subs = [[]],
-            cur = []
-
-          step1:
-            subs = [[], [1]],
-            cur = [[1]]
-
-          step2:
-            subs = [[], [1], [2], [1,2]]
-            cur = [[2], [1,2]]
-
-          step3: nums[i] == nums[i-1]
-            subs = [[], [1], [2], [1,2], [2,2], [1,2,2]]
-            cur = [[2,2], [1,2,2]]  # iterative from cur in the step2
-          ```
-        * Python
-          ```python
-          def subsetsWithDup(self, nums: List[int]) -> List[List[int]]:
-            if not nums:
-                return []
-
-            nums.sort()
-            subs = [[]]
-            cur = []
-
-            for i in range(len(nums)):
-                n = nums[i]
-
-                # same idea, we can not insert duplicate val in the same position
-                if i > 0 and nums[i] == nums[i-1]:
-                    cur = [sub + [n] for sub in cur]
-                else:
-                    cur = [sub + [n] for sub in subs]
-
-                subs.extend(cur)
-
-            return subs
-          ```
-  * **Combinations**
-    * 077: Combinations (M)
-      * Description
-        * Given two integers n and k, return all possible **combinations of k numbers out of 1 ... n**.
+        * https://leetcode.com/problems/coin-change/discuss/77368/*Java*-Both-iterative-and-recursive-solutions-with-explanations
       * Example:
-        ```txt
-          n = 5, k = 3
-
-          [1] -> [1,2] -> [1,2,3] (len == k, backtrack)
-                       -> [1,2,4] (len == k, backtrack)
-                       -> [1,2,5] (len == k, backtrack)
-                       -> 6 > n, backtrack
-
-              -> [1,3] -> [1,3,4] (len == k, backtrack)
-                       -> [1,3,5] (len == k, backtrack)
-                       -> 6 > n, backtrack
-
-              -> [1,4] -> [1,4,5] (len == k, backtrack)
-                       -> 6 > n, backtrack
-
-              -> [1,5] -> not enough elements, backtrack
-                       ->  6 > n, backtrack
-
-          [2] -> [2,3] -> [2,3,4] (len == k, backtrack)
-                       -> [2,3,5] (len == k, backtrack)
-                       -> 6 > n, backtrack
-
-              -> [2,4] -> [2,4,5] (len == k, backtrack)
-                       -> 6 > n, backtrack
-
-              -> [2,5] -> not enough elements, backtrack
-          ...
-        ```
-      * Approach1: Recursive Time: O(k * n!/(n!*(n-k))!), Space: O(n!/(n!*(n-k)!)
-        * Time: O(k* n!/(n!*(n-k)!)
-          * total n!/(n!*(n-k)! combinations
-          * k is the time to pupulate each combinations
-        * Space: O(n!/(n!*(n-k)!)
-          * Total O(n!/(n!*(n-k)!) combintations
-        * Python
-            ```python
-            def combine(self, n: int, k: int) -> List[List[int]]:
-              def backtrack(start, cur):
-                  if len(cur) == k:
-                      comb.append(cur[:])
-                      return
-
-                  # skip the cases that can not satisfy k == len(cur) in the future
-                  if k - len(cur) > n - start + 1:
-                      return
-
-                  for i in range(start, n+1):
-                      cur.append(i)
-                      backtrack(i+1, cur)
-                      cur.pop()
-
-              if k > n:
-                  return []
-
-              comb = []
-              cur = []
-              backtrack(1, cur)
-              return comb
-            ```
-      * Approach2: Iterative
-        * The same idea like recursive approach, use stack to control backtrack
+        * 1
+          * Input: coins = [1, 2, 5], amount = 11
+          * Output: 3
+        * 2
+          * Input: coins = [2], amount = 3
+          * Output: -1
+      * Approach1: backtracking:
         * Python
           ```python
-          def combin_iter_v2(n: int, k: int) -> List[List[int]]:
-            """
-            Ref: https://leetcode.com/problems/combinations/discuss/27029/AC-Python-backtracking-iterative-solution-60-ms
-            Time: O(k* n!/(n!*(n-k)!))
-            Space: O(n!/(n!*(n-k)!))   (extra space: O(k))
-            """
-            comb, cur = [], []
-            start = 1
-            while True:
-                l = len(cur)
+          def coinChange(self, coins: List[int], amount: int) -> int:
+            def backtrack(target, start, cur_num):
+                nonlocal min_num
 
-                if l == k:
-                    comb.append(cur[:])
-                """
-                k - l > n - start + 1 means that l will not satisfy k in the future
-                in fact, (k - l) > (n - start + 1)  can cover start > n when (l-k) = -1
-                The backtrack condition is the same as recursive approach1:
-                1. len(cur) == k
-                2. can not satisfity in the future: (k - l) > (n - start + 1)
-                3. out of boundary
-                """
-                if l == k or (k - l) > (n - start + 1) or start > n:
-                    if not cur: # done !
+                if target < 0:
+                    return
+
+                if target == 0:
+                    min_num = min(cur_num, min_num)
+                    return
+
+                # combination, prevent duplicated
+                for i in range(start, len(coins)):
+                    backtrack(target-coins[i], i, cur_num+1)
+
+            min_num = float('inf')
+            backtrack(amount, 0, 0)
+
+            if min_num == float('inf'):
+                min_num = -1
+
+            return min_num
+          ```
+      * Recursive Relation:
+        * f(n) = 1 + min(f[i-coin1], f[i-coin2], ... f[i-coink])
+        * else not found
+      * Approach2: Top down + memo, Time:O(S*n), Space:O(S)
+        * Python
+          ```python
+          def coinChange(self, coins: List[int], amount: int) -> int:
+            def coin_change(target):
+                if memo[target] != None:
+                    return memo[target]
+
+                memo[target] = not_found
+                min_cnt = float('inf')
+                for coin in coins:
+                    if coin > target:
+                      break
+                    cnt = coin_change(target-coin)
+                    if cnt != not_found:
+                        min_cnt = min(min_cnt, 1 + cnt)
+
+                if min_cnt != float('inf'):
+                    memo[target] = min_cnt
+
+                return memo[target]
+
+            not_found = -1
+            coins.sort()
+            memo = [None] * (amount + 1)
+            memo[0] = 0
+            coin_change(target=amount)
+            return memo[-1]
+          ```
+      * Approach3: Bottom up DP, Time:O(S*n), Space:O(S)
+        * Python
+          ```python
+          def coinChange(self, coins: List[int], amount: int) -> int:
+            not_found = -1
+            coins.sort()
+            memo = [not_found] * (amount+1)
+            memo[0] = 0
+
+            for target in range(1, amount+1):
+                min_cnt = float('inf')
+                for coin in coins:
+                    if coin > target:
                         break
-                    start = cur.pop() + 1
+
+                    res = memo[target-coin]
+                    if res != not_found:
+                      min_cnt = min(min_cnt, 1+res)
+
+                if min_cnt != float('inf'):
+                    memo[target] = min_cnt
+
+            return memo[-1]
+          ```
+    * 983: Minimum Cost For Tickets (M)
+      * Ref:
+        * https://leetcode.com/problems/minimum-cost-for-tickets/discuss/226659/Two-DP-solutions-with-pictures
+      * Recursive Relation:
+        * f(n) = min(cost1+f(n-1), cost7+f(n-7), cost30++f(n-30))
+      * Approach1: Track Calendar days, Time:O(N), Space:O(N)
+        * N is the number of calendar days
+        * Python
+          ```python
+          def mincostTickets(self, days: List[int], costs: List[int]) -> int:
+            travel_days = set(days)
+            max_day = days[-1]
+            memo = [0] * (max_day + 1)
+
+            for day in range(1, max_day+1):
+                if day not in travel_days:
+                    memo[day] = memo[day-1]
                 else:
-                    cur.append(start)
-                    start += 1
-            return comb
+                    memo[day] = min(costs[0] + memo[day-1],
+                                    costs[1] + memo[max(0, day-7)],
+                                    costs[2] + memo[max(0, day-30)])
+            return memo[-1]
           ```
-    * 039: Combination Sum (M)
-      * Given a set of candidate numbers (candidates) (**without duplicates**) and a target number (target), **find all unique combinations** in candidates where the candidate numbers sums to target
-      * Time:
-        * https://leetcode.com/problems/combination-sum/discuss/16634/If-asked-to-discuss-the-time-complexity-of-your-solution-what-would-you-say
-      * Approach1: Recursive:
-        * Python
-          ```python
-          def combinationSum(self, candidates: List[int], target: int) -> List[List[int]]:
-            def dfs(start, target, cur):
-                if target < 0:
-                    return
-
-                if target == 0:
-                    results.append(cur[:])
-                    return
-
-                for i in range(start, n):
-                    num = candidates[i]
-                    cur.append(num)
-
-                    """
-                    use start the keep the sequence
-                    """
-                    dfs(i, target-num, cur)
-                    cur.pop()
-
-            if target < 0:
-                return []
-
-            n = len(candidates)
-            results = []
-            cur = []
-            dfs(0, target, cur)
-            return results
-          ```
-      * Approach2: Iterative + DP
-        * Ref:
-          * https://leetcode.com/problems/combination-sum/discuss/16509/Iterative-Java-DP-solution
-    * 040: Combination Sum II (M)
-      * Given a collection of candidate numbers (candidates) and a target number (target), **find all unique combinations** in candidates where the candidate numbers sums to target.
-      * Each number in candidates **may only be used once** in the combination.
-      * Approach1: BackTracking:
-        * Python
-          ```python
-          def combinationSum2(self, candidates: List[int], target: int) -> List[List[int]]:
-            def dfs(start, target, cur):
-                if target < 0:
-                    return
-
-                if target == 0:
-                    results.append(cur[:])
-                    return
-
-                for i in range(start, n):
-
-                    # The val in the same position can be used only once.
-                    if i > start and candidates[i] == candidates[i-1]:
-                        continue
-                    num = candidates[i]
-                    cur.append(num)
-                    dfs(i+1, target-num, cur)
-                    cur.pop()
-
-
-            if target < 0:
-                return []
-
-            candidates.sort()
-            n = len(candidates)
-            results = []
-            cur = []
-            dfs(0, target, cur)
-            return results
-          ```
-    * 216: Combination Sum III (M)
-    * 377: Combination Sum IV (M)
-  * **Permutation**
-    * 046: Permutations (M)
-      * Given a collection of **distinct integers**, return all possible permutations.
-      * Approach1: Recursive, Time: O(n!), Space: O(n!),
-        * Time: O(n!)
-          * Total: n * n-1 * n-2..  * 2 * 1  -> n!
-        * Python
-          ```python
-          def permute(self, nums: List[int]) -> List[List[int]]:
-            def backtrack(start):
-                if start == n:
-                    perms.append(nums[:])
-                    return
-
-                for i in range(start, n):
-                    nums[start], nums[i] = nums[i], nums[start]
-                    backtrack(start+1)
-                    nums[start], nums[i] = nums[i], nums[start]
-
-            if not nums:
-                return []
-
-            perms = []
-            n = len(nums)
-            backtrack(0)
-
-            return perms
-          ```
-      * Approach2: Iterative, Time: O(n!), Space: O(n!)
-        * Time: O(n!)
-          * Total: 1 * 2 * 3 * ... (n-1) * n operation -> n!
-        * Space: O(n!)
-          * n! permutations
-        * example: [a, b, c]
-          * s1: [a]
-          * s2: [a, b], [b, a]
-          * s3: [c, a, b], [a, c, b], [a, b, c], [c, b, a], [b, c, a], [b, a, c]
-        * Python
+      * Approach2: Track Traverl days, Time:O(n), Space:O(38)
+        * n is the number of traverl days
+          * Python
             ```python
-            def permute(self, nums: List[int]) -> List[List[int]]:
-              if not nums:
-                  return []
+            import collections
 
-              perms = [[nums[0]]]
+            TOP = 0
+            DAY = 0
+            COST = 1
 
-              for i in range(1, len(nums)):
-                  num = nums[i]
-                  new_perms = []
+            def mincostTickets(self, days: List[int], costs: List[int]) -> int:
+                last_7 = collections.deque()
+                last_30 = collections.deque()
+                cost = 0
 
-                  for perm in perms:
-                      for b in range(0, len(perm)+1):
-                          new_perms.append(perm[:b] + [num] + perm[b:])
+                for day in days:
+                    # pop expire
+                    while last_7 and last_7[TOP][DAY] + 6 < day:
+                        last_7.popleft()
 
-                  perms = new_perms
+                    while last_30 and last_30[TOP][DAY] + 29 < day:
+                        last_30.popleft()
 
-              return perms
-            ```
-    * 047: Permutations II (M)
-      * Given a collection of numbers **that might contain duplicates**, return all possible unique permutations.
-      * Note:
-        * How to avoid duplicate val in the same position?
-        * Length of Permutation should be n.
-      * Approach1: Recursive, BackTracking + Counter
-        * Note:
-          * How to avoid duplicate val in the same position?
-          * Length of Permutation should be n.
-          * answer:
-            * Use Counter to Control recursive call.
-        * Python
-          ```python
-          def permuteUnique(self, nums):
-              def backtrack(counter, cur):
-                  if len(cur) == n:
-                      results.append(cur[:])
-                      return
+                    last_7.append((day, cost))
+                    last_30.append((day, cost))
 
-                  # don't pick duplicates in the same position
-                  for num in counter:
-                      # take only once in each permuation
-                      if counter[num] == 0:
-                          continue
+                    cost = min(cost + costs[0],
+                              last_7[TOP][COST] + costs[1],
+                              last_30[TOP][COST] + costs[2])
 
-                      cur.append(num)
-                      counter[num] -= 1
+                return cost
 
-                      # pop the key when the number == 0 and append later ??
-                      backtrack(counter, cur)
-
-                      cur.pop()
-                      counter[num] += 1
-
-              n = len(nums)
-              results = []
-              cur = []
-              counter = Counter(nums)
-              backtrack(counter, cur)
-
-              return results
-          ```
-      * Approach2: Iterative bottom up
-        * Ref
-          * https://leetcode.com/problems/permutations-ii/discuss/18602/9-line-python-solution-with-1-line-to-handle-duplication-beat-99-of-others-%3A-)
-        * How to avoid duplicate ?
-          * just avoid inserting a number AFTER any of its duplicates.
-          * Another way to think is that we have symmetry and inserting only towards left of previous 2 or only towards right of previous 2 is all we have to do.
-            * 1. [n]
-            * 2. [n* n] == [n n*]
-          * Example:
-            ```txt
-            [1, 2, 2*]
-
-            step1:
-            [1]
-
-            step2:
-            [1, 2],  [2, 1]
-
-            step3:
-            [2*, 1, 2],  [1, 2*, 2],  x[1, 2, 2*]
-            [2*, 2, 1], x[2, 2*, 1],  x[2, 1, 2*]
-            ``
-        * Python
-          ```python
-          def permuteUnique(self, nums: List[int]) -> List[List[int]]:
-            if not nums:
-                return []
-
-            perms = [[]]
-            for n in nums:
-                new_perms = []
-                for perm in perms:
-                    for i in range(len(perm)+1):
-                        new_perms.append(perm[:i]+[n]+perm[i:])
-                        # To handle duplication
-                        # just avoid inserting a number AFTER any of its duplicates.
-                        if i < len(perm) and perm[i] == n:
-                            break
-
-                perms = new_perms
-            return perms
-          ```
-    * 031: Next Permutation (M)
-    * 060: Permutation Sequence (M)
-  * 291: Word Pattern II
+              ```
+    * 518: Coin Change 2 (M)
+      * Description
+        * Write a function to compute the number of combinations that make up that amount.
+      * Ref:
+        * https://leetcode.com/problems/coin-change-2/discuss/99212/Knapsack-problem-Java-solution-with-thinking-process-O(nm)-Time-and-O(m)-Space
+    * 039: Combination Sum
+      * see backtracking
+    * 416: Partition Equal Subset Sum (M)
 ### Graph
-  * Eulerian trail
+  * **Eulerian trail**
     * A finite graph that **visits every edge** exactly once.
     * 332: Reconstruct Itinerary (M)
+      * Description:
+        * Given a list of airline tickets represented by pairs of **departure and arrival airports [from, to]**, reconstruct the itinerary in order. All of the tickets belong to a man who departs from JFK. Thus, the itinerary must begin with JFK.
+        * Note:
+          * **If there are multiple valid itineraries, you should return the itinerary that has the smallest lexical order** when read as a single string. For example, the itinerary ["JFK", "LGA"] has a smaller lexical order than ["JFK", "LGB"].
+          * You may assume all tickets form at least one valid itinerary.
       * This is the problem of Eulerian trail
         * vertex: airport
         * edge: ticket
@@ -13949,41 +14316,47 @@ Table of Content
         * Python Solution
           ```python
           def findItinerary(self, tickets: List[List[str]]) -> List[str]:
-            flights = collections.defaultdict(list)
+            g_outdegree = collections.defaultdict(list)
+            # create the graph
+            for departure, arrival in tickets:
+                g_outdegree[departure].append(arrival)
 
-            for departure, arrivial in tickets:
-                arrival_heap = flights[departure]
-                # put the neighbors in a min-heap for lexical order
-                heapq.heappush(arrival_heap, arrivial)
+            # gnerate the min-heap for each arrival list
+            for arrivals in g_outdegree.values():
+                heapq.heapify(arrivals)
 
-            stack = ["JFK"]  # start from JFK
-            route = collections.deque()
+            itinerary = collections.deque()
 
+            stack =["JFK"]
             while stack:
                 departure = stack[-1]
-                arrival_heap = flights[departure]
-                if arrival_heap:  # do not use while here
-                    stack.append(heapq.heappop(arrival_heap))
+                arrivials = g_outdegree[departure]
+                if arrivials:
+                    stack.append(heapq.heappop(arrivials))
                 else:
-                    # apeendleft to avoid unnecessary reverse
-                    route.appendleft(stack.pop())
+                    stack.pop()
+                    itinerary.appendleft(departure)
 
-            return route
+            return itinerary
           ```
-  * Eulerian circuit
+  * **Eulerian circuit**
     * An **Eulerian trail** that **starts and ends on the same vertex**.
-  * Hamilton path
+  * **Hamilton path**
     * A finite graph that **visits every vertex** exactly once.
-  * Hamilton cycle
+  * **Hamilton cycle**
     * An Hamilton path that **starts and ends on the same vertex**.
-  * Minimum Spanning Tree
+  * **Minimum Spanning Tree**
     * A minimum spanning tree (MST) or minimum weight spanning tree is **a subset of the edges of a connected, edge-weighted undirected graph that connects all the vertices together, without any cycles and with the minimum possible total edge weight**.
-  * Shortest Path
+  * **Shortest Path**
   * Topological Sort
     * Ref:
       * https://www.youtube.com/watch?v=ddTC4Zovtbc
       * https://leetcode.com/problems/course-schedule-ii/solution/
     * 207: Course Schedule (M)
+      * Description:
+        * There are a total of n courses you have to take, labeled from 0 to n-1.
+        * Some courses may have prerequisites, for example to take course 0 you have to first take course 1, which is expressed as a pair: [0,1]
+          * [course, prequisite]
       * Approach1: Peeling Onion, Time: O(V+E), Space: O(V+E)
         * Time: O(V+E)
           * Build Outdegree List Graph and Indegree Array
@@ -14015,49 +14388,42 @@ Table of Content
               * If course u is a prerequisite of course v, then the adjacency list of u will contain v.
             * **A degree array**
               * Calculate how many prerequisite courses for each.
-        * Python Solution:
+        * Python:
           ```python
           def canFinish(self, numCourses: int, prerequisites: List[List[int]]) -> bool:
-              """
-              graph of adjency list:
-              If course u is a prerequisite of course v,
-              then the adjacency list of u will contain v.
-              """
-              # outdegree Adjacency list, the list stores nodes of outdegree
-              g_adj = [[] for _ in range(numCourses)]
+            g_outdegree = collections.defaultdict(list)
+            g_indegree = [0] * numCourses
 
-              # indegree array
-              a_indegree = [0 for _ in range(numCourses)]
+            for course, preq in prerequisites:
+                g_outdegree[preq].append(course)
+                g_indegree[course] += 1
 
-              for course, preq_course in prerequisites:
-                  g_adj[preq_course].append(course)
-                  a_indegree[course] += 1
+            """
+            Starting from the courses having 0 prequisite (indegree is 0)
+            """
+            q = collections.deque()
+            for course, indegree in enumerate(g_indegree):
+                if indegree == 0:
+                    q.append(course)
 
-              q = collections.deque()
-              for course, indegree in enumerate(a_indegree):
-                  # indegree == 0 means no prequisites
-                  if indegree == 0:
-                      q.append(course)
+            scheduled_courses = 0
+            while q:
+                cur = q.popleft()
+                schedule_cnt += 1
 
-              sheduled_cnt = 0
-              while q:
-                  cur = q.popleft()
-                  sheduled_cnt += 1
-                  # remove outdegree edges of node
-                  for next_course in g_adj[cur]:
-                      a_indegree[next_course] -= 1
-                      # indegree == 0 means no prequisites
-                      if a_indegree[next_course] == 0:
-                          q.append(next_course)
+                for nxt in g_outdegree[cur]:
+                    g_indegree[nxt] -= 1
+                    if g_indegree[nxt] == 0:
+                        q.append(nxt)
 
-              return sheduled_cnt == numCourses
+            return scheduled_courses == numCourses
           ```
       * Approach2: DFS:
         * Algorithm:
           * For each of the nodes in our graph, we will run a depth first search in case that node was not already visited in some other node's DFS traversal.
           * Suppose we are executing the depth first search for a node N. We will recursively traverse all of the neighbors of node N which have not been processed before.
           * Once the processing of all the neighbors is done, we will add the node N to the stack. We are making use of a stack to simulate the ordering we need. When we add the node N to the stack, all the nodes that require the node N as a prerequisites (among others) will already be in the stack.
-        * Python Solution
+        * Python
           ```python
           class Status(object):
             WHITE = 1  # default
@@ -14106,42 +14472,42 @@ Table of Content
           ```
     * 210: Course Schedule II (M)
       * Same Concept as 207, the only difference is to keep the scheduled courses list.
-      * Python Solution
-        ```python
-        def findOrder(self, numCourses: int, prerequisites: List[List[int]]) -> List[int]:
+      * Approach1: Peeling Onion
+        * Python
+          ```python
+          def findOrder(self, numCourses: int, prerequisites: List[List[int]]) -> List[int]:
 
-            # graph Adjacency list, the list stores nodes of outdegree
-            g_adj = [[] for _ in range(numCourses)]
+          g_outdegree = collections.defaultdict(list)
+          g_indegree = [0] * numCourses
 
-            # indegree array
-            a_indegree = [0 for _ in range(numCourses)]
+          for course, preq in prerequisites:
+              g_outdegree[preq].append(course)
+              g_indegree[course] += 1
 
-            for course, preq_course in prerequisites:
-                g_adj[preq_course].append(course)
-                a_indegree[course] += 1
+          """
+          Traverse from the courses having 0 prequisite (indegree is 0)
+          """
+          q = collections.deque()
+          for course, indegree in enumerate(g_indegree):
+              if indegree == 0:
+                  q.append(course)
 
-            q = collections.deque()
-            for course, indegree in enumerate(a_indegree):
-                # indegree == 0 means no prequisites
-                if indegree == 0:
-                    q.append(course)
+          scheduled_courses = []
+          while q:
+              cur = q.popleft()
+              scheduled_courses.append(cur)
 
-            scheduled_course = list()
-            while q:
-                cur = q.popleft()
-                scheduled_course.append(cur)
+              for nxt in g_outdegree[cur]:
+                  g_indegree[nxt] -= 1
+                  if g_indegree[nxt] == 0:
+                      q.append(nxt)
 
-                for nxt in g_adj[cur]:
-                    a_indegree[nxt] -= 1
-                    if a_indegree[nxt] == 0:
-                        q.append(nxt)
-
-            if len(scheduled_course) == numCourses:
-                return scheduled_course
-            else:
-                return []
-        ```
+          return scheduled_courses if numCourses == len(scheduled_courses) else []
+          ```
     * 269: Alien Dictionary (H)
+  * Other:
+    * 685: Redundant Connection II
+    * 323: Number of Connected Components in an Undirected Graph
 ### Bit Manipulation
 ### Union Field
   * 1135: Connecting Cities With Minimum Cost
@@ -14277,11 +14643,14 @@ Table of Content
     * 077: Combinations (M)
     * 078: Subsets (M)
   * BFS & DFS
-    * 200: Number of Islands (M)
-      * For BFS / DFS iterations, set visits to True before append to the queue to **reduce unnecessary queue/stack push/pop operations.**
+    * **Islands**
+      * 200: Number of Islands (M)
+      * 695: Max Area of Island (M)
+    **Nested**
+       * 364: **Nested List** Weight Sum II (M)
     * 286: Walls and Gates (M)
       * Start From Gates
-    * 364: **Nested List** Weight Sum II (M)
+    * Surrounded Regions (M)
     * 127: Word Ladder (M)
   * Graph
     * Eulerian trail
@@ -14307,6 +14676,8 @@ Table of Content
       * 064: Minimum Path Sum (M)
     * Knapsack problem
       * 322: Coin Change (M)
+      * 983: Minimum Cost For Tickets (M)
+      * 518: Coin Change 2 (M)
     * **Deduction**
       * 276: Paint Fence (E)
       * 198: House Robber (E)
