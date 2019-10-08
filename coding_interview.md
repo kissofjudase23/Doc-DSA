@@ -20,8 +20,8 @@ Table of Content
   - [Tree](#tree)
   - [Trie (Prefix Tree)](#trie-prefix-tree)
   - [BFS & DFS](#bfs--dfs)
-  - [Dynamic Programming](#dynamic-programming)
   - [Backtracking](#backtracking)
+  - [Dynamic Programming](#dynamic-programming)
   - [Graph](#graph)
   - [Bit Manipulation](#bit-manipulation)
   - [Union Field](#union-field)
@@ -663,50 +663,7 @@ Table of Content
     * Definition:
       * The majority element is **the element that appears more than ⌊ n/2 ⌋ times**.
     * 1150: Check If a Number Is Majority Element in a Sorted Array (E)
-      * This question is similar to 034: Find **First and Last Position of Element** in Sorted Array
-      * Example:
-          ```txt
-          [ x x x x x x x . . . . . . ]   # majority at the beginning
-          [ . . . x x x x x x x . . . ]   # majority at the middle
-          [ . . . . . . x x x x x x x ]   # majority at the ending
-          ```
-      * Approach1: Binary Search, Time:O(logn)
-        * Python
-          ```python
-          def isMajorityElement(self, nums: List[int], target: int) -> bool:
-
-            def binary_search_left(left, right, target):
-                while left <= right:
-                    mid = (left + right) // 2
-                    if target <= nums[mid]:
-                        right = mid - 1
-                    else:
-                        left = mid + 1
-
-                return left
-
-            def binary_search_right(left, right, target):
-                while left <= right:
-                    mid = (left + right) // 2
-                    if target >= nums[mid]:
-                        left = mid + 1
-                    else:
-                        right = mid - 1
-
-                return right
-
-
-            n = len(nums)
-            m_left = binary_search_left(0, n-1, target)
-
-            if m_left >= n-1 or nums[m_left] != target:
-                return False
-
-            m_right = binary_search_right(m_left, n-1, target)
-
-            return (m_right - m_left + 1) > (n // 2)
-
-          ```
+      * See Binary Search
     * 169: Majority Element (E)
       * Notice the odd and even cases
       * Approach1: Sorting, Time:O(nlogn), Space:O(sorting)
@@ -3996,6 +3953,46 @@ Table of Content
 
             return start if total_tank >= 0 else not_found
             ```
+    * 624: Maximum Distance in Arrays (E)
+      * Description:
+        * Given m arrays, and each array is sorted in ascending order. Now you can pick up two integers from two different arrays (each array picks one) and calculate the distance. We define the distance between two integers a and b to be their absolute difference |a-b|. Your task is to find the maximum distance.
+      * Approach1: Brute Force, Time:O(n^2), Space:O(1)
+        * Cnsider only the distances between the first(minimum element) element of an array and the last(maximum element) element of the other arrays and find out the maximum distance from among all such distances.
+        * Python
+          ```python
+          def maxDistance(self, arrays: List[List[int]]) -> int:
+            a = arrays
+            n = len(a)
+            max_dis = float('-inf')
+
+            for i in range(0, n-1):
+                for j in range(i+1, n):
+                    max_dis = max(max_dis, abs(a[i][0] - a[j][-1]))
+                    max_dis = max(max_dis, abs(a[j][0] - a[i][-1]))
+            return max_dis
+          ```
+      * Approach2: Single Scan, Time:O(n^2), Space:O(1)
+        * Keep the pre min and prev max
+        * Python
+          ```python
+          def maxDistance(self, arrays: List[List[int]]) -> int:
+            a = arrays
+            min_val, max_val = a[0][0], a[0][-1]
+            max_dis = 0
+
+            for i in range(1, len(a)):
+
+                cur_min, cur_max = a[i][0], a[i][-1]
+                max_dis = max(max_dis,
+                              abs(max_val-cur_min),
+                              abs(cur_max-min_val))
+
+                # update min and max for next list
+                min_val = min(min_val, cur_min)
+                max_val = max(max_val, cur_max)
+
+            return max_dis
+          ```
     * 723：Candy Crush (M)
 ### Matrix
  * 289: Game of Life (M)
@@ -5012,8 +5009,8 @@ Table of Content
     * Approach2: Binary Search, Time:O(logn), Space:O(1)
       * Standard Binary Search
       * boundaries
-        * left boundary: The values before left boundary are less than the target.
-        * right boundary: the values after right boundary are greater than the target.
+        * left: The values before left boundary are less than the target.
+        * right: the values after right boundary are greater than the target.
       * If the target not found:
         * return not_found (-1)
       * Python
@@ -5038,6 +5035,11 @@ Table of Content
           return res
           ```
   * 035: Search Insert Position (E)
+    * Description:
+      * Given a sorted array and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.
+      * example:
+        * Input: [1,3,5,6], 2
+        * Output:[1]
     * Find the first value >= target
     * Approach1: Linear, Time:O(n), Space:O(1)
     * Approach2: Binary Search, Time:O(logn), Space:O(1)
@@ -5051,27 +5053,24 @@ Table of Content
       * Python
         ```python
         def searchInsert(self, nums: List[int], target: int) -> int:
+          # insert to to the first position if nums is empty
           if not nums:
               return 0
 
-          # find the first value >= target
-          left, right = 0, len(nums)-1
-          res = not_found = -1
+          l, r = 0, len(nums)-1
+          res = None
 
-          while left <= right:
-
-              mid = (left + right) // 2
-
+          while l <= r:
+              mid = (l + r) // 2
               if target == nums[mid]:
                   res = mid
                   break
               elif target < nums[mid]:
-                  right = mid - 1
+                  r = mid - 1
               else:
-                  left = mid + 1
-
-          if res is not_found:
-              res = left
+                  l = mid + 1
+          else:
+              res = l
 
           return res
         ```
@@ -5087,159 +5086,204 @@ Table of Content
           * Versions after right are bad
       * If the target is not found:
         * It's impossible according to the definiton
-        * Python
-          ```python
-          def firstBadVersion(self, n):
-            # assume there exists a bad version
-            if n == 1:
-                return 1
+      * Python
+        ```python
+        def firstBadVersion(self, n):
+        if isBadVersion(1) or n == 1:
+            return 1
 
-            # if the first version is bad, just return
-            if isBadVersion(1):
-                return 1
-
-            left = 2   # versions before left are good
-            right = n  # versions after right are bad
-            while left <= right:
-                mid = (left + right) // 2
-                if isBadVersion(mid):
-                    right = mid - 1
-                else:
-                    left = mid + 1
-            return left
-          ```
-    * 162: Find **Peak Element** (M)
-      * 3 cases:
-        * case1: Peak is the first element
-          * All the number appear in a descending order.
-        * case2: Peak is the last element
-          * All the number appear in a ascending order.
-        * case3: Peak is in the middle of the nums
-      * Approach1: Linear, Time:O(n), Space:O(1)
-        * Python
-          ```python
-          def findPeakElement(self, nums):
-            n = len(nums)
-
-            if n == 1:
-                return 0
-
-            peak = n - 1
-            # from 0 to n-2
-            for i in range(0, n-1):
-                if nums[i] > nums[i+1]:
-                    peak = i
-                    break
-
-            return peak
-          ```
-      * Approach2: Binary Search, Time:O(logn), Space:O(1)
-        * Peak is not unique, we can return any peak in the nums
-        * Python
-          ```python
-          def findPeakElement(self, nums):
-            n = len(nums)
-
-            if n == 1:
-                return 0
-
-            left = 0
-            right = n-1
-            peak = None
-            while left <= right:
-
-                mid = (left + right) // 2
-
-                if mid == n-1:
-                    peak = n-1
-                    break
-                # descending order, find left part
-                if nums[mid] > nums[mid+1]:
-                    right = mid - 1
-                # ascending order, find the right part
-                else:
-                    left = mid + 1
-
-            if peak is None:
-                peak = left
-
-            return peak
-          ```
-  * 034: Find **First and Last Position of Element** in Sorted Array (M)
-      * Approach1: Linear Search, Time:O(n), Space:O(1)
-        * Python
-          ```python
-          def searchRange(self, nums: List[int], target: int) -> List[int]:
-            not_found = -1
-            start = end = not_found
-            for idx, val in enumerate(nums):
-                if val == target:
-                    if start == not_found:
-                        start = idx
-                    end = idx
-
-            return [start, end]
-          ```
-      * Approach2: Binary Search, Time:O(n), Space:O(1)
-        * Boundaries:
-          * to find start
-            * left: val before left boundary is less than the target
-            * right: val after right boundary is **grater or equal** to the target
-          * to find end
-            * left: val before left boundary is **less or equal** to the target
-            * right: val after right boundary is grater than the target
-        * Python
-          ```python
-          def searchRange(self, nums: List[int], target: int) -> List[int]:
-            def bin_search_left(left, right):
-                start = not_found
-                l, r = left, right
-
-                while l <= r:
-                    mid = (l + r) // 2
-                    # val after right boundary is **grater or equal** to the target
-                    if target <= nums[mid]:
-                        r = mid - 1
-                    # target > nums[mid] -> nums[mid] < target
-                    else:
-                        l = mid + 1
-
-                if left <= l <= right and nums[l] == target:
-                    start = l
-
-                return start
-
-            def bin_search_right(left, right):
-                end = not_found
-                l, r = left, right
-
-                while l <= r:
-                    mid = (l + r) // 2
-                    # val before left boundary is **less or equal** to the target
-                    if target >= nums[mid]:
-                        l = mid + 1
-                    else: # target < nums[mid] -> mid > target
-                        r = mid - 1
-
-                if left <= r <= right and nums[r] == target:
-                    end = r
-
-                return end
-
-            not_found = -1
-            # find start
-            left = 0
-            right = len(nums) - 1
-
-            s = bin_search_left(left, right)
-            if s == not_found:
-                e = not_found
+        l, r = 2, n
+        while l <= r:
+            mid = (l + r) // 2
+            if isBadVersion(mid):
+                r = mid - 1
             else:
-                e = bin_search_right(s, right)
+                l = mid + 1
 
-            return [s, e]
-          ```
+        return l
+        ```
+  * 162: Find **Peak Element** (M)
+    * Description:
+      * Given an input array nums, where nums[i] ≠ nums[i+1], find a peak element and return its index.
+      * **The array may contain multiple peaks,** in that case return the index to any one of the peaks is fine.
+    * 3 cases:
+      * case1: Peak is the first element
+        * All the number appear in a descending order.
+      * case2: Peak is the last element
+        * All the number appear in a ascending order.
+      * case3: Peak is in the middle of the nums
+    * Approach1: Linear, Time:O(n), Space:O(1)
+      * Python
+        ```python
+        def findPeakElement(self, nums):
+          if not nums:
+              return None
+
+          peak = None
+          for i in range(0, len(nums)-1):
+              if nums[i] > nums[i+1]:
+                  peak = i
+                  break
+          else:
+              peak = len(nums)-1
+
+          return peak
+        ```
+    * Approach2: Binary Search, Time:O(logn), Space:O(1)
+      * Peak is not unique, we can return any peak in the nums
+      * Python
+        ```python
+        def findPeakElement(self, nums):
+
+          if not nums:
+              return None
+
+          n = len(nums)
+          peak = None
+          l, r = 0, n-1
+          while l <= r:
+
+              mid = (l + r) // 2
+              if mid == n-1:
+                  peak = mid
+                  break
+
+              # descending order, go left
+              if nums[mid] > nums[mid+1]:
+                  r = mid - 1
+
+              # ascending order, go right
+              else:
+                  l = mid + 1
+          else:
+              peak = l
+
+          return peak
+        ```
+  * 034: Find **First and Last Position of Element** in Sorted Array (M)
+    * Description:
+      * Given an array of integers nums sorted in ascending order, find the **starting** and **ending** position of a given target value.
+      * If the target is not found in the array, return [-1, -1].
+    * Approach1: Linear Search, Time:O(n), Space:O(1)
+      * Python
+        ```python
+        def searchRange(self, nums: List[int], target: int) -> List[int]:
+          not_found = -1
+          start = end = not_found
+          for idx, val in enumerate(nums):
+              if val == target:
+                  if start == not_found:
+                      start = idx
+                  end = idx
+
+          return [start, end]
+        ```
+    * Approach2: Binary Search, Time:O(n), Space:O(1)
+      * Boundaries:
+        * to find start
+          * left: val before left boundary is less than the target
+          * right: val after right boundary is **grater or equal** to the target
+        * to find end
+          * left: val before left boundary is **less or equal** to the target
+          * right: val after right boundary is grater than the target
+      * Python
+        ```python
+        def searchRange(self, nums: List[int], target: int) -> List[int]:
+          def binary_search_left(left, right, target):
+              l, r = left, right
+              while l <= r:
+                  mid = (l + r) // 2
+                  if target <= nums[mid]:
+                      r = mid - 1
+                  else:
+                      l = mid + 1
+
+              res = not_found
+              if left <= l <= right and nums[l] == target:
+                  res = l
+              return res
+
+          def binary_search_right(left, right, target):
+              l, r = left, right
+              while l <= r:
+                  mid = (l + r) // 2
+                  if target >= nums[mid]:
+                      l = mid + 1
+                  else:
+                      r = mid - 1
+
+              res = not_found
+              if left <= r <= right and nums[r] == target:
+                  res = r
+              return res
+
+
+          n = len(nums)
+          not_found = -1
+          if n == 0:
+              return [not_found, not_found]
+
+          s = binary_search_left(0, n-1, target)
+          if s == not_found:
+              e = not_found
+          else:
+              e = binary_search_right(s, n-1, target)
+
+          return [s, e]
+        ```
   * 1150: Check If a Number Is Majority Element in a Sorted Array (E)
+    * Same concept as 034
+    * Description
+      * Example:
+          ```txt
+          [ x x x x x x x . . . . . . ]   # majority at the beginning
+          [ . . . x x x x x x x . . . ]   # majority at the middle
+          [ . . . . . . x x x x x x x ]   # majority at the ending
+          ```
+    * Approach1: Linear Search, Time:O(n)
+    * Approach2: Binary Search, Time:O(logn)
+      * Python
+        ```python
+        def isMajorityElement(self, nums: List[int], target: int) -> bool:
+          def binary_search_left(left, right, target):
+              l, r = left, right
+              while l <= r:
+                  mid = (l + r) // 2
+                  if target <= nums[mid]:
+                      r = mid - 1
+                  else:
+                      l = mid + 1
+
+              res = not_found
+              if left <= l <= right and nums[l] == target:
+                  res = l
+              return res
+
+          def binary_search_right(left, right, target):
+              l, r = left, right
+              while l <= r:
+                  mid = (l + r) // 2
+                  if target >= nums[mid]:
+                      l = mid + 1
+                  else:
+                      r = mid - 1
+
+              res = not_found
+              if left <= r <= right and nums[r] == target:
+                  res = r
+              return res
+
+
+          not_found = -1
+          n = len(nums)
+
+          m_left = binary_search_left(0, n-1, target)
+          if m_left == not_found:
+              return False
+          m_right = binary_search_right(m_left, n-1, target)
+
+          return (m_right - m_left + 1) > (n // 2)
+        ```
   * 275: H-Index II (M)
     * Approach1: Linear search: O(n)
       * Concept
@@ -5762,6 +5806,9 @@ Table of Content
           return (2**d - 1) + left
         ```
   * 004: **Median** of **Two Sorted Arrays** (H)
+    * Description:
+      * There are two sorted arrays nums1 and nums2 of size m and n respectively.
+      * Find the median of the two sorted arrays. The overall run time complexity should be O(log (m+n)).
     * Approach1: Merge and Find, Time:O(m+n), Space:O(m+n)
       * Time: O(m+n)
         * Merge takes O(m+n)
@@ -5772,92 +5819,81 @@ Table of Content
         * [Concept](https://www.youtube.com/watch?v=LPFhl65R7ww)
         * [Implementation](https://leetcode.com/problems/median-of-two-sorted-arrays/discuss/2481/Share-my-O(log(min(mn)))-solution-with-explanation)
       * ![median_of_2](./image/algo/median_of_two.png)
-      * Python Solution:
+      * Python:
         ```python
         MAX_VAL = float('inf')
-        MIN_VAL = -float('inf')
-
+        MIN_VAL = float('-inf')
         def findMedianSortedArrays(self, nums1: List[int], nums2: List[int]) -> float:
-            n1 = len(nums1)
-            n2 = len(nums2)
+            n1, n2 = len(nums1), len(nums2)
+
+            if n1 == n2 == 0:
+                return 0
 
             if n1 > n2:
-                # keep n1 shorter
-                nums1, nums2 = nums2, nums1
                 n1, n2 = n2, n1
+                nums1, nums2 = nums2, nums1
 
             """
             This number means how many number is smaller than the median:
             0:  0 elements are smaller than the median
             n1: all elements are smaller than the median
-            ( total n + 1 cases starting from 0 to n )
+            total n + 1 cases starting from 0 to n
             """
-            left_b = 0    # left boundary
-            right_b = n1  # right boundary
+            left = 0    # left boundary
+            right = n1  # right boundary
+
             """
             The half len of merged array (merge nums1 and nums2)
-            +1 to let left side of the merged array has more than one element when the length is odd.
-            p_n1 + p_n2 = (n1 + n2 + 1) // 2
+            p_n1 + p_n2 = half_len
             """
             half_len = (n1 + n2 + 1) // 2
+            median = None
 
-            while left_b <= right_b:
-                p_n1 = (left_b + right_b)//2
-                # p_n1 + p_n2 = (n1 + n2 + 1) // 2
+            while left <= right:
+
+                p_n1 = (left + right) // 2
                 p_n2 = half_len - p_n1
                 """
                 p_n1 == 0 means nothing is there on left side. Use -INF as sentinel
                 p_n1 == n1 means there is nothing on right side. Use +INF as sentinel
                 for example, if nums1 = [1, 2, 3]
-                case0: [-INF], [1, 2, 3]  # partition_n1 == 0
-                case1: [1], [2,3]
-                case2: [1, 2], [3]
-                case3: [1, 2, 3], [+INF]  # partition_n1 == n1
+                case0: [-INF], [1, 2, 3]  # p_n1 == 0, [nums1-left][nums2][nums1-right] =
+                case1: [1], [2,3]         # p_n1 == 1
+                case2: [1, 2], [3]        # p_n1 == 2
+                case3: [1, 2, 3], [+INF]  # p_n1 == 3 == n1, [nums1-left][nums2][nums1-right]
                 """
-                max_left_n1 = MIN_VAL if p_n1 == 0 else nums1[p_n1-1]  # case0
-                min_right_n1 = MAX_VAL if p_n1 == n1 else nums1[p_n1]  # case3
+                max_left_n1 = MIN_VAL if p_n1 == 0 else nums1[p_n1-1]
+                min_right_n1 = MAX_VAL if p_n1 == n1 else nums1[p_n1]
 
                 max_left_n2 = MIN_VAL if p_n2 == 0 else nums2[p_n2-1]
                 min_right_n2 = MAX_VAL if p_n2 == n2 else nums2[p_n2]
 
-                if (max_left_n1 <= min_right_n2 and max_left_n2 <= min_right_n1):
-                    if (n1 + n2) % 2 == 0:  # even number of elements
-                        return (max(max_left_n1, max_left_n2) + min(min_right_n1, min_right_n2))/2
+                if max_left_n1 <= min_right_n2 and max_left_n2 <= min_right_n1:
+                    # even
+                    if (n1 + n2) % 2 == 0:
+                        median = (max(max_left_n1, max_left_n2) +
+                                  min(min_right_n1, min_right_n2)) / 2
                     else:
-                        return float(max(max_left_n1, max_left_n2))
+                        """
+                        p_n1 + p_n2 = half_len
+                        """
+                        median = float(max(max_left_n1, max_left_n2))
+                    break
 
                 elif max_left_n1 > min_right_n2:
-                    # shrink n1 left part
-                    right_b = p_n1 - 1
+                    """
+                    shrink n1 left part
+                    """
+                    right = p_n1 - 1
+                else:
+                    """
+                    max_left_n2 > min_right_n1
+                    shrink n2 left part, increase n1 left part
+                    """
+                    left = p_n1 + 1
 
-                else: # max_left_n2 > min_right_n1
-                    # shrink n2 left part, that is, increase n1 left part
-                    left_b = p_n1 + 1
+            return median
             ```
-
-      * memo[i] is the longest increasing subsequece of nums[:i+1]
-        * possible prev indices are from 0 to i
-      * Python
-        ```python
-        def lengthOfLIS(self, nums: List[int]) -> int:
-          if not nums:
-              return 0
-
-          n = len(nums)
-          memo = [0 for _ in range(n)]
-          max_lis = memo[0] = 1
-
-          for cur in range(1, n):
-              cur_lis = 1
-              for prev in range(0, cur):
-                  if nums[cur] > nums[prev]:
-                      cur_lis = max(cur_lis, 1+memo[prev])
-              memo[cur] = cur_lis
-
-              max_lis = max(max_lis, memo[cur])
-
-          return max_lis
-        ```
   * 300: Longest Increasing Subsequence (**LIS**) (M)
     * Approach1: Top down Recursive, Time:O(n^2), Space:O(n)
       * 2 cases:
@@ -5894,6 +5930,8 @@ Table of Content
           return max_lis
         ```
     * Approach2: Bottom up iterative + memo, Time:O(n^2), Space:O(n)
+      * memo[i] is the longest increasing subsequece of nums[:i+1]
+        * possible prev indices are from 0 to i
       * Python
         ```python
         def lengthOfLIS(self, nums: List[int]) -> int:
@@ -5967,6 +6005,10 @@ Table of Content
   * 187: Repeated DNA Sequences (M)
   * 315: Count of Smaller Numbers After Self (H)
   * 354: Russian Doll Envelopes (H)
+  * Other:
+    * 896: Monotonic Array (E)
+    * 1060: Missing Element in Sorted Array (M)
+
 ### Linked List
 * **Techiniques**:
   * The "**Runner**"
@@ -11027,6 +11069,9 @@ Table of Content
   * 642: Design Search Autocomplete System (H)
   * 745: Prefix and Suffix Search (H)
 ### BFS & DFS
+  * Note:
+    * utlities:
+      *
   * **Islands**
     * 200: Number of Islands (M)
       * Description:
@@ -12689,6 +12734,41 @@ Table of Content
       * Approach4: Fibonacci Formula, Time:O(logn), Space:O(1)
         * Ref:
           * https://leetcode.com/problems/climbing-stairs/solution/
+    * 746: Min Cost Climbing Stairs (E)
+      * Recursive Relation:
+        * f(0) == f(1) == 0
+        * f(n) = min(f(n-1) + cost(n-1), f(n-2) + cost(n-2))
+      * Approach1: Iterative + memo
+        * Python
+          ```python
+          def minCostClimbingStairs(self, cost: List[int]) -> int:
+            n = len(cost)
+
+            if n <= 2:
+                return 0
+
+            memo = [0] * (len(cost)+1)
+
+            for i in range(2, n+1):
+                memo[i] = min(memo[i-1]+cost[i-1], memo[i-2]+cost[i-2])
+
+            return memo[-1]
+          ```
+      * Approach2: Iterative + n variables
+        * Python
+          ```python
+          def minCostClimbingStairs(self, cost: List[int]) -> int:
+            n = len(cost)
+
+            if n <= 2:
+                return 0
+
+            prev = cur = 0
+            for i in range(2, n+1):
+                prev, cur = cur, min(cur+cost[i-1], prev+cost[i-2])
+
+            return cur
+          ```
     * 091: **Decode Ways** (M)
       * Recursive relation
         * Check conditions
@@ -14626,6 +14706,8 @@ Table of Content
   * Binary Search:
     * 035: Search Insert Position (E)
     * 278: First Bad Version (E)
+    * 034: Find **First and Last Position of Element** in Sorted Array (M)
+    * 1150: Check If a Number Is Majority Element in a Sorted Array (E)
     * 275: H-Index II (M)
     * 033 & 081: Search in Rotated Sorted Array (M)
     * 004: Median of Two Sorted Arrays (H)
@@ -14648,6 +14730,9 @@ Table of Content
       * 695: Max Area of Island (M)
     **Nested**
        * 364: **Nested List** Weight Sum II (M)
+    * **Nested**
+      * 339: Nested List Weight Sum (E)
+      * 565: Array Nesting (M)
     * 286: Walls and Gates (M)
       * Start From Gates
     * Surrounded Regions (M)
