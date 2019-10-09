@@ -3008,6 +3008,8 @@ Table of Content
               return jump_cnt
             ```
   * **H-Index**
+    * Description:
+      * According to the definition of h-index on Wikipedia: "**A scientist has index h if h of his/her N papers have at least h citations each**, and the other N − h papers have no more than h citations each."
     * 274: H-Index (M)
       * observation:
         * max_hidx = len(nums)
@@ -3041,7 +3043,7 @@ Table of Content
           * step2:
             * Find the H-Index costs O(log(n))
             * please refer 275: H-Index II
-    * H-Index II (M)
+    * 275: H-Index II (M)
       * Please refer binary search
   * **Best Time to Buy and Sell Stock**
     * Ref:
@@ -3953,46 +3955,6 @@ Table of Content
 
             return start if total_tank >= 0 else not_found
             ```
-    * 624: Maximum Distance in Arrays (E)
-      * Description:
-        * Given m arrays, and each array is sorted in ascending order. Now you can pick up two integers from two different arrays (each array picks one) and calculate the distance. We define the distance between two integers a and b to be their absolute difference |a-b|. Your task is to find the maximum distance.
-      * Approach1: Brute Force, Time:O(n^2), Space:O(1)
-        * Cnsider only the distances between the first(minimum element) element of an array and the last(maximum element) element of the other arrays and find out the maximum distance from among all such distances.
-        * Python
-          ```python
-          def maxDistance(self, arrays: List[List[int]]) -> int:
-            a = arrays
-            n = len(a)
-            max_dis = float('-inf')
-
-            for i in range(0, n-1):
-                for j in range(i+1, n):
-                    max_dis = max(max_dis, abs(a[i][0] - a[j][-1]))
-                    max_dis = max(max_dis, abs(a[j][0] - a[i][-1]))
-            return max_dis
-          ```
-      * Approach2: Single Scan, Time:O(n^2), Space:O(1)
-        * Keep the pre min and prev max
-        * Python
-          ```python
-          def maxDistance(self, arrays: List[List[int]]) -> int:
-            a = arrays
-            min_val, max_val = a[0][0], a[0][-1]
-            max_dis = 0
-
-            for i in range(1, len(a)):
-
-                cur_min, cur_max = a[i][0], a[i][-1]
-                max_dis = max(max_dis,
-                              abs(max_val-cur_min),
-                              abs(cur_max-min_val))
-
-                # update min and max for next list
-                min_val = min(min_val, cur_min)
-                max_val = max(max_val, cur_max)
-
-            return max_dis
-          ```
     * 723：Candy Crush (M)
 ### Matrix
  * 289: Game of Life (M)
@@ -5285,6 +5247,9 @@ Table of Content
           return (m_right - m_left + 1) > (n // 2)
         ```
   * 275: H-Index II (M)
+    * Description:
+      * Given an array of citations sorted in ascending order (each citation is a non-negative integer) of a researcher, write a function to compute the researcher's h-index.
+      *  According to the definition of h-index on Wikipedia: "A scientist has index h if h of his/her N papers have at least h citations each, and the other N − h papers have no more than h citations each."
     * Approach1: Linear search: O(n)
       * Concept
         * Sort the citations array in **ascending order** (draw it).
@@ -5297,14 +5262,14 @@ Table of Content
           max_hidx = len(citations)
 
           for idx, cita in enumerate(citations):
-              h_idx = max_hidx - idx
-              if cita >= h_idx:
-                  res = h_idx
+              hidx = max_hidx - idx
+              if cita >= hidx:
+                  res = hidx
                   break
 
           return res
         ```
-    * Approach2: **Binary Search**: O(log(n))
+    * Approach2: Binary Search: O(log(n))
       * Search algo like 35
       * Ref:
         * https://leetcode.com/problems/h-index-ii/discuss/71063/Standard-binary-search
@@ -5331,26 +5296,28 @@ Table of Content
       * Python
         ```python
         def hIndex(self, citations: List[int]) -> int:
+          idx = 0
           max_hidx = len(citations)
-          left, right = 0, len(citations)-1
 
-          idx = None
-          while left <= right:
-              mid = (left + right) // 2
-              h_idx = max_hidx - mid
+          l, r = 0, len(citations)-1
 
-              if citations[mid] == h_idx:
+          while l <= r:
+              mid = (l + r) // 2
+              hidx = max_hidx - mid
+
+              if citations[mid] == hidx:
                   idx = mid
                   break
 
-              elif citations[mid] < h_idx:
-                  left = mid + 1
-
+              # find the smaller hidx
+              elif citations[mid] < hidx:
+                  l = mid + 1
+              # find the bigger hidx
               else:
-                  right = mid - 1
+                  r = mid - 1
 
-          if idx is None:
-              idx = left
+          else:
+              idx = l
 
           return max_hidx - idx
         ```
@@ -5362,12 +5329,11 @@ Table of Content
          nums  [4, 4, 1, 2, 3, 4, 4 ]
          idx    0  1  2  3  4  5  6
                 l  p           p* r
-         In such case, if we choose a pivot with value 4
-         we can not know the pivot is in the left part (p) or right part (p*)
-         if in the left part, nums[l:p] is ascending order
-         if in the right part, nums[p:r] is ascending order
-         one solution is to move l to right until nums[left] != nums[right]
       ```
+      * In such case, if we choose a pivot with value 4, we can not know the pivot is in the left part (p) or right part (p*)
+        * in the left part, nums[l:p] is ascending order
+        * in the right part, nums[p*:r] is ascending order
+      * One solution is to move l to right until nums[left] != nums[right]
     * Approach1: Linear Search, Time:O(n), Space:O(1)
     * Approach2: Get Rotate Index (unique value), Time:O(logn), Space:O(1)
       * Algo:
@@ -5545,84 +5511,79 @@ Table of Content
       * Python
         ```python
         def search(self, nums: List[int], target: int) -> int:
-          not_found = -1
-          n = len(nums)
+          """
+          You may assume no duplicate exists in the array.
+          """
+          l, r = 0, len(nums)-1
+          start = 0
+          res = not_found = -1
 
-          if n < 1:
-              return not_found
-
-          if n == 1:
-              return 0 if nums[0] == target else not_found
-
-          res = not_found
-          left = 0
-          right = n-1
-          while left <= right:
-              mid = (left + right) // 2
+          while l <= r:
+              mid = (l + r) // 2
               if nums[mid] == target:
                   res = mid
                   break
-              else:
-                  # don't forget to add eeuql(=)
-                  if nums[mid] >= nums[left]:
-                      # case1: left to mid is non-roated array
-                      if nums[left] <= target < nums[mid]:
-                          right = mid - 1
-                      else:
-                          left = mid + 1
+
+              # in the left part
+              if nums[mid] >= nums[start]:
+                  if nums[l] <= target < nums[mid]:
+                      r = mid - 1
                   else:
-                      # case2: mid to right is non-rotated array
-                      if nums[mid] < target <= nums[right]:
-                          left = mid + 1
-                      else:
-                          right = mid - 1
+                      l = mid + 1
+              else:
+                  if nums[mid] < target <= nums[r]:
+                      l = mid + 1
+                  else:
+                      r = mid - 1
+
           return res
         ```
     * Approach5: One Pass binary Search (duplicated value), Time:O(logn)~O(n), Space:O(1)
+      * Note, don't forget to update start
       * Python
         ```python
-        def search(self, nums: List[int], target: int) -> bool:
-          n = len(nums)
+          def search(self, nums: List[int], target: int) -> int:
+          """
+          nums may contain duplicates.
+          """
 
-          if n < 1:
-              return False
-
-          if n == 1:
-              return True if nums[0] == target else False
-
+          l , r = 0, len(nums)-1
           is_found = False
-          left = 0
-          right = n-1
 
-          # Previous algorithm can deal with duplicated items
-          # if the head of array is not a duplicated item
-          # special case: [4, 4, 1, 2, 3, 4, 4]
-          while left != right and nums[left] == nums[right]:
-              left += 1
+          """
+          Previous algorithm can deal with duplicated items
+          if the head of array is not a duplicated item
+          special case: [4, 4, 1, 2, 3, 4, 4]
+          """
+          while l < r and nums[l] == nums[r]:
+              l += 1
 
-            while left <= right:
+          """
+          Don't forget to update start
+          """
+          start = l
 
-                mid = (left + right) // 2
+          while l <= r:
 
-                if nums[mid] == target:
-                    is_found = True
-                    break
+              mid = (l + r) // 2
 
-                else:
-                    if nums[mid] >= nums[left]:
-                        # left to mid is an un-rotated array
-                        if nums[left] <= target < nums[mid]:
-                            right = mid - 1
-                        else:
-                            left = mid + 1
-                    else:
-                        #  mid to right is an un-rotated array
-                        if nums[mid] < target <= nums[right]:
-                            left = mid + 1
-                        else:
-                            right = mid - 1
+              if nums[mid] == target:
+                  is_found = True
+                  break
 
-            return is_found
+              # in the left part
+              if nums[mid] >= nums[start]:
+                  if nums[l] <= target < nums[mid]:
+                      r = mid - 1
+                  else:
+                      l = mid + 1
+              else:
+                  if nums[mid] < target <= nums[r]:
+                      l = mid + 1
+                  else:
+                      r = mid - 1
+
+          return is_found
         ```
   * 153 & 154: Find Minimum in **Rotated Sorted Array** (M)
     * The same concept like 33 and 81.
@@ -5633,39 +5594,36 @@ Table of Content
       * Python
         ```python
         def findMin(self, nums: List[int]) -> int:
-          def find_rotate_idx(left, right):
-              rotate_idx = 0
-              right_boundary = right
+          l, r = 0, len(nums)-1
+          while l < r and nums[l] == nums[r]:
+              l += 1
 
-              while left <= right:
-                  mid = (left + right) // 2
+          """
+          Don't forget update start and default rotated_idx
+          """
+          start, end = l, len(nums)-1
+          rotated_idx = l
 
-                  if mid == right_boundary:
-                      break
+          while l <= r:
+              mid = (l + r) // 2
 
-                  if nums[mid] > nums[mid+1]:
-                      rotate_idx = mid + 1
-                      break
+              # the array is not rotated
+              if mid == end:
+                  break
 
-                  else:
-                      if nums[mid] >= nums[left]:
-                          left = mid + 1
-                      else:
-                          right = mid - 1
+              if nums[mid] > nums[mid+1]:
+                  rotated_idx = mid + 1
+                  break
 
-              return rotate_idx
+              # in the left part, go right
+              if nums[mid] >= nums[start]:
+                  l = mid + 1
 
-            n = len(nums)
+              # in the right part, go left
+              else:
+                  r = mid - 1
 
-            if n < 1:
-                return None
-
-            if n == 1:
-                return nums[0]
-
-            rotate_idx = find_rotate_idx(0, n-1)
-
-            return nums[rotate_idx]
+          return nums[rotated_idx]
         ```
     * Approach3: Find Rotate index (duplicated value), Time:O(logn~n), Space:O(1)
       * Python
@@ -5710,7 +5668,9 @@ Table of Content
 
           return nums[rotate_idx]
         ```
-  * 222: Count **Complete** Tree Nodes (M)
+  * 222: Count **Complete Tree Nodes** (M)
+    * Description:
+      * Given a complete binary tree, count the number of nodes.
     * Approach1: Preorder, Time:O(n), Space:O(n)
       * Python
         ```python
@@ -5754,57 +5714,51 @@ Table of Content
         def countNodes(self, root: TreeNode) -> int:
 
           def get_depth(cur):
-              depth = 0
+              d = 0
 
               while cur.left:
-                  depth += 1
+                  d += 1
                   cur = cur.left
 
-              return depth
+              return d
 
-          def check_node_exists(node_idx, d, cur):
-              target = cur
-              # go at most depth level
-              # Last level nodes are enumerated from 0 to 2**d -1
-              left = 0
-              right = 2**d - 1
+          def is_leaf_exists(idx, cur, d):
+              l, r = 0, 2**d-1
+
               for _ in range(d):
-                  mid = (left + right) // 2
-                  # mid is inclued in the left part
-                  if node_idx <= mid:
-                      target = target.left
-                      right = mid - 1
+                  mid = (l + r) // 2
+                  if idx <= mid:
+                      r = mid
+                      cur = cur.left
                   else:
-                      target = target.right
-                      left = mid + 1
+                      l = mid + 1
+                      cur = cur.right
 
-              return target is not None
+              return cur is not None
 
           if not root:
               return 0
 
           d = get_depth(root)
+          """
+          Last level nodes are enumerated from 0 to 2**d -1
+          we starts from 2th node (index 1), since 1st node always exists.
+          """
+          l, r = 1, 2**d-1
 
-          if d == 0:
-              return 1
-
-          # Last level nodes are enumerated from 0 to 2**d -1
-          # we starts from 2nd node (index 1), since 1st node always exists.
-          left, right = 1, 2**d-1
-          while left <= right:
-              mid = (left + right) // 2
-
-              if check_node_exists(mid, d, root):
-                  # every nodes before mid exist
-                  left = mid + 1
+          while l <= r:
+              mid = (l + r) // 2
+              if is_leaf_exists(mid, root, d):
+                  l = mid + 1
               else:
-                  # there are no nodes after mid
-                  right = mid - 1
+                  r = mid - 1
 
-          # The tree contains 2**d - 1 nodes on the first (d - 1) levels
-          # and left nodes on the last level.
-          return (2**d - 1) + left
-        ```
+          """
+          The tree contains 2**d - 1 nodes on the first (d - 1) levels
+          And leaf nodes in the last level
+          """
+          return (2**d -1) + l
+          ```
   * 004: **Median** of **Two Sorted Arrays** (H)
     * Description:
       * There are two sorted arrays nums1 and nums2 of size m and n respectively.
@@ -5895,72 +5849,46 @@ Table of Content
             return median
             ```
   * 300: Longest Increasing Subsequence (**LIS**) (M)
-    * Approach1: Top down Recursive, Time:O(n^2), Space:O(n)
-      * 2 cases:
-        * case1: taken the current character if possible (cur > prev)
-        * case2: do not taken the current character
-      * Python
-        ```python
-        def lengthOfLIS(self, nums: List[int]) -> int:
-          def get_lis(prev, cur, lis):
-              # end condition
-              if cur == n:
-                  return
-
-              nonlocal max_lis
-
-              # taken the cur character
-              if prev == -1 or nums[cur] > nums[prev]:
-                  taken_lis = 1 + lis
-                  max_lis = max(max_lis, taken_lis)
-                  get_lis(cur, cur+1, taken_lis)
-
-              # not taken
-              get_lis(prev, cur+1, lis)
-
-          if not nums:
-              return 0
-
-          max_lis = 0
-
-          n = len(nums)
-
-          get_lis(prev=-1, cur=0, lis=0)
-
-          return max_lis
-        ```
-    * Approach2: Bottom up iterative + memo, Time:O(n^2), Space:O(n)
+    * Approach1: Bottom up DP, Time:O(n^2), Space:O(n)
       * memo[i] is the longest increasing subsequece of nums[:i+1]
         * possible prev indices are from 0 to i
+        * **i should be included**
       * Python
         ```python
         def lengthOfLIS(self, nums: List[int]) -> int:
           n = len(nums)
 
-          if n == 0:
-              return 0
+          if n <= 1:
+              return n
 
-          if n == 1:
-              return 1
-
-          memo = [0] * n
-          memo[0] = 1
           max_lis = 1
-          for cur in range(1, n):
+          memo = [1] * n
+          for i in range(1, n):
               lis = 1
-              for prev in range(0, cur):
-                  if nums[cur] > nums[prev]:
+              for prev in range(0, i):
+                  if nums[i] > nums[prev]:
                       lis = max(lis, memo[prev]+1)
 
-              memo[cur] = lis
+              memo[i] = lis
               max_lis = max(max_lis, lis)
 
+          """
+          max lis is not memo[-1]
+          """
           return max_lis
         ```
-    * Approach3: Binary Search, Time:O(nlogn), Space:O(n)
+    * Approach2: Binary Search, Time:O(nlogn), Space:O(n)
       * Ref:
         * https://leetcode.com/problems/longest-increasing-subsequence/discuss/74824/JavaPython-Binary-search-O(nlogn)-time-with-explanation
         * https://www.youtube.com/watch?v=S9oUiVYEq7E
+      * Concept:
+        * tails is an array storing the smallest tail of all increasing subsequences with length i in tails[i-1]
+         * example:
+           ```txt
+           len = 1:  [4], [5], [6], [3]   => tails[0] = 3
+           len = 2:  [4, 5], [5, 6]       => tails[1] = 5
+           len = 3:  [4, 5, 6]            => tails[2] = 6
+           ```
       * Use binary search to either
         * 1. extend increasing sequence with larger numbers
           * if n is larger than all tails, append it, increase the size by 1
@@ -5977,30 +5905,35 @@ Table of Content
       * Python
         ```python
         def lengthOfLIS(self, nums: List[int]) -> int:
-          tails = [0 for _ in range(len(nums))]
-          size = 0
+          n = len(nums)
 
-          for n in nums:
-              left, right = 0, size-1
-              need_update = True
+          if n <= 1:
+              return n
 
-              while left <= right:
-                  mid = (left + right) // 2
+          tails = [None] * n
+          tails[0] = nums[0]
+          length = 1
+
+          for i in range(1, n):
+              target = nums[i]
+              l, r = 0, length-1
+
+              while l <= r:
+                  mid = (l + r) // 2
+
                   # do not need to update
-                  if n == tails[mid]:
-                      need_update = False
+                  if target == tails[mid]:
                       break
-                  elif n > tails[mid]:
-                      left = mid + 1
-                  else:  # n < tails
-                      right = mid - 1
 
-              # update the smallest val which is greater than x
-              if need_update:
-                  tails[left] = n
-                  size = max(size, left + 1)
+                  if target < tails[mid]:
+                      r = mid - 1
+                  else:
+                      l = mid + 1
+              else:
+                  tails[l] = target
+                  length = max(length, l+1)
 
-          return size
+          return length
         ```
   * 187: Repeated DNA Sequences (M)
   * 315: Count of Smaller Numbers After Self (H)
@@ -6008,7 +5941,6 @@ Table of Content
   * Other:
     * 896: Monotonic Array (E)
     * 1060: Missing Element in Sorted Array (M)
-
 ### Linked List
 * **Techiniques**:
   * The "**Runner**"
@@ -13030,6 +12962,48 @@ Table of Content
             return memo[0]
           ```
   * **One Dimensional**:
+    * 624: Maximum Distance in Arrays (E)
+      * Description:
+        * Given m arrays, and each array is sorted in ascending order. Now you can pick up two integers from two different arrays (each array picks one) and calculate the distance. We define the distance between two integers a and b to be their absolute difference |a-b|. Your task is to find the maximum distance.
+      * Approach1: Brute Force, Time:O(n^2), Space:O(1)
+        * Cnsider only the distances between the first(minimum element) element of an array and the last(maximum element) element of the other arrays and find out the maximum distance from among all such distances.
+        * Python
+          ```python
+          def maxDistance(self, arrays: List[List[int]]) -> int:
+            a = arrays
+            n = len(a)
+            max_dis = float('-inf')
+
+            for i in range(0, n-1):
+                for j in range(i+1, n):
+                    max_dis = max(max_dis, abs(a[i][0] - a[j][-1]))
+                    max_dis = max(max_dis, abs(a[j][0] - a[i][-1]))
+            return max_dis
+          ```
+      * Approach2: Single Scan, Time:O(n^2), Space:O(1)
+        * Keep the pre min and prev max
+        * Python
+          ```python
+          def maxDistance(self, arrays: List[List[int]]) -> int:
+            a = arrays
+            min_val, max_val = a[0][0], a[0][-1]
+            max_dis = 0
+
+            for i in range(1, len(a)):
+
+                cur_min, cur_max = a[i][0], a[i][-1]
+                max_dis = max(max_dis,
+                              abs(max_val-cur_min),
+                              abs(cur_max-min_val))
+
+                # update min and max for next list
+                min_val = min(min_val, cur_min)
+                max_val = max(max_val, cur_max)
+
+            return max_dis
+          ```
+    * 300: Longest Increasing Subsequence (**LIS**) (M)
+      * see binary search
     * 062: Unique Paths (M)
       * The robot **can only move either down or right** at any point in time.
       * Approach1: Combination:
@@ -14705,14 +14679,12 @@ Table of Content
       * 255: Verify Preorder Sequence in Binary Search Tree (M)
   * Binary Search:
     * 035: Search Insert Position (E)
-    * 278: First Bad Version (E)
     * 034: Find **First and Last Position of Element** in Sorted Array (M)
-    * 1150: Check If a Number Is Majority Element in a Sorted Array (E)
-    * 275: H-Index II (M)
     * 033 & 081: Search in Rotated Sorted Array (M)
+    * 153 & 154: Find Minimum in **Rotated Sorted Array**
     * 004: Median of Two Sorted Arrays (H)
     * 222: Count **Complete** Tree Nodes (M)
-    * 162: Find Peak Element (M)
+    * 300: Longest Increasing Subsequence (**LIS**)
   * Cache
     * 146: LRU Cache (M)
     * 460: LFU Cache (H)
