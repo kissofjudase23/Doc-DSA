@@ -1012,6 +1012,38 @@ Table of Content
               return nums
             ```
       * Approach4: **Quick** Sort, Time:O(nlogn), Space:O(logn~n)
+        * complexity:
+          * In the quicksort, you have to take care of two sides of the pivot. But in quickselect, you only focus on the side the target object should be. So, in optimal case, the running time of quicksort is (n + 2 * (n/2) + 4 * (n/4)...), it has logn iterations. Instead, the running time of quickselect would be (n + n/2 + n/4 +...) it has logn iterations as well
+        * quick select:
+          * Python
+            ```python
+            def partition(nums, start, end):
+              ran = random.randint(start, end)
+              pivot = end
+              nums[pivot], nums[ran] = nums[ran], nums[pivot]
+
+              border = start
+              for cur in range(start, end):
+                  if nums[cur] <= nums[pivot]:
+                    nums[cur], nums[border] = nums[border], nums[cur]
+                    border += 1
+
+              nums[border], nums[pivot] = nums[pivot], nums[border]
+              return border
+
+          def quick_select(nums, start, end, k_smallest):
+              res = None
+              while start <= end:
+                  p = partition(nums, start, end)
+                  if p == k_smallest:
+                      res = nums[k_smallest]
+                      break
+                  elif p > k_smallest:
+                      end = p - 1
+                  else:
+                      start = p + 1
+              return res
+            ```
         * Iterative, Time:O(nlogn), Space:O(logn~n):
           * Python
             ```python
@@ -1345,6 +1377,8 @@ Table of Content
                    else:  # nums[cur] == 1
                        cur += 1
              ```
+      * bucket sort:
+        * see 347: **Top K Frequent** Elements (M)
 ### String
   * Remove Duplicate
     * 316: Remove Duplicate Letters (H)
@@ -5321,7 +5355,7 @@ Table of Content
 
           return max_hidx - idx
         ```
-  * 033 & 081: Search in **Rotated Sorted Array** (M)
+  * 033 & 081: **Search** in **Rotated Sorted Array** (M)
     * 033: unique
     * 081: allow duplicates
     * For duplicates, the key is how to handle the case like:
@@ -5585,7 +5619,7 @@ Table of Content
 
           return is_found
         ```
-  * 153 & 154: Find Minimum in **Rotated Sorted Array** (M)
+  * 153 & 154: Find **Minimum** in **Rotated Sorted Array** (M)
     * The same concept like 33 and 81.
     * 153: unique
     * 154: allow duplicates
@@ -5594,79 +5628,84 @@ Table of Content
       * Python
         ```python
         def findMin(self, nums: List[int]) -> int:
-          l, r = 0, len(nums)-1
-          while l < r and nums[l] == nums[r]:
-              l += 1
 
-          """
-          Don't forget update start and default rotated_idx
-          """
-          start, end = l, len(nums)-1
-          rotated_idx = l
+          def find_rotate_idx(left, right):
+              l , r = left ,right
+              rotated_idx = left
 
-          while l <= r:
-              mid = (l + r) // 2
 
-              # the array is not rotated
-              if mid == end:
-                  break
+              while l <= r:
 
-              if nums[mid] > nums[mid+1]:
-                  rotated_idx = mid + 1
-                  break
+                  mid = (l + r) // 2
 
-              # in the left part, go right
-              if nums[mid] >= nums[start]:
-                  l = mid + 1
+                  # the array is not rotated
+                  if mid == right:
+                      break
 
-              # in the right part, go left
-              else:
-                  r = mid - 1
+                  if nums[mid] > nums[mid+1]:
+                      rotated_idx = mid + 1
+                      break
 
-          return nums[rotated_idx]
+                  # mid is in the left part, search right
+                  if nums[mid] >= nums[left]:
+                      l = mid + 1
+                  # mid is in the right part, search left
+                  else:
+                      r = mid - 1
+
+              return rotated_idx
+
+
+          if not nums:
+              return -1
+
+          rotated_idx = find_rotate_idx(left=0,
+                                        right=len(nums)-1)
+
+        return nums[rotated_idx]
         ```
     * Approach3: Find Rotate index (duplicated value), Time:O(logn~n), Space:O(1)
       * Python
         ```python
         def findMin(self, nums: List[int]) -> int:
+
           def find_rotate_idx(left, right):
-              # Previous algorithm can deal with duplicated items
-              # if the head of array is not a duplicated item
-              while left != right and nums[left] == nums[right]:
-                  left += 1
+              l , r = left ,right
+              rotated_idx = left
 
-              rotate_idx = left
-              right_boundary = right
+              while l <= r:
 
-              while left <= right:
-                  mid = (left + right) // 2
+                  mid = (l + r) // 2
 
-                  if mid == right_boundary:
+                  # the array is not rotated
+                  if mid == right:
                       break
 
                   if nums[mid] > nums[mid+1]:
-                      rotate_idx = mid + 1
+                      rotated_idx = mid + 1
                       break
 
+                  # mid is in the left part, search right
+                  if nums[mid] >= nums[left]:
+                      l = mid + 1
+                  # mid is in the right part, search left
                   else:
-                      if nums[mid] >= nums[left]:
-                          left = mid + 1
-                      else:
-                          right = mid - 1
+                      r = mid - 1
 
-              return rotate_idx
+              return rotated_idx
 
-          n = len(nums)
+          if not nums:
+              return -1
 
-          if n < 1:
-              return None
+          left, right = 0, len(nums)-1
 
-          if n == 1:
-              return nums[0]
+          while left < right and nums[left] == nums[right]:
+              left += 1
 
-          rotate_idx = find_rotate_idx(0, n-1)
+          rotated_idx = find_rotate_idx(left,
+                                        right)
 
-          return nums[rotate_idx]
+          return nums[rotated_idx]
         ```
   * 222: Count **Complete Tree Nodes** (M)
     * Description:
@@ -6708,6 +6747,9 @@ Table of Content
           from queue import PriorityQueue
 
           class Event(object):
+
+              __slots__ = 'node'
+
               def __init__(self, node):
                   self.node = node
 
@@ -6735,6 +6777,9 @@ Table of Content
         * Implementation2: Use min heap
           ```python
           class Element(object):
+
+            __slots__ = 'node'
+
             def __init__(self, node):
                 self.node = node
 
@@ -7106,39 +7151,51 @@ Table of Content
   * 1171: Remove Zero Sum Consecutive Nodes from Linked List
 ### Stack and Queue
   * 155: Min Stack (E)
-    * Space (n)
+    * Description:
+      * Design a stack that supports push, pop, top, and retrieving the minimum element in constant time.
+        * push(x)
+          * Push element x onto stack.
+        * pop()
+          * Removes the element on top of the stack.
+        * top()
+        *   Get the top element.
+        * getMin()
+          * Retrieve the minimum element in the stack.
+    * Approach1:
       * Use extra space to keep minimum
-      * Python Solution
-      ```python
-      class MinStack:
-        def __init__(self):
-            """
-            initialize your data structure here.
-            """
-            self.stack = list()
-            self.mins = list()
+      * Python
+        ```python
+        class MinStack:
+          __slots__ = ['s', 'min_s']
+          def __init__(self):
+              """
+              initialize your data structure here.
+              """
+              self.s = []
+              self.min_s = []
 
-        def push(self, x: int) -> None:
-            self.stack.append(x)
-            if not self.mins:
-                self.mins.append(x)
-            else:
-                self.mins.append(min(self.mins[-1], x))
+          def push(self, x: int) -> None:
+              self.s.append(x)
 
+              if not self.min_s:
+                  self.min_s.append(x)
+              else:
+                  self.min_s.append(min(self.min_s[-1], x))
 
-        def pop(self) -> None:
-            if not self.stack:
-                return
+          def pop(self) -> None:
+              if not self.s:
+                  return
 
-            self.stack.pop()
-            self.mins.pop()
+              self.s.pop()
+              self.min_s.pop()
 
-        def top(self) -> int:
-            return self.stack[-1]
+          def top(self) -> int:
+              return self.s[-1]
 
-        def getMin(self) -> int:
-            return self.mins[-1]
-      ```
+          def getMin(self) -> int:
+              return self.min_s[-1]
+        ```
+  * 716: Max Stack (E)
   * 232: Implement Queue using Stacks (E)
     * Approach1: Use 2 stacks, push:O(1), pop: average, O(1)
       * Ref:
@@ -7317,11 +7374,12 @@ Table of Content
       * Python
         ```python
         def verifyPreorder(self, preorder: List[int]) -> bool:
-          lower = float('-inf')
+          low_boundary = float('-inf')
           stack = []
           is_bst = True
           for n in preorder:
-              if n < lower:
+
+              if n < low_boundary:
                   is_bst = False
                   break
 
@@ -7338,6 +7396,9 @@ Table of Content
       * Python
         ```python
         class NestedIterator(object):
+
+          __slots__ = ['stack']
+
           def __init__(self, nestedList):
               self.stack = nestedList[::-1]
 
@@ -7345,410 +7406,855 @@ Table of Content
               return self.stack.pop().getInteger()
 
           def hasNext(self):
+              has_next = False
               while self.stack:
                   top = self.stack[-1]
                   if top.isInteger():
-                      return True
+                      has_next = True
+                      break
                   else:
-                      self.stack = self.stack[:-1] + top.getList()[::-1]
+                      self.stack.pop()
+                      self.stack.extend(top.getList()[::-1])
 
-              return False
+              return has_next
         ```
     * Approach2: Use deque
       * Python
       ```python
       class NestedIterator(object):
 
-          def __init__(self, nestedList):
-              self.dq = collections.deque()
-              self.dq.extend(nestedList)
+        __slots__ = ['dq']
 
-          def next(self):
-              return self.dq.popleft().getInteger()
+        def __init__(self, nestedList):
+            self.dq = collections.deque(nestedList)
 
-          def hasNext(self):
-              while self.dq:
-                  top = self.dq[0]
-                  if top.isInteger():
-                      return True
-                  else:
-                      self.dq.popleft()
-                      self.dq.extendleft(top.getList()[::-1])
+        def next(self):
+            return self.dq.popleft().getInteger()
 
-              return False
+        def hasNext(self):
+            has_next = False
+
+            while self.dq:
+                top = self.dq[0]
+                if top.isInteger():
+                    has_next = True
+                    break
+                else:
+                    self.dq.popleft()
+                    self.dq.extendleft(top.getList()[::-1])
+
+            return has_next
       ```
 ### Heap (Priority Queue)
   * Note:
     * For Python, heapq is min-heap
-  * 023: Merge k Sorted Lists (H) (LinkedList)
-    * Ｐleaser refer linked list section (use min heap)
-  * 253: Meeting Rooms II (M)
-      * Find the minimum requirement of the meeting rooms.
-      * Approach1: Brute Force, Time: O(n^2), Space: O(1)
-      * Approach2: Min Heap: O(nlog(n)), Space: O(n)
-        * Check after sorting
-        * Algo
-          * Sort the intervals by start time
-          * For every meeting room check if the minimum element of the heap is free or not.
-            * If the room is free, then we extract the topmost element and add it back with the ending time of the current meeting we are processing.
-            * If not, then we allocate a new room and add it to the heap.
+  * Merge k Sorted Lists
+    * 023: Merge k Sorted Lists (H)
+      * Please refer linked list section (use min heap)
+    * 378: **Kth Smallest Element** in a Sorted Matrix (M)
+      * Please refer matrix section
+    * 373: **Find K Pairs** with Smallest Sums (M)
+      * Approach1: Brute Force, Time:O(nmlogk), Space:O(k)
+        * Complexity:
+          * Space:
+            * min_heap with size k
+          * Time:
+            * generate mn pairs and push to min_heap
+        * Generate all possible pair and push to min_heap with size k
         * Python
-            ```python
-            def minMeetingRooms(self, intervals: List[List[int]]) -> int:
-              if not intervals:
-                  return 0
+          ```python
+          class Element(object):
+            def __init__(self, pair):
+                self.pair = pair
 
-              start, end = 0, 1
-              intervals.sort(key=lambda interval: interval[start])
-              heap = [intervals[0][end]]
+            # for max heap
+            def __lt__(self, other):
+                return (self.pair[0] + self.pair[1]) > (other.pair[0] + other.pair[1])
 
-              for i in range(1, len(intervals)):
-                  # heap[0] is current minimum end time
-                  # need a new room
-                  if heap[0] > intervals[i][start]:
-                      heapq.heappush(heap, intervals[i][end])
-                  # reuse the room
+            def __repr__(self):
+                return str(self.pair)
+
+          def kSmallestPairs(self, nums1: List[int], nums2: List[int], k: int) -> List[List[int]]:
+              heap = []
+
+              for n1 in nums1:
+                  for n2 in nums2:
+                      n_pair = (n1, n2)
+                      if len(heap) < k:
+                          heapq.heappush(heap, Element(n_pair))
+                          continue
+
+                      cur_max_pair = heap[0].pair
+                      if (n_pair[0] + n_pair[1]) < (cur_max_pair[0] + cur_max_pair[1]):
+                          heapq.heapreplace(heap, Element(n_pair))
+                      else:
+                          break
+
+              return [e.pair for e in heap]
+          ```
+      * Approach2: Use Matrix to simulate merge k sorted list, Time:O(k*heap_size), Space:O(heap_size)
+        * Complexity:
+          * n : len(nums1), row number
+          * heap_size : min(k, n)
+          * Time complexity:
+            * k * heap_size
+        * Example:
+          * nums1 = [1,3,5]
+          * nums2 = [2,4,6]
+          * list1: (1,2) -> (1,4) -> (1,6)
+          * list2: (3,2) -> (3,4) -> (3,6)
+          * list3: (5,2) -> (5,4) -> (5,6)
+        * Python:
+          ```python
+          class Element(object):
+            def __init__(self, r, c, val):
+                self.r = r
+                self.c = c
+                self.val = val
+
+            def __lt__(self, other):
+                return self.val < other.val
+
+            def __repr__(self):
+                return str(self.val)
+
+          def kSmallestPairs(self, nums1: List[int], nums2: List[int], k: int) -> List[List[int]]:
+              if not nums1 or not nums2:
+                  return []
+
+              row, col = len(nums1), len(nums2)
+              min_heap = []
+              for r in range(min(row, k)):
+                  c = 0
+                  min_heap.append(Element(r, c, nums1[r]+nums2[c]))
+              heapq.heapify(min_heap)
+
+              pairs = []
+              while min_heap and len(pairs) < k:
+                  r, c = min_heap[0].r, min_heap[0].c
+                  if c + 1 < col:
+                      heapq.heapreplace(min_heap, Element(r, c+1, nums1[r]+nums2[c+1]))
                   else:
-                      heapq.heapreplace(heap, intervals[i][end])
+                      heapq.heappop(min_heap)
 
-              return len(heap)
-            ```
-  * 703. **Kth Largest** Element in a Stream (E)
-    * Approach1: min heap, Time: O(log(k)), Space: O(k)
-      * Time: O(log(k))
-        * __init__: O(nlog(k))
-          * n items for heap push
-        * add:
-          * heapreplace and heappush take O(log(k))
-      * Space: O(k)
-        * Capacity of heap size
-      * Python Solution:
-        ```python
-        class KthLargest:
+                  pairs.append((nums1[r], nums2[c]))
 
-          def __init__(self, k: int, nums: List[int]):
-              # You may assume that nums' length ≥ k-1 and k ≥ 1.
-              self.heap = list()
-              self.cap = k
-              for num in nums:
-                  self._add(num)
+              return pairs
+          ```
+  * Schedule:
+    * 253: Meeting Rooms II (M)
+        * Find the minimum requirement of the meeting rooms.
+        * Approach1: Brute Force, Time: O(n^2), Space: O(1)
+        * Approach2: Min Heap: O(nlog(n)), Space: O(n)
+          * Check after sorting
+          * Algo
+            * Sort the intervals by start time
+            * For every meeting room check if the minimum element of the heap is free or not.
+              * If the room is free, then we extract the topmost element and add it back with the ending time of the current meeting we are processing.
+              * If not, then we allocate a new room and add it to the heap.
+          * Python
+              ```python
+              def minMeetingRooms(self, intervals: List[List[int]]) -> int:
+                if not intervals:
+                    return 0
 
-          def _add(self, val):
-              if len(self.heap) < self.cap:
-                  heapq.heappush(self.heap, val)
-              else:
-                  # replace the minimize element in the heap
-                  if val > self.heap[0]:
-                      heapq.heapreplace(self.heap, val)
+                START, END = 0, 1
+                intervals.sort(key=lambda interval: interval[START])
 
-          def add(self, val: int) -> int:
-              self._add(val)
-              return self.heap[0]
-        ```
-  * 215: **Kth Largest** Element in an Array (M)
-    * Find the kth largest element in an unsorted array.
-    * Approach1: Sorting, Time: O(nlog(n)), Space:O(log(n))
-    * Approach2: min heap, Time: O(nlog(k)), Space: O(k)
-      * keep the k element in the minimum heap
-      * Time Complexity: O(nlog(l))
-        * **heappush**
-          * Append to the tail of list, and make bubble up comparison cost log(k)
-        * **heapreplace**
-          * Replace the min, and make bubble down operation, cost log(k)
-      * Python Solution
-        ```python
-        def findKthLargest(self, nums: List[int], k: int) -> int:
-          heap = []
-          for num in nums:
-              if len(heap) < k:
-                  heapq.heappush(heap, num)
-              elif num > heap[0]:
-                  # replace the minimize element in the heap
-                  heapq.heapreplace(heap, num)
+                min_heap = [intervals[0][END]]
 
-          return heap[0]
-        ```
-    * Approach3: Quick select, Time: O(n), Space:O(1)
-      * Python Solution:
-        ```python
-        class Solution:
-          def partition(self, nums, start, end):
-              # to avoid worst case
-              pivot_ran = random.randint(start, end)
+                for i in range(1, len(intervals)):
+                    cur = intervals[i]
 
-              pivot = end
-              nums[pivot_ran], nums[pivot] = nums[pivot], nums[pivot_ran]
-              pivot_val = nums[pivot]
+                    if min_heap[0] > cur[START]:
+                        heapq.heappush(min_heap, cur[END])
 
-              border = start
-              for cur in range(start, end):
-                  if nums[cur] <= pivot_val:
-                      nums[border], nums[cur] = nums[cur], nums[border]
-                      border += 1
+                    else: # heap[0] <= cur[START]
+                        heapq.heapreplace(min_heap, cur[END])
 
-              nums[border], nums[pivot] = nums[pivot], nums[border]
-              return border
+                return len(min_heap)
+              ```
+        * Approach3: O(m), Space:O(m)
+          * If we can know the time range, this problem can be O(time_range)
+    * 1094: Car Pooling (M)
+      * Similar to Meeting Rooms II
+      * Approach1: Brute Force, Time:O(n^2), Space:O(1)
+      * Approach2: min-heap, Time:O(nlogn), Space:O(n)
+        * Python
+          ```python
+          CNT, START, END = 0, 1, 2
 
-          def quick_select(self, nums, start, end, k_smallest):
-              while start <= end:
-                pivot = self.partition(nums, start, end)
-                if k_smallest == pivot:
-                    return nums[pivot]
-                elif k_smallest < pivot:
-                    end = pivot - 1
+          class Element(object):
+              def __init__(self, trip):
+                  self.trip = trip
+
+              def __lt__(self, other):
+                  return self.trip[END] < other.trip[END]
+
+          def carPooling(self, trips: List[List[int]], capacity: int) -> bool:
+              if not trips:
+                  return True
+
+              trips.sort(key=lambda trip: trip[START])
+              min_heap = []
+
+              res = True
+              for trip in trips:
+                  # any passengers need to get off?
+                  while min_heap and min_heap[0].trip[END] <= trip[START]:
+                      top = heapq.heappop(min_heap)
+                      # release the seats
+                      capacity += top.trip[CNT]
+
+                  capacity -= trip[CNT]
+                  if capacity < 0:
+                      res = False
+                      break
+
+                  heapq.heappush(min_heap, Element(trip))
+
+              return res
+          ```
+      * Approach3: Time:O(max(n, m)), Space:O(m)
+        * M is the number of stations
+        * Since stations cnt is limited, we can add passenger count to the start location, and remove them from the end location, and process the array the check if the current people exceeds the capacity.
+        * Python
+          ```python
+          CNT, START, END = 0, 1, 2
+
+          def carPooling(self, trips: List[List[int]], capacity: int) -> bool:
+              if not trips:
+                  return True
+
+              stations = [0] * 1000
+
+              for trip in trips:
+                  stations[trip[START]] += trip[CNT]
+                  stations[trip[END]] -= trip[CNT]
+
+              res = True
+              acc_cnt = 0
+              for cnt in stations:
+                  acc_cnt += cnt
+                  if acc_cnt > capacity:
+                      res = False
+                      break
+
+              return res
+          ```
+    * 1109: Corporate Flight Bookings (M)
+      * Approach1:
+        * Python
+          ```python
+          def corpFlightBookings(self, bookings: List[List[int]], n: int) -> List[int]:
+            START, END, CNT = 0, 1, 2
+            flights = [0] * n
+
+            for b in bookings:
+                flights[b[START]-1] += b[CNT]
+                """
+                booking from booking[START] to booking[END]
+                release day is booking[END] + 1
+                """
+                end = b[END]
+                if end < n:
+                    flights[end] -= b[CNT]
+
+            cur_cnt = 0
+            for i, cnt in enumerate(flights):
+                cur_cnt += cnt
+                flights[i] = cur_cnt
+
+            return flights
+          ```
+
+      * Description:
+        * Implement a MyCalendar class to store your events. A new event can be added if adding the event will not cause a double booking.
+        * Approach1: Brute Force, Time:O(n^2), Space:O(n)
+        *
+    * 731: My Calendar II (M)
+    * 732: My Calendar III (H)
+    * 630. Course Schedule III (H)
+      * Ref:
+        * https://leetcode.com/problems/course-schedule-iii/discuss/104847/Python-Straightforward-with-Explanation
+  * Kth problem:
+    * Ref:
+      * Summary:
+        * https://leetcode.com/problems/k-closest-points-to-origin/discuss/220235/Java-Three-solutions-to-this-classical-K-th-problem.
+        * heap solution: Time:O(nlogk), Space:O(k)
+          * The advantage of this solution is **it can deal with real-time(online) stream data**.
+        * quick select: Time:O(n~n^2), Space:O(n)
+          * The disadvatage of this solution are it is n**either an online solution nor a stable one. And the K elements closest are not sorted in ascending order**.
+    * 703: **Kth Largest** Element in a Stream (E)
+      * Approach1: min heap, Time: O(log(k)), Space: O(k)
+        * Time: O(log(k))
+          * __init__: O(nlog(k))
+            * n items for heap push
+          * add:
+            * heapreplace and heappush take O(log(k))
+        * Space: O(k)
+          * Capacity of heap size
+        * Python:
+          ```python
+          class KthLargest:
+
+            def __init__(self, k: int, nums: List[int]):
+                # You may assume that nums' length ≥ k-1 and k ≥ 1.
+                self.min_heap = list()
+                self.cap = k
+                for num in nums:
+                    self._add(num)
+
+            def _add(self, val):
+                if len(self.min_heap) < self.cap:
+                    heapq.heappush(self.min_heap, val)
                 else:
-                    start = pivot + 1
+                    # replace the minimize element in the heap
+                    if val > self.min_heap[0]:
+                        heapq.heapreplace(self.min_heap, val)
 
+            def add(self, val: int) -> int:
+                self._add(val)
+                return self.min_heap[0]
+          ```
+    * 215: **Kth Largest** Element in an Array (M)
+      * Note:
+        * heap, quick select
+      * Approach1: Sorting, Time: O(nlog(n)), Space:O(log(n)~n)
+      * Approach2: min heap, Time: O(nlog(k)), Space: O(k)
+        * keep the k element in the minimum heap
+        * Time Complexity: O(nlog(k))
+          * **heappush**
+            * Append to the tail of list, and make bubble up comparison cost log(k)
+          * **heapreplace**
+            * Replace the min, and make bubble down operation, cost log(k)
+        * Python
+          ```python
           def findKthLargest(self, nums: List[int], k: int) -> int:
+            min_heap = []
+            for n in nums:
+                if len(min_heap) < k:
+                    heapq.heappush(min_heap, n)
+                elif n > min_heap[0]:
+                    heapq.heapreplace(min_heap, n)
+
+            return min_heap[0]
+          ```
+      * Approach3: Quick select, Time: O(n~n^2), Space:O(1)
+        * Python:
+          ```python
+          def findKthLargest(self, nums: List[int], k: int) -> int:
+
+              def partition(start, end):
+                  ran = random.randint(start, end)
+                  pivot = end
+                  nums[pivot], nums[ran] = nums[ran], nums[pivot]
+
+                  border = start
+                  for cur in range(start, end):
+                      if nums[cur] >= nums[pivot]:
+                        nums[cur], nums[border] = nums[border], nums[cur]
+                        border += 1
+
+                  nums[border], nums[pivot] = nums[pivot], nums[border]
+                  return border
+
+              def quick_select(start, end, k_largest):
+                  res = None
+                  while start <= end:
+                      p = partition(start, end)
+                      if p == k_largest:
+                          res = nums[k_largest]
+                          break
+                      elif p > k_largest:
+                          end = p - 1
+                      else:
+                          start = p + 1
+                  return res
+
               if k > len(nums):
                   return None
 
-              # k_smallest is len(nums)-k
-              return self.quick_select(nums, 0, len(nums)-1, len(nums)-k)
-        ```
-  * 347: **Top K Frequent** Elements (M)
-    * Given a non-empty array of integers, return the **k most frequent elements**.
-    * If k == 1, Hash Table, Time:O(n), Space:O(n)
-      * Use dictionary and keep the max key
-    * If k > 1, Hash Table + min heap Time:O(nlog(k)), Space:O(n)
-      * Time O(nlog(k))
-        * build hash map :O(n)
-        * build heap :O(nlog(k))
-      * Space: O(n)
-        * O(n) for hash table
-        * O(k) for heap
-      * Approach1: heapq-1:
-        ```python
-        class Element(object):
-          def __init__(self, key, count):
-              self.key = key
-              self.count = count
+              return quick_select(0, len(nums)-1, k-1)
+          ```
+      * can not use bucket sort since we don't know the range
+    * 347: **Top K Frequent** Elements (M)
+      * Given a non-empty array of integers, return the **k most frequent elements**.
+        * Approach0: If k == 1, Hash Table, Time:O(n), Space:O(n)
+        * Approach2: min-heap: Time O(nlog(k)), Space:O(n)
+          * Complexity:
+            * Space:
+              * Counter: O(n)
+              * min_heap: O(k)
+            * Time:
+              * O(nlogk)
+          * Implementation1
+            ```python
+            class Element(object):
+                __slots__ = 'key', 'cnt'
 
-          def __lt__(self, other):
-              return self.count < other.count
+                def __init__(self, key, cnt):
+                    self.key = key
+                    self.cnt = cnt
 
-          def __repr__(self):
-              return str(self.key)
+                def __lt__(self, other):
+                    return self.cnt < other.cnt
 
-        def topKFrequent(nums: List[int], k: int) -> List[int]:
-            d = collections.Counter(nums)
-            heap = list()
+            def topKFrequent(self, nums: List[int], k: int) -> List[int]:
+                if not k:
+                    return []
 
-            for key, cnt in d.items():
-                if len(heap) < k:
-                    heapq.heappush(heap, Element(key, cnt))
+                counter = collections.Counter(nums)
+
+                min_heap = []
+                for key, cnt in counter.items():
+                    if len(min_heap) < k:
+                        heapq.heappush(min_heap, Element(key, cnt))
+                    elif cnt > min_heap[0].cnt:
+                        heapq.heapreplace(min_heap, Element(key, cnt))
+
+                return [e.key for e in min_heap]
+            ```
+          * Implementation2, use nlargest
+            ```python
+            def topKFrequent(self, nums: List[int], k: int) -> List[int]:
+              counter = collections.Counter(nums)
+              return heapq.nlargest(k, counter.keys(), key=counter.get)
+            ```
+        * Approach3: quick-select, Time:O(n), Space:O(n)
+          * Complexity:
+            * Space: O(n)
+              * Counter:O(n)
+              * key_cnt array: O(n)
+            * Time: O(n)
+              * Quick select: O(n)
+          * Python
+            ```python
+            class Element(object):
+
+                __slots__ = 'key', 'cnt'
+
+                def __init__(self, key, cnt):
+                    self.key = key
+                    self.cnt = cnt
+
+                def __ge__(self, other):
+                    return self.cnt >= other.cnt
+
+                def __repr__(self):
+                    return f'{self.key}:{self.cnt}'
+
+            class Solution:
+                def quick_select(self, array, start, end, k_largest):
+                    def partition(start, end):
+                        ran = random.randint(start, end)
+                        pivot = end
+                        array[pivot], array[ran] = array[ran], array[pivot]
+
+                        border = start
+                        for cur in range(start, end):
+                            if array[cur] >= array[pivot]:
+                                array[cur], array[border] = array[border], array[cur]
+                                border += 1
+
+                        array[border], array[pivot] = array[pivot], array[border]
+                        return border
+
+                    while start <= end:
+                        p = partition(start, end)
+                        if p == k_largest:
+                            break
+                        elif p > k_largest:
+                            end = p - 1
+                        else:
+                            start = p + 1
+
+                def topKFrequent(self, nums: List[int], k: int) -> List[int]:
+                    if not k:
+                        return []
+
+                    counter = collections.Counter(nums)
+
+                    key_cnt = []
+                    for key, cnt in counter.items():
+                        key_cnt.append(Element(key, cnt))
+
+                    self.quick_select(array=key_cnt,
+                                      start=0,
+                                      end=len(key_cnt)-1,
+                                      k_largest=k-1)
+
+                    return [e.key for e in key_cnt[:k]]
+            ```
+        * Approach4: bucket-sort, Time:O(n), Space:O(n)
+          * Since we know the max freq would be len(nums), we can use bucket sort
+          * Complexity:
+            * Space:
+              * Counter:O(n)
+              * Bucket:O(n)
+            * Time: O(n)
+          * Python
+            ```python
+            def topKFrequent(self, nums: List[int], k: int) -> List[int]:
+                if not k:
+                    return []
+
+                counter = collections.Counter(nums)
+
+                bucket = [None] * (len(nums) + 1)
+                for key, cnt in counter.items():
+                    if not bucket[cnt]:
+                        bucket[cnt] = []
+                    bucket[cnt].append(key)
+
+                res = []
+                # from len(nums) to 1
+                for cnt in range(len(nums), 0, -1):
+                    if bucket[cnt]:
+                        res.extend(bucket[cnt])
+
+                    if len(res) >= k:
+                        break
+
+                return res
+            ```
+    * 692: **Top K Frequent** Words (M)
+      * Description:
+        * Given a non-empty list of words, return the k most frequent elements.
+        * Your answer should be sorted by frequency from highest to lowest. I**f two words have the same frequency, then the word with the lower alphabetical order comes first**.
+      * Note:
+        * notice the alphabetical order
+      * Approach1: min heap, Time:O(nlogk), Space:O(n):
+        * notice the pop order of min_heap
+        * Complexity:
+          * Space:
+            * Counter: O(n)
+            * Heap:O(k)
+          * Time: O(n) + O(nlogk)
+            * Create Counter: O(n)
+            * Insert to Heap: O(nlogk)
+            * Pop from heap: O(klogk)
+        * Python:
+          ```python
+          import collections
+
+          class Element(object):
+
+              __slots__ = ['key', 'cnt']
+
+              def __init__(self, key, cnt):
+                  self.key = key
+                  self.cnt = cnt
+
+              def __lt__(self, other):
+                  """
+                  min heap
+                  if the cnt is different, pop the smaller cnt first
+                  else pop high alphabetical first
+                  """
+                  if self.cnt == other.cnt:
+                      # pop high alphabetical first
+                      return self.key > other.key
+                  else:
+                      return self.cnt < other.cnt
+
+          class Solution:
+              def topKFrequent(self, words: List[str], k: int) -> List[str]:
+                  counter = collections.Counter(words)
+
+                  min_heap = []
+                  for key, cnt in counter.items():
+                      e = Element(key, cnt)
+                      if len(min_heap) < k:
+                          heapq.heappush(min_heap, e)
+                      elif e > min_heap[0]:
+                          heapq.heapreplace(min_heap, e)
+
+                  res = collections.deque()
+                  while min_heap and len(res) < k:
+                      e = heapq.heappop(min_heap)
+                      res.appendleft(e.key)
+
+                  return res
+          ```
+      * Approach2: bucket sort, Time:O(n), Space:O(n)
+        * Each bucket stores a trie structure with different freq.
+          * use trie to handle alphabetical order
+        * Ref:
+          * https://leetcode.com/problems/top-k-frequent-words/discuss/108399/Java-O(n)-solution-using-HashMap-BucketSort-and-Trie-22ms-Beat-81
+      * Quick select is not suitable due to the output should be alphabetical order.
+    * 451: Sort Characters By Frequency
+      * This is similar to 347: **Top K Frequent** Elements
+      * Complexity:
+        * Time:
+          * average cost of heapify if O(n)
+      * Approach1: Sorting, Time:O(nlogn), Space:O(logn~n)
+      * Approach2: min-heap, Time:O(n), Space:O(n)
+        * Python
+          ```python
+          class Element(object):
+
+              __slots__ = ['key', 'cnt']
+
+              def __init__(self, key, cnt):
+                  self.key = key
+                  self.cnt = cnt
+
+              def __lt__(self, other):
+                  return self.cnt < other.cnt
+
+          def frequencySort(self, s: str) -> str:
+              """
+              1. create freq cnt for each char
+              """
+              freq_cnt = collections.Counter(s)
+
+              """
+              1. heapify (linear time)
+              """
+              min_heap = [Element(key, cnt) for key, cnt in freq_cnt.items()]
+              heapq.heapify(min_heap)
+
+              """
+              1. pop from min-heap (use deque to prevent reverse operation)
+              """
+              res = collections.deque()
+              while min_heap:
+                  e = heapq.heappop(min_heap)
+                  res.appendleft(e.key * e.cnt)
+
+              return ''.join(res)
+          ```
+      * Approach3: bucket-sort, Time:O(n), Space:O(n)
+        * Since we know the max freq is len(s), bucket sort is suitable.
+        * Python
+          ```python
+          class Element(object):
+            __slots__ = ['key', 'cnt']
+            def __init__(self, key, cnt):
+                self.key = key
+                self.cnt = cnt
+
+            def __lt__(self, other):
+                return self.cnt < other.cnt
+
+          def frequencySort(self, s: str) -> str:
+            """
+            1: create the frequency map for each char
+            """
+            freq_cnt = collections.Counter(s)
+
+            """
+            1. The chars in the same bucket have the same frequency.
+            """
+            bucket = [None] * (len(s) + 1)
+            for key, cnt in freq_cnt.items():
+                if not bucket[cnt]:
+                    bucket[cnt] = [key]
                 else:
-                    e = Element(key, cnt)
-                    if heap[0] < e:
-                        heapq.heapreplace(heap, e)
+                    bucket[cnt].append(key)
 
-            return [e.key for e in heap]
-        ```
-      * Approach2: heapq-2
-        ```python
-        def topKFrequent(self, nums: List[int], k: int) -> List[int]:
-          counter = collections.Counter(nums)
-          return heapq.nlargest(k, counter.keys(), key=counter.get)
-        ```
-  * 692: **Top K Frequent** Words (M)
-    * Approach1: hash table + min heap, Time:O(nlogk), Space:O(n):
-      * Time:
-        * Create Hash Table: O(n)
-        * Insert to Heap: O(nlogk)
-        * Pop from heap: O(klogk)
-      * Space:
-        * Hash Table: O(n)
-        * Heap: O(k)
-      * Python Solution:
-        ```python
-        class Element(object):
+            """
+            1. pop char from high freq to low freq and format the string
+            """
+            res = []
+            for cnt in range(len(s), 0, -1):
+                if not bucket[cnt]:
+                    continue
+                for key in bucket[cnt]:
+                    res.append(cnt * key)
 
-          def __init__(self, key, count):
-              self.key = key
-              self.count = count
+            return ''.join(res)
+          ```
+      * quick-select can not apply this problem since the output order.
+    * 973: K Closest Points to Origin
+      * Description:
+      * Approach1: Sorting, Time:O(nlogn), Space:O(logn~n)
+      * Approach2: Max-heap, Time:O(nlogk), Space:O(k)
+        * Python
+          ```python
+          class Element(object):
 
-          def __lt__(self, other):
-              if self.count == other.count:
-                  # If two words have the same frequency,
-                  # then the word with the lower alphabetical order has higher priority
-                  return self.key > other.key
-              else:
-                  return self.count < other.count
+            __slots__ = 'point'
 
-          def __repr__(self):
-              return str(f'{self.key}:{self.count}')
+            @staticmethod
+            def distance(x, y):
+                """
+                Euclidean distance to the origin (0,0)
+                """
+                return x**2 + y **2
 
-        def topKFrequent(self, words: List[str], k: int) -> List[str]:
-            d = collections.Counter(words)
-            heap = list()
+            def __init__(self, point):
+                # coordinate tuple (x, y)
+                self.point = point
 
-            for key, cnt in d.items():
-                if len(heap) < k:
-                    heapq.heappush(heap, Element(key, cnt))
-                else:
-                    e = Element(key, cnt)
-                    if heap[0] < e:
-                        heapq.heapreplace(heap, e)
+            def __eq__(self, other):
+                return self.distance(*self.point) == self.distance(*other.point)
 
-            ret = list()
-            while heap:
-                ret.append(heapq.heappop(heap).key)
-            return ret[::-1]
-        ```
-  * 373: **Find K Pairs** with Smallest Sums (M)
-    * Approach1: Brute Force, Time:O(nm), Space:O(k)
-      * Python
-        ```python
-        class Element(object):
-          def __init__(self, pair):
-              self.pair = pair
+            def __lt__(self, other):
+                """
+                reverse the operator for min heap
+                """
+                return self.distance(*self.point) > self.distance(*other.point)
 
-          # for max heap
-          def __lt__(self, other):
-              return (self.pair[0] + self.pair[1]) > (other.pair[0] + other.pair[1])
+            def __gt__(self, other):
+                """
+                reverse the operator for min heap
+                """
+                return self.distance(*self.point) < self.distance(*other.point)
 
-          def __repr__(self):
-              return str(self.pair)
+            def kClosest(self, points: List[List[int]], K: int) -> List[List[int]]:
+                max_heap = []
+                for p in points:
+                    e = Element(p)
+                    #print(e, e.distance(*e.point))
+                    if len(max_heap) < K:
+                        heapq.heappush(max_heap, e)
+                    elif e > max_heap[0]:
+                        """
+                        heapq is min heap, reverse the operator
+                        """
+                        heapq.heapreplace(max_heap, e)
 
-        def kSmallestPairs(self, nums1: List[int], nums2: List[int], k: int) -> List[List[int]]:
-            heap = []
+                return [e.point for e in max_heap]
+            ```
+      * Approach3: Quick select, Time:O(n), Space:O(n)
+        * Python
+          ```python
+          class Element(object):
 
-            for n1 in nums1:
-                for n2 in nums2:
-                    n_pair = (n1, n2)
-                    if len(heap) < k:
-                        heapq.heappush(heap, Element(n_pair))
-                        continue
+            __slots__ = 'point'
 
-                    cur_max_pair = heap[0].pair
-                    if (n_pair[0] + n_pair[1]) < (cur_max_pair[0] + cur_max_pair[1]):
-                        heapq.heapreplace(heap, Element(n_pair))
+            @staticmethod
+            def distance(x, y):
+                """
+                Euclidean distance to the origin (0,0)
+                """
+                return x**2 + y **2
+
+            def __init__(self, point):
+                # coordinate tuple (x, y)
+                self.point = point
+
+            def __le__(self, other):
+                return self.distance(*self.point) <= self.distance(*other.point)
+
+          class Solution:
+              def partition(self, array, start, end):
+                  ran = random.randint(start, end)
+                  pivot = end
+                  array[pivot], array[ran] = array[ran], array[pivot]
+
+                  border = start
+                  for cur in range(start, end):
+                      if array[cur] <= array[pivot]:
+                          array[cur], array[border] = array[border], array[cur]
+                          border += 1
+
+                  array[border], array[pivot] = array[pivot], array[border]
+                  return border
+
+              def quick_select(self, array, start, end, k_smallest):
+                  while start <= end:
+                      p = self.partition(array, start, end)
+                      if p == k_smallest:
+                          break
+                      elif p < k_smallest:
+                          start = p + 1
+                      else:
+                          end = p - 1
+
+              def kClosest(self, points: List[List[int]], K: int) -> List[List[int]]:
+                  array = [Element(p) for p in points]
+                  self.quick_select(array=array,
+                                    start=0,
+                                    end=len(array)-1,
+                                    k_smallest=K-1)
+
+                  res = []
+                  for e in array:
+                      res.append(e.point)
+                      if len(res) == K:
+                          break
+
+                  return res
+            ```
+  * Stream
+    * 703: **Kth Largest** Element in a Stream
+    * 295: Find **Median** from Data Stream (H)
+      * Approach1: Insertion Sort, Time:O(n), Space:O(n)
+        * Time: O(n)
+          * add num: O(n)
+            * search: O(logn), binary search to find correct position takes
+            * insertion: O(n), since elements have to be shifted inside the container
+          * find median: O(1)
+        * Python
+          ```python
+          class MedianFinder:
+            def __init__(self):
+                self.nums = []
+
+            def addNum(self, num: int) -> None:
+                self.nums.append(num)
+                # from insert-1 to 0
+                for i in range(len(self.nums)-2, -1, -1):
+                    if self.nums[i] > self.nums[i+1]:
+                        self.nums[i], self.nums[i+1] = self.nums[i+1], self.nums[i]
                     else:
                         break
 
-            return [e.pair for e in heap]
+            def findMedian(self) -> float:
+                n = len(self.nums)
+
+                if n == 0:
+                    return None
+
+                if n % 2: # odd
+                    return self.nums[n//2]
+                else: # even
+                    return (self.nums[n//2] + self.nums[n//2-1]) / 2
+                ```
+      * Approach2: 2 heaps, Time:O(n), Space:O(n)
+        * two heaps:
+          * max heap (lo): A max-heap lo to store the smaller half of the numbers
+          * min heap (hi): A min-heap hi to store the larger half of the numbers
+          * This leads us to a huge point of pain in this approach: **balancing the two heaps**!
+        * The concept is similar to median of 2 sorted array
+        * lo (max heap) is allowed to hold n + 1 elements, while hi can hold n elements
+          * example:
+            * for 2n element, lo holds n, hi hold n as well.
+            * for 2n+1 elements, lo hold n+1, hi hold n.
+        * Python
+          ```python
+          class MedianFinder:
+            def __init__(self):
+                self.lo = []  # max-heap, keep the smaller half of the numbers
+                self.hi = []  # min-heap, keep the larger half of the number
+
+            def addNum(self, num: int) -> None:
+                # push to lo
+                if len(self.lo) == len(self.hi):
+                    pop = heapq.heappushpop(self.hi, num)
+                    # revert the number to transfer min-heap to max-heap
+                    heapq.heappush(self.lo, -pop)
+
+                # push to hi
+                else: # len(self.lo) > len(self.hi)
+                    # revert the number to transfer min-heap to max-heap
+                    pop = -heapq.heappushpop(self.lo, -num)
+                    heapq.heappush(self.hi, pop)
+
+            def findMedian(self) -> float:
+
+                if len(self.lo) == len(self.hi):
+                    return  (-self.lo[0] + self.hi[0]) / 2
+                else:
+                    return -self.lo[0]
         ```
-    * Approach2: Use Matrix to simulate merge k sorted list, Time:O(klogn), Space:O(min(k,n))
-      * Example:
-        * nums1 = [1,3,5]
-        * nums2 = [2,4,6]
-        * list1: (1,2) -> (1,4) -> (1,6)
-        * list2: (3,2) -> (3,4) -> (3,6)
-        * list3: (5,2) -> (5,4) -> (5,6)
-      * Python:
-        ```python
-        class Element(object):
-          def __init__(self, r, c, val):
-              self.r = r
-              self.c = c
-              self.val = val
-
-          def __lt__(self, other):
-              return self.val < other.val
-
-          def __repr__(self):
-              return str(self.val)
-
-        def kSmallestPairs(self, nums1: List[int], nums2: List[int], k: int) -> List[List[int]]:
-          if not nums1 or not nums2:
-              return []
-
-          heap = []
-          res = []
-
-          # Use matrix to simulate merge k sorted list
-          # push the heads of the lists
-          # we don't need to push more than k elements
-          for r in range(min(k, len(nums1))):
-            heap.append(Element(r, 0, nums1[r] + nums2[0]))
-          heapq.heapify(heap)
-
-          while heap and len(res) < k:
-              r, c = heap[0].r, heap[0].c
-              if c + 1 < len(nums2):
-                  heapq.heapreplace(heap, Element(r, c+1, nums1[r]+nums2[c+1]))
-              else:
-                  heapq.heappop(heap)
-
-              res.append((nums1[r], nums2[c]))
-
-          return res
-        ```
-  * 295: Find Median from Data Stream (H)
-    * Approach1: Insertion Sort, Time:O(n), Space:O(n)
-      * Time: O(n)
-        * add num: O(n)
-          * search: O(logn), binary search to find correct position takes
-          * insertion: O(n), since elements have to be shifted inside the container
-        * find median: O(1)
-      * Python
-        ```python
-        class MedianFinder:
-          def __init__(self):
-              self.nums = []
-
-          def addNum(self, num: int) -> None:
-              self.nums.append(num)
-              # from insert-1 to 0
-              for i in range(len(self.nums)-2, -1, -1):
-                  if self.nums[i] > self.nums[i+1]:
-                      self.nums[i], self.nums[i+1] = self.nums[i+1], self.nums[i]
-                  else:
-                      break
-
-          def findMedian(self) -> float:
-              n = len(self.nums)
-
-              if n == 0:
-                  return None
-
-              if n % 2: # odd
-                  return self.nums[n//2]
-              else: # even
-                  return (self.nums[n//2] + self.nums[n//2-1]) / 2
-              ```
-    * Approach2: 2 heaps, Time:O(n), Space:O(n)
-      * two heaps:
-        * max heap (lo): A max-heap lo to store the smaller half of the numbers
-        * min heap (hi): A min-heap hi to store the larger half of the numbers
-        * This leads us to a huge point of pain in this approach: **balancing the two heaps**!
-      * The concept is similar to median of 2 sorted array
-      * lo (max heap) is allowed to hold n + 1 elements, while hi can hold n elements
-        * example:
-          * for 2n element, lo holds n, hi hold n as well.
-          * for 2n+1 elements, lo hold n+1, hi hold n.
-      * Python
-        ```python
-        class MedianFinder:
-          def __init__(self):
-              self.lo = []  # max-heap, keep the smaller half of the numbers
-              self.hi = []  # min-heap, keep the larger half of the number
-
-          def addNum(self, num: int) -> None:
-              # push to lo
-              if len(self.lo) == len(self.hi):
-                  pop = heapq.heappushpop(self.hi, num)
-                  # revert the number to transfer min-heap to max-heap
-                  heapq.heappush(self.lo, -pop)
-
-              # push to hi
-              else: # len(self.lo) > len(self.hi)
-                  # revert the number to transfer min-heap to max-heap
-                  pop = heapq.heappushpop(self.lo, -num)
-                  heapq.heappush(self.hi, -pop)
-
-          def findMedian(self) -> float:
-
-              if len(self.lo) == len(self.hi):
-                  return  (-self.lo[0] + self.hi[0]) / 2
-              else:
-                  return -self.lo[0]
-        ```
-  * 630. Course Schedule III (H)
-    * Ref:
-      * https://leetcode.com/problems/course-schedule-iii/discuss/104847/Python-Straightforward-with-Explanation
   * 313: Super Ugly Numbe (M)
   * 218: The Skyline Problem (H)
+    * Ref:
+      * https://briangordon.github.io/2014/08/the-skyline-problem.html
 ### Cache
   * 146: LRU Cache (M)
     * Note:
@@ -8365,6 +8871,130 @@ Table of Content
             max_path = 0
             dfs(root, 1)
             return max_path
+          ```
+    * 617: Merge Two Binary Trees
+      * Description:
+        * You need to **merge them into a new binary tree**. The merge rule is that if two nodes overlap, then sum node values up as the new value of the merged node. Otherwise, the NOT null node will be used as the node of new tree.
+      * Approach1: Iterative (reuse existing node), Time:O(n), Space:O(n)
+        * Python
+          ```python
+          def mergeTrees(self, t1: TreeNode, t2: TreeNode) -> TreeNode:
+
+            if not t1 and not t2:
+                return None
+
+            if not t1:
+                return t2
+
+            if not t2:
+                return t1
+
+            root = TreeNode(0)
+            s = [(root, t1, t2)]
+
+            while s:
+                """
+                At least one tree exists
+                """
+                cur, t1, t2 = s.pop()
+
+                if t1:
+                    cur.val += t1.val
+
+                if t2:
+                    cur.val += t2.val
+
+                if not t1:
+                    cur.left, cur.right = t2.left, t2.right
+                    continue
+
+                if not t2:
+                    cur.left, cur.right = t1.left, t1.right
+                    continue
+
+                # if t1 and t2
+                if t1.left or t2.left:
+                    cur.left = TreeNode(0)
+                    s.append((cur.left, t1.left, t2.left))
+
+                if t1.right or t2.right:
+                    cur.right = TreeNode(0)
+                    s.append((cur.right, t1.right, t2.right))
+
+            return root
+
+          ```
+      * Approach2: Iterative (create a new tree), Time:O(n), Space:O(n)
+        * Python
+          ```python
+          def mergeTrees(self, t1: TreeNode, t2: TreeNode) -> TreeNode:
+            if not t1 and not t2:
+                return None
+
+            root = TreeNode(0)
+            s = [(root, t1, t2)]
+
+            while s:
+                """
+                At least one tree exists
+                """
+                cur, t1, t2 = s.pop()
+
+                l_t1 = r_t1 = None
+                l_t2 = r_t2 = None
+
+                if t1:
+                    cur.val += t1.val
+                    l_t1 = t1.left
+                    r_t1 = t1.right
+
+                if t2:
+                    cur.val += t2.val
+                    l_t2 = t2.left
+                    r_t2 = t2.right
+
+                if l_t1 or l_t2:
+                    cur.left = TreeNode(0)
+                    s.append((cur.left, l_t1, l_t2))
+
+                if r_t1 or r_t2:
+                    cur.right = TreeNode(0)
+                    s.append((cur.right, r_t1, r_t2))
+
+            return root
+          ```
+      * Approach3: Recursive (create a new tree), Time:O(n), Space:O(n)
+        * Python
+          ```python
+          def mergeTrees(self, t1: TreeNode, t2: TreeNode) -> TreeNode:
+            def merge_tree(cur, t1, t2):
+                l_t1 = r_t1 = None
+                l_t2 = r_t2 = None
+
+                if t1:
+                    cur.val += t1.val
+                    l_t1 = t1.left
+                    r_t1 = t1.right
+
+                if t2:
+                    cur.val += t2.val
+                    l_t2 = t2.left
+                    r_t2 = t2.right
+
+                if l_t1 or l_t2:
+                    cur.left = TreeNode(0)
+                    merge_tree(cur.left, l_t1, l_t2)
+
+                if r_t1 or r_t2:
+                    cur.right = TreeNode(0)
+                    merge_tree(cur.right, r_t1, r_t2)
+
+            if not t1 and not t2:
+                return None
+
+            root = TreeNode(0)
+            merge_tree(root, t1, t2)
+            return root
           ```
     * 331: Verify Preorder Serialization of a Binary Tree	(M)
   * **Inorder**
@@ -10764,6 +11394,7 @@ Table of Content
     * 255: Verify Preorder Sequence in Binary Search Tree (M)
       * See Stack and Queue
     * 333: Largest BST Subtree (M)
+    * 729: My Calendar I
     * 099: **Recover** Binary Search Tree (H)
   * **Other**:
     * 156: Binary Tree Upside Down (M)
@@ -14643,6 +15274,12 @@ Table of Content
     * Add numbers
       * 002: Add Two Numbers (M)
       * 369: Plus One Linked List (M)
+  * Stack and Queue
+    * 155: Min Stack (E)
+    * 716: Max Stack (E)
+    * 394: Decode String (M)
+    * 255: Verify Preorder Sequence in Binary Search Tree (M)
+    * 341: Flatten Nested List Iterator (M)
   * Tree:
     * PreOrder:
       * 111: **Minimum Depth** of Binary Tree	(E)
@@ -14691,7 +15328,20 @@ Table of Content
   * Trie (Prefix Tree)
     * 211: Add and Search Word - Data structure design (M)
   * Heap
-    * 692: Top K Frequent Words (M)
+    * Merge k Sorted Lists
+      * 023: Merge k Sorted Lists (H)
+      * 378: **Kth Smallest Element** in a Sorted Matrix (M)
+      * 373: **Find K Pairs** with Smallest Sums (M)
+    * Schedule
+      * 253: Meeting Rooms II (M)
+      * 1094: Car Pooling (M)
+      * 1109: Corporate Flight Bookings (M)
+    * Kth
+      * 703: **Kth Largest** Element in a Stream
+      * 215: **Kth Largest** Element in an Array
+        * quick select
+      * 973: K Closest Points to Origin
+    * 295: Find **Median** from Data Stream (H)
   * BackTracking
     * 022: Generate Parentheses (M)
     * 077: Combinations (M)
