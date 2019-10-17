@@ -1390,7 +1390,7 @@ Table of Content
       * Approach2: Chunked Transfer Encoding
   * Text
     * 068: Text Justification (H)
-  * **Edit Distance**
+  * Edit Distance
     * 161: One Edit Distance (M)
        * Notice the **zero edit distance cases**.
        * Approach1: Time O(n+m), Space (1):
@@ -1399,17 +1399,10 @@ Table of Content
          * Python
           ```python
           def isOneEditDistance(self, s: str, t: str) -> bool:
-            """
-            case1: Insert a character into s to get t
-            case2: Delete a character from s to get t
-            case3: Replace a character of s to get t
-            """
             diff = len(s) - len(t)
             if abs(diff) >= 2:
                 return False
 
-            # find the short and long strings
-            # case2 can be merged to case1
             same_len = False
             if diff < 0:
                 short, long = s, t
@@ -1419,146 +1412,55 @@ Table of Content
             else:
                 short, long = t, s
 
-            # traverse the short one
-            i = j = 0
+            is_one_edit = True
             edit_cnt = 0
+            i = j = 0
             while i < len(short):
                 if short[i] == long[j]:
-                    i += 1
+                    i, j = i+1, j+1
+                    continue
+
+                if edit_cnt != 0:
+                    is_one_edit = False
+                    break
+
+                edit_cnt += 1
+                if same_len:  # edit operation
+                    i, j = i+1, j+1
+                else:         # insert operation
                     j += 1
-                else:
-                    if edit_cnt:
-                        return False
-                    edit_cnt += 1
 
-                    # This is case3
-                    if same_len:
-                        i += 1
-                        j += 1
-                    # This is case 1 and case2
-                    else:
-                        j += 1
+            if same_len and edit_cnt == 0:
+                is_one_edit = False
 
-            # zero edit distance case
-            if same_len and not edit_cnt:
-                return False
-
-            # exactly one edit distance
-            return True
+            return is_one_edit
           ```
     * 072: Edit Distance (H)
       * See DP
-  * **SubString**
-     * 028: Implement **strStr** (E)
-       * Find Sub-String
-       * m is the length of txt and
-       * n is the length of the pattern string.
-       * Approach1: Brute Force, Time: O(mn), Space(1)
-         * Python Solution
-         ```python
-         def strStr(self, haystack: str, needle: str) -> int:
-            txt = haystack
-            pattern = needle
-            res = not_found = -1
-
-            if txt == "" and pattern == "":
-                return 0
-
-            if txt and not pattern:
-                return 0
-
-            for i in range(len(txt)-len(pattern)+1):
-                t = i
-                p = 0
-                while p < len(needle):
-                    if txt[t] != pattern[p]:
-                        break
-                    t += 1
-                    p += 1
-
-                if p == len(pattern):
-                    res = t - p
-                    break
-
-            return res
-         ```
-       * Approach2: **KMP (substring match)**, Time: O(m+n), Space: O(n)
-         * Reference:
-           * [Concept](https://www.youtube.com/watch?v=GTJr8OvyEVQ)
-             * **Reuse the longest common prefix suffix for next pattern searching**.
-               * **The current suffix range is the next prefix range**.
-                 * please see the figure below
-           * [The LPS table](http://jakeboxer.com/blog/2009/12/13/the-knuth-morris-pratt-algorithm-in-my-own-words/)
-             * Definiton of **Proper Prefix** and **Proper Suffix**
-               * For a pattern: "Snape"
-                 * The **Proper Prefix** would be:
-                   * S, Sn, Sna, Snap
-                 * The **Proper Suffix** would be:
-                   * nape, ape, pe, e
-             * Definition of the value in prefix suffix table
-               * **The length of the longest proper prefix** in the (sub)pattern that matches a proper suffix in the same (sub)pattern.
-           * Example
-             * ![KMP example](./image/algo/KMP.png)
-               * When un-macth happends, **the max reusable string range for next round is in suffix range**.
-               * Seach from LPS array and find the proper start position of pattern comparison pointer (in this example, index 3).
-         * Python Solution
-           ```python
-           def get_lps(self, pattern):
-            lps = [None] * len(pattern)
-            lps[0] = 0
-            p = 0  # prefix pointer
-            s = 1  # suffix pointer
-
-            while s < len(pattern):
-                if pattern[s] == pattern[p]:
-                    p += 1
-                    lps[s] = p  # set index+1 of p to s
-                    s += 1
-                else:
-                    if p:
-                        # reuse the prefix string that has been scanned.
-                        # The length of the longest common prefix suffix
-                        # are put in lps[p-1]
-                        p = lps[p-1]
-                    else:
-                        # do not match anything
-                        lps[s] = 0
-                        s += 1
-
-           def strStr(self, haystack: str, needle: str) -> int:
-            txt = haystack
-            pattern = needle
-            res = not_found = -1
-
-            if txt == "" and pattern == "":
-                return 0
-
-            if txt and not pattern:
-                return 0
-
-            lps = self.get_lps(pattern)
-            t = p = 0
-
-            while t < len(txt):
-                if txt[t] == pattern[p]:
-                    t += 1
-                    p += 1
-                    if p == len(pattern):
-                        res = t - p
-                        break
-                else:
-                    if p:
-                        # reuse the prefix string that has been scanned.
-                        # The length of the longest common prefix suffix
-                        # are put in lps[p-1]
-                        p = lps[p-1]
-                    else:
-                        # do not match anything
-                        t += 1
-
-            return res
-           ```
+  * SubString
+     * 459: Repeated Substring Pattern
+       * Approach1: Brute Force, Time:(n^2), Space:O(1)
+       * Approach2: Time:O(n), Space:O(n)
+         * Ref:
+           * https://leetcode.com/problems/repeated-substring-pattern/discuss/94334/Easy-python-solution-with-explaination
+         * If the string S has repeated block, it could be described in terms of pattern.
+           * S = SpSp (For example, S has two repeatable block at most)
+           * If we repeat the string, then SS=SpSpSpSp.
+           * Destroying first and the last pattern by removing each character, we generate a new S2=SxSpSpSy.
+           * If the string has repeatable pattern inside, S2 should have valid S in its string.
+         * Python
+          ```python
+          def repeatedSubstringPattern(self, s: str) -> bool:
+            return s in (2 * s)[1:-1]
+          ```
+     * 030: Substring with Concatenation of All Words (H)
+     * 395: Longest Substring with **At Least K Repeating** Characters (M)
+     * 340: Longest Substring with At Most K Distinct Characters (H)
+     * 159: Longest Substring with At Most Two Distinct Characters (H)
+  * Sliding Window:
      * 003:	Longest Substring **Without Repeating** Characters (M)
+       * Description:
+         * Given a string, find the length of the longest substring without repeating characters.
        * Approach1: Brute Force, Time:O(n^2), Space:O(n)
          * Iterative all pairs and use hash table to keep previous values
            * [1], [1,2], [1,2,3], # start with index 0
@@ -1648,6 +1550,7 @@ Table of Content
                   c = s[end]
 
                   if c in d and d[c] >= start:
+                      # move the left boundary
                       start = d[c] + 1
 
                   max_len = max(max_len, end-start+1)
@@ -1657,45 +1560,9 @@ Table of Content
               return max_len
             ```
      * 076: Minimum Window Substring (H)
-       * Approach1: Brute Force: Time:O(m^2+n), Space:O(m+n)
-         * Time:
-           * Generate Hash Table pattern: O(n)
-           * Compare all pairs : O(m^2)
-         * Find all paris
-           * [1], [1,2], [1,2,3], # start with index 0
-           * [2], [2,3]           # start with index 1
-           * [3]                  # start with index 2
-         * Python Solution:
-           ```python
-           def minWindow(self, s, t):
-            if not t or not s:
-                return ""
-
-            # substring length, start and end
-            res = [float('inf'), None, None]
-            counter_t = collections.Counter(t)
-            desired_formed = len(counter_t)
-
-            for start in range(len(s)):
-                formed = 0
-                counter_s = collections.defaultdict(int)
-                for end in range(start, len(s)):
-                    c = s[end]
-
-                    counter_s[c] += 1
-                    if counter_s[c] == counter_t[c]:
-                        formed += 1
-
-                    if formed == desired_formed:
-                        w_len = end - start + 1
-                        # print(start, end, s[start:end+1])
-                        if w_len < res[0]:
-                            res[0], res[1], res[2] = w_len, start, end
-
-                        break # break since we want to find the minimum one
-
-             return "" if res[0] == float('inf') else s[res[1]: res[2]+1]
-           ```
+       * Description:
+         * Given a string S and a string T, find the minimum window in S which will contain all the characters in T in complexity O(n).
+       * Approach1: Brute Force, Time:(n^2), Space:O(1)
        * Approach2: Sliding Window: Time:O(m+n), Space:O(m)
          * Time: O(m+n)
            * Generate Hash Table for Pattern: O(n)
@@ -1730,92 +1597,353 @@ Table of Content
          * Python
             ```python
             def minWindow(self, s, t):
-              if not t or not s:
-                  return ""
+              txt, pattern = s, t
 
-              # substring length, start and end
-              res = [float('inf'), None, None]
-              counter_t = collections.Counter(t)
+              if not txt or not pattern:
+                  return ""
 
               """
               formed is used to keep track of how many unique characters in t are present in the
               current window in its desired frequency.
               e.g. if t is "AABC" then the window must have two A's, one B and one C.
-                  Thus formed would be = 3 when all these conditions are met.
+                    Thus formed would be = 3 when all these conditions are met.
               """
-              cur_formed = 0
-              desired_formed = len(counter_t)
-              counter_s = collections.defaultdict(int)
+              COUNTER_P = collections.Counter(pattern)
+              FORMED_P = len(COUNTER_P)
+
+              counter_t = collections.defaultdict(int)
+              formed_t = 0
+
+              UPPER_BOUND = len(s) + 1
+              res = [UPPER_BOUND, None, None]
+
               start = end = 0
+              while end < len(txt):
+                  c = txt[end]
+                  if c in COUNTER_P:
+                      counter_t[c] += 1
+                      if counter_t[c] == COUNTER_P[c]:
+                          formed_t += 1
 
-              while end < len(s):
-                  c = s[end]
+                  """
+                  current window meets the requiremrnt
+                  """
+                  while start <= end and formed_t == FORMED_P:
+                      window_len = end - start + 1
+                      if window_len < res[0]:
+                          res[0], res[1], res[2] = window_len, start, end
 
-                  if c in counter_t:
-                      counter_s[c] += 1
-                      if counter_s[c] == counter_t[c]:
-                          cur_formed += 1
-
-                  # start == end means len == 1
-                  while start <= end and cur_formed == desired_formed:
-                      c_start = s[start]
-                      w_len = end - start + 1
-                      # update
-                      if w_len < res[0]:
-                          res[0], res[1], res[2] = w_len, start, end
-
-                      if c_start in counter_t:
-                          counter_s[c_start] -= 1
-                          if counter_s[c_start] < counter_t[c_start]:
-                              cur_formed -= 1
+                      # try to shrink the window
+                      r_c = txt[start]
+                      if r_c in COUNTER_P:
+                          counter_t[r_c] -= 1
+                          if counter_t[r_c] < COUNTER_P[r_c]:
+                              formed_t -= 1
                       start += 1
 
                   end += 1
 
-              return "" if res[0] == float('inf') else s[res[1]: res[2]+1]
+              return "" if res[0] == UPPER_BOUND else s[res[1]: res[2]+1]
             ```
-     * 030: Substring with Concatenation of All Words (H)
-     * 395: Longest Substring with **At Least K Repeating** Characters (M)
-     * 340: Longest Substring with At Most K Distinct Characters (H)
-     * 159: Longest Substring with At Most Two Distinct Characters (H)
-  * **Palindrome**
-     * 009: Palindrome **Number** (E)
-       * Approach1: Covert to string, Time:O(n), Space:O(n)
+     * 209: Minimum Size Subarray Sum (M)
+        * Description:
+          * Given an array of n positive integers and a positive integer s.
+          * Find the **minimal length of a contiguous subarray of which the sum ≥ s**.
+        * Approach1: Brute Force, Time:O(n^2), Space:O(1)
+          * Python
+            ```python
+            def minSubArrayLen(self, s: int, nums: List[int]) -> int:
+              if not nums:
+                return 0
+
+              min_len = float('inf')
+              for start in range(len(nums)):
+                  acc = 0
+                  for i in range(start, len(nums)):
+                      acc += nums[i]
+                      if acc >= s:
+                          min_len = min(min_len, i-start+1)
+                          break
+
+              if min_len == float('inf'):
+                min_len = 0
+
+              return min_len
+            ```
+        * Approach2: Binary Search, Time:O(nlogn), Space:O(n)
+          * binary search:
+            * 1. create a memo, memo[i] = memo[i-1] + nums[i]
+            * 2. for i in range(0, n):
+              * find the minimum j where:
+                * memo[j] - memo[i] >= target
+                * memo[j] >= memo[i] + target
+                  * mid >= memo[i] + target
+                    * r = mid - 1
+                  * mid < memo[i] + target
+                    * l = mid + 1
+                  * return left
+        * Approach3: Sliding Window, Time:O(n), Space:O(1)
+          * Python
+            ```python
+            def minSubArrayLen(self, s: int, nums: List[int]) -> int:
+              if not nums:
+                  return 0
+
+              UPPER_BOUND = len(nums) + 1
+              min_len = UPPER_BOUND
+              start = end = 0
+              acc = 0
+
+              while end < len(nums):
+                  acc += nums[end]
+
+                  while start <= end and acc >= s:
+                      w_len = end - start + 1
+                      min_len = min(min_len, w_len)
+                      acc -= nums[start]
+                      start += 1
+
+                  end += 1
+
+              return 0 if min_len == UPPER_BOUND else min_len
+            ```
+  * KMP:
+    * Reference:
+      * [Concept](https://www.youtube.com/watch?v=GTJr8OvyEVQ)
+        * **Reuse the longest common prefix suffix for next pattern searching**.
+          * **The current suffix range is the next prefix range**.
+            * please see the figure below
+      * [The LPS table](http://jakeboxer.com/blog/2009/12/13/the-knuth-morris-pratt-algorithm-in-my-own-words/)
+        * Definiton of **Proper Prefix** and **Proper Suffix**
+          * For a pattern: "Snape"
+            * The **Proper Prefix** would be:
+              * S, Sn, Sna, Snap
+            * The **Proper Suffix** would be:
+              * n at position 1
+              * n, na at position 2
+              * n, na, nap at position 3
+              * n ,na nap, nape at position 4
+        * Definition of the value in prefix suffix table
+          * **The length of the longest proper prefix** in the (sub)pattern that matches a proper suffix in the same (sub)pattern.
+      * Example
+        * ![KMP example](./image/algo/KMP.png)
+          * When un-macth happends, **the max reusable string range for next iteration is in suffix range**.
+          * Seach from LPS array and find the proper start position of pattern comparison pointer (in this example, index 3).
+    * 028: Implement **strStr** (E)
+      * Approach1: Brute Force, Time: O(mn), Space(1)
          * Python Solution
+         ```python
+         def strStr(self, haystack: str, needle: str) -> int:
+            txt, pattern = haystack, needle
+            res = not_found = -1
+
+            if not txt and not pattern:
+                return 0
+
+            if not pattern:
+                return 0
+
+            if len(pattern) > len(txt):
+                return not_found
+
+            for start in range(len(txt)-len(pattern)+1):
+                t, p = start, 0
+                while p < len(pattern):
+                    if txt[t] != pattern[p]:
+                        break
+                    t, p = t+1, p+1
+                    if p == len(pattern):
+                        res = t - len(pattern)
+
+                if res != not_found:
+                    break
+
+            return res
+         ```
+      * Approach2: **KMP (substring match)**, Time: O(m+n), Space: O(n)
+         * Python
+           ```python
+           class Solution:
+            def get_lps(self, pattern):
+                if len(pattern) == 1:
+                    return [0]
+
+                lps = [0] * len(pattern)
+                p, s = 0, 1
+                while s < len(lps):
+                    if pattern[p] == pattern[s]:
+                        p += 1
+                        lps[s] = p
+                        s += 1
+                    else:
+                        if p == 0:
+                            """
+                            do not match anything
+                            lps[s] = 0
+                            """
+                            s += 1
+                        else:
+                          """
+                          Reuse the prefix string that has been scanned.
+                          The length of the longest common prefix suffix
+                          are put in lps[p-1]
+                          """
+                          p = lps[p-1]
+
+                return lps
+
+              def strStr(self, haystack: str, needle: str) -> int:
+                  txt, pattern = haystack, needle
+                  res = not_found = -1
+
+                  if not txt and not pattern:
+                      return 0
+
+                  if not pattern:
+                      return 0
+
+                  if len(pattern) > len(txt):
+                      return not_found
+
+                  lps = self.get_lps(pattern)
+                  t = p = 0
+                  while t < len(txt):
+                      if txt[t] == pattern[p]:
+                          t, p = t+1, p+1
+                          if p == len(pattern):
+                              res = t - len(pattern)
+                              break
+                      else:
+                          if p == 0:
+                              t += 1
+                          else:
+                              p =lps[p-1]
+
+                  return res
+            ```
+    * 214:**Shortest** Palindrome (H)
+       * Description:
+         * Given a string s, you are **allowed to convert it to a palindrome by adding characters in front of it**. Find and return the shortest palindrome you can find by performing this transformation.
+       * Approach1: Brute Force, Time:O(n^2), Space:O(n)
+         * Reverse the string
+         * Find the **longest common prefix of the str and suffix of reverse str**
+         * For example:
+           * str = "abade"
+           * rev = "edaba"
+           * the longest palindrom string would be rev + str = "edabaabade"
+             * The longest common suffix of rev and prefix of str is aba
+             * The shortest palindrom would be "edabaed"
+         * Python
+            ```python
+            def shortestPalindrome(self, s: str) -> str:
+              rev = s[::-1]
+              n = len(s)
+              # default is longest palindrom
+              shortest_palindrom = rev + s
+              for i in range(n):
+                  suffix = rev[i:]
+                  prefix = s[:n-i]
+                  if prefix == suffix:
+                      shortest_palindrom = rev[:i] + s
+                      break
+
+              return shortest_palindrom
+            ```
+       * Approach2: KMP, Time:O(n), Space:O(n)
+         * The problem can be converted to longest palindrome substring **starts from 0**
+         * For example: str = "abade"
+             * The longest palindrom substr substring from 0 is "aba"
+             * The **reverse** the substring after "aba" is "ed"
+             * Append "ed" before the head, 'ed'abadede is the answer.
+         * Use Kmp to speed up finding the **longest common prefix of the str and suffix of reverse str**
+         * For example:
+           * str = "abade"
+           * rev = "edaba"
+           * create a tmp string **str + # rev_str**
+             * '#' is used to force the match in reverse str starts from its first index)
+             ```txt
+             a b a d e # e d a b a
+             0 0 1 0 0 0 0 0 1 2 3 <--- 3 is what we want
+             ```
+          * we know the length of the palindrom substring is 3, final anser would be
+            * ed + abade = edabade
+          * Python:
+            ```python
+            def get_lps(self, pattern):
+              if len(pattern) == 1:
+                  return [0]
+
+              lps = [0] * len(pattern)
+              p, s = 0, 1
+              while s < len(lps):
+                  if pattern[p] == pattern[s]:
+                      p += 1
+                      lps[s] = p
+                      s += 1
+                  else:
+                      if p == 0:
+                          """
+                          do not match anything
+                          lps[s] = 0
+                          """
+                          s += 1
+                      else:
+                        """
+                        Reuse the prefix string that has been scanned.
+                        The length of the longest common prefix suffix
+                        are put in lps[p-1]
+                        """
+                        p = lps[p-1]
+
+              return lps
+
+            def shortestPalindrome(self, s: str) -> str:
+              rev = s[::-1]
+              lps = self.get_lps(f'{s}#{rev}')
+              """
+              The longest suffix of rev and prefix of s is lps[-1]
+              """
+              shortest_palindrom = rev[:len(s)-lps[-1]] + s
+              return shortest_palindrom
+  * Palindrome
+     * 009: Palindrome **Number** (E)
+       * notice the negative value:
+         * example: -121
+         * From left to right, it reads -121. From right to left, it becomes 121-.
+       * Approach1: Covert to string, Time:O(n), Space:O(n)
+         * Python
           ```python
           def isPalindrome(self, x: int) -> bool:
             s = str(x)
-            left, right = 0, len(s)-1
+            l, r = 0, len(s)-1
 
-            res = True
-            while left < right:
-                if s[left] != s[right]:
-                    res = False
+            is_palindrom = True
+            while l < r:
+                if s[l] != s[r]:
+                    is_palindrom = False
                     break
 
-                left += 1
-                right -=1
+                l, r = l+1, r-1
 
-            return res
-          ```
-       * Approach2: Reverse the interger, Time:O(log(n)), Space:O(1)
-         * Python Solution
+            return is_palindrom
+              ```
+        * Approach2: Reverse the interger, Time:O(log(n)), Space:O(1)
+          * Python
             ```python
             def isPalindrome(self, x: int) -> bool:
               if x < 0:
                   return False
 
-              ref_x = x
-
+              ori = x
               rev = 0
               while x:
                   pop = x % 10
                   x = x // 10
                   rev = rev * 10 + pop
 
-              return rev == ref_x
+              return rev == ori
             ```
-     * 125:	**Valid** Palindrome (E)
+     * 125:	Valid Palindrome (E)
        * Approach1: Time O(n), Space O(1)
          * Python Solution
           ```python
@@ -1840,7 +1968,7 @@ Table of Content
           ```
      * 266:	Palindrome **Permutation** (E)
        * Approach1: Time O(n), Space O(c)
-         * Python Solution
+         * Python
             ```python
             def canPermutePalindrome(self, s: str) -> bool:
               d = collections.defaultdict(int)
@@ -1854,7 +1982,27 @@ Table of Content
 
               return odd_cnt <= 1
             ```
+     * 409: Longest Palindrome
+       * Description:
+         * Given a string which consists of lowercase or uppercase letters, **find the length of the longest palindromes that can be built with those letters**.
+         * This is case sensitive, for example "Aa" is not considered a palindrome here.
+       * Approach1: Use Counter, Time:O(n), Space:O(n)
+         * Same idea like 266
+         * Python
+            ```python
+            def longestPalindrome(self, s: str) -> int:
+                counter = collections.Counter(s)
+                longest_len = 0
+                for cnt in counter.values():
+                    if not longest_len % 2 and cnt % 2:
+                      longest_len += 1
+
+                    longest_len += (cnt // 2) * 2
+
+                return longest_len
+            ```
      * 267:	Palindrome **Permutation** II (M)
+       * See backtrack
      * 005: **Longest** Palindromic Substring (M)
        * Ref:
          * https://leetcode.com/problems/longest-palindromic-substring/solution/
@@ -1896,9 +2044,11 @@ Table of Content
            * means s[i:j+1] is a palindrom or not
          * Rules:
            * case1: For i == j:
-             * memo(i,i) = true
+             * one character
+             * memo(i, i) = true
            * case2: For i+1 == j
-             * memo(i,i+1) = (s(i) == s(i+1))
+             * two characters
+             * memo(i, i+1) = (s(i) == s(i+1))
            * case3: For j > i + 1
              * memo(i,j) =  memo(i+1, j-1) and (s(i) == s(i+1))
                * memo(i+1, j-1) is substring result
@@ -1936,6 +2086,7 @@ Table of Content
               """
               # from n-3 to 0, skip length <=2 (case1 and case2)
               for left in range(n-3, -1, -1):
+                  # skip case 1 and case2
                   for right in range(left+2, n):
                       # case3
                       if s[left] == s[right] and memo[left+1][right-1]:
@@ -1951,118 +2102,35 @@ Table of Content
              * a**b**a -> the center is b
            * even case
              * a**bb**a -> the center is between bb
-         * Python Solution
-          ```python
-          def longestPalindrome(self, s: str) -> str:
+         * Python
+            ```python
+            def longestPalindrome(self, s: str) -> str:
+              def expand_center(l, r):
+                  while l >= 0 and r < len(s):
+                      if s[l] != s[r]:
+                          break
+                      l, r = l-1, r+1
 
-            def expand_center(left, right):
-                while left > -1 and right < len(s):
-                    if s[left] != s[right]:
-                        break
+                  l, r = l+1, r-1
+                  return (r-l+1), l, r
 
-                    left -= 1
-                    right += 1
+              res = [float('-inf'), None, None]
+              for center in range(len(s)):
+                  length, l, r = expand_center(center, center)
+                  if length > res[0]:
+                      res[0], res[1], res[2] = length, l, r
 
-                # out of boundary or s[left] != s[right]
-                return left+1, right-1
+                  length, l, r = expand_center(center, center+1)
+                  if length > res[0]:
+                      res[0], res[1], res[2] = length, l, r
 
-            if not s:
-                return ""
-
-            l = r = 0
-            n = len(s)
-
-            for center in range(n):
-                l1, r1 = expand_center(left=center, right=center)
-                if (r1 - l1) > (r - l):
-                    l, r = l1, r1
-
-                l2, r2 = expand_center(left=center, right=center+1)
-                if (r2 - l2) > (r - l):
-                    l, r = l2, r2
-
-            return s[l:r+1]
-            ```
+              return "" if res[0] == float('-inf') else s[res[1]:res[2]+1]
+              ```
        * Approach4: Manacher's Algorithm, Time: O(n), Space: O(n)
          * Ref:
            * https://www.youtube.com/watch?v=nbTSfrEfo6M
      * 214:	**Shortest** Palindrome (H)
-       * The problem can be converted to longest palindrome substring **starts from 0**
-         * For example: str = "abade"
-             * The longest palindrom substr substring from 0 is "aba"
-             * The **reverse** the substring after "aba" is "ed"
-             * Append "ed" before the head, 'ed'abadede is the answer.
-       * Approach1: Brute Force, Time:O(n^2), Space:O(n)
-         * Reverse the string
-         * Find the **longest common prefix of the str and suffix of reverse str**
-         * For example:
-           * str = "abade"
-           * rev = "edaba"
-           * The longest common suffix of rev and prefix of str is "aba"
-           * so the result would be xx + abaxx = xxabaxx
-         * Python Solution
-            ```python
-            def shortestPalindrome(self, s: str) -> str:
-              rev = s[::-1]
-              res = ""
-              for i in range(0, len(s)):
-                  # try to find longest common suffix of rev and prefix of s
-                  if rev[i:] == s[:len(s)-i]:
-                      res = rev[:i] + s
-                      break
-              return res
-            ```
-       * Approach2: KMP, Time:O(n), Space:O(n)
-         * Use Kmp to speed up finding the **longest common prefix of the str and suffix of reverse str**
-         * For example:
-           * str = "abade"
-           * rev = "edaba"
-           * create a tmp string **str + # rev_str**
-             * '#' is used to force the match in reverse str starts from its first index)
-             ```txt
-             a b a d e # e d a b a
-             0 0 1 0 0 0 0 0 1 2 3 <--- 3 is what we want
-             ```
-          * we know the length of the palindrom substring is 3, final anser would be
-            * ed + abade = edabade
-          * Python Solution:
-              ```python
-              def shortestPalindrome(self, s: str) -> str:
-
-                def get_lps(s):
-                    lps = [0] * len(s)
-                    i = 0 # pointer prefix
-                    j = 1 # pointer to suffix
-                    while j < len(s):
-                        if s[j] == s[i]:
-                            i += 1
-                            lps[j] = i
-                            j += 1
-                        else:
-                            if i:
-                                i = lps[i-1]
-                            else:
-                                lps[j] = 0
-                                j += 1
-                    return lps
-
-                if not s:
-                    return ""
-
-                if len(s) == 1:
-                    return s
-
-                # separator is used to force the match in reverse str starts from its first index
-                separator = '#'
-                rev = s[::-1]
-                """
-                string + separator + reverse string
-                """
-                lps = get_lps(f'{s}{separator}{rev}')
-                palindrom_len = lps[-1]
-
-                return rev[:len(s)-palindrom_len] + s
-              ```
+       * See KMP
      * 336:	Palindrome **Pairs** (H)
        * n: number of words
        * k: average length of each word
@@ -2076,7 +2144,7 @@ Table of Content
            * Two words shoud be distinct from each other, how to avoid ?
      * 131:	Palindrome **Partitioning** (M)
      * 132:	Palindrome **Partitioning** II (M)
-  * **Parentheses**
+  * Parentheses
      * 020: Valid Parentheses (E)
        * Valid Cases:
          * [] () {}
@@ -2111,7 +2179,7 @@ Table of Content
      * 241: Different Ways to Add Parentheses (M)
      * 032:	Longest Valid Parentheses (H)
      * 301: Remove Invalid Parentheses (H)
-  * **Subsequence**
+  * Subsequence
     * Definition:
       * A subsequence of a string is a new string which is **formed from the original string by deleting some (can be none) of the characters without disturbing the relative positions of the remaining characters.**
     * 392: Is Subsequence (E)
@@ -2159,7 +2227,7 @@ Table of Content
       * See Binary Search
     * 187: Repeated DNA Sequences (M)
     * 115: Distinct Subsequences (H)
-  * **Reorder**
+  * Reorder
      * 344: Reverse String (E)
        * Python Solution
        ```python
@@ -2325,7 +2393,7 @@ Table of Content
           return "".join(l)
         ```
      * 358: Rearrange String k Distance Apart (H)
-  * **Isomorphism** and **Pattern**
+  * Isomorphism and Pattern
      * 205: **Isomorphic** Strings (E)
         * Example:
           * aabbaa,  112233 -> False
@@ -2379,7 +2447,7 @@ Table of Content
 
           return res
          ```
-  * **Anagram**
+  * Anagram
     * The key is how to calculate **signatures**.
      * 242: Valid Anagram (E)
        * Approach1: Use hash table, Time:O(n), Space:O(n)
@@ -3504,65 +3572,6 @@ Table of Content
 
               d[acc] += 1
             return cnt
-          ```
-    * 209: Minimum Size Subarray Sum (M)
-      * Approach1: Brute Force, Time:O(n^2), Space:O(1)
-        * Python
-          ```python
-          def minSubArrayLen(self, s: int, nums: List[int]) -> int:
-            if not nums:
-              return 0
-
-            min_len = float('inf')
-            for start in range(len(nums)):
-                acc = 0
-                for i in range(start, len(nums)):
-                    acc += nums[i]
-                    if acc >= s:
-                        min_len = min(min_len, i-start+1)
-                        break
-
-            if min_len == float('inf'):
-              min_len = 0
-
-            return min_len
-          ```
-      * Approach2: Binary Search, Time:O(nlogn), Space:O(n)
-        * binary search:
-          * 1. create a memo, memo[i] = memo[i-1] + nums[i]
-          * 2. for i in range(0, n):
-            * find the minimum j where:
-              * memo[j] - memo[i] >= target
-              * memo[j] >= memo[i] + target
-                * mid >= memo[i] + target
-                  * r = mid - 1
-                * mid < memo[i] + target
-                  * l = mid + 1
-                * return left
-      * Approach3: Sliding Window, Time:O(n), Space:O(1)
-        * Python
-          ```python
-          def minSubArrayLen(self, s: int, nums: List[int]) -> int:
-            if not nums:
-                return 0
-
-            min_len = float('inf')
-            start = end = 0
-            acc = 0
-
-            while end < len(nums):
-                acc += nums[end]
-                while start <= end and acc >= s:
-                    min_len = min(min_len, end-start+1)
-                    acc -= nums[start]
-                    start += 1
-
-                end += 1
-
-            if min_len == float('inf'):
-                min_len = 0
-
-            return min_len
           ```
     * 238: **Product** of Array **Except Self** (M)
       * Approach1: Allow to use Division, Time:O(n)
@@ -7158,7 +7167,7 @@ Table of Content
         * pop()
           * Removes the element on top of the stack.
         * top()
-        *   Get the top element.
+          * Get the top element.
         * getMin()
           * Retrieve the minimum element in the stack.
     * Approach1:
@@ -7196,6 +7205,25 @@ Table of Content
               return self.min_s[-1]
         ```
   * 716: Max Stack (E)
+    * Description:
+      * Design a max stack that supports push, pop, top, peekMax and popMax.
+        * push(x)
+          * Push element x onto stack.
+        * pop()
+        *   Remove the element on top of the stack and return it.
+        * top()
+          * Get the element on the top.
+        * peekMax()
+          * Retrieve the maximum element in the stack.
+        * popMax()
+          * Retrieve the maximum element in the stack, and remove it. If you find more than one maximum elements, only remove the top-most one.
+    * Approach1: Use 2 stacks, popMax() would be O(n)
+      * Same concept like 155: Min Stack, use another stack the track the max
+      * For popMax, we know what the current maximum (peekMax) is. We can pop until we find that maximum, then push the popped elements back on the stack.
+      * Ref:
+        * https://leetcode.com/problems/max-stack/discuss/108941/C%2B%2B-using-Two-Stack
+
+      *
   * 232: Implement Queue using Stacks (E)
     * Approach1: Use 2 stacks, push:O(1), pop: average, O(1)
       * Ref:
@@ -7323,6 +7351,10 @@ Table of Content
               return not len(self.queue)
         ```
   * 394: Decode String (M)
+    * Description:
+      * example:
+        * Input:"3[a]2[bc]", Output "aaabcbc".
+        * Input:"3[a2[bc]]", Output "abcbcabcbcabcbc".
     * Approach1: Use 2 stacks: Time:O(kn), Space:O(kn)
       * Ref:
         * https://leetcode.com/problems/decode-string/discuss/87534/Simple-Java-Solution-using-Stack
@@ -7330,8 +7362,8 @@ Table of Content
         ```python
         def decodeString(self, s: str) -> str:
           buf = []
+          prfix_s = []
           cnt_s = []
-          decode_s = []
           ord_0 = ord('0')
 
           i = 0
@@ -7340,28 +7372,27 @@ Table of Content
               if c.isdigit():
                   cnt = 0
                   while s[i].isdigit():
-                      cnt = cnt * 10 + (ord(s[i]) - ord_0)
-                      i+= 1
+                      cnt = cnt * 10 + (ord(s[i]) - ord('0'))
+                      i += 1
                   cnt_s.append(cnt)
 
               elif c == '[':
-                  decode_s.append(buf)
+                  prfix_s.append([''.join(buf)])
                   buf = []
                   i += 1
 
               elif c == ']':
-                  repeat_cnt = cnt_s.pop()
-                  repeat_str = "".join(buf)
-                  buf = decode_s.pop()
-                  for _ in range(repeat_cnt):
-                      buf.append(repeat_str)
+                  cnt = cnt_s.pop()
+                  repeated_str = ''.join(buf)
+                  buf = prfix_s.pop()
+                  buf.append(cnt * repeated_str)
                   i += 1
 
               else:
-                  buf.append(c)
+                  buf.append(s[i])
                   i += 1
 
-            return "".join(buf)
+          return ''.join(buf)
           ```
   * 255: Verify Preorder Sequence in Binary Search Tree (M)
     * Ref:
@@ -8251,6 +8282,23 @@ Table of Content
                 else:
                     return -self.lo[0]
         ```
+  * 480: Sliding Window Median (H)
+    * Approach1: Sorting, Time:O(nk)
+      * Keep the sorted window with size k, for each iteration
+        * Insert the new element (keep the window sorted)
+          * O(k)
+        * Remove the out of window element (keep the window sorted)
+          * O(k)
+        * Complexity would be O(nk)
+    * Approach2: Two Heaps (Lazy Removal)
+      * The idea is the same as Find **Median** from Data Stream.
+      * The only additional requirement is removing the outgoing elements from the window.
+        * At this point, an important thing to notice is the fact that if the two heaps are balanced, only the top of the heaps are actually needed to find the medians. This means that as long as we can somehow keep the heaps balanced, we could also keep some extraneous elements.
+        * **Thus, we can use hash-tables to keep track of invalidated elements. Once they reach the heap tops, we remove them from the heaps. This is the lazy removal technique.**
+      * Ref:
+        * question, how to keep balanced ??
+        * https://leetcode.com/problems/sliding-window-median/discuss/262689/Python-Small-and-Large-Heaps
+
   * 313: Super Ugly Numbe (M)
   * 218: The Skyline Problem (H)
     * Ref:
@@ -8269,6 +8317,9 @@ Table of Content
       * Python
         ```python
         class DLinkedNode(object):
+
+            __slots__ == ['key', 'val', 'prev', 'next']
+
             def __init__(self, key=None, val=None):
                 # key is necessary for key pop operation
                 self.key = key
@@ -8388,6 +8439,9 @@ Table of Content
       * Python
         ```python
         class DLinkedNode(object):
+
+          __slots__ == ['key', 'val', 'freq', 'prev', 'next']
+
           def __init__(self, key=None, val=None, freq=0):
               # key is necessary for key pop operation
               self.key = key
@@ -13156,6 +13210,52 @@ Table of Content
                 perms = new_perms
             return perms
           ```
+    * 267: Palindrome **Permutation** II (M)
+       * Description:
+         * Given a string s, return all the **palindromic permutations** (without duplicates) of it. Return an empty list if no palindromic permutation could be form.
+       * Approach1: backtrack, Time:O(n!), Space:O(n)
+         * Python
+          ```python
+          def generatePalindromes(self, s: str) -> List[str]:
+            def get_odd_cnt_char(counter):
+                odd_cnt = 0
+                odd_char = None
+                for c, cnt in counter.items():
+                    if cnt % 2:
+                        odd_cnt += 1
+                        odd_char = c
+                return odd_cnt, odd_char
+
+            def backtrack(cur, counter):
+                if len(cur) == len(s):
+                    perm.append(''.join(cur))
+                    return
+
+                for c, cnt in counter.items():
+                    if cnt < 2:
+                        continue
+                    counter[c] -= 2
+                    cur.append(c)
+                    cur.appendleft(c)
+                    backtrack(cur, counter)
+                    cur.pop()
+                    cur.popleft()
+                    counter[c] += 2
+
+            counter = collections.Counter(s)
+            odd_cnt, odd_chr = get_odd_cnt_char(counter)
+
+            if odd_cnt > 1:
+                return []
+
+            cur = collections.deque()
+            if odd_cnt == 1:
+                cur.append(odd_chr)
+
+            perm = []
+            backtrack(cur, counter)
+            return perm
+          ```
     * 031: Next Permutation (M)
     * 060: Permutation Sequence (M)
   * 291: Word Pattern II
@@ -15225,22 +15325,12 @@ Table of Content
     * 075: Sort Colors (M)
       * Notice the end conditino of Dutch National Flag Problem
   * String
-    * 038: Count and Say (E)
-    * 392: Is Subsequence (E)
-    * substring
-      * 028: Implement **strStr** (E) (**KMP** algorithm)
-      * 003: Longest Substring Without Repeating Characters (M)
-      * 076: Minimum Window Substring (H)
-    * Anagram
-      * 049: Group Anagrams (M)
-      * 249: Group Shifted Strings (M)
-    * Number and carry:
-      * 168: Excel Sheet Column Title (E)
-      * 013: Romain to Integer (E)
-    * Other:
-      * 014: Longest Common Prefix (E)
-      * 294: Flip Game II (M)
-  * Array
+    * Edit Distance:
+      * all
+    * Sliding Window
+    * KMP
+    * Palindrome
+      * all execept 125: valid Palindrome (E)
     * Container
       * 042: Trapping Rain Water (H)
         * Don't forget why we should include height[i] for left_max and right_max array
