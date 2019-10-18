@@ -1380,7 +1380,7 @@ Table of Content
       * bucket sort:
         * see 347: **Top K Frequent** Elements (M)
 ### String
-  * Remove Duplicate
+  * Remove Duplicate:
     * 316: Remove Duplicate Letters (H)
   * Encode and Decode:
     * 394: Decode String (M)
@@ -1390,7 +1390,7 @@ Table of Content
       * Approach2: Chunked Transfer Encoding
   * Text
     * 068: Text Justification (H)
-  * Edit Distance
+  * **Edit Distance**:
     * 161: One Edit Distance (M)
        * Notice the **zero edit distance cases**.
        * Approach1: Time O(n+m), Space (1):
@@ -1437,8 +1437,10 @@ Table of Content
           ```
     * 072: Edit Distance (H)
       * See DP
-  * SubString
+  * SubString:
      * 459: Repeated Substring Pattern
+       * Description:
+         * Given a non-empty string check if it can be constructed by taking a substring of it and appending multiple copies of the substring together.
        * Approach1: Brute Force, Time:(n^2), Space:O(1)
        * Approach2: Time:O(n), Space:O(n)
          * Ref:
@@ -1457,7 +1459,7 @@ Table of Content
      * 395: Longest Substring with **At Least K Repeating** Characters (M)
      * 340: Longest Substring with At Most K Distinct Characters (H)
      * 159: Longest Substring with At Most Two Distinct Characters (H)
-  * Sliding Window:
+  * **Sliding Window:**
      * 003:	Longest Substring **Without Repeating** Characters (M)
        * Description:
          * Given a string, find the length of the longest substring without repeating characters.
@@ -1707,7 +1709,7 @@ Table of Content
 
               return 0 if min_len == UPPER_BOUND else min_len
             ```
-  * KMP:
+  * **KMP**:
     * Reference:
       * [Concept](https://www.youtube.com/watch?v=GTJr8OvyEVQ)
         * **Reuse the longest common prefix suffix for next pattern searching**.
@@ -1905,7 +1907,7 @@ Table of Content
               """
               shortest_palindrom = rev[:len(s)-lps[-1]] + s
               return shortest_palindrom
-  * Palindrome
+  * **Palindrome**
      * 009: Palindrome **Number** (E)
        * notice the negative value:
          * example: -121
@@ -1982,7 +1984,7 @@ Table of Content
 
               return odd_cnt <= 1
             ```
-     * 409: Longest Palindrome
+     * 409: Longest Palindrome (E)
        * Description:
          * Given a string which consists of lowercase or uppercase letters, **find the length of the longest palindromes that can be built with those letters**.
          * This is case sensitive, for example "Aa" is not considered a palindrome here.
@@ -2002,7 +2004,7 @@ Table of Content
                 return longest_len
             ```
      * 267:	Palindrome **Permutation** II (M)
-       * See backtrack
+       * See backtracking
      * 005: **Longest** Palindromic Substring (M)
        * Ref:
          * https://leetcode.com/problems/longest-palindromic-substring/solution/
@@ -2144,8 +2146,10 @@ Table of Content
            * Two words shoud be distinct from each other, how to avoid ?
      * 131:	Palindrome **Partitioning** (M)
      * 132:	Palindrome **Partitioning** II (M)
-  * Parentheses
+  * **Parentheses**
      * 020: Valid Parentheses (E)
+       * Description:
+         * Given a string containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid.
        * Valid Cases:
          * [] () {}
          * { [ () ] }
@@ -2154,72 +2158,75 @@ Table of Content
          * ))
          * ((
        * Approach1: Use stack, Time:O(n), Space:O(n)
-         * Python Solution
+         * Python
            ```python
-           BRACKET_MAP = {'(': ')', '[': ']', '{': '}'}
-           def is_valid_parentheses(self, s: str) -> bool:
-               if not s:
-                   return True
+           def isValid(self, s: str) -> bool:
+              BRACKET_MAP = {'(': ')', '[': ']', '{': '}'}
+              is_valid = True
+              stack = []
+              for c in s:
+                  if c in BRACKET_MAP:
+                      stack.append(c)
+                  else:
+                      if not stack or c != BRACKET_MAP[stack.pop()]:
+                        is_valid = False
+                        break
 
-               ret = True
-               stack = list()
-               for c in s:
-                   if c in BRACKET_MAP:
-                       stack.append(c)
-                   else:
-                       # can not find the left bracket
-                       if not stack or c != BRACKET_MAP[stack.pop()]:
-                           return False
-
-               # if len(stack) !=0 means that can not find the right bracket
-               return len(stack) == 0
+              return is_valid and len(stack) == 0
            ```
      * 022: Generate Parentheses (M)
        * See backtracking
      * 241: Different Ways to Add Parentheses (M)
      * 032:	Longest Valid Parentheses (H)
      * 301: Remove Invalid Parentheses (H)
-  * Subsequence
+  * **Subsequence**
     * Definition:
       * A subsequence of a string is a new string which is **formed from the original string by deleting some (can be none) of the characters without disturbing the relative positions of the remaining characters.**
     * 392: Is Subsequence (E)
+      * Description:
+        * Check if the pattern is a subsequence of txt
       * Approach1: Iterate pattern, Time:O(n), Space:O(1)
-        * Python Solution
+        * Python
           ```python
           def isSubsequence(self, s: str, t: str) -> bool:
-            if not s:
+            pattern, txt = s, t
+
+            if not pattern:
                 return True
 
-            i = 0
-            res = True
-            for c in s:
-                while i < len(t) and t[i] != c:
-                    i += 1
+            is_subsequence = True
+            j = 0
+            for c in pattern:
+                while j < len(txt) and txt[j] != c:
+                    j += 1
 
-                if i == len(t):  # not found
-                    res = False
+                if j == len(txt):
+                    is_subsequence = False
                     break
+                else:
+                    j += 1
 
-                i += 1
-
-            return res
+            return is_subsequence
           ```
-      * Approach2: Iterate original string, Time:O(n), Space:O(1)
-        * Python Solution
+      * Approach2: Iterate txt, Time:O(n), Space:O(1)
+        * Python
           ```python
-            def isSubsequence(self, s: str, t: str) -> bool:
-              if not s:
-                  return True
+          def isSubsequence(self, s: str, t: str) -> bool:
+            pattern, txt = s, t
 
-              res = False
-              i = j = 0
-              for c in t:
-                  if c == s[i]:
-                      i += 1
-                      if i == len(s):
-                          res = True
-                          break
-              return res
+            if not pattern:
+                return True
+
+            is_subsequence = False
+            i = 0
+            for c in txt:
+                if pattern[i] == c:
+                    i += 1
+                    if i == len(pattern):
+                        is_subsequence = True
+                        break
+
+            return is_subsequence
           ```
     * 1143: Longest Common Subsequence (M)
       * See DP
@@ -2227,9 +2234,13 @@ Table of Content
       * See Binary Search
     * 187: Repeated DNA Sequences (M)
     * 115: Distinct Subsequences (H)
-  * Reorder
+  * **Reorder**
+     * Ref:
+       * https://docs.python.org/3/library/stdtypes.html
+       * isspace, isalpha, isascii(3.7)
      * 344: Reverse String (E)
-       * Python Solution
+       * Approach1: Time:O(n), Space:O()
+       * Python
        ```python
        def reverseString(self, s: List[str]) -> None:
         """
@@ -2237,47 +2248,73 @@ Table of Content
         """
         if len(s) <= 1:
             return
-
         left, right = 0, len(s)-1
-
         while left < right:
             s[left], s[right] = s[right], s[left]
             left += 1
             right -= 1
        ```
      * 541: Reverse String II (E)
-       * You need to **reverse the first k characters for every 2k characters** counting from the start of the string.
-         * example1
-           * input: s = "abcdefg", k = 2
-           * output: "bacdfeg"
+       * Description:
+         * You need to **reverse the first k characters for every 2k characters** counting from the start of the string.
+         * If there are less than k characters left, reverse all of them.
          * example
            * input: s = "abcdefgh", k = 3
            * output: "cbadefhg"
-       * Python Solution
-        ```python
-        def reverseStr(self, s: str, k: int) -> str:
-          def reverse_list(left, right):
-              while left < right:
-                  l[left], l[right] = l[right], l[left]
-                  left += 1
-                  right -= 1
+       * Approach1: Scan From Left to right, Time:O(n), Space:O(1)
+         * Python
+            ```python
+            def reverseStr(self, s: str, k: int) -> str:
+              def reverse(s, l, r):
+                  while l < r:
+                      s[l], s[r] = s[r], s[l]
+                      l, r = l+1, r-1
 
-          if k <= 1 or not s:
-              return s
+              if not s or k == 1:
+                  return s
 
-          l = list(s)
-          n = len(l)
-          left = 0
+              s = list(s)
+              left = right = 0
+              rev = True
+              for right in range(len(s)):
+                  if (right + 1) % k == 0:
+                      if rev:
+                          reverse(s, left, right)
+                      rev = not rev
+                      left = right + 1
 
-          while left < n:
-              right = min(left+k-1, n-1)
-              reverse_list(left, right)
+              if left < len(s) and rev:
+                  reverse(s, left, len(s)-1)
 
-              left = left + 2*k
+              return ''.join(s)
+            ```
+       * Approach2: Jump, Time:O(n), Space:O(1)
+         * Python
+           ```python
+            def reverseStr(self, s: str, k: int) -> str:
+              def reverse(s, l, r):
+                while l < r:
+                    s[l], s[r] = s[r], s[l]
+                    l, r = l+1, r-1
 
-          return ''.join(l)
-        ```
+              if not s or k == 1:
+                  return s
+
+              s = list(s)
+              left = 0
+              n = len(s)
+              while left < n:
+                  right = min(n-1, left + k - 1)
+                  reverse(s, left, right)
+
+                  left += 2*k
+
+              return ''.join(s)
+           ```
      * 151:	Reverse **Words** in a String	(M)
+       * Description:
+         * Given an input string, reverse the string word by word.
+         * 151 has many corners cases.
        * Approach1, from end to the end, Time O(n), Space O(n) (one pass)
          * From end to beginning of the string
          * Python solution
@@ -2339,34 +2376,72 @@ Table of Content
             ```
      * 186:	Reverse **Words** in a String II (M)
        * Approach1, Time:O(n), Space:O(1)
-         * Python Solution
+         * Python
          ```python
-         def reverseWords(self, s: List[str]) -> None:
-          def reverse_list(left, right):
-            while left < right:
-                s[left], s[right] = s[right], s[left]
-                left += 1
-                right -= 1
+        def reverseWords(self, s: List[str]) -> None:
 
-          reverse_list(0, len(s)-1)
+          def reverse(s, l, r):
+              while l < r:
+                  s[l], s[r] = s[r], s[l]
+                  l, r = l+1, r-1
 
-          w_start = 0
-          boundary = len(s)
-          while w_start < boundary:
-              while w_start + 1 < boundary and s[w_start].isspace():
-                  w_start += 1
+          n = len(s)
+          reverse(s, 0, n-1)
+          w_s = 0
+          while w_s < n:
+              while w_s < n and s[w_s].isspace():
+                  w_s += 1
 
-              if s[w_start].isspace():
+              # can not find the start position of the word
+              if w_s == n:
                   break
 
-              w_end = w_start
-              while w_end + 1 < boundary and not s[w_end+1].isspace():
-                  w_end += 1
+              w_e = w_s
+              while w_e+1 < n and not s[w_e+1].isspace():
+                  w_e += 1
 
-              reverse_list(w_start, w_end)
-              # skip the space after w_end
-              w_start = w_end + 2
+              reverse(s, w_s, w_e)
+
+              w_s = w_e + 2
          ```
+     * 557: Reverse **Words** in a String III (E)
+       * Simpler than 186
+       * Description:
+         * example:
+           * Input: "Let's take LeetCode contest"
+           * Output: "s'teL ekat edoCteeL tsetnoc"
+       * Approach1:
+         * Python
+          ```python
+          def reverseWords(self, s: str) -> str:
+            def reverse(s, l, r):
+                while l < r:
+                    s[l], s[r] = s[r], s[l]
+                    l, r = l+1, r-1
+
+            if not s:
+                return s
+
+            s = list(s)
+            n = len(s)
+            w_s = 0
+            while w_s < n:
+
+                while w_s < n and s[w_s].isspace():
+                    w_s += 1
+
+                if w_s == n:
+                    break
+
+                w_e = w_s
+                while w_e + 1 < n and not s[w_e+1].isspace():
+                    w_e += 1
+
+                reverse(s, w_s, w_e)
+                w_s = w_e + 1
+
+          return ''.join(s)
+          ```
      * 345:	Reverse **Vowels** of a String (E)
        * Approach1: Hash Table, Time:O(n), Space:O(k)
        * Python Solution
@@ -2391,6 +2466,34 @@ Table of Content
                 end -= 1
 
           return "".join(l)
+        ```
+     * 917: Reverse Only Letters(E)
+       * The same like 345
+       * Description:
+       * Python
+        ```python
+        def reverseOnlyLetters(self, S: str) -> str:
+          if not S:
+              return S
+
+          s = list(S)
+          n = len(s)
+          l, r = 0, n-1
+
+          while l < r:
+              while l < r and not s[l].isalpha():
+                  l += 1
+
+              while l < r and not s[r].isalpha():
+                  r -= 1
+
+              if l >= r:
+                  break
+
+              s[l], s[r] = s[r], s[l]
+              l, r = l+1, r-1
+
+          return ''.join(s)
         ```
      * 358: Rearrange String k Distance Apart (H)
   * Isomorphism and Pattern
@@ -2483,7 +2586,7 @@ Table of Content
             return d.values()
             ```
        * Approach2: Categorized by **Character Count**, Time: O(nk), Space: O(nk)
-         * Python Solution
+         * Python
             ```python
             def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
               def get_key(s):
@@ -12582,86 +12685,88 @@ Table of Content
 ### Backtracking
   * 294: Flip Game II (M)
   * 022: Generate Parentheses (M)
-     * Approach1-1: Brute Force, Recursive, Time:O(n*n^(2n))
+     * Description:
+       * Given n pairs of parentheses, write a function to generate all combinations of well-formed parentheses.
+     * Approach1-1: Brute Force, Recursive, Time:O(n*2^n)
        * f(n) = f(n-1) + '('  or f(n-1) + ')'
        * Time Complexity:
          * total n^(2n) combination
        * Space Complexity:
-       * Python Solution:
+       * Python:
+          ```python
+          def generateParenthesis(self, n: int) -> List[str]:
+            def valid(cur):
+                bal = 0
+                for bracket in cur:
+                    if bracket == '(':
+                        bal += 1
+                    else:
+                        bal -= 1
+                        if bal < 0:
+                            return False
+                return bal == 0
+
+            def backtrack(cur):
+                if len(cur) == 2*n:
+                    if valid(cur):
+                        res.append("".join(cur))
+                    return
+
+                # case1: f(n) = f(n-1) + '('
+                cur.append('(')
+                backtrack(cur)
+                cur.pop()
+                # case2 : f(n) = f(n-1) + ')'
+                cur.append(')')
+                backtrack(cur)
+                cur.pop()
+
+            res = []
+            cur = []
+            backtrack(cur)
+            return res
+          ```
+     * Approach1-2: Brute Force, Iterative: Time:O(n*2^n)
+       * Python
         ```python
         def generateParenthesis(self, n: int) -> List[str]:
-          def valid(cur):
-              bal = 0
-              for bracket in cur:
-                  if bracket == '(':
-                      bal += 1
-                  else:
-                      bal -= 1
-                      if bal < 0:
-                          return False
-              return bal == 0
+            def valid(cur):
+                bal = 0
+                for bracket in cur:
+                    if bracket == '(':
+                        bal += 1
+                    else:
+                        bal -= 1
+                        if bal < 0:
+                            return False
 
-          def backtrack(cur):
-              if len(cur) == 2*n:
-                  if valid(cur):
-                      res.append("".join(cur))
-                  return
+                return bal == 0
 
-              # case1: f(n) = f(n-1) + '('
-              cur.append('(')
-              backtrack(cur)
-              cur.pop()
-              # case2 : f(n) = f(n-1) + ')'
-              cur.append(')')
-              backtrack(cur)
-              cur.pop()
+            combos = [[]]
+            res = []
+            for _ in range(2*n):
+                combo_len = len(combos)
+                for j in range(combo_len):
+                    combo = combos[j]
+                    copy=combo.copy()
+                    copy.append('(')
+                    combos.append(copy)
+                    combo.append(')')
 
-          res = []
-          cur = []
-          backtrack(cur)
-          return res
+            for combo in combos:
+                if valid(combo):
+                    res.append("".join(combo))
+
+            return res
         ```
-     * Approach1-2: Brute Force, Iterative: Time:O(n*n^(2n))
-       * Python Solution
-       ```python
-       def generateParenthesis(self, n: int) -> List[str]:
-          def valid(cur):
-              bal = 0
-              for bracket in cur:
-                  if bracket == '(':
-                      bal += 1
-                  else:
-                      bal -= 1
-                      if bal < 0:
-                          return False
-
-              return bal == 0
-
-          combos = [[]]
-          res = []
-          for _ in range(2*n):
-              combo_len = len(combos)
-              for j in range(combo_len):
-                  combo = combos[j]
-                  copy=combo.copy()
-                  copy.append('(')
-                  combos.append(copy)
-                  combo.append(')')
-
-          for combo in combos:
-              if valid(combo):
-                  res.append("".join(combo))
-
-          return res
-       ```
      * Approach2-1: Control the left and right, Recursive:
        * Add them only when we know it will remain a valid sequence (cut off the tree)
-       * Python Solution:
+       * Python:
         ```python
         def generateParenthesis(self, n: int) -> List[str]:
           def backtrack(cur, left, right):
               if left == right == n:
-                  partheneses.append(''.join(cur))
+                  parentheses.append(''.join(cur))
                   return
 
               if left < n:
@@ -12675,33 +12780,70 @@ Table of Content
                   cur.pop()
 
           cur = []
-          partheneses = []
+          parentheses = []
           backtrack(cur, left=0, right=0)
 
-          return partheneses
+          return parentheses
         ```
      * Approach2-2: Control the left and right, Iterative:
        * Python Solution:
+          ```python
+          def generateParenthesis(self, n: int) -> List[str]:
+            parentheses = []
+            stack = []
+            # s, left ,right
+            stack.append(('(', 1, 0))
+            while stack:
+                s, left, right = stack.pop()
+                if left == right == n:
+                    parentheses.append(s)
+                    continue
+
+                if left < n:
+                    stack.append((s+'(', left+1, right))
+
+                if right < left:
+                    stack.append((s+')', left, right+1))
+
+            return parentheses
+          ```
+     * Approach3: DP
+       * Ref:
+         * https://leetcode.com/problems/generate-parentheses/discuss/10127/An-iterative-method.
+        ```txt
+        Lets f(n) is a function which is set of valid string with n (matched) parantheses.
+        f(0) = ""
+        f(1) = (f(0))f(0)
+        f(2) = (f(0))f(1) + (f(1))f(0)
+        f(3) = (f(0))f(2) + (f(1))f(1) + (f(2))f(0)
+        f(n) = ( f(0) ) f(n-1) + ( f(1) ) f(n-2) + ( f(2) ) f(n-3) + ...... + ( f(n-1) ) f(0)
+        ```
+      * Python
         ```python
         def generateParenthesis(self, n: int) -> List[str]:
-          res = []
-          stack = []
-          # s, left ,right
-          stack.append(('(', 1, 0))
-          while stack:
-              s, left, right = stack.pop()
-              if left == right == n:
-                  res.append(s)
-                  continue
+          """
+          f(0) = ""
+          f(1) = (f(0))f(0)
+          f(2) = (f(0))f(1) + (f(1))f(0)
+          f(3) = (f(0))f(2) + (f(1))f(1) + (f(2))f(0)
+          f(n) = ( f(0) ) f(n-1) + ( f(1) ) f(n-2) + ( f(2) ) f(n-3) + ...... + ( f(n-1) ) f(0)
+          """
+          parentheses = [[] for i in range(n+1)]
+          parentheses[0].append("")
 
-              if left < n:
-                  stack.append((s+'(', left+1, right))
+          for i in range(1, n+1):
+              for left, right in zip(range(i), reversed(range(i))):
+                  p_left = parentheses[left]
+                  p_right = parentheses[right]
+                  """
+                  p_left and p_right are lists
+                  """
+                  for l in p_left:
+                      for r in p_right:
+                          parentheses[i].append(f'({l}){r}')
 
-              if right < left:
-                  stack.append((s+')', left, right+1))
-
-          return res
-        ```
+          return parentheses[-1]
+          ```
   * **Subset**
     * 078: Subsets (M)
       * Ref:
@@ -12803,19 +12945,16 @@ Table of Content
             ```
         * Python
             ```python
-            def subsets_iter_bit(nums: List[int]) -> List[List[int]]:
-                subs = []
-                subs_len = 2 ** len(nums)
-                num_len = len(nums)
+            def subsets(self, nums: List[int]) -> List[List[int]]:
+              n = len(nums)
+              subs = [[] for i in range(2**n)]
 
-                for sub_idx in range(subs_len):
-                    new_sub = []
-                    for num_idx in range(num_len):
-                        if sub_idx & (1 << num_idx):
-                            new_sub.append(nums[num_idx])
-                    subs.append(new_sub)
+              for sub_idx in range(len(subs)):
+                  for num_idx in range(n):
+                      if sub_idx & 1 << num_idx:
+                          subs[sub_idx].append(nums[num_idx])
 
-                return subs
+              return subs
             ```
     * 090: Subsets II (M)
       * Given a collection of integers that might **contain duplicates**, nums, return all possible subsets (the power set).
@@ -15331,17 +15470,18 @@ Table of Content
     * KMP
     * Palindrome
       * all execept 125: valid Palindrome (E)
-    * Container
-      * 042: Trapping Rain Water (H)
-        * Don't forget why we should include height[i] for left_max and right_max array
-          * example:
-            * [2, 10, 5], for 1th bin, if we do not inlcude 10, the area would be negative.
-    * Jump Game
-      * 045: Jump Game II (H)
-    * 325: Maximum Size Subarray Sum **Equals k** (M)
-    * 560: Subarray Sum **Equals K** (M)
-    * 152: Maximum **Product** Subarray (M)
-    * 134: Gas Station (M)
+    * Parentheses
+      * 020: Valid Parentheses (E)
+      * 022: Generate Parentheses (M)
+    * Subsequence
+      * 392: Is Subsequence (E)
+      * 1143: Longest Common Subsequence (M)
+      * 300: Longest Increasing Subsequence (**LIS**) (M)
+    * Reorder:
+      * 186: Reverse **Words** in a String II (M)
+      * 557: Reverse **Words** in a String III (E)
+      * 345:	Reverse **Vowels** of a String (E)
+  * Array
   * LinkedList
     * **Runner** and **Detect Circle**
       * 142: Linked List Cycle II (M)
