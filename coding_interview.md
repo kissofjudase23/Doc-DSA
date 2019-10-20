@@ -1382,12 +1382,6 @@ Table of Content
 ### String
   * Remove Duplicate:
     * 316: Remove Duplicate Letters (H)
-  * Encode and Decode:
-    * 394: Decode String (M)
-      * See Queue and Stack Section
-    * 271: Encode and Decode Strings (M)
-      * Approach1: Non-ASCII Delimiter
-      * Approach2: Chunked Transfer Encoding
   * Text
     * 068: Text Justification (H)
   * **Edit Distance**:
@@ -2495,39 +2489,184 @@ Table of Content
 
           return ''.join(s)
         ```
+     * 058: Length of Last Word (E)
+       * Approach1: Seach **from the end to the beginning**.
+         * Python
+            ```python
+            def lengthOfLastWord(self, s: str) -> int:
+              cnt = 0
+              for i in range(len(s)-1, -1, -1):
+                  if s[i].isspace():
+                      if cnt:
+                          break
+                  else:
+                      cnt += 1
+
+              return cnt
+            ```
+       * Approach2: Two pointers
+        * Python
+          ```python
+          def lengthOfLastWord(self, s: str) -> int:
+            n = len(s)
+            w_start = n - 1
+            cnt = 0
+            boundary = -1
+            while w_start >= 0:
+                while w_start > boundary and s[w_start].isspace():
+                    w_start -= 1
+
+                if w_start == boundary:
+                    break
+
+                w_end = w_start
+
+                while w_end - 1 > boundary and not s[w_end-1].isspace():
+                    w_end -= 1
+
+                cnt = w_start - w_end + 1
+                break
+
+            return cnt
+        ```
      * 358: Rearrange String k Distance Apart (H)
-  * Isomorphism and Pattern
-     * 205: **Isomorphic** Strings (E)
+  * Encode and Decode:
+    * 038: Count and Say (E)
+      * Description:
+        ```txt
+         1.     1
+         2.     11
+         3.     21
+         4.     1211
+         5.     111221
+         6.     312211
+        ```
+      * Approach1: Two Pointers
+        * Python
+          ```python
+          def countAndSay(self, n: int) -> str:
+            cur = ['1']
+            for _ in range(2, n+1):
+                nxt = []
+                start = 0
+                while start < len(cur):
+                    end = start
+                    while end + 1 < len(cur) and cur[end+1] == cur[start]:
+                        end += 1
+
+                    cnt = end - start + 1
+                    nxt.append(str(cnt))
+                    nxt.append(cur[start])
+                    start = end + 1
+
+                cur = nxt
+
+            return ''.join(cur)
+          ```
+      * Approach2: Cnt and One Pointer
+        * Python
+          ```python
+          def countAndSay(self, n: int) -> str:
+            cur = ['1']
+            for _ in range(2, n+1):
+                nxt = []
+                end = 0
+                while end < len(cur):
+                    cnt = 1
+                    while end + 1 < len(cur) and cur[end+1] == cur[end]:
+                        cnt, end = cnt + 1, end + 1
+
+                    nxt.append(str(cnt))
+                    nxt.append(cur[end])
+                    end += 1
+
+                cur = nxt
+
+            return ''.join(cur)
+          ```
+    * 443: String Compression
+      * Description:
+        * The length after compression must always be smaller than or equal to the original array.
         * Example:
-          * aabbaa,  112233 -> False
-          * aabbaa,  112211 -> True
-        * Approach1, Use Hash Table
+          * 1:
+            * Intput: ["a","a","b","b","c","c","c"]
+            * Output: ["a","3","b","2","c","3"]
+          * 2
+            * Input:  [a]
+            * Output: [a]
+          * 3:
+            * Input: ["a","b","b","b","b","b","b","b","b","b","b","b","b"]
+            * Output:  ["a", "1", "2"]
+          * 4:
+            * Input: ["a","a","a","a","a","b"]
+            * Output: ["a","5", "b"]
+      * Approach1: Time:O(n), Space:O(1)
+        * Python
+          ```python
+          def compress(self, chars: List[str]) -> int:
+            border = 0
+            end = 0
+            while end < len(chars):
+                cnt = 1
+                while end + 1 < len(chars) and chars[end + 1] == chars[end]:
+                    cnt, end = cnt+1, end+1
+
+                chars[border] = chars[end]
+                border += 1
+                if cnt > 1:
+                    """
+                    Input: ["a","b","b","b","b","b","b","b","b","b","b","b","b"]
+                    Output would be ["a", "1", "2"] rather than ["a", "12"]
+                    """
+                    for c in str(cnt):
+                        chars[border] = c
+                        border += 1
+
+                end += 1
+
+            return border
+          ```
+    * 394: Decode String (M)
+      * See Queue and Stack Section
+    * 271: Encode and Decode Strings (M)
+      * Approach1: Non-ASCII Delimiter
+      * Approach2: Chunked Transfer Encoding
+  * **Isomorphism and Pattern**:
+     * 205: **Isomorphic** Strings (E)
+        * Description:
+          * Two strings are isomorphic if the characters in s can be replaced to get t.
+          * All occurrences of a character must be replaced with another character **while preserving the order of characters.**
+          * Example:
+            * aabbaa,  112233 -> False
+            * aabbaa,  112211 -> True
+        * Approach1, Use Dict to track chr positions
           * Use hash Table to keep **last seen index**
-          * Python Solution
+          * Python
             ```python
             def isIsomorphic(self, s: str, t: str) -> bool:
-                if len(s) != len(t):
-                    return False
+              if len(s) != len(t):
+                  return False
 
-                # -1 means that this char does not appear before
-                f = lambda: -1
-                ds = collections.defaultdict(f)
-                dt = collections.defaultdict(f)
+              is_isomorphic = True
 
-                res = True
-                for i in range(len(s)):
-                    if ds[s[i]] != dt[t[i]]:
-                        res = False
-                        break
+              f = lambda: -1
+              d1 = collections.defaultdict(f)
+              d2 = collections.defaultdict(f)
 
-                    ds[s[i]] = dt[t[i]] = i
-                return res
+              for i, (c1, c2) in enumerate(zip(s, t)):
+                  if d1[c1] != d2[c2]:
+                      is_isomorphic = False
+                      break
+
+                  d1[c1] = d2[c2] = i
+
+              return is_isomorphic
             ```
      * 290: Word **Pattern** (E)
        * The same concept as 205
        * Approach1, Use Hash Table
           * Use hash Table to keep **last seen index**
-       * Python Solution
+       * Python
          ```python
          def wordPattern(self, pattern: str, str: str) -> bool:
           if not str or not pattern:
@@ -2550,34 +2689,52 @@ Table of Content
 
           return res
          ```
-  * Anagram
+     * 291: Word Pattern II (H)
+  * **Anagram**
     * The key is how to calculate **signatures**.
      * 242: Valid Anagram (E)
+       * Description:
+         * Input:
+           * s = "anagram", t = "nagaram"
+         * Output: True
        * Approach1: Use hash table, Time:O(n), Space:O(n)
          * Python Solution
+            ```python
+            def isAnagram(self, s: str, t: str) -> bool:
+              if len(s) != len(t):
+                  return False
+
+              is_anagram = True
+              s_counter = collections.Counter(s)
+              for c in t:
+                  if s_counter[c] == 0:
+                      is_anagram = False
+                      break
+
+                  s_counter[c] -= 1
+
+              return is_anagram
+          ```
+       * Approach2: Use sort, Time:O(nlogn), Space:O(n)
+         * Python
           ```python
           def isAnagram(self, s: str, t: str) -> bool:
             if len(s) != len(t):
                 return False
 
-            d = collections.defaultdict(int)
-            for c in s:
-                d[c] += 1
-
-            res = True
-            for c in t:
-                if d[c] == 0:
-                    res = False
-                    break
-                d[c] -= 1
-
-            return res
-         ```
-       * Approach2: Use sort, Time:O(nlogn), Space:O(n)
+            return sorted(s) == sorted(t)
+          ```
      * 049: Group Anagrams (M)
-       * n is the number of strings, k is the maximum length of the strings
+       * Description:
+         * Input:
+           * ["eat", "tea", "tan", "ate", "nat", "bat"]
+         * Output:
+           * [ ["ate","eat","tea"],
+               ["nat","tan"],
+               ["bat"]
+            ]
        * Approach1: Categorized by **sorted string**, Time: O(n*klog(k)) Space: O(nk)
-         * Python Solution
+         * Python
             ```python
             def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
               d = collections.defaultdict(list)
@@ -2589,25 +2746,31 @@ Table of Content
          * Python
             ```python
             def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
-              def get_key(s):
-                  count_arr = [0] * 26
+              def get_sig(s):
+                  sig = [0] * 26
                   for c in s:
-                      count_arr[ord(c)-ord_base] += 1
+                      sig[ord(c) - ORD_A] += 1
+                  return str(sig)
 
-                  return tuple(count_arr)
-
+              ORD_A = ord('a')
               d = collections.defaultdict(list)
-              ord_base = ord('a')
               for s in strs:
-                  k = get_key(s)
-                  d[k].append(s)
+                  d[get_sig(s)].append(s)
 
               return d.values()
             ```
      * 249: Group **Shifted Strings** (M)
-       * Time: O(nk)
-         * n is the number of strings
-         * k is the length of the string
+       * Description:
+         * "abc" -> "bcd" -> ... -> "xyz"
+         * Input:
+           * ["abc", "bcd", "acef", "xyz", "az", "ba", "a", "z"]
+         * Output:
+           * [
+              ["abc","bcd","xyz"],
+              ["az","ba"],
+              ["acef"],
+              ["a","z"]
+           * ]
        * Approach1: Group by diff string, Time:O(nk)
          * Example:
            * [a, b] and [z, a]
@@ -2617,45 +2780,20 @@ Table of Content
            * (ord(b) - ord(a)) ≡ 1 (mod 26)
            * (ord(a) - ord(z)) ≡ -25 ≡ 1 (mod 26)
            * 1 is **congruent** to 25 (modulo 26)
-       * Python Solution
+       * Python
          ```python
-        def groupStrings(self, strings: List[str]) -> List[List[str]]:
-          def get_key(s):
+         def groupStrings(self, strings: List[str]) -> List[List[str]]:
+            def get_sig(s):
               ord_first = ord(s[0])
               return tuple((ord(c)- ord_first)%26  for c in s)
 
-          d = collections.defaultdict(list)
-          for s in strings:
-              k = get_key(s)
-              d[k].append(s)
+            d = collections.defaultdict(list)
+            for s in strings:
+                d[get_sig(s)].append(s)
 
-          return d.values()
+            return d.values()
          ```
   * Deduction:
-    * 038: Count and Say (E)
-      * Approach1:
-        * Python Solution
-          ```python
-          def countAndSay(self, n: int) -> str:
-            # 1
-            cur = "1"
-            # 2 to n
-            for _ in range(2, n+1):
-                start = end = 0
-                nxt = []
-                while start < len(cur):
-                    cnt = 0
-                    while end < len(cur) and cur[end] == cur[start]:
-                        cnt += 1
-                        end += 1
-
-                    nxt.append(f"{cnt}{cur[start]}")
-                    start = end
-
-                cur = "".join(nxt)
-
-            return cur
-          ```
     * 293: Flip Game (E)
         * python solution
         ```python
@@ -2668,62 +2806,11 @@ Table of Content
           return output
         ```
     * 294: Flip Game II (M)
-      * Approach1: backtracking: Time: O(n!!), Space: O(n*2)
-        * **Double factorial**: (n-1) * (n-3) * (n-5) * ... 1=
-         * python solution
-           ```python
-           def canWin(self, s: str) -> bool:
-             # from 0 to len(s)-2
-             for i in range(0, len(s)-1):
-                 # the 1st makes the flip.
-                 if s[i] == s[i+1] == '+':
-                     first_flip_s = f"{s[0:i]}--{s[i+2:]}"
-
-                     # the 2nd person makes the flip.
-                     if not self.canWin(first_flip_s):
-                         # 1st person wins the game
-                         return True
-
-             # can not make any flips or 2nd person always wins
-             # this is end condition
-             return False
-           ```
-      * Approach1: backtracking with memo
-        * time complexity:
-          * number_of_distinct_strings * each_unique_string_first_time_computation_contribution
-            * O(2^n) * n (not sure)
-        * space complexity:
-          * O(n^2)
-        * python solution
-           ```python
-           def canWin(self, s: str) -> bool:
-             memo = dict()
-
-             def _canWin(self, s):
-                 if s in memo:
-                     return memo[s]
-
-                 # from 0 to len(s)-2
-                 for i in range(0, len(s)-1):
-                     if s[i] == s[i+1] == '+':
-                         first_flip_s = f"{s[0:i]}--{s[i+2:]}"
-                         # the 2nd flip
-                         if not self.canWin(first_flip_s):
-                             # first person wins the game
-                             memo[s] = True
-                             return True
-
-                 # can not make any flips or 2nd person always wins
-                 # this is end condition
-                 memo[s] = False
-                 return False
-
-             return _canWin(self, s)
-           ```
-  * Other
-     * 387: First Unique Character in a String (E)
-       * Approach1: Use Hash Table to count the occurrence, Time: O(n), Space: O(c)
-         * Python Solution
+      * see backtracking
+  * Counter:
+    * 387: First Unique Character in a String (E)
+       * Approach1: Use char counter, Time: O(n), Space: O(c)
+         * Python
          ```python
          def firstUniqChar(self, s: str) -> int:
           res = not_found = -1
@@ -2735,25 +2822,27 @@ Table of Content
 
           return res
          ```
-     * 058: Length of Last Word (E)
-       * Approach1: Seach **from the end to the beginning**.
-       * Python Solution
-          ```python
-          def lengthOfLastWord(self, s: str) -> int:
-            w_count = 0
-            found = False
-            # traverse from end to start
-            for i in range(len(s)-1, -1, -1):
-                if s[i] != ' ':
-                    w_count += 1
-                    found = True
-                else:
-                    # we have found a word before
-                    if find:
-                        break
+       * Approach2: Sorting, Time:O(nlogn), Space:O(1)
+    * 383: Ransom Note (E)
+      * Description:
+        * write a function that will return true if the ransom note can be constructed from the magazines ; otherwise, it will return false.
+        * Each letter in the magazine string can only be used once in your ransom note.
+      * Approach1: Counter, Time:O(m+n), Space:O(m)
+        * Python
+        ```python
+          def canConstruct(self, ransomNote: str, magazine: str) -> bool:
+            counter = collections.Counter(magazine)
+            can_construct = True
+            for c in ransomNote:
+                if c not in counter or counter[c] <= 0:
+                    can_construct = False
+                    break
 
-            return w_count
-          ```
+                counter[c] -= 1
+
+            return can_construct
+        ```
+  * Other
      * 014: Longest **Common Prefix** (E)
        * Approach1: **vertical scanning**, Time: O(mn), Space: O(1)
          * Notice the edge cases:
@@ -2761,55 +2850,30 @@ Table of Content
            * 1 character for each string, [a, b]
          * Time: O(mn)
            * Where m is the minimum length of str in strs and n is the number of strings.
-         * Python Solution
-             ```python
-             def longestCommonPrefix(self, strs: List[str]) -> str:
-              if not strs:
-                return ""
+         * Python
+            ```python
+            def longestCommonPrefix(self, strs: List[str]) -> str:
+              if len(strs) == 0:
+                  return ""
 
               """
-              Need to cover
-              1. one string
-              2. one character with multiple strings
+              vertical scanning
+              the lognest common prefix is strs[0]
               """
-              # vertical scanning
-              # prefix is the maximum length of the common prefix
-              common_prefix = prefix = strs[0]
-              leave = False
+              prefix = strs[0]
+              border = len(prefix)
+              for i in range(len(prefix)):
+                  for j in range(1, len(strs)):
+                      s = strs[j]
+                      if i == len(s) or prefix[i] != s[i]:
+                          border = i
+                          break
+                  else:
+                      continue
+                  break
 
-              # for each character in the prefix
-              for idx, c in enumerate(prefix):
-                  # compare with character in the same idx with other strings
-                  for i in range(1, len(strs)):
-                      compare_str = strs[i]
-                      if idx < len(compare_str) and c == compare_str[idx]:
-                        continue
-
-                      common_prefix = prefix[0:idx]
-                      leave = True
-                      break
-
-                  # break outer loop
-                  if leave:
-                      break
-
-              return common_prefix
-             ```
-     * 383: Ransom Note (E)
-        * Approach1: Hash Table, Time:O(m+n), Space:O(m)
-          * Python Solution
-          ```python
-          def canConstruct(self, ransomNote: str, magazine: str) -> bool:
-            d = collections.Counter(magazine)
-
-            for w in ransomNote:
-                if w not in d or d[w] <= 0:
-                    return False
-                else:
-                    d[w] -= 1
-
-            return True
-          ```
+              return prefix[:border]
+            ```
      * 087: Scramble String (H)
 ### Array
   * **Check Duplicate**
@@ -7497,6 +7561,8 @@ Table of Content
 
           return ''.join(buf)
           ```
+  * 227: Basic Calculator II (M)
+  * 224: Basic Calculator
   * 255: Verify Preorder Sequence in Binary Search Tree (M)
     * Ref:
       * https://leetcode.com/problems/verify-preorder-sequence-in-binary-search-tree/discuss/68185/C%2B%2B-easy-to-understand-solution-with-thought-process-and-detailed-explanation
@@ -12684,6 +12750,58 @@ Table of Content
   * 317: Shortest Distance from All Buildings
 ### Backtracking
   * 294: Flip Game II (M)
+      * Approach1: backtracking: Time: O(n!!), Space: O(n*2)
+        * **Double factorial**: (n-1) * (n-3) * (n-5) * ... 1=
+         * python
+           ```python
+           def canWin(self, s: str) -> bool:
+             # from 0 to len(s)-2
+             for i in range(0, len(s)-1):
+                 # the 1st makes the flip.
+                 if s[i] == s[i+1] == '+':
+                     first_flip_s = f"{s[0:i]}--{s[i+2:]}"
+
+                     # the 2nd person makes the flip.
+                     if not self.canWin(first_flip_s):
+                         # 1st person wins the game
+                         return True
+
+             # can not make any flips or 2nd person always wins
+             # this is end condition
+             return False
+           ```
+      * Approach1: backtracking with memo
+        * time complexity:
+          * number_of_distinct_strings * each_unique_string_first_time_computation_contribution
+            * O(2^n) * n (not sure)
+        * space complexity:
+          * O(n^2)
+        * python solution
+           ```python
+           def canWin(self, s: str) -> bool:
+             memo = dict()
+
+             def _canWin(self, s):
+                 if s in memo:
+                     return memo[s]
+
+                 # from 0 to len(s)-2
+                 for i in range(0, len(s)-1):
+                     if s[i] == s[i+1] == '+':
+                         first_flip_s = f"{s[0:i]}--{s[i+2:]}"
+                         # the 2nd flip
+                         if not self.canWin(first_flip_s):
+                             # first person wins the game
+                             memo[s] = True
+                             return True
+
+                 # can not make any flips or 2nd person always wins
+                 # this is end condition
+                 memo[s] = False
+                 return False
+
+             return _canWin(self, s)
+           ```
   * 022: Generate Parentheses (M)
      * Description:
        * Given n pairs of parentheses, write a function to generate all combinations of well-formed parentheses.
@@ -15481,6 +15599,8 @@ Table of Content
       * 186: Reverse **Words** in a String II (M)
       * 557: Reverse **Words** in a String III (E)
       * 345:	Reverse **Vowels** of a String (E)
+    * Isomorphism
+    * Anagram
   * Array
   * LinkedList
     * **Runner** and **Detect Circle**
