@@ -2224,6 +2224,8 @@ Table of Content
           ```
     * 1143: Longest Common Subsequence (M)
       * See DP
+    * 674: Longest Continuous Increasing Subsequence (**LCIS**) (E)
+      * See DP
     * 300: Longest Increasing Subsequence (**LIS**) (M)
       * See Binary Search
     * 187: Repeated DNA Sequences (M)
@@ -2530,7 +2532,7 @@ Table of Content
             return cnt
         ```
      * 358: Rearrange String k Distance Apart (H)
-  * Encode and Decode:
+  * Encode(Compression) and Decode:
     * 038: Count and Say (E)
       * Description:
         ```txt
@@ -2584,7 +2586,7 @@ Table of Content
 
             return ''.join(cur)
           ```
-    * 443: String Compression
+    * 443: String Compression (E)
       * Description:
         * The length after compression must always be smaller than or equal to the original array.
         * Example:
@@ -2878,45 +2880,97 @@ Table of Content
 ### Array
   * **Check Duplicate**
     * 217: Contains Duplicate (E)
-      * Approach1: Use hash Table
-        * Python Solution
+      * Description:
+        * Your function should return true if any value appears at least twice in the array, and it should return false if every element is distinct.
+      * Approach1: Use Counter, Time:O(n), Space:O(n)
+        * Python
           ```python
           def containsDuplicate(self, nums: List[int]) -> bool:
             d = dict()
             res = False
-
-            for num in nums:
-                if num not in d:
-                    d[num] = True
-                else:
-                    res = True
-                    break
-
-            return res
-          ```
-    * 219: Contains Duplicate II (E)
-      * Find out whether there are two distinct indices i and j in the array such that nums[i] = nums[j] and the absolute difference between i and j is at most k.
-      * Approach1: Use hash Table to store index.
-        * Python Solution
-        ```python
-        def containsNearbyDuplicate(self, nums: List[int], k: int) -> bool:
-          if not nums:
-              return False
-
-          d = dict()
-          res = False
-
-          for idx, num in enumerate(nums):
-              if num in d and idx - d[num] <= k:
+            for n in nums:
+                if n in d:
                   res = True
                   break
 
-              d[num] = idx
+                d[n] = True
+            return res
+          ```
+      * Approach2: Sorting, Time:O(nlogn), Space:O(logn~n)
+        * Python
+          ```python
+          def containsDuplicate(self, nums: List[int]) -> bool:
+            nums.sort()
+            res = False
+            for i in range(0, len(nums)-1):
+                if nums[i] == nums[i+1]:
+                    res = True
+                    break
+            return res
+          ```
+    * 219: Contains Duplicate II (E)
+      * Description:
+        * Find out whether there are two distinct indices i and j in the array such that nums[i] = nums[j] and the absolute difference between **i and j is at most k**.
+      * Approach1: Use dict to store index.
+        * Python
+        ```python
+          def containsNearbyDuplicate(self, nums: List[int], k: int) -> bool:
+            if not nums:
+                return False
 
-          return res
-        ```
+            d = dict()
+            res = False
+            for idx, n in enumerate(nums):
+                if n in d and idx - d[n] <= k:
+                    res = True
+                    break
+
+                d[n] = idx
+
+            return res
+          ```
+    * 220: Contains Duplicate III (M)
+      * Description:
+        * find out whether there are two distinct indices i and j in the array such that
+          * The **absolute difference** between **nums[i] and nums[j] is at most t**.
+          * The **absolute difference** between **i and j is at most k**.
+      * Approach1: Brute Force:O(n^2), Space:O(1)
+      * Approach2: Buckets: O(n^2), Space:O(n)
+        * Ref:
+          * https://leetcode.com/problems/contains-duplicate-iii/discuss/61639/JavaPython-one-pass-solution-O(n)-time-O(n)-space-using-buckets
+          * The difference of values in the same bucket <= t
+          * keep at most k buckets
+        * Python
+          ```python
+          def containsNearbyAlmostDuplicate(self, nums: List[int], k: int, t: int) -> bool:
+            if t < 0:
+                return False
+
+            """
+            The difference of values in the same bucket <= t
+            """
+            buckets = dict()
+            bucket_size = t + 1
+            res = False
+            for i, n in enumerate(nums):
+                b_idx = n // bucket_size
+
+                # check the same bucket and neighbor buckets
+                if b_idx in buckets \
+                  or b_idx - 1 in buckets and n - buckets[b_idx - 1] <= t \
+                  or b_idx + 1 in buckets and buckets[b_idx + 1] - n <= t:
+                    res = True
+                    break
+
+                buckets[b_idx] = n
+                if i >= k:
+                    buckets.pop(nums[i - k] // bucket_size)
+
+            return res
+          ```
     * 287: Find the Duplicate Number (M)
-      * Given an array nums **containing n + 1 integers** where each integer is between 1 and n (inclusive), prove that at least one duplicate number must exist. Assume that there is only one duplicate number, find the duplicate one.
+      * Description:
+        * Given an array nums **containing n + 1 integers** where each integer is between 1 and n (inclusive), prove that at least one duplicate number must exist. **Assume that there is only one duplicate number, find the duplicate one.**
         * intergers range: 1 ~ n (n)
         * idx range: 0 ~ n (n+1)
       * Approach1: Sorting, Time:O(nlogn), Space:O(n)
@@ -2973,13 +3027,13 @@ Table of Content
             while True:
                 slow = nums[slow]
                 fast = nums[nums[fast]]
-                if slow == fast:
+                if slow is fast:
                     break
 
             target = nums[0]
             while True:
                 # the intersection may be the first element
-                if target == slow:
+                if target is slow:
                     break
                 target = nums[target]
                 slow = nums[slow]
@@ -2987,25 +3041,32 @@ Table of Content
             return target
           ```
   * **Remove Duplicate**
+    * Tips:
+      * The key is how to handle the border
     * 027: Remove elements (E)
+      * Description:
+        * Given an array nums and a value val, remove all instances of that value in-place and return the new length.
       * Approach1:
         * Like partition step of quick sort (keep the border)
-        * Copy the wanted elements to the position of the current border
-        * Python Solution
+        * Python
           ```python
           def removeElement(self, nums: List[int], val: int) -> int:
             border = 0
-            for num in nums:
-                if num != val:
-                    nums[border] = num
+            for n in nums:
+                if n != val:
+                    nums[border] = n
                     border += 1
 
             return border
           ```
     * 026: Remove **Duplicates** from **Sorted Array** (E)
-      * Python Solution
+      * Description:
+        * Given a sorted array nums, remove the duplicates in-place such that each element appear only once and return the new length.
+      * Python
         ```python
         def removeDuplicates(self, nums: List[int]) -> int:
+          if not nums:
+            return 0
           i = 0
           for j in range(1, len(nums)):
               if nums[j] != nums[i]:
@@ -3014,39 +3075,49 @@ Table of Content
           return i + 1
         ```
     * 080: Remove **Duplicates** from **Sorted Array** II (M) *
-      * Approach1: Use cnt
-        * Python Solution:
+      * Description:
+        * Given a sorted array nums, remove the duplicates in-place such that duplicates appeared **at most twice** and return the new length.
+        * example:
+          * input: [1,1,1,2,2,3], output: [1,1,2,2,3]
+          * input: [1,1,1,2,2,3], output: [1,1,2,2,3]
+      * Approach1: border + cnt, Time:O(n), Space:O(1)
+        * Python:
           ```python
           def removeDuplicates(self, nums: List[int]) -> int:
-            if not nums:
-                return 0
+            if len(nums) <= 2:
+                return len(nums)
 
             max_duplicate = 2
-            i, cnt = 0, 1
-            for j in range(1, len(nums)):
-                if nums[i] == nums[j]:
+            border = 0
+            cnt = 1
+            for i in range(1, len(nums)):
+                if nums[i] == nums[border]:
                     cnt += 1
                     if cnt <= max_duplicate:
-                        i += 1
-                        nums[i] = nums[j]
+                        border += 1
+                        nums[border] = nums[i]
 
                 else:
-                    i += 1
-                    nums[i] = nums[j]
+                    border += 1
+                    nums[border] = nums[i]
                     cnt = 1
 
-            return i + 1
+            return border + 1
           ```
-      * Approach2: See backward
-        * Python Solution
+      * Approach2: border only, Time:O(n), Space:O(1)
+        * Python
           ```python
           def removeDuplicates(self, nums: List[int]) -> int:
-            i = 0
-            for n in nums:
-                if i < 2 or n > nums[i-2]:
-                    nums[i] = n
-                    i += 1
-            return i
+            if len(nums) <= 2:
+                return len(nums)
+
+            border = 1
+            for i in range(2, len(nums)):
+                if nums[i] > nums[border-1]:
+                    border += 1
+                    nums[border] = nums[i]
+
+            return border + 1
           ```
   * **Containers**
     * 011: Container With Most Water (M)
@@ -3054,30 +3125,30 @@ Table of Content
         * min(left_border, right_border) * width
       * Approach1: brute force, Time: O(n^2), Space: O(1)
         * Calculating area for all height pairs.
-        * Python Solution:
-        ```python
-        def maxArea(self, height: List[int]) -> int:
-          if not height:
-              return 0
+        * Python:
+          ```python
+          def maxArea(self, height: List[int]) -> int:
+            if not height:
+                return 0
 
-          max_area = 0
-          n = len(height)
+            max_area = 0
+            n = len(height)
 
-          # (0, 1), (0, 2), (0, 3)
-          # (1, 2), (1, 3)
-          # (2, 3)
-          for left in range(0, n-1):
-              for right in range(left+1, n):
-                  h = min(height[left], height[right])
-                  w = right - left
-                  area = h * w
-                  max_area = max(max_area, area)
+            # (0, 1), (0, 2), (0, 3)
+            # (1, 2), (1, 3)
+            # (2, 3)
+            for left in range(0, n-1):
+                for right in range(left+1, n):
+                    h = min(height[left], height[right])
+                    w = right - left
+                    area = h * w
+                    max_area = max(max_area, area)
 
-          return max_area
-        ```
+            return max_area
+          ```
       * Approach2: greedy with 2 pointers, Time: O(n), Space: O(1)
           * Move the index with shorter height to find the bigger area.
-          * Python Solution
+          * Python
             ```python
             def maxArea(self, height: List[int]) -> int:
               if not height:
@@ -3100,7 +3171,9 @@ Table of Content
 
               return max_area
             ```
-    * 042: Trapping Rain Water (H) *
+    * 042: Trapping Rain Water (H)
+      * Description:
+        * Given n non-negative integers representing an elevation map where the width of each bar is 1, compute how much water it is able to trap after raining.
       * Ref:
         * https://leetcode.com/problems/trapping-rain-water/solution/
       * How to calculate the area?
@@ -3115,20 +3188,16 @@ Table of Content
             * The left_max[i] is the **left border** in ith bin.
           * right_max
             * The right_max[i] is the **right border** in ith bin.
-          * Python Solution
+          * Python
             ```python
             def trap(self, height: List[int]) -> int:
-              if not height or len(height) <= 2:
+              if len(height) <= 2:
                 return 0
 
               n = len(height)
 
               left_max = [0] * n
-              right_max = [0] * n
               left_max[0] = height[0]
-              right_max[n-1] = height[n-1]
-
-
               for i in range(1, n):
                   """
                   left_max[i] should consider height[i]
@@ -3138,6 +3207,8 @@ Table of Content
                   """
                   left_max[i] = max(left_max[i-1], height[i])
 
+              right_max = [0] * n
+              right_max[n-1] = height[n-1]
               for i in range(n-2, -1, -1):
                   right_max[i] = max(right_max[i+1], height[i])
 
@@ -3152,20 +3223,23 @@ Table of Content
             * If the right border > left border, the area of ith bin is determined by the left border.
             * vice versa
             * So we fix the higher border, and move the lower border to calcualte the area
-          * Python Solution
+          * Python
             ```python
             def trap(self, height: List[int]) -> int:
-              if not height:
+              if len(height) <= 2:
                   return 0
 
               area = 0
               left, right = 0, len(height)-1
               max_left = max_right = 0
-              while left < right:
+
+              while left <= right:
                   # area depends on left border
                   if height[left] <= height[right]:
                       if height[left] >= max_left:
-                          # new left border, do not need to calculate area
+                          """
+                          new left border, do not need to calculate area
+                          """
                           max_left = height[left]
                       else:
                           area += (max_left - height[left])
@@ -3173,8 +3247,10 @@ Table of Content
 
                   # area depends on right border
                   else:
-                      if height[right] > max_right:
-                          # new right border, do not need to calculate area
+                      if height[right] >= max_right:
+                          """
+                          new right border, do not need to calculate area
+                          """
                           max_right = height[right]
                       else:
                           area += (max_right - height[right])
@@ -3182,100 +3258,10 @@ Table of Content
 
               return area
             ```
+    * 407: Trapping Rain Water II (H)
   * **Jump Game**:
     * 055: Jump Game (M)
-      * Ref:
-        * https://leetcode.com/problems/jump-game/solution/
-      * Approach1: DP, Recursive + memo (top-down), Time: O(n^2), Space: O(n)
-        * Python Solution
-          ```python
-          def canJump(self, nums: List[int]) -> bool:
-            def _can_jump_from(start):
-                # can not use True/False evaluation
-                if memo[start] is not None:
-                    return memo[start]
-
-                memo[start] = False
-                max_jump_dst = min(start+nums[start], n-1)
-
-                # from max_jump_dst to start + 1
-                for jump_dst in range(max_jump_dst, start, -1):
-                    if _can_jump_from(jump_dst):
-                        memo[start] = True
-                        break
-
-                return memo[start]
-
-            if not nums:
-                return False
-
-            n = len(nums)
-            memo = [None] * n
-            memo[n-1] = True
-
-            return _can_jump_from(0)
-          ```
-      * Approach2: DP, Iterative + memo (botoom-up), Time: O(n^2), Space: O(n)
-        * Python Solution
-          ```python
-          def canJump(self, nums: List[int]) -> bool:
-            n = len(nums)
-            memo = [None] * n
-            memo[n-1] = True
-
-            # from n-2 to 0
-            for start in range(n-2, -1, -1):
-                max_jump_dst = min(start+nums[start] ,n-1)
-                # from max_jump_dst to start+1
-                for jump_dst in range(max_jump_dst, start, -1):
-                    if memo[jump_dst]:
-                        memo[start] = True
-                        break
-
-            return memo[0]
-          ```
-      * Approach2: Greedy, Time: O(n), Space: O(1)
-        * **The main concept is to keep the left most good index**
-          * If we can reach a GOOD index, then our position is a GOOD index as well. and this new GOOD index will be the new leftmost GOOD index.
-        * Python Solution
-          ```python
-          def canJump(self, nums: List[int]) -> bool:
-            n = len(nums)
-            left_most_good_idx = n - 1
-
-            # from n-2 to 0
-            for start in range(n-2, -1, -1):
-                if start + nums[start] >= left_most_good_idx:
-                    left_most_good_idx = start
-
-            return left_most_good_idx == 0
-          ```
-    * 045: Jump Game II (H) *
-      * Ref:
-        * https://leetcode.com/problems/jump-game-ii/discuss/18014/Concise-O(n)-one-loop-JAVA-solution-based-on-Greedy
-      * Approach1: Greedy
-        * Find the minimum jump
-        * Greedy
-          * Time: O(n), Space: O(1)
-          *  **cur == cur_border**, like BFS solution
-             *  means you visited all the items on the current level
-             *  Incrementing jumps+=1 is like incrementing the level you are on.
-          *  And **cur_end = cur_farthest** is like getting the queue size (level size) for the next level you are traversing.
-        *  Python Solution
-            ```python
-            def jump(self, nums: List[int]) -> int:
-              jump_cnt = cur_border = cur_farthest = 0
-              # from 0 to n-2
-              for cur in range(0, len(nums)-1):
-                  cur_farthest = max(cur_farthest, cur+nums[cur])
-                  # the boundary need to jump
-                  if cur == cur_border:
-                      jump_cnt +=1
-                      # determine the next border
-                      cur_end = cur_farthest
-
-              return jump_cnt
-            ```
+      * See DP
   * **H-Index**
     * Description:
       * According to the definition of h-index on Wikipedia: "**A scientist has index h if h of his/her N papers have at least h citations each**, and the other N − h papers have no more than h citations each."
@@ -3315,135 +3301,7 @@ Table of Content
     * 275: H-Index II (M)
       * Please refer binary search
   * **Best Time to Buy and Sell Stock**
-    * Ref:
-      * [General solution](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/discuss/108870/Most-consistent-ways-of-dealing-with-the-series-of-stock-problems)
-    * 121: Best Time to Buy and Sell Stock (E)
-      * You may complete **at most one transactions**.
-      * Approach1: Time:O(n), Space:O(1)
-        * For each round, keep the current minimum buy price and update best sell prcie.
-        * Python Solution:
-          ```python
-          def maxProfit(self, prices: List[int]) -> int:
-            if not prices:
-                return  0
-
-            max_profit = 0
-            min_price = prices[0]
-
-            for i in range(1, len(prices)):
-                profit = prices[i] - min_price
-                max_profit = max(profit, max_profit)
-                min_price = min(prices[i], min_price)
-
-            return max_profit
-          ```
-    * 122: Best Time to Buy and Sell Stock II (E)
-      * Multiple transcations allowed.
-      * Approach1: Peak Valley , Time:O(n), Space:O(1)
-        * Python Solution:
-        ```python
-        def maxProfit(self, prices: List[int]) -> int:
-          """
-          Peak Valley Approach
-          """
-          n = len(prices)
-          valley = 0
-          profit = 0
-
-          while valley < n:
-              while valley + 1 < n and prices[valley+1] <= prices[valley]:
-                  valley += 1
-
-              peak = valley + 1
-              while peak + 1 < n and prices[peak+1] >= prices[peak]:
-                  peak += 1
-
-              if valley < peak < n:
-                  profit += (prices[peak]-prices[valley])
-
-              valley = peak + 1
-
-          return profit
-        ```
-      * Approach2: Peak Valley II Time:O(n), Space:O(1)
-        * Python Solution1
-           ```python
-           valley = peak = prices[0];
-           max_profit = 0
-           while i < len(prices) - 1:
-              # find the valley
-              while i < len(prices) - 1 and price[i] >= prices[i+1]:
-                  i += 1
-              valley = prices[i]
-
-              while i < len(prices) - 1 and price[i] <= prices[i+1]:
-                  i += 1
-              peak = prices[i]
-
-              max_profit += (peak - valley);
-           ```
-        * Python Solution2
-          ```python
-          max_profit = 0
-          for i in range(1, len(prices)):
-              if prices[i] > price[i-1]:
-                  max_profit += prices[i] - price[i-1]
-          ```
-    * 714: Best Time to Buy and Sell **Stock with Transaction Fee** (M), Time:O(n), Space:O(1)
-      * Ref:
-        * [solution](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/solution/)
-      * Approach1: bottom up DP, Time:O(n), Space:O(1)
-        * Cash(i):
-          * The cash in hand, if you are **not holding the stock** at the end of day(i):
-            * case1:
-              * cash[i] = cash[i-1]
-            * case2:
-              * cash[i] = hold[i-1] + prcie[i] - fee
-            * cash[i]
-              * max(case1, case2) = max(cash[i-1], hold[i-1] + prcie[i] - fee)
-        * Hold(i):
-          * The cash in hand, if you are **holding the stock** at the end of day(i):
-            * case1:
-              * hold[i] = hold[i-1]
-            * case2:
-              * hold[i] = **hold[i-1] + price[i] - fee** - price[i]
-            * case3:
-              * hold[i] = **cash[i-1]** - price[i]
-            * case2 and case3 can be reduced to
-              *  **cash[i]** - price[i]
-            * hold[i]
-              * max(case1, case2, case3) = max(hold[i-1], **cash[i]-price[i]**)
-        * Python
-            ```python
-            def maxProfit(self, prices: List[int], fee: int) -> int:
-              cash = 0
-              hold = -prices[0]
-
-              for i in range(1, len(prices)):
-                  price = prices[i]
-
-                  """
-                  cash[i] = max(case1, case2)
-                  case1 : cash[i-1]
-                  case2:  hold[i-1] + prices[i] - fee
-                  case3:  cash[i-1] - prices[i] - fee + prices[i] (skip this case)
-                  """
-                  cash = max(cash, hold+price-fee)
-                  """
-                  hold[i] = max(case1, case2, case3) = max(case1, case4)
-                  case1: hold[i]
-                  case2: hold[i] + prices[i] - fee - prices[i]
-                  case3: cash[i-1] - prices[i]
-                  case4: cash[i] - prices[i-1]  (come from case2 and case3)
-                  """
-                  hold = max(hold, cash-price)
-
-              return cash
-            ```
-    * 123: Best Time to Buy and Sell Stock III (H)
-      * You may complete **at most two transactions**.
-    * 188: Best Time to Buy and Sell Stock IV (H)
-      * You may complete **at most k transactions**.
+    * See DP
   * **Shortest Word Distance**
     * 243: Shortest Word Distance (E) *
        * Approach1: Time:O(n), Space:O(1)
@@ -4165,6 +4023,7 @@ Table of Content
 
             return start if total_tank >= 0 else not_found
             ```
+    * 845: Longest Mountain in Array
     * 723：Candy Crush (M)
 ### Matrix
  * 289: Game of Life (M)
@@ -7326,197 +7185,363 @@ Table of Content
 * TODO
   * 1171: Remove Zero Sum Consecutive Nodes from Linked List
 ### Stack and Queue
-  * 155: Min Stack (E)
-    * Description:
-      * Design a stack that supports push, pop, top, and retrieving the minimum element in constant time.
-        * push(x)
-          * Push element x onto stack.
-        * pop()
-          * Removes the element on top of the stack.
-        * top()
-          * Get the top element.
-        * getMin()
-          * Retrieve the minimum element in the stack.
-    * Approach1:
-      * Use extra space to keep minimum
-      * Python
-        ```python
-        class MinStack:
-          __slots__ = ['s', 'min_s']
-          def __init__(self):
-              """
-              initialize your data structure here.
-              """
-              self.s = []
-              self.min_s = []
+  * Design:
+    * 155: Min Stack (E)
+      * Description:
+        * Design a stack that supports push, pop, top, and retrieving the minimum element in constant time.
+          * push(x)
+            * Push element x onto stack.
+          * pop()
+            * Removes the element on top of the stack.
+          * top()
+            * Get the top element.
+          * getMin()
+            * Retrieve the minimum element in the stack.
+      * Approach1:
+        * Use extra space to keep minimum
+        * Python
+          ```python
+          class MinStack:
+            __slots__ = ['s', 'min_s']
+            def __init__(self):
+                """
+                initialize your data structure here.
+                """
+                self.s = []
+                self.min_s = []
 
-          def push(self, x: int) -> None:
-              self.s.append(x)
+            def push(self, x: int) -> None:
+                self.s.append(x)
 
-              if not self.min_s:
-                  self.min_s.append(x)
-              else:
-                  self.min_s.append(min(self.min_s[-1], x))
+                if not self.min_s:
+                    self.min_s.append(x)
+                else:
+                    self.min_s.append(min(self.min_s[-1], x))
 
-          def pop(self) -> None:
-              if not self.s:
-                  return
+            def pop(self) -> None:
+                if not self.s:
+                    return
 
-              self.s.pop()
-              self.min_s.pop()
+                self.s.pop()
+                self.min_s.pop()
 
-          def top(self) -> int:
-              return self.s[-1]
+            def top(self) -> int:
+                return self.s[-1]
 
-          def getMin(self) -> int:
-              return self.min_s[-1]
-        ```
-  * 716: Max Stack (E)
-    * Description:
-      * Design a max stack that supports push, pop, top, peekMax and popMax.
-        * push(x)
-          * Push element x onto stack.
-        * pop()
-        *   Remove the element on top of the stack and return it.
-        * top()
-          * Get the element on the top.
-        * peekMax()
-          * Retrieve the maximum element in the stack.
-        * popMax()
-          * Retrieve the maximum element in the stack, and remove it. If you find more than one maximum elements, only remove the top-most one.
-    * Approach1: Use 2 stacks, popMax() would be O(n)
-      * Same concept like 155: Min Stack, use another stack the track the max
-      * For popMax, we know what the current maximum (peekMax) is. We can pop until we find that maximum, then push the popped elements back on the stack.
-      * Ref:
-        * https://leetcode.com/problems/max-stack/discuss/108941/C%2B%2B-using-Two-Stack
+            def getMin(self) -> int:
+                return self.min_s[-1]
+          ```
+    * 716: Max Stack (E)
+      * Description:
+        * Design a max stack that supports push, pop, top, peekMax and popMax.
+          * push(x)
+            * Push element x onto stack.
+          * pop()
+          *   Remove the element on top of the stack and return it.
+          * top()
+            * Get the element on the top.
+          * peekMax()
+            * Retrieve the maximum element in the stack.
+          * popMax()
+            * Retrieve the maximum element in the stack, and remove it. If you find more than one maximum elements, only remove the top-most one.
+      * Approach1: Use 2 stacks, popMax() would be O(n)
+        * Same concept like 155: Min Stack, use another stack the track the max
+        * For popMax, we know what the current maximum (peekMax) is. We can pop until we find that maximum, then push the popped elements back on the stack.
+        * Ref:
+          * https://leetcode.com/problems/max-stack/discuss/108941/C%2B%2B-using-Two-Stack
 
+        *
+    * 232: Implement Queue using Stacks (E)
+      * Approach1: Use 2 stacks, push:O(1), pop: average, O(1)
+        * Ref:
+          * https://leetcode.com/articles/implement-queue-using-stacks/
+        * Python
+          ```python
+          class MyQueue:
+            def __init__(self):
+                """
+                Initialize your data structure here.
+                """
+                self.push_stack = []
+                self.pop_stack = []
+
+            def push(self, x: int) -> None:
+                """
+                Push element x to the back of queue.
+                """
+                self.push_stack.append(x)
+
+            def pop(self) -> int:
+                """
+                Removes the element from in front of queue and returns that element.
+                """
+                if self.empty():
+                    return None
+
+                return self.pop_stack.pop()
+
+            def peek(self) -> int:
+                """
+                Get the front element.
+                """
+                if self.empty():
+                    return None
+
+                return self.pop_stack[-1]
+
+            def empty(self) -> bool:
+                """
+                Returns whether the queue is empty.
+                """
+                if len(self.pop_stack) > 0:
+                    return False
+
+                while self.push_stack:
+                    self.pop_stack.append(self.push_stack.pop())
+
+                return len(self.pop_stack) == 0
+          ```
+    * 225: Implement Stack using Queues (E)
+      * Approach1: 1 queues, Push:O(1), Pop:O(n)
+        * Python
+          ```python
+          class MyStack:
+            def __init__(self):
+                """
+                Initialize your data structure here.
+                """
+                self.queue = collections.deque()
+
+            def push(self, x: int) -> None:
+                """
+                Push element x onto stack.
+                """
+                self.queue.append(x)
+
+            def pop(self) -> int:
+                """
+                Removes the element on top of the stack and returns that element.
+                """
+                q_len = len(self.queue)
+                for _ in range(q_len-1):
+                    self.queue.append(self.queue.popleft())
+
+                return self.queue.popleft()
+
+            def top(self) -> int:
+                """
+                Get the top element.
+                """
+                return self.queue[-1]
+
+            def empty(self) -> bool:
+                """
+                Returns whether the stack is empty.
+                """
+                return not len(self.queue)
+          ```
+      * Approach3: 1 queues, Push:O(n), Pop:O(1)
+        * Python
+          ```python
+          class MyStack:
+            def __init__(self):
+                """
+                Initialize your data structure here.
+                """
+                self.queue = collections.deque()
+
+            def push(self, x: int) -> None:
+                """
+                Push element x onto stack.
+                """
+                self.queue.append(x)
+                q_len = len(self.queue)
+                for _ in range(q_len-1):
+                    self.queue.append(self.queue.popleft())
+
+            def pop(self) -> int:
+                """
+                Removes the element on top of the stack and returns that element.
+                """
+                return self.queue.popleft()
+
+            def top(self) -> int:
+                """
+                Get the top element.
+                """
+                return self.queue[0]
+
+            def empty(self) -> bool:
+                """
+                Returns whether the stack is empty.
+                """
+                return not len(self.queue)
+          ```
+  * Calculator
+    * 227: Basic Calculator II (M)
+      * Description:
+        * The expression string contains only non-negative integers, +, -, *, / operators and empty spaces . The integer division should truncate toward zero.
+      * Approach1: 2 dqs, Time:O(n), Space:O(n)
+        * Python
+          ```python
+          def calculate(self, s: str) -> int:
+
+            num_dq = collections.deque()
+            op_dq = collections.deque()
+            i = 0
+            while i < len(s):
+                c = s[i]
+                if c.isdigit():
+                    n = 0
+                    while i< len(s) and s[i].isdigit():
+                        n = n * 10 + (ord(s[i]) - ord('0'))
+                        i += 1
+
+                    """
+                    for * and /
+                    """
+                    if op_dq and op_dq[-1] in ['*', '/']:
+                        op = op_dq.pop()
+                        prev = num_dq.pop()
+                        if op == '*':
+                            n = prev * n
+                        else:
+                            n = prev // n
+
+                    num_dq.append(n)
+
+                elif c.isspace():
+                    i += 1
+                else:
+                    op_dq.append(c)
+                    i += 1
+
+            res = 0
+            if num_dq:
+                res = num_dq.popleft()
+
+            """
+            for + and -
+            """
+            while num_dq and op_dq:
+                op = op_dq.popleft()
+                nxt = num_dq.popleft()
+                if op == '+':
+                    res = res + nxt
+                else:
+                    res = res - nxt
+
+            return res
+          ```
+      * Approach2: 1 stack, Time:O(n), Space:O(n)
+        * notice the negative value
+          * -2 / 3 = should be case2
+            * case1: -(2) // 3 = -1
+            * case2: -(2 // 3 ) = 0
+        * Python
+          ```python
+          def calculate(self, s: str) -> int:
+            n_stack = []
+            sign = '+'
+            i = 0
+            while i < len(s):
+                c = s[i]
+                if c.isdigit():
+                    n = 0
+                    while i< len(s) and s[i].isdigit():
+                        n = n * 10 + (ord(s[i]) - ord('0'))
+                        i += 1
+
+                    if sign == '+':
+                        n_stack.append(n)
+                    elif sign == '-':
+                        n_stack.append(-n)
+                    elif sign == '*':
+                        n_stack.append(n_stack.pop() * n)
+                    else:  # '/'
+                        """
+                        -2/3 should be case2
+                        case1: (-2) // 3 = -1
+                        case2: -(2//3) = 0
+                        """
+                        prev = n_stack.pop()
+                        if prev < 0:
+                            # transfer case1 to case2
+                            n_stack.append(-(-prev//n))
+                        else:
+                            n_stack.append(prev//n)
+
+                elif c.isspace():
+                    i += 1
+                else:
+                    sign = c
+                    i += 1
+
+            return sum(n_stack)
+          ```
+    * 224: Basic Calculator (H)
+      * Description:
+        * The expression string may contain open ( and closing parentheses ), the plus + or minus sign -, non-negative integers and empty spaces .
+        * example:
+          * " 2-1 + 2 " = 3
+          *  "(1+(4+5+2)-3)+(6+8)" = 23
+      * Appraoch1 One Stack, Time:O(n), Space:O(n)
+        * Python
+          ```python
+          def calculate(self, s: str) -> int:
+            stack = []
+            """
+            sign: 0  -> +
+                  -1 -> -
+            """
+            result, sign = 0, 1
+            i = 0
+
+            while i < len(s):
+                c = s[i]
+                if c.isdigit():
+                    n = 0
+                    while i< len(s) and s[i].isdigit():
+                        n = n * 10 + (ord(s[i]) - ord('0'))
+                        i += 1
+
+                    result += sign * n
+
+                elif c == '(':
+                    stack.append(result)
+                    stack.append(sign)
+                    result, sign = 0, 1
+                    i += 1
+
+                elif c == ')':
+                    sign = stack.pop()
+                    prev = stack.pop()
+                    result = prev + sign * result
+                    i += 1
+
+                elif c == '+':
+                    sign = 1
+                    i += 1
+
+                elif c == '-':
+                    sign = -1
+                    i += 1
+
+                else:
+                    i += 1
+
+            return result
+          ```
+    * 772: Basic Calculator III (H)
+      * Combination of 227 and 224
+      * Description:
+        * The expression string contains only non-negative integers, +, -, *, / operators , open ( and closing parentheses ) and empty spaces . The integer division should truncate toward zero.
+        * example:
+          * "1 + 1" = 2
+          * " 6-4 / 2 " = 4
+          * "2*(5+5*2)/3+(6/2+8)" = 21
+          * "(2+6* 3+5- (3*14/7+2)*5)+3"=-12
       *
-  * 232: Implement Queue using Stacks (E)
-    * Approach1: Use 2 stacks, push:O(1), pop: average, O(1)
-      * Ref:
-        * https://leetcode.com/articles/implement-queue-using-stacks/
-      * Python
-        ```python
-        class MyQueue:
-          def __init__(self):
-              """
-              Initialize your data structure here.
-              """
-              self.push_stack = []
-              self.pop_stack = []
-
-          def push(self, x: int) -> None:
-              """
-              Push element x to the back of queue.
-              """
-              self.push_stack.append(x)
-
-          def pop(self) -> int:
-              """
-              Removes the element from in front of queue and returns that element.
-              """
-              if self.empty():
-                  return None
-
-              return self.pop_stack.pop()
-
-          def peek(self) -> int:
-              """
-              Get the front element.
-              """
-              if self.empty():
-                  return None
-
-              return self.pop_stack[-1]
-
-          def empty(self) -> bool:
-              """
-              Returns whether the queue is empty.
-              """
-              if len(self.pop_stack) > 0:
-                  return False
-
-              while self.push_stack:
-                  self.pop_stack.append(self.push_stack.pop())
-
-              return len(self.pop_stack) == 0
-        ```
-  * 225: Implement Stack using Queues (E)
-    * Approach1: 1 queues, Push:O(1), Pop:O(n)
-      * Python
-        ```python
-        class MyStack:
-          def __init__(self):
-              """
-              Initialize your data structure here.
-              """
-              self.queue = collections.deque()
-
-          def push(self, x: int) -> None:
-              """
-              Push element x onto stack.
-              """
-              self.queue.append(x)
-
-          def pop(self) -> int:
-              """
-              Removes the element on top of the stack and returns that element.
-              """
-              q_len = len(self.queue)
-              for _ in range(q_len-1):
-                  self.queue.append(self.queue.popleft())
-
-              return self.queue.popleft()
-
-          def top(self) -> int:
-              """
-              Get the top element.
-              """
-              return self.queue[-1]
-
-          def empty(self) -> bool:
-              """
-              Returns whether the stack is empty.
-              """
-              return not len(self.queue)
-        ```
-    * Approach3: 1 queues, Push:O(n), Pop:O(1)
-      * Python
-        ```python
-        class MyStack:
-          def __init__(self):
-              """
-              Initialize your data structure here.
-              """
-              self.queue = collections.deque()
-
-          def push(self, x: int) -> None:
-              """
-              Push element x onto stack.
-              """
-              self.queue.append(x)
-              q_len = len(self.queue)
-              for _ in range(q_len-1):
-                  self.queue.append(self.queue.popleft())
-
-          def pop(self) -> int:
-              """
-              Removes the element on top of the stack and returns that element.
-              """
-              return self.queue.popleft()
-
-          def top(self) -> int:
-              """
-              Get the top element.
-              """
-              return self.queue[0]
-
-          def empty(self) -> bool:
-              """
-              Returns whether the stack is empty.
-              """
-              return not len(self.queue)
-        ```
   * 394: Decode String (M)
     * Description:
       * example:
@@ -7538,7 +7563,7 @@ Table of Content
               c = s[i]
               if c.isdigit():
                   cnt = 0
-                  while s[i].isdigit():
+                  while i < len(s) and s[i].isdigit():
                       cnt = cnt * 10 + (ord(s[i]) - ord('0'))
                       i += 1
                   cnt_s.append(cnt)
@@ -7561,8 +7586,6 @@ Table of Content
 
           return ''.join(buf)
           ```
-  * 227: Basic Calculator II (M)
-  * 224: Basic Calculator
   * 255: Verify Preorder Sequence in Binary Search Tree (M)
     * Ref:
       * https://leetcode.com/problems/verify-preorder-sequence-in-binary-search-tree/discuss/68185/C%2B%2B-easy-to-understand-solution-with-thought-process-and-detailed-explanation
@@ -13805,6 +13828,562 @@ Table of Content
 
             return cur
         ```
+  * **Subsequence**:
+    * 1143: Longest Common Subsequence, LCS (M)
+      * Ref:
+         * https://www.youtube.com/watch?v=NnD96abizww
+         * https://leetcode.com/problems/longest-common-subsequence/discuss/348884/C%2B%2B-with-picture-O(nm)
+      * Relation
+        * definition:
+          * memo[i][j] is LCS between s1[0:i+1] and s2:[0:j+1]
+        * if s1[i] == s2[j]
+          * memo[i][j] = memo[i-1][j-1] + 1
+        * else (s1[i] != s2[j])
+          * memo[i][j] = max(memo[i][j-1], memo[i-1][j])
+      * DP Example:
+        ```txt
+        # x is dummy
+          x a c e
+        x 0 0 0 0
+        a 0 1 1 1
+        b 0 1 1 1
+        c 0 1 2 2
+        d 0 1 2 2
+        e 0 1 2 3
+        ```
+      * Traverse Back Function:
+        * Python
+          ```python
+            @staticmethod
+            def traverse_lcs_memo(s1, s1_idx, s2, s2_idx, memo):
+                """ traverse the memo array to find lcs
+                """
+                lcs_len = memo[s1_idx][s2_idx]
+                lcs = [None] * lcs_len
+                i, j = s1_idx, s2_idx
+
+                while lcs_len:
+                    if s1[i] == s2[j]:
+                        lcs_len -= 1
+                        lcs[lcs_len] = s1[i]
+                        i -= 1
+                        j -= 1
+                    else:
+                        if memo[i][j] == memo[i-1][j]:
+                            i -= 1
+                        else:  # memo[i][j] == memo[i][j-1]
+                            j -= 1
+
+                return "".join(lcs)
+          ```
+      * Approach1: DP: Time: O(mn), Space: O(mn)
+        * Python
+          * Implementation1:
+            ```python
+            def longestCommonSubsequence(self, text1: str, text2: str) -> int:
+
+              s1, s2 = text1, text2
+              l1, l2 = len(text1), len(text2)
+              row, col = l1, l2
+
+              if not l1 or not l2:
+                  return 0
+
+              memo = [[0 for _ in range(col)] for _ in range(row)]
+
+              # init start
+              if s1[0] == s2[0]:
+                  memo[0][0] = 1
+
+              # init first row
+              for c in range(1, col):
+                  if memo[0][c-1] or s2[c] == s1[0]:
+                      memo[0][c] = 1
+
+              # init first col
+              for r in range(1, row):
+                  if memo[r-1][0] or s1[r] == s2[0]:
+                      memo[r][0] = 1
+
+              # complete the memo
+              for r in range(1, row):
+                  for c in range(1, col):
+                      if s1[r] == s2[c]:
+                          memo[r][c] = memo[r-1][c-1] + 1
+                      else:
+                          memo[r][c] = max(memo[r][c-1], memo[r-1][c])
+
+              return memo[row-1][col-1]
+            ```
+          * Implementation2 (waste some space but is more clear):
+            ```python
+            def longestCommonSubsequence(self, text1: str, text2: str) -> int:
+              s1, s2 = text1, text2
+              l1, l2 = len(text1), len(text2)
+              row, col = l1+1, l2+1
+
+              if not l1 or not l2:
+                  return 0
+
+              memo = [[0 for _ in range(col)] for _ in range(row)]
+
+              # complete the memo
+              for r in range(1, row):
+                  for c in range(1, col):
+                      if s1[r-1] == s2[c-1]:
+                          memo[r][c] = memo[r-1][c-1] + 1
+                      else:
+                          memo[r][c] = max(memo[r][c-1], memo[r-1][c])
+
+              return memo[row-1][col-1]
+            ```
+      * Approach2: DP + mem optimization1: O(mn), Space:O(n)
+        * Ref:
+          * https://leetcode.com/problems/longest-common-subsequence/discuss/348884/C%2B%2B-with-picture-O(nm)
+        * Python
+          ```python
+          def longestCommonSubsequence(self, text1: str, text2: str) -> int:
+            s1, s2 = text1, text2
+            l1, l2 = len(text1), len(text2)
+            row, col = l1 + 1, l2 + 1
+
+            if not l1 or not l2:
+                return 0
+
+            # memory optimization, use two rows
+            memo = [[0 for _ in range(col)] for _ in range(2)]
+
+            for r in range(1, row):
+                prev_r = (r - 1) % 2
+                cur_r = r % 2
+                for c in range(1, col):
+                    if s1[r-1] == s2[c-1]:
+                        memo[cur_r][c] = memo[prev_r][c-1] + 1
+                    else:
+                        memo[cur_r][c] = max(memo[cur_r][c-1], memo[prev_r][c])
+
+            return memo[(row-1) % 2][-1]
+          ```
+      * Approach3: DP + mem optimization2: O(mn), Space:O(n)
+        ```python
+        def longestCommonSubsequence(self, text1: str, text2: str) -> int:
+          s1, s2 = text1, text2
+          l1, l2 = len(text1), len(text2)
+          row, col = l1+1, l2+1
+
+          if not l1 or not l2:
+              return 0
+
+          memo = [0 for _ in range(col)]
+
+          # complete the memo
+          for r in range(1, row):
+              # use prev to keep memo[r-1][c-1]
+              prev = memo[0]
+              for c in range(1, col):
+                  tmp = memo[c]
+                  if s1[r-1] == s2[c-1]:
+                      # memo[r][c] = memo[r-1][c-1]
+                      memo[c] = prev + 1
+                  else:
+                      # memo[r][c] = max(memo[r][c-1], memo[r-1][c])
+                      memo[c] = max(memo[c-1], memo[c])
+                  prev = tmp
+
+          return memo[-1]
+        ```
+    * 300: Longest Increasing Subsequence (**LIS**) (M)
+      * see binary search
+    * 674: Longest Continuous Increasing Subsequence (**LCIS**) (E)
+      * Approach1: Iterative + memo, Time:O(n), Space:O(n)
+        * Python
+          ```python
+          def findLengthOfLCIS(self, nums: List[int]) -> int:
+            if not nums:
+                return 0
+
+            n = len(nums)
+            memo = [1] * n
+            max_lcis = 1
+
+            for i in range(1, n):
+                if nums[i] > nums[i-1]:
+                    memo[i] = 1 + memo[i-1]
+                    max_lcis = max(max_lcis, memo[i])
+
+            return max_lcis
+          ```
+      * Approach2: Iterative + variables, Time:O(n), Space:O(1)
+        * Python
+          ```python
+          def findLengthOfLCIS(self, nums: List[int]) -> int:
+            if not nums:
+                return 0
+
+            n = len(nums)
+            max_lcis = 1
+            lcis = 1
+
+            for i in range(1, n):
+                if nums[i] > nums[i-1]:
+                    lcis = 1 + lcis
+                    max_lcis = max(max_lcis, lcis)
+                else:
+                    lcis = 1
+
+            return max_lcis
+          ```    *
+  * **Best Time to Buy and Sell Stock**
+    * Ref:
+      * [General solution](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/discuss/108870/Most-consistent-ways-of-dealing-with-the-series-of-stock-problems)
+    * 121: Best Time to Buy and Sell Stock (E)
+      * Description:
+        * You may complete **at most one transaction**.
+      * Approach1: Brute Force:O(n^2), Space:O(1)
+      * Approach2: Time:O(n), Space:O(1)
+        * For each round, keep the current minimum buy price and update best sell prcie.
+        * Python:
+          ```python
+          def maxProfit(self, prices: List[int]) -> int:
+            if not prices:
+                return  0
+
+            max_profit = 0
+            min_price = prices[0]
+
+            for i in range(1, len(prices)):
+                profit = prices[i] - min_price
+                max_profit = max(profit, max_profit)
+                min_price = min(prices[i], min_price)
+
+            return max_profit
+          ```
+    * 122: Best Time to Buy and Sell Stock II (E)
+      * Description
+        * Multiple transcations allowed.
+      * Approach1: Peak Valley , Time:O(n), Space:O(1)
+        * Python:
+          ```python
+          def maxProfit(self, prices: List[int]) -> int:
+            """
+            Peak Valley Approach
+            """
+            n = len(prices)
+            valley = 0
+            profit = 0
+            while valley < n:
+                while valley + 1 < n and prices[valley+1] <= prices[valley]:
+                    valley += 1
+
+                peak = valley + 1
+                while peak + 1 < n and prices[peak+1] >= prices[peak]:
+                    peak += 1
+
+                if valley < peak < n:
+                    profit += (prices[peak]-prices[valley])
+
+                valley = peak + 1
+
+            return profit
+          ```
+      * Approach2: Peak Valley II Time:O(n), Space:O(1)
+        * Python Solution2
+          ```python
+          def maxProfit(self, prices: List[int]) -> int:
+            max_profit = 0
+            for i in range(1, len(prices)):
+                if prices[i] > price[i-1]:
+                    max_profit += prices[i] - price[i-1]
+
+            return max_profit
+          ```
+    * 714: Best Time to Buy and Sell **Stock with Transaction Fee** (M)
+      * Description:
+        * You may complete as many transactions as you like, but you need to pay the transaction fee for each transaction.
+        * You may not buy more than 1 share of a stock at a time (ie. you must sell the stock share before you buy again.)
+      * Solution:
+        * Ref:
+          * https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/solution/
+        * Cash(i):
+          * The cash in hand, if you are **not holding the stock** at the end of day(i):
+          * cash[i] = max(case1, case2, case3) = max(case1, case2)
+            * case1:
+              * cash[i] = cash[i-1]
+            * case2:
+              * cash[i] = hold[i-1] + prcie[i] - fee
+            * case3:
+              * cash[i] = chsh[i-1] - prices[i] - fee + prices[i] = cash[i-1] - fee
+        * Hold(i):
+          * The cash in hand, if you are **holding the stock** at the end of day(i):
+          * hold[i] = max(case1, case2, case3) = max(case1, case2)
+            * case1:
+              * hold[i] = hold[i-1]
+            * case2:
+              * hold[i] = hold[i-1] + price[i] - fee - price[i]
+            * case2:
+              * hold[i] = hold[i-1] + prices[i] - fee - prices[i] = hold[i-1] - fee
+
+      * Approach1: DP, Time:O(n), Space:O(n)
+        * Python
+          ```python
+          def maxProfit(self, prices: List[int], fee: int) -> int:
+            if not prices:
+                return 0
+
+            n = len(prices)
+            cash = [0] * n
+            hold = [0] * n
+            hold[0] = -prices[0]
+
+            for i in range(1, len(prices)):
+                p = prices[i]
+                cash[i] = max(cash[i-1], hold[i-1] + p - fee)
+                hold[i] = max(hold[i-1], cash[i]-p)
+
+            return cash[-1]
+          ```
+      * Approach2: DP, Time:O(n), Space:O(1)
+        * Python
+            ```python
+            def maxProfit(self, prices: List[int], fee: int) -> int:
+              if not prices:
+                  return 0
+
+              n = len(prices)
+              cash = 0
+              hold = -prices[0]
+
+              for i in range(1, len(prices)):
+                  p = prices[i]
+                  prev_cash = cash
+                  """
+                  cash[i] = max(case1, case2)
+                  case1 : cash[i-1]
+                  case2:  hold[i-1] + prices[i] - fee
+                  case3:  cash[i-1] - prices[i] - fee + prices[i] (skip this case)
+                  """
+                  cash = max(cash, hold+p-fee)
+                  """
+                  hold[i] = max(case1, case2, case3) = max(case1, case2)
+                  case1: hold[i]
+                  case2: cash[i-1] - prices[i]
+                  case3: hold[i] + prices[i] - fee - prices[i]
+                  """
+                  hold = max(hold, prev_cash-p)
+
+              return cash
+            ```
+    * 309: Best Time to Buy and Sell Stock with **Cooldown** (M)
+      * Description:
+        * You may complete as many transactions as you like
+        * you must sell the stock before you buy again
+        * After you sell your stock, you cannot buy stock on next day. (coolddown)
+      * Solution:
+        * Ref:
+          * https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-cooldown/discuss/75928/Share-my-DP-solution-(By-State-Machine-Thinking)
+        * Concept:
+          * hold[i]: hold a stock, can sell
+            * init: hold[0] = -prices[0]
+            * hold[i] = max(case1, case2)
+              * case1: hold[i-1]
+              * case2: cash[i-1] - prices[i]
+          * cooldown[i]: just sold stock, only can rest
+            * init
+            * cooldown[i] = hold[i-1] + prices[i]
+          * cash[i]: do not hold any stock
+            * init: 0
+            * cash[i] = max(case1, case2)
+              * case1: cash[i-1]
+              * case2: cooldown[i-1]
+      * Approach1: DP, Time:O(n), Space:O(n)
+        * Python
+          ```python
+          def maxProfit(self, prices: List[int]) -> int:
+            if len(prices) <= 1:
+                return 0
+
+            n = len(prices)
+
+            hold = [0] * n
+            hold[0] = -prices[0]
+            cash = [0] * n
+            cooldown = [0] * n
+
+            for i in range(1, n):
+                p = prices[i]
+                hold[i] = max(hold[i-1], cash[i-1]-p)
+                cash[i] = max(cash[i-1], cooldown[i-1])
+                cooldown[i] = hold[i-1] + p
+
+            return max(cash[-1], cooldown[-1])
+          ```
+      * Approach2: DP, Time:O(n), Space:O(1)
+        * Python
+          ```python
+          def maxProfit(self, prices: List[int]) -> int:
+            if len(prices) <= 1:
+                return 0
+
+            n = len(prices)
+
+            hold = -prices[0]
+            cash = 0
+            cooldown = 0
+
+            for i in range(1, n):
+                p = prices[i]
+                prev_cooldown = cooldown
+                """
+                cooldown[i] = hold[i-1] + p
+                hold[i] = max(hold[i-1], cash[i-1]-p)
+                cash[i] = max(cash[i-1], cooldown[i-1])
+                """
+                cooldown = hold + p
+                hold = max(hold, cash-p)
+                cash = max(cash, prev_cooldown)
+
+            return max(cash, cooldown)
+          ```
+    * 123: Best Time to Buy and Sell Stock III (H)
+      * Description:
+        * You may complete **at most two transactions**.
+      * Ref:
+        * https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iii/discuss/135704/Detail-explanation-of-DP-solution
+      * Concept:
+        * memo[k, i]: k transactions on i-th day
+        * memo[k, i] = max(case1, case2)
+          * case1: memo[k, i-1]: the profit is same as previous day
+          * case2: max(prices[i] - prices[j] + memo[k-1][j]) for j=[0..i]
+            * The best buying day from k-1 transactions
+            * buy a stock on j-th day and sell on i-th day
+            * When j == i, dp[k-1][i] looks like we just lose one chance of transaction.
+      * Approach1: DP, Time:O(kn), Space:O(kn)
+        * Python
+          ```python
+          def maxProfit(self, prices: List[int]) -> int:
+            if len(prices) <= 1:
+                return 0
+
+            max_trans = 2  # at most 2 transactions
+            n = len(prices)
+            memo = [[0 for _ in range(n)] for _ in range(max_trans+1)]
+
+            """
+            starting from k == 1, since profit of k == 0 is 0
+            """
+            for k in range(1, max_trans+1):
+                """
+                case1:
+                    memo[k, i-1]: the profit is same as previous day
+                case2:
+                    prices[i] - prices[j] + memo[k-1][j]
+                    buy a stock on j-th day and sell i-th day
+                """
+                best_buy = -prices[0]
+                for i in range(1, n):
+                    best_buy = max(best_buy, memo[k-1][i] - prices[i])
+                    memo[k][i] = max(memo[k][i-1],
+                                     prices[i] + best_buy)
+            return memo[-1][-1]
+          ```
+      * Approach2-1: DP, Time:O(kn), Space:O(kn)
+        * Scan col by col
+        * Python
+          ```python
+          def maxProfit(self, prices: List[int]) -> int:
+            if len(prices) <= 1:
+                return 0
+
+            max_trans = 2  # at most 2 transactions
+            n = len(prices)
+            memo = [[0 for _ in range(n)] for _ in range(max_trans+1)]
+            best_buy = [-prices[0]] * (max_trans+1)
+
+            for i in range(1, n):
+                for k in range(1, max_trans+1):
+                    """
+                    best_buy[k][i] = max(best_buy[k-1][i-1],
+                                         memo[k-1][i] - prices[i])
+                    """
+                    best_buy[k] = max(best_buy[k], memo[k-1][i] - prices[i])
+                    memo[k][i] = max(memo[k][i-1],
+                                    prices[i] + best_buy[k])
+
+            return memo[-1][-1]
+          ```
+      * Approach2-2: DP, Time:O(kn), Space:O(k)
+        * Python
+          ```python
+          def maxProfit(self, prices: List[int]) -> int:
+            if len(prices) <= 1:
+                return 0
+
+            max_trans = 2  # at most 2 transactions
+            n = len(prices)
+            memo = [0] * (max_trans+1)
+            best_buy = [-prices[0]] * (max_trans+1)
+
+            for i in range(1, n):
+                for k in range(1, max_trans+1):
+                    """
+                    best_buy[k][i] = max(best_buy[k][i-1],
+                                         memo[k-1][i] - prices[i])
+                    """
+                    best_buy[k] = max(best_buy[k],
+                                      memo[k-1] - prices[i])
+
+                    """
+                    memo[k][i] = max(memo[k][i-1],
+                                     prices[i] + best_buy[k]
+
+                    """
+                    memo[k] = max(memo[k],
+                                  prices[i] + best_buy[k])
+
+            return memo[-1]
+          ```
+    * 188: Best Time to Buy and Sell Stock IV (H)
+      * Description:
+        * You may complete **at most k transactions**.
+      * Combination of 122 and 123.
+        * if k >= n/2:
+          * you can make maxium number of transactions (solution 122)
+          * The reason why k becomes effectively unlimited is because we need at least 2 days to perform a sell - one day to buy and one day to sell.
+        * else
+          * solution 123
+      * Approach1: DP, Time:O(n), Space:O(k)
+        * Python
+          ```python
+          def maxProfit(self, k: int, prices: List[int]) -> int:
+
+            def unlimited_transactions():
+                profit = 0
+                for i in range(1, len(prices)):
+                    if prices[i] > prices[i-1]:
+                        profit += (prices[i] - prices[i-1])
+
+                return profit
+
+            def limited_transactions(max_trans):
+                n = len(prices)
+                memo = [0] * (max_trans+1)
+                best_buy = [-prices[0]] * (max_trans+1)
+
+                for i in range(1, n):
+                    for k in range(1, max_trans+1):
+                        best_buy[k] = max(best_buy[k], memo[k-1] - prices[i])
+                        memo[k] = max(memo[k], prices[i] + best_buy[k])
+
+                return memo[-1]
+
+            if len(prices) <= 1:
+                return 0
+
+            if k >= len(prices) / 2:
+                return unlimited_transactions()
+            else:
+                return limited_transactions(max_trans=k)
+          ```
   * **Triangle**:
     * 118: Pascal's Triangle (E)
       * Relation
@@ -13990,8 +14569,77 @@ Table of Content
 
             return max_dis
           ```
-    * 300: Longest Increasing Subsequence (**LIS**) (M)
-      * see binary search
+    * 055: Jump Game (M)
+      * Description:
+        * Given an array of non-negative integers, you are initially positioned at the first index of the array.
+        * Each element in the array represents your maximum jump length at that position.
+        * Determine if you are able to reach the last index.
+      * Ref:
+        * https://leetcode.com/problems/jump-game/solution/
+      * Approach1: DP, Recursive + memo (top-down), Time: O(n^2), Space: O(n)
+        * Python
+          ```python
+          def canJump(self, nums: List[int]) -> bool:
+            def _can_jump_from(start):
+                # can not use True/False evaluation
+                if memo[start] is not None:
+                    return memo[start]
+
+                memo[start] = False
+                max_jump_dst = min(start+nums[start], n-1)
+
+                # from max_jump_dst to start + 1
+                for jump_dst in range(max_jump_dst, start, -1):
+                    if _can_jump_from(jump_dst):
+                        memo[start] = True
+                        break
+
+                return memo[start]
+
+            if not nums:
+                return False
+
+            n = len(nums)
+            memo = [None] * n
+            memo[n-1] = True
+
+            return _can_jump_from(0)
+          ```
+      * Approach2: DP, Iterative + memo (botoom-up), Time: O(n^2), Space: O(n)
+        * Python
+          ```python
+          def canJump(self, nums: List[int]) -> bool:
+            n = len(nums)
+            memo = [None] * n
+            memo[n-1] = True
+
+            # from n-2 to 0
+            for start in range(n-2, -1, -1):
+                max_jump_dst = min(start+nums[start] ,n-1)
+                # from max_jump_dst to start+1
+                for jump_dst in range(max_jump_dst, start, -1):
+                    if memo[jump_dst]:
+                        memo[start] = True
+                        break
+
+            return memo[0]
+          ```
+      * Approach2: Greedy, Time: O(n), Space: O(1)
+        * **The main concept is to keep the left most good index**
+          * If we can reach a GOOD index, then our position is a GOOD index as well. and this new GOOD index will be the new leftmost GOOD index.
+        * Python
+          ```python
+          def canJump(self, nums: List[int]) -> bool:
+            n = len(nums)
+            left_most_good_idx = n - 1
+
+            # from n-2 to 0
+            for start in range(n-2, -1, -1):
+                if start + nums[start] >= left_most_good_idx:
+                    left_most_good_idx = start
+
+            return left_most_good_idx == 0
+          ```
     * 062: Unique Paths (M)
       * The robot **can only move either down or right** at any point in time.
       * Approach1: Combination:
@@ -14314,169 +14962,6 @@ Table of Content
     * 375: Guess Number Higher or Lower II (M)
     * 312: Burst Balloons (H)
   * **Two Dimensional**:
-    * 1143: Longest Common Subsequence, LCS (M)
-      * Ref:
-         * https://www.youtube.com/watch?v=NnD96abizww
-         * https://leetcode.com/problems/longest-common-subsequence/discuss/348884/C%2B%2B-with-picture-O(nm)
-      * Relation
-        * definition:
-          * memo[i][j] is LCS between s1[0:i+1] and s2:[0:j+1]
-        * if s1[i] == s2[j]
-          * memo[i][j] = memo[i-1][j-1] + 1
-        * else (s1[i] != s2[j])
-          * memo[i][j] = max(memo[i][j-1], memo[i-1][j])
-      * DP Example:
-        ```txt
-        # x is dummy
-          x a c e
-        x 0 0 0 0
-        a 0 1 1 1
-        b 0 1 1 1
-        c 0 1 2 2
-        d 0 1 2 2
-        e 0 1 2 3
-        ```
-      * Traverse Back Function:
-        * Python
-          ```python
-            @staticmethod
-            def traverse_lcs_memo(s1, s1_idx, s2, s2_idx, memo):
-                """ traverse the memo array to find lcs
-                """
-                lcs_len = memo[s1_idx][s2_idx]
-                lcs = [None] * lcs_len
-                i, j = s1_idx, s2_idx
-
-                while lcs_len:
-                    if s1[i] == s2[j]:
-                        lcs_len -= 1
-                        lcs[lcs_len] = s1[i]
-                        i -= 1
-                        j -= 1
-                    else:
-                        if memo[i][j] == memo[i-1][j]:
-                            i -= 1
-                        else:  # memo[i][j] == memo[i][j-1]
-                            j -= 1
-
-                return "".join(lcs)
-          ```
-      * Approach1: DP: Time: O(mn), Space: O(mn)
-        * Python
-          * Implementation1:
-            ```python
-            def longestCommonSubsequence(self, text1: str, text2: str) -> int:
-
-              s1, s2 = text1, text2
-              l1, l2 = len(text1), len(text2)
-              row, col = l1, l2
-
-              if not l1 or not l2:
-                  return 0
-
-              memo = [[0 for _ in range(col)] for _ in range(row)]
-
-              # init start
-              if s1[0] == s2[0]:
-                  memo[0][0] = 1
-
-              # init first row
-              for c in range(1, col):
-                  if memo[0][c-1] or s2[c] == s1[0]:
-                      memo[0][c] = 1
-
-              # init first col
-              for r in range(1, row):
-                  if memo[r-1][0] or s1[r] == s2[0]:
-                      memo[r][0] = 1
-
-              # complete the memo
-              for r in range(1, row):
-                  for c in range(1, col):
-                      if s1[r] == s2[c]:
-                          memo[r][c] = memo[r-1][c-1] + 1
-                      else:
-                          memo[r][c] = max(memo[r][c-1], memo[r-1][c])
-
-              return memo[row-1][col-1]
-            ```
-          * Implementation2 (waste some space but is more clear):
-            ```python
-            def longestCommonSubsequence(self, text1: str, text2: str) -> int:
-              s1, s2 = text1, text2
-              l1, l2 = len(text1), len(text2)
-              row, col = l1+1, l2+1
-
-              if not l1 or not l2:
-                  return 0
-
-              memo = [[0 for _ in range(col)] for _ in range(row)]
-
-              # complete the memo
-              for r in range(1, row):
-                  for c in range(1, col):
-                      if s1[r-1] == s2[c-1]:
-                          memo[r][c] = memo[r-1][c-1] + 1
-                      else:
-                          memo[r][c] = max(memo[r][c-1], memo[r-1][c])
-
-              return memo[row-1][col-1]
-            ```
-      * Approach2: DP + mem optimization1: O(mn), Space:O(n)
-        * Ref:
-          * https://leetcode.com/problems/longest-common-subsequence/discuss/348884/C%2B%2B-with-picture-O(nm)
-        * Python
-          ```python
-          def longestCommonSubsequence(self, text1: str, text2: str) -> int:
-            s1, s2 = text1, text2
-            l1, l2 = len(text1), len(text2)
-            row, col = l1 + 1, l2 + 1
-
-            if not l1 or not l2:
-                return 0
-
-            # memory optimization, use two rows
-            memo = [[0 for _ in range(col)] for _ in range(2)]
-
-            for r in range(1, row):
-                prev_r = (r - 1) % 2
-                cur_r = r % 2
-                for c in range(1, col):
-                    if s1[r-1] == s2[c-1]:
-                        memo[cur_r][c] = memo[prev_r][c-1] + 1
-                    else:
-                        memo[cur_r][c] = max(memo[cur_r][c-1], memo[prev_r][c])
-
-            return memo[(row-1) % 2][-1]
-          ```
-      * Approach3: DP + mem optimization2: O(mn), Space:O(n)
-        ```python
-        def longestCommonSubsequence(self, text1: str, text2: str) -> int:
-          s1, s2 = text1, text2
-          l1, l2 = len(text1), len(text2)
-          row, col = l1+1, l2+1
-
-          if not l1 or not l2:
-              return 0
-
-          memo = [0 for _ in range(col)]
-
-          # complete the memo
-          for r in range(1, row):
-              # use prev to keep memo[r-1][c-1]
-              prev = memo[0]
-              for c in range(1, col):
-                  tmp = memo[c]
-                  if s1[r-1] == s2[c-1]:
-                      # memo[r][c] = memo[r-1][c-1]
-                      memo[c] = prev + 1
-                  else:
-                      # memo[r][c] = max(memo[r][c-1], memo[r-1][c])
-                      memo[c] = max(memo[c-1], memo[c])
-                  prev = tmp
-
-          return memo[-1]
-        ```
     * 072: Edit Distance (H)
       * Ref:
         * https://leetcode.com/problems/edit-distance/discuss/159295/Python-solutions-and-intuition
@@ -15599,9 +16084,15 @@ Table of Content
       * 186: Reverse **Words** in a String II (M)
       * 557: Reverse **Words** in a String III (E)
       * 345:	Reverse **Vowels** of a String (E)
+    * Encode(Compression) and Decode
+      * 038: Count and Say (E)
+      * 443: String Compression (E)
     * Isomorphism
     * Anagram
   * Array
+    * Check Duplicate
+      * 220: Contains Duplicate III (M)
+      * 287: Find the Duplicate Number (M)
   * LinkedList
     * **Runner** and **Detect Circle**
       * 142: Linked List Cycle II (M)
@@ -15630,6 +16121,7 @@ Table of Content
     * 394: Decode String (M)
     * 255: Verify Preorder Sequence in Binary Search Tree (M)
     * 341: Flatten Nested List Iterator (M)
+    * Calculator
   * Tree:
     * PreOrder:
       * 111: **Minimum Depth** of Binary Tree	(E)
