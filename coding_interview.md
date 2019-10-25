@@ -1275,110 +1275,110 @@ Table of Content
     * 147: Insertion Sort List (M)
     * 148: Sort list (M)
   * Others:
-      * 280: Wiggle Sort (M)
-         * Given an unsorted array nums, reorder it in-place such that nums[0] <= nums[1] >= nums[2] <= nums[3]
-         * Approach1: sorting, O(log(n))
-           * Sort and then pair swapping
-           * Python Solution
-             ```python
-             def wiggleSort(self, nums: List[int]) -> None:
-              nums.sort()
-              for i in range(1, len(nums)-1, 2):
-                  nums[i], nums[i+1] = nums[i+1], nums[i]
-             ```
-         * Approach2: greedy, O(n)
-           * Greedy from left to right
-           * Python Solution
-             ```python
-             def wiggleSort(self, nums: List[int]) -> None:
-              should_less = True
-              for i in range(len(nums)-1):
-                  if should_less:
-                      if nums[i] > nums[i+1]:
-                          nums[i], nums[i+1] = nums[i+1], nums[i]
-                  else:
-                      if nums[i] < nums[i+1]:
-                          nums[i], nums[i+1] = nums[i+1], nums[i]
-
-                  should_less = not should_less
-             ```
-      * 324: Wiggle Sort II (M)
-        * Given an unsorted array nums, reorder it such that nums[0] < nums[1] > nums[2] < nums[3]
-        * Error answer:
-          * test case:
-            * [1,2,2,1,2,1,1,1,1,2,2,2]
-          * Python
-          ```python
-          def wiggleSort(self, nums: List[int]) -> None:
+    * 280: Wiggle Sort (M)
+       * Given an unsorted array nums, reorder it in-place such that nums[0] <= nums[1] >= nums[2] <= nums[3]
+       * Approach1: sorting, O(log(n))
+         * Sort and then pair swapping
+         * Python Solution
+           ```python
+           def wiggleSort(self, nums: List[int]) -> None:
+            nums.sort()
+            for i in range(1, len(nums)-1, 2):
+                nums[i], nums[i+1] = nums[i+1], nums[i]
+           ```
+       * Approach2: greedy, O(n)
+         * Greedy from left to right
+         * Python Solution
+           ```python
+           def wiggleSort(self, nums: List[int]) -> None:
             should_less = True
             for i in range(len(nums)-1):
                 if should_less:
-                    if nums[i] >= nums[i+1]:
+                    if nums[i] > nums[i+1]:
                         nums[i], nums[i+1] = nums[i+1], nums[i]
                 else:
-                    if nums[i] <= nums[i+1]:
+                    if nums[i] < nums[i+1]:
                         nums[i], nums[i+1] = nums[i+1], nums[i]
 
                 should_less = not should_less
+           ```
+    * 324: Wiggle Sort II (M)
+      * Given an unsorted array nums, reorder it such that nums[0] < nums[1] > nums[2] < nums[3]
+      * Error answer:
+        * test case:
+          * [1,2,2,1,2,1,1,1,1,2,2,2]
+        * Python
+        ```python
+        def wiggleSort(self, nums: List[int]) -> None:
+          should_less = True
+          for i in range(len(nums)-1):
+              if should_less:
+                  if nums[i] >= nums[i+1]:
+                      nums[i], nums[i+1] = nums[i+1], nums[i]
+              else:
+                  if nums[i] <= nums[i+1]:
+                      nums[i], nums[i+1] = nums[i+1], nums[i]
 
-          ```
-      * 075: Sort Colors (M)
-         * Approach1: Quick sort, Time:O(nlog(n)), Space:O(log(n)~n)
-         * Approach2: **Counting sort**, Time:O(n+k), Space:O(k)
-           * Python:
+              should_less = not should_less
+
+        ```
+    * 075: Sort Colors (M)
+       * Approach1: Quick sort, Time:O(nlog(n)), Space:O(log(n)~n)
+       * Approach2: **Counting sort**, Time:O(n+k), Space:O(k)
+         * Python:
+         ```python
+         def sortColors(self, nums: List[int]) -> None:
+           """
+           Do not return anything, modify nums in-place instead.
+           """
+           if not nums:
+               return
+
+           # 3 colors only
+           color_num = 3
+           cnt_memo = [0] * color_num
+
+           for num in nums:
+               cnt_memo[num] += 1
+
+           p = 0
+           for color, cnt in enumerate(cnt_memo):
+               for _ in range(cnt):
+                   nums[p] = color
+                   p += 1
+         ```
+       * Approach3: **Dutch National Flag Problem**, Time:O(n), Space:O(1)
+         * Like 2 boundary quick sort
+           * p0: boundary for 0
+           * p2: boundary for 2
+           * cur: runner
+         * Notice the end condition
+           * p0 points to the **next** position 0 can be put.
+           * p2 points to the **next** position 2 can be put.
+         * Python
            ```python
            def sortColors(self, nums: List[int]) -> None:
-             """
-             Do not return anything, modify nums in-place instead.
-             """
+
              if not nums:
                  return
 
-             # 3 colors only
-             color_num = 3
-             cnt_memo = [0] * color_num
+             cur = p0 = 0
+             p2 = len(nums)-1
 
-             for num in nums:
-                 cnt_memo[num] += 1
-
-             p = 0
-             for color, cnt in enumerate(cnt_memo):
-                 for _ in range(cnt):
-                     nums[p] = color
-                     p += 1
+             while cur <= p2:
+                 if nums[cur] == 2:
+                     nums[cur], nums[p2] = nums[p2], nums[cur]
+                     p2 -= 1
+                 elif nums[cur] == 0:
+                     nums[cur], nums[p0] = nums[p0], nums[cur]
+                     p0 += 1
+                     # p0 only forwards 1, cur does not need to check again.
+                     cur += 1
+                 else:  # nums[cur] == 1
+                     cur += 1
            ```
-         * Approach3: **Dutch National Flag Problem**, Time:O(n), Space:O(1)
-           * Like 2 boundary quick sort
-             * p0: boundary for 0
-             * p2: boundary for 2
-             * cur: runner
-           * Notice the end condition
-             * p0 points to the **next** position 0 can be put.
-             * p2 points to the **next** position 2 can be put.
-           * Python
-             ```python
-             def sortColors(self, nums: List[int]) -> None:
-
-               if not nums:
-                   return
-
-               cur = p0 = 0
-               p2 = len(nums)-1
-
-               while cur <= p2:
-                   if nums[cur] == 2:
-                       nums[cur], nums[p2] = nums[p2], nums[cur]
-                       p2 -= 1
-                   elif nums[cur] == 0:
-                       nums[cur], nums[p0] = nums[p0], nums[cur]
-                       p0 += 1
-                       # p0 only forwards 1, cur does not need to check again.
-                       cur += 1
-                   else:  # nums[cur] == 1
-                       cur += 1
-             ```
-      * bucket sort:
-        * see 347: **Top K Frequent** Elements (M)
+    * bucket sort:
+      * see 347: **Top K Frequent** Elements (M)
 ### String
   * Remove Duplicate:
     * 316: Remove Duplicate Letters (H)
@@ -3303,7 +3303,11 @@ Table of Content
   * **Best Time to Buy and Sell Stock**
     * See DP
   * **Shortest Word Distance**
-    * 243: Shortest Word Distance (E) *
+    * 243: Shortest Word Distance (E)
+       * Description:
+         * Given a list of words and two words word1 and word2, return the shortest distance between these two words in the list.
+         * You may assume that **word1 does not equal to word2**.
+         * word1 and word2 are both in the list
        * Approach1: Time:O(n), Space:O(1)
          * Calculate the distance and update the shortest distance in each round.
            * Draw some cases1:
@@ -3311,70 +3315,65 @@ Table of Content
              * 1 2 2* 1* -> still can cover
                * 1-2* will not cover, but it is bigger than 1-2
                * 2-1* is the same, it is bigger than 2*-1*
-           * Python Solution
+           * Python
               ```python
               def shortestDistance(self, words: List[str], word1: str, word2: str) -> int:
-                shortest_dist = len(words) # beyond upper bound
-                idx1 = idx2 = -1
-                found = False
+                idx1 = idx2 = not_found = -1
+                min_dis = len(words)
 
                 for idx, w in enumerate(words):
                     if w == word1:
                         idx1 = idx
-
                     elif w == word2:
                         idx2 = idx
 
-                    if idx1 == -1 or idx2 == -1:
-                        continue
+                    if idx1 != not_found and idx2 != not_found:
+                        min_dis = min(min_dis, abs(idx1-idx2))
 
-                    shortest_dist = min(shortest_dist, abs(idx1-idx2))
-                    found = True
-
-                return shortest_dist if found else -1
+                return min_dis
               ```
-    * 245: Shortest Word Distance III (M) *
-      * Allow **duplicated words**.
+    * 245: Shortest Word Distance III (M)
+      * Description
+        * Allow **duplicated words**.
       * Approach1:
         * The same concept with 243, but need to handle duplicated words
-        * Python Solution
+        * Python
             ```python
             def shortestWordDistance(self, words: List[str], word1: str, word2: str) -> int:
-              shortest_dist = len(words)
-              idx1 = idx2 = -1
-              found = False
+              idx1 = idx2 = not_found = -1
+              min_dis = len(words)
+
               same = True if word1 == word2 else False
 
               for idx, w in enumerate(words):
                   if w == word1:
-                      if same:
-                          idx1, idx2 = idx2, idx
-                      else:
+                      if not same:
                           idx1 = idx
+                      else:
+                          idx1, idx2 = idx2, idx
+
                   elif w == word2:
                       idx2 = idx
 
-                  if idx1 == -1 or idx2 == -1:
-                      continue
+                  if idx1 != not_found and idx2 != not_found:
+                      min_dis = min(min_dis, abs(idx1-idx2))
 
-                  shortest_dist = min(shortest_dist, abs(idx1-idx2))
-                  found = True
-
-              return shortest_dist if found else -1
+              return min_dis
             ```
-    * 244: Shortest Word Distance II (M) **
-       * **Init once** and **search for multiple time**.
-       * Approach1: Time:O(K + L), Space:O(n)
+    * 244: Shortest Word Distance II (M)
+       * Description:
+         * **Init once** and **search for multiple time**.
+       * Approach1, indexes list of words, Time:O(K + L), Space:O(n)
          * Using **Preprocessed Sorted Indices** and two pointers to traverse
            * Space: O(n)
              * For or the dictionary that we prepare in the constructor.
              * The keys represent all the unique words in the input and the values represent all of the indices from 0 ... N0...N.
-         * Time Complexity:
-           * Init step:
+         * Complexity:
+           * Init:
              * O(n), where n is the number of words.
-           * Find the shortest distance :
-             * O(K + L), where K and L represent the number of occurrences of the two words.
-         * Python Solution
+           * Find:
+           * O(K + L), where K and L represent the number of occurrences of the two words.
+         * Python
             ```python
             class WordDistance:
               def __init__(self, words: List[str]):
@@ -3383,28 +3382,27 @@ Table of Content
                       self.word_d[w].append(idx)
 
               def shortest(self, word1: str, word2: str) -> int:
-                  idx_list_1 = self.word_d[word1]
-                  idx_list_2 = self.word_d[word2]
-                  idx1 = idx2 = 0
-                  shortest_dist = float('inf')
+                  idxes1 = self.word_d[word1]
+                  idxes2 = self.word_d[word2]
 
-                  while idx1 < len(idx_list_1) and idx2 < len(idx_list_2):
-                      w_idx1 = idx_list_1[idx1]
-                      w_idx2 = idx_list_2[idx2]
-                      shortest_dist = min(shortest_dist, abs(w_idx1-w_idx2))
-                      # move the smaller one
-                      if w_idx1 <= w_idx2:
-                          idx1 += 1
+                  i = j = 0
+                  min_dis = float('inf')
+                  while i < len(idxes1) and j < len(idxes2):
+                      idx1, idx2 = idxes1[i], idxes2[j]
+                      min_dis = min(min_dis, abs(idx1-idx2))
+                      if idx1 <= idx2:
+                          i += 1
                       else:
-                          idx2 += 1
+                          j += 1
 
-                  return shortest_dist
-            ```
+                  return min_dis
   * **Interval**
     * 252: Meeting Rooms (E)
-      * Check if one person **can attend all meetings**.
-      * How to check overlaps ?
-        * min(interval1.end, interval2.end) > max(interval1.start, interval2.start)
+      * Description:
+        * Check if one person **can attend all meetings**.
+      * FAQ
+        * How to check overlaps ?
+          * min(interval1.end, interval2.end) > max(interval1.start, interval2.start)
       * Approach1: Brute Force, Time:O(n^2)
           * Python Solution
             ```python
@@ -3430,47 +3428,155 @@ Table of Content
         * Algo:
           * Sort by start time of intervals
           * Check if interval[i] and intervalp[i+1] have overlap.
-        * Python Solution
+        * Python
           ```python
           def canAttendMeetings(self, intervals: List[List[int]]) -> bool:
-            start, end = 0, 1
-            can_attend = True
-            intervals.sort(key=lambda interval: interval[start])
+            START, END = 0, 1
+            can_attend_all = True
+
+            intervals.sort(key=lambda interval: interval[START])
 
             for i in range(1, len(intervals)):
-                if intervals[i-1][end] > intervals[i][start]:
-                    can_attend = False
+                if intervals[i-1][END] > intervals[i][START]:
+                    can_attend_all = False
 
-            return can_attend
+            return can_attend_all
           ```
     * 253: Meeting Rooms II (M)
       * see heap (Priority Queue) section
     * 056: Merge Intervals (M)
-      * Approach1: Sorting and check, Time: O(nlogn), Space: O(n)
+      * Description:
+        * Given a collection of intervals, merge all overlapping intervals.
+        * example:
+          * Input: [[1,3],[2,6],[8,10],[15,18]], Output: [[1,3],[2,6],[8,10],[15,18]]
+      * FAQ:
+        * For greedy method, why we don't need a max-heap to track?
+          * Because merged_interval[-1][END] is the maximum end value in the list
+      * Approach1: Brute Force, Time:O(n^2)
+      * Approach2: Greedy, Time: O(nlogn), Space: O(n)
         * Sort the intervals by start time,
         * Update the output if there exists interval overlap.
-        * Python Solution
+        * Python
           ```python
           def merge(self, intervals: List[List[int]]) -> List[List[int]]:
             if not intervals:
                 return []
 
-            start, end = 0, 1
-            intervals.sort(key=lambda interval: interval[start])
-            output = [intervals[0][:]]
+            START, END = 0, 1
+
+            intervals.sort(key=lambda interval: interval[START])
+            merged_interval = [intervals[0][:]]
 
             for i in range(1, len(intervals)):
-                last = output[-1]
+                last = merged_interval[-1]
                 cur = intervals[i]
 
-                # merge
-                if last[end] >= cur[start]:
-                      last[end] = max(last[end], cur[end])
+                if last[END] >= cur[START]:
+                    last[END] = max(last[END], cur[END])
                 else:
-                    # copy
-                    output.append(cur[:])
+                    merged_interval.append(cur[:])
 
-            return output
+            return merged_interval
+          ```
+    * 435: Non-overlapping Intervals (M)
+      * Description:
+        * Given a collection of intervals, find the minimum number of intervals you need to remove to make the rest of the intervals non-overlapping.
+      * FAQ:
+        * For greedy method, why we don't need a max-heap to track?
+          * Use a prev_end variable can do the same thing
+          * similar to the problem 56
+      * Approach1: DP, Time:O(n^2), Space:O(n)
+        * memo[i] stores the maximum number of valid intervals that can be included
+        * Python
+          ```python
+          def eraseOverlapIntervals(self, intervals: List[List[int]]) -> int:
+            if not intervals:
+                return 0
+
+            START, END = 0, 1
+            intervals.sort(key=lambda interval: interval[START])
+
+            """
+            stores the maximum number of valid intervals that can be included
+            """
+            memo = [1] * len(intervals)
+
+            for cur in range(1, len(intervals)):
+                max_valid = 0
+                for prev in range(0, cur):
+                    if intervals[prev][END] <= intervals[cur][START]:
+                        max_valid = memo[prev]
+
+                if max_valid:
+                    memo[cur] = max_valid + 1
+
+            """
+            min remove cnt is total cnt minus max valid cnt
+            """
+            return len(intervals) - max(memo)
+          ```
+      * Approach2: Greedy, Time:O(nlong), Space:O(n)-
+        * Python
+          ```python
+          def eraseOverlapIntervals(self, intervals: List[List[int]]) -> int:
+            if not intervals:
+                return 0
+
+            START, END = 0, 1
+            intervals.sort(key=lambda interval: interval[START])
+
+            remove_cnt = 0
+            prev_end = intervals[0][END]
+
+            for i in range(1, len(intervals)):
+                cur = intervals[i]
+                if prev_end <= cur[START]:
+                    prev_end = cur[END]
+                else:
+                    """
+                    keep the interval with smaller end time,
+                    that is, remove the interal with bigger end time
+                    """
+                    remove_cnt += 1
+                    prev_end = min(prev_end, cur[END])
+
+            return remove_cnt
+          ```
+    * 452: Minimum Number of Arrows to Burst Balloons
+      * Description:
+        * For each balloon, provided input is the **start and end coordinates** of the **horizontal** diameter.
+        * Since it's horizontal, y-coordinates don't matter and hence the x-coordinates of start and end of the diameter suffice.
+        * An arrow can be shot up exactly vertically from different points along the x-axis.
+          * A balloon with xstart and xend bursts by an arrow shot at x if xstart ≤ x ≤ xend.
+      * The problem is similar to 435
+      * Approach1: Sorting by start, Time:O(nlong), Space:O(n)
+        * Python
+          ```python
+          def findMinArrowShots(self, points: List[List[int]]) -> int:
+            if not points:
+                return 0
+
+            START, END = 0, 1
+            points.sort(key=lambda point: point[START])
+
+            arrow = 1
+            prev_end = points[0][END]
+
+            for i in range(1, len(points)):
+                cur = points[i]
+                """
+                can not merge
+                """
+                if prev_end < cur[START]:
+                    prev_end = cur[END]
+                    arrow += 1
+                else:
+                    """
+                    after merged, keep the smaller prev_end
+                    """
+                    prev_end = min(prev_end, cur[END])
+
+            return arrow
           ```
     * 057: Insert Interval (H)
     * 352: Data Stream as Disjoint Intervals (H)
@@ -7766,40 +7872,46 @@ Table of Content
           ```
   * Schedule:
     * 253: Meeting Rooms II (M)
-        * Find the minimum requirement of the meeting rooms.
-        * Approach1: Brute Force, Time: O(n^2), Space: O(1)
-        * Approach2: Min Heap: O(nlog(n)), Space: O(n)
-          * Check after sorting
-          * Algo
-            * Sort the intervals by start time
-            * For every meeting room check if the minimum element of the heap is free or not.
-              * If the room is free, then we extract the topmost element and add it back with the ending time of the current meeting we are processing.
-              * If not, then we allocate a new room and add it to the heap.
-          * Python
-              ```python
-              def minMeetingRooms(self, intervals: List[List[int]]) -> int:
-                if not intervals:
-                    return 0
+      * Find the minimum requirement of the meeting rooms.
+      * Approach1: Brute Force, Time: O(n^2), Space: O(1)
+      * Approach2: Min Heap: O(nlog(n)), Space: O(n)
+        * Algo
+          * Sort the intervals by start time
+          * For every meeting room check if the minimum element of the heap is free or not.
+            * If the room is free, then we extract the topmost element and add it back with the ending time of the current meeting we are processing.
+            * If not, then we allocate a new room and add it to the heap.
+        * We need a min_heap to track current mininum end time interval in the list
+        * Python
+          ```python
+          def minMeetingRooms(self, intervals: List[List[int]]) -> int:
+            if not intervals:
+                return 0
 
-                START, END = 0, 1
-                intervals.sort(key=lambda interval: interval[START])
+            START, END = 0, 1
+            intervals.sort(key=lambda interval: interval[START])
+            min_heap = [intervals[0][END]]
 
-                min_heap = [intervals[0][END]]
+            for i in range(1, len(intervals)):
+                cur = intervals[i]
 
-                for i in range(1, len(intervals)):
-                    cur = intervals[i]
+                if min_heap[0] > cur[START]:
+                    heapq.heappush(min_heap, cur[END])
 
-                    if min_heap[0] > cur[START]:
-                        heapq.heappush(min_heap, cur[END])
+                else:
+                    """
+                    replace the ending meeting
+                    """
+                    heapq.heapreplace(min_heap, cur[END])
 
-                    else: # heap[0] <= cur[START]
-                        heapq.heapreplace(min_heap, cur[END])
-
-                return len(min_heap)
-              ```
-        * Approach3: O(m), Space:O(m)
-          * If we can know the time range, this problem can be O(time_range)
+            return len(min_heap)
+          ```
+      * Approach3: O(m), Space:O(m)
+        * If we can know the time range, this problem can be O(time_range)
     * 1094: Car Pooling (M)
+      * Description:
+        * You are driving a vehicle that has capacity empty seats initially available for passengers.  The vehicle only drives east.
+        * Given a list of trips
+        * trip[i] = [num_passengers, start_location, end_location]
       * Similar to Meeting Rooms II
       * Approach1: Brute Force, Time:O(n^2), Space:O(1)
       * Approach2: min-heap, Time:O(nlogn), Space:O(n)
@@ -7890,14 +8002,9 @@ Table of Content
 
             return flights
           ```
-
-      * Description:
-        * Implement a MyCalendar class to store your events. A new event can be added if adding the event will not cause a double booking.
-        * Approach1: Brute Force, Time:O(n^2), Space:O(n)
-        *
     * 731: My Calendar II (M)
     * 732: My Calendar III (H)
-    * 630. Course Schedule III (H)
+    * 630: Course Schedule III (H)
       * Ref:
         * https://leetcode.com/problems/course-schedule-iii/discuss/104847/Python-Straightforward-with-Explanation
   * Kth problem:
@@ -8490,7 +8597,6 @@ Table of Content
       * Ref:
         * question, how to keep balanced ??
         * https://leetcode.com/problems/sliding-window-median/discuss/262689/Python-Small-and-Large-Heaps
-
   * 313: Super Ugly Numbe (M)
   * 218: The Skyline Problem (H)
     * Ref:
@@ -14122,7 +14228,6 @@ Table of Content
               * hold[i] = hold[i-1] + price[i] - fee - price[i]
             * case2:
               * hold[i] = hold[i-1] + prices[i] - fee - prices[i] = hold[i-1] - fee
-
       * Approach1: DP, Time:O(n), Space:O(n)
         * Python
           ```python
@@ -14160,7 +14265,7 @@ Table of Content
                   cash[i] = max(case1, case2)
                   case1 : cash[i-1]
                   case2:  hold[i-1] + prices[i] - fee
-                  case3:  cash[i-1] - prices[i] - fee + prices[i] (skip this case)
+                  case3:  cash[i-1] - prices[i] - fee + prices[i]
                   """
                   cash = max(cash, hold+p-fee)
                   """
@@ -15708,6 +15813,8 @@ Table of Content
             return memo[-1]
           ```
     * 983: Minimum Cost For Tickets (M)
+      * Description:
+        * The passes allow that many days of consecutive travel.  For example, if we get a 7-day pass on day 2, then we can travel for 7 days: day 2, 3, 4, 5, 6, 7, and 8.
       * Ref:
         * https://leetcode.com/problems/minimum-cost-for-tickets/discuss/226659/Two-DP-solutions-with-pictures
       * Recursive Relation:
@@ -15757,8 +15864,8 @@ Table of Content
                     last_30.append((day, cost))
 
                     cost = min(cost + costs[0],
-                              last_7[TOP][COST] + costs[1],
-                              last_30[TOP][COST] + costs[2])
+                               last_7[TOP][COST] + costs[1],
+                               last_30[TOP][COST] + costs[2])
 
                 return cost
 
@@ -16093,6 +16200,12 @@ Table of Content
     * Check Duplicate
       * 220: Contains Duplicate III (M)
       * 287: Find the Duplicate Number (M)
+    * Remove Duplicate
+    * Containers
+    * Jump Game
+    * Best Time to Buy and Sell Stock
+    * Shortest Word Distance
+    * Interval
   * LinkedList
     * **Runner** and **Detect Circle**
       * 142: Linked List Cycle II (M)
