@@ -1703,6 +1703,70 @@ Table of Content
 
               return 0 if min_len == UPPER_BOUND else min_len
             ```
+     * 713: Subarray Product Less Than K (M)
+       * Description:
+        * Your are given an array of **positive integers nums**.
+        * Count and print the number of (**contiguous**) subarrays where the product of all the elements in the subarray is less than k.
+        *
+       * Approach1: Brute Force
+       * Approach2: Sliding window
+         * **It would be better to think about the subarray is endied with right.**
+         * Example:
+          ```
+          step1:
+            [1, 2, 3, 4]
+             lr
+             l = r = 0
+             all contiguous subarray ending with 1 and product < k is 1
+             [1]
+          step2:
+            [ 1, 2, 3, 4]
+              l  r
+              l = 0, r = 1
+             all contiguous subarray ending with 2 and < k is 2
+             [2]
+             [1,2]
+          step3:
+            [ 1, 2, 3, 4]
+              l      r
+              l = 0, r = 2
+             all contiguous subarray ending with 2 and < k is 3
+             [3]
+             [2,3]
+             [1,2,3]
+
+          step4:
+            [ 1, 2, 3, 4]
+              l  l`    r
+              l = 0, r = 3 but prod >= k
+              move left until find new left whose produt < k>
+              if new left is l`
+              all contiguous subarray ending with 2 and < k is 3
+              [4]
+              [3,4]
+              [2,3,4]
+          ```
+         * Python
+          ```python
+          def numSubarrayProductLessThanK(self, nums, k):
+            if k <= 1:
+                return 0
+
+            left = right = 0
+            prod = 1
+            cnt = 0
+            while right < len(nums):
+                prod *= nums[right]
+
+                while prod >= k:
+                    prod /= nums[left]
+                    left += 1
+
+                cnt += (right - left + 1)
+                right += 1
+
+            return cnt
+          ```
   * **KMP**:
     * Reference:
       * [Concept](https://www.youtube.com/watch?v=GTJr8OvyEVQ)
@@ -2935,7 +2999,7 @@ Table of Content
           * The **absolute difference** between **nums[i] and nums[j] is at most t**.
           * The **absolute difference** between **i and j is at most k**.
       * Approach1: Brute Force:O(n^2), Space:O(1)
-      * Approach2: Buckets: O(n^2), Space:O(n)
+      * Approach2: Buckets: O(n), Space:O(n)
         * Ref:
           * https://leetcode.com/problems/contains-duplicate-iii/discuss/61639/JavaPython-one-pass-solution-O(n)-time-O(n)-space-using-buckets
           * The difference of values in the same bucket <= t
@@ -2967,78 +3031,6 @@ Table of Content
                     buckets.pop(nums[i - k] // bucket_size)
 
             return res
-          ```
-    * 287: Find the Duplicate Number (M)
-      * Description:
-        * Given an array nums **containing n + 1 integers** where each integer is between 1 and n (inclusive), prove that at least one duplicate number must exist. **Assume that there is only one duplicate number, find the duplicate one.**
-        * intergers range: 1 ~ n (n)
-        * idx range: 0 ~ n (n+1)
-      * Approach1: Sorting, Time:O(nlogn), Space:O(n)
-        * Python
-          ```python
-          def findDuplicate(self, nums: List[int]) -> int:
-            n = len(nums)
-
-            if n <= 1:
-                return None
-
-            nums = sorted(nums)
-            target = None
-            for i in range(0, n-1):
-                if nums[i] == nums[i+1]:
-                    target = nums[i]
-                    break
-
-            return target
-          ```
-      * Approach2: Hash Table, Time:O(n), Space:O(n)
-        * Python
-          ```python
-          def findDuplicate(self, nums: List[int]) -> int:
-            if len(nums) <= 1:
-                return None
-
-            d = dict()
-            target = None
-            for n in nums:
-                if n in d:
-                    target = n
-                    break
-
-                d[n] = True
-
-            return target
-          ```
-      * Approach3: Floyd's Tortoise and Hare (Cycle Detection), Time:O(n), Space:O(1)
-        * The beginning of the loop if the duplicate number
-        * Note
-          * intergers range: 1 ~ n (n)
-          * idx range: 0 ~ n (n+1)
-          * Because each number in nums is between 1 and n, **it will necessarily point to an index that exists**.
-            * **The val is also the idx of next val**
-          * Example:
-            * nums = [1, 2, 3, 2], n = 3
-            * 1 -> 2 nums[1] -> 3 nums[2] -> 2 nums[3] -> 2 nums[1] -> ...
-        * Python
-          ```python
-          def findDuplicate(self, nums):
-            slow = fast = nums[0]
-
-            while True:
-                slow = nums[slow]
-                fast = nums[nums[fast]]
-                if slow is fast:
-                    break
-
-            target = nums[0]
-            while True:
-                # the intersection may be the first element
-                if target is slow:
-                    break
-                target = nums[target]
-                slow = nums[slow]
-
-            return target
           ```
   * **Remove Duplicate**
     * Tips:
@@ -3452,6 +3444,21 @@ Table of Content
       * FAQ:
         * For greedy method, why we don't need a max-heap to track?
           * Because merged_interval[-1][END] is the maximum end value in the list
+      * 3 cases:
+        * case1: no overloap
+        * case2 &case3: having overlap, merge two intervals
+        * ```txt
+
+          case1:  [-----]
+                          [-----]
+
+          case2: [-----------------]
+                          [-----]
+
+          case3: [------------]
+                          [--------]
+
+         ```
       * Approach1: Brute Force, Time:O(n^2)
       * Approach2: Greedy, Time: O(nlogn), Space: O(n)
         * Sort the intervals by start time,
@@ -3485,6 +3492,22 @@ Table of Content
         * For greedy method, why we don't need a max-heap to track?
           * Use a prev_end variable can do the same thing
           * similar to the problem 56
+        * 3 cases:
+          * case1: no overloap
+          * case2: remove interval[i]
+          * case3: remove interval[i+1]
+        * ```txt
+
+          case1:  [-----]
+                          [-----]
+
+          case2: [-----------------]
+                          [-----]
+
+          case3: [------------]
+                          [--------]
+
+         ```
       * Approach1: DP, Time:O(n^2), Space:O(n)
         * memo[i] stores the maximum number of valid intervals that can be included
         * Python
@@ -3530,12 +3553,15 @@ Table of Content
 
             for i in range(1, len(intervals)):
                 cur = intervals[i]
+                """
+                END == START is not overlap
+                """
                 if prev_end <= cur[START]:
                     prev_end = cur[END]
                 else:
                     """
                     keep the interval with smaller end time,
-                    that is, remove the interal with bigger end time
+                    that is, remove the interval with bigger end time
                     """
                     remove_cnt += 1
                     prev_end = min(prev_end, cur[END])
@@ -3582,8 +3608,10 @@ Table of Content
     * 352: Data Stream as Disjoint Intervals (H)
   * **Subarray**
     * 053: Maximum Subarray (E)
-       * Approach1: Brute Force, O(n^2)
-         * Python Solution
+      * Description
+        * Given an integer array nums, find the contiguous subarray (containing at least one number) which has the largest sum and return its sum.
+      * Approach1: Brute Force, Time:O(n^2), Space:O(1)
+         * Python
             ```python
             def maxSubArray(self, nums: List[int]) -> int:
               max_sum = 0
@@ -3595,26 +3623,72 @@ Table of Content
 
               return max_sum
             ```
-       * Approach2: Kadane's Algorithm, O(n)
-         * Python Solution
+      * Approach2: DP with memo, Time:O(n), Space:O(n)
+        * meomo[i], largest sum of contiguous subarray inclued nums[i]
+        * Python
+          ```python
+          def maxSubArray(self, nums: List[int]) -> int:
+          if not nums:
+              return 0
+
+          max_sum = nums[0]
+          memo = [0] * len(nums)
+          memo[0] = nums[0]
+
+          for i in range(1, len(nums)):
+              n = nums[i]
+              memo[i] = max(memo[i-1] + n, n)
+              max_sum = max(max_sum, memo[i])
+
+          return max_sum
+          ```
+      * Approach3: Dp with variables, Time:O(n), Space:O(1)
+         * Python
             ```python
-            def max_sub_array(self, nums: List[int]) -> int:
-                max_sum = max_sum_so_far = nums[0]
+            def maxSubArray(self, nums: List[int]) -> int:
+              if not nums:
+                  return 0
 
-                for i in range(1, len(nums)):
-                    max_sum_so_far = max(nums[i], max_sum_so_far+nums[i])
-                    max_sum = max(max_sum, max_sum_so_far)
+              max_sum = nums[0]
+              cur = nums[0]
+              for i in range(1, len(nums)):
+                  n = nums[i]
+                  cur = max(cur + n, n)
+                  max_sum = max(max_sum, cur)
 
-                return max_sum
+              return max_sum
           ```
     * 152: Maximum **Product** Subarray (M)
+      * Description:
+        * Given an integer array nums, find the contiguous subarray within an array (containing at least one number) which has the largest product.
       * Approach1: Brute Force, Time:O(n^2)
-      * Approach2: Kadane's Algorithm like algo, Time: O(n), Space: O(1)
+      * Approach2: DP-1, Time: O(n), Space: O(1)
+        * Python
+          ```python
+          def maxProduct(self, nums: List[int]) -> int:
+            MAX, MIN = 0, 1
+            memo = [[0, 0] for i in range(len(nums))]
+            max_product = memo[0][MAX] = memo[0][MIN] = nums[0]
+
+            for i in range(1, len(nums)):
+                n = nums[i]
+                prev_max, prev_min = memo[i-1][MAX], memo[i-1][MIN]
+                if n < 0:
+                    prev_max, prev_min = prev_min, prev_max
+
+                memo[i][MAX] = max(prev_max * n, n)
+                memo[i][MIN] = max(prev_min * n, n)
+
+                max_product = max(max_product, memo[i][MAX])
+
+            return max_product
+          ```
+      * Approach3: DP-2, Time: O(n), Space: O(1)
         * The concept is just like 53: maximum subarray, but need to notice negative value in the array.
         * Python Solution
           ```python
           def maxProduct(self, nums: List[int]) -> int:
-            g_max = cur_min = cur_max = nums[0]
+            max_product = cur_min = cur_max = nums[0]
             for i in range(1, len(nums)):
                 # we redefine the extremums by swapping them
                 # when multiplied by a negative
@@ -3624,15 +3698,16 @@ Table of Content
                 cur_max = max(nums[i], cur_max*nums[i])
                 cur_min = min(nums[i], cur_min*nums[i])
 
-                g_max = max(cur_max, g_max)
+                max_product = max(max_product, g_max)
 
-            return g_max
+            return max_product
           ```
     * 325: Maximum Size Subarray Sum **Equals k** (M)
-      * Find the maximum length of a subarray that sums to k
+      * Description
+        * Find the maximum length of a subarray that sums to k
       * Approach1: Brute force, O(n^2), Space: O(1)
         * List all pairs of acc and keep the max
-        * Python Solution
+        * Python
           ```python
           def subarraySum(self, nums: List[int], k: int) -> int:
             max_len = 0
@@ -3650,7 +3725,7 @@ Table of Content
             * key: accumulation value
             * val: index
         * Use hash table to keep acc value and the index.
-        * Python Solution
+        * Python
           ```python
           def maxSubArrayLen(self, nums: List[int], k: int) -> int:
             acc = max_len = 0
@@ -3685,32 +3760,71 @@ Table of Content
                   cnt += 1
             return cnt
           ```
-      * Approach2: Use hash Table Time: O(n), Space: O(n)
+      * Approach2: Use dict, Time: O(n), Space: O(n)
         * Use hash table to keep acc value and cnt
-        * Python Solution
+        * Python
           ```python
           def subarraySum(self, nums: List[int], k: int) -> int:
             acc = cnt = 0
             d = collections.defaultdict(int)
-            d[0] += 1 # init value for acc == k
+            """
+            init value for acc == k (starting from index 0)
+            """
+            d[0] += 1
 
             for n in nums:
               acc += n
+              """
+              target_acc + k = acc
+              """
               target_acc = acc - k
 
               if target_acc in d:
                   cnt += d[target_acc]
-
               d[acc] += 1
             return cnt
           ```
+    * 525: Contiguous Array (M)
+      * Description:
+        * Given a binary array, find the maximum length of a contiguous subarray with equal number of 0 and 1.
+      * Approach1: Brute Force:O(n^2), Space:O(1)
+      * Approach2: Count and indexes: Time:O(n), Space:O(n)
+        * Ref:
+          * https://leetcode.com/problems/contiguous-array/discuss/99655/Python-O(n)-Solution-with-Visual-Explanation
+        * To find the maximum length, we need a dict to store the value of count (as the key) and its associated index (as the value). We only need to save a count value and its index at the first time, when the same count values appear again, we use the new index subtracting the old index to calculate the length of a subarray.
+        * Python
+          ```python
+          def findMaxLength(self, nums: List[int]) -> int:
+            if not nums:
+                return 0
+
+            # for subarray starting from index 0
+            d = {0: -1}
+            max_len = 0
+            cnt = 0
+            for idx, n in enumerate(nums):
+                if n == 0:
+                    cnt -= 1
+                else:
+                    cnt += 1
+
+                if cnt in d:
+                    max_len = max(max_len, idx-d[cnt])
+                else:
+                    d[cnt] = idx
+
+            return max_len
+          ```
     * 238: **Product** of Array **Except Self** (M)
-      * Approach1: Allow to use Division, Time:O(n)
+      * Description:
+        * example:
+          * Input: [1,2,3,4], Output: [24,12,8,6]
+      * Approach1: Allow to use Division, Time:O(n), Space:O(1)
         * We can simply take the product of all the elements in the given array and then, for each of the elements xx of the array, we can simply find product of array except self value by dividing the product by xx.
         * Containing zero cases
           * exactly 1 zero
           * more than 1 zero
-        * Python Solution,
+        * Python
           ```python
           def productExceptSelf(self, nums: List[int]) -> List[int]:
             product = 1
@@ -3727,13 +3841,13 @@ Table of Content
             if zero_cnt == 1:
               output[zero_idx] = product
             elif zero_cnt == 0:
-              for i in range(len(output)):
-                output[i] = product//nums[i]
+              for idx, n in enumerate(nums):
+                output[idx] = product // n
             return output
             ```
       * Approach2: Not Allow to use Division1: Time:O(n), Space:O(n)
         * **For every given index i, we will make use of the product of all the numbers to the left of it and multiply it by the product of all the numbers to the right**.
-        * Python Solution:
+        * Python:
         ```python
         def productExceptSelf(self, nums: List[int]) -> List[int]:
           n = len(nums)
@@ -3749,14 +3863,14 @@ Table of Content
           for i in range(n-2, -1, -1):
               right_p[i] = right_p[i+1] * nums[i+1]
 
-          for i in range(0, n):
-              output[i] = left_p[i] * right_p[i]
+          for i, (l, r) in enumerate(zip(left, right)):
+              output[i] = l * r
 
           return output
         ```
       * Approach3: Not Allow to use Division2: Time:O(n), Space:O(n)
           * We can use a variable to replace right_product array
-          * Python Solution:
+          * Python:
             ```python
             def productExceptSelf(self, nums: List[int]) -> List[int]:
               n = len(nums)
@@ -3775,60 +3889,67 @@ Table of Content
               return output
             ```
     * 228: **Summary Ranges** (M)
-      * Given a sorted integer array without duplicates, return the summary of its ranges.
+      * Description
+        * Given a sorted integer array without duplicates, return the summary of its ranges.
         * Input:
           * [0,1,2,4,5,7]
         * Output:
           * ["0->2","4->5","7"]
-      * Approach1:
-        * Python Solution
+      * Approach1: Time:O(n), Space:O(1)
+        * Python
           ```python
           def summaryRanges(self, nums: List[int]) -> List[str]:
+              def append_output(start, end):
+                if start == end:
+                    output.append(str(nums[start]))
+                else:
+                    output.append(f'{nums[start]}->{nums[end]}')
+
             n = len(nums)
             output = list()
             start = 0
-
             while start < n:
                 end = start
                 while end + 1 < n and nums[end]+1 == nums[end+1]:
                     end += 1
 
-                if end == start:
-                    output.append(str(nums[start]))
-                else:
-                    output.append(f'{nums[start]}->{nums[end]}')
+                append_output(start, end)
 
                 start = end + 1
 
             return output
           ```
     * 163: **Missing Ranges** (M)
-      * Example:
-        * Input: nums = [0, 1, 3, 50, 75], lower = 0 and upper = 99
-        * Output: ["2", "4->49", "51->74", "76->99"]
-      * Approach1:
+      * Description
+        * Given a sorted integer array nums, where the range of elements are in the inclusive range [lower, upper], return its missing ranges.
+        * Example:
+          * Input: nums = [0, 1, 3, 50, 75], lower = 0 and upper = 99
+          * Output: ["2", "4->49", "51->74", "76->99"]
+      * Approach1: Time:O(n), Space:O(1)
         * Need to know how to handle the boundary properly.
-        * Python Solution
-        ```python
-          @staticmethod
-          def format_result(left_boundary, right_boundary, output):
-            diff = right_boundary - left_boundary
-            if diff == 2:
-                output.append(str(left_boundary+1))
-            elif diff > 2:
-                output.append(f"{left_boundary+1}->{right_boundary-1}")
-
+        * Python
+          ```python
           def findMissingRanges(self, nums: List[int], lower: int, upper: int) -> List[str]:
-              output = []
-              left_boundary = lower - 1
-              for n in nums:
-                  right_boundary = n
-                  self.format_result(left_boundary, right_boundary, output)
-                  left_boundary = right_boundary
+            def append_output(left_b, right_b):
+                diff = right_b - left_b
+                if diff == 2:
+                    output.append(str(left_b+1))
+                elif diff > 2:
+                    output.append(f"{left_b+1}->{right_b-1}")
 
-              right_boundary = upper + 1
-              self.format_result(left_boundary, right_boundary, output)
-              return output
+            output = []
+            left_b = lower - 1
+
+            for n in nums:
+                right_b = n
+                append_output(left_b, right_b)
+                left_b = right_b
+
+            right_b = upper + 1
+            append_output(left_b, right_b)
+
+            return outputt(left_boundary, right_boundary, output)
+            return output
           ```
     * 239: Sliding Window Maximum (H)
   * **Reorder**
@@ -3908,7 +4029,75 @@ Table of Content
                 nums[border], nums[i] = nums[i], nums[border]
                 border += 1
            ```
-  * Intersection:
+  * Counter:
+    * 299: Bulls and Cows (M)
+      * Description:
+        * Bull:
+          * Two characters are the same and having the same index.
+        * Cow
+          * Two characters are the same but do not have the same index.
+        * example:
+          * Intput: secret = "1807", guess = "7810"
+          * Output: "1A3B", 1 bull (8) and 3 cows (0,1,7)
+      * Approach1: Hash TableTime O(n), Space O(n) and **one pass**
+        * Use **hash Table** to count cows.
+        * Python
+          ```python
+          def getHint(self, secret: str, guess: str) -> str:
+            bull = cow = 0
+
+            d = collections.defaultdict(int)
+            for c1, c2 in zip(secret, guess):
+                if c1 == c2:
+                    bull += 1
+                else:
+                    if d[c1] < 0:
+                        cow += 1
+
+                    if d[c2] > 0:
+                        cow += 1
+
+                    d[c1] += 1
+                    d[c2] -= 1
+
+            return f'{bull}A{cow}B'
+          ```
+    * 1002: Find Common Characters
+      * Description:
+        * Given an array A of strings made only from lowercase letters, return a list of all characters that show up in all strings within the list (including duplicates).
+      * Example:
+        * Input: ["bella","label","roller"], Output: ["e","l","l"]
+        * Input: ["cool","lock","cook"], Output: ["c","o"]
+      * Approach1: Time:O(kn), Space:O(c)
+        * k: number of string, n: avg length of string, c: signature size
+        * Python
+          ```python
+          def commonChars(self, A: List[str]) -> List[str]:
+            def get_counter(s):
+                sig = [0 for _ in range(26)]
+                for c in s:
+                    sig[ord(c)-ord_a] += 1
+
+                return sig
+
+            if not A:
+                return []
+
+            n = len(A)
+            ord_a = ord('a')
+            min_counter = get_counter(A[0])
+            for i in range(1, len(A)):
+                counter = get_counter(A[i])
+                for i, (c1, c2) in enumerate(zip(min_counter, counter)):
+                  min_counter[i] = min(c1, c2)
+
+            res = []
+            for i, cnt in enumerate(min_counter):
+                c = chr(ord_a + i)
+                res += [c] * cnt
+
+          return res
+          ```
     * 349: Intersection of Two Arrays (E)
       * Each element in the result must be unique.
       * Approach1: Use hash Table, Time:O(m+n), Space:O(m)
@@ -3927,14 +4116,18 @@ Table of Content
             for n in nums2:
                 if n in d1 and d1[n]:
                     intersection.append(n)
+                    """
+                    deduplicate
+                    """
                     d1[n] = False
 
             return intersection
           ```
     * 350: Intersection of Two Arrays II (E)
-      * Each element in the result should appear as many times as it shows in both arrays.
-      * follow up:
-        * What if the given array is already sorted? How would you optimize your algorithm?
+      * Description:
+        * Each element in the result should appear as many times as it shows in both arrays.
+        * follow up:
+          * What if the given array is already sorted? How would you optimize your algorithm?
       * Approach1: Hash Table, Time:O(m+n), Space:O(m)
         * Python
           ```python
@@ -3972,10 +4165,148 @@ Table of Content
 
               return intersection
             ```
+  * **Number**:
+    * 041: First missing positive (H)
+      * Description:
+        * Given an unsorted integer array, **find the smallest missing positive integer**.
+        * example:
+          * Input: [1,2,0] Output: 3
+          * Input: [3,4,-1,1], Output: 2
+      * Ref
+        * https://leetcode.com/problems/first-missing-positive/discuss/17073/Share-my-O(n)-time-O(1)-space-solution
+        * https://leetcode.com/problems/first-missing-positive/discuss/17071/My-short-c%2B%2B-solution-O(1)-space-and-O(n)-time
+      * The idea is **like you put k balls into k+1 bins**, there must be a bin empty, the empty bin can be viewed as the missing number.
+      * For example:
+        * if length of n is 3:
+          * The ideal case would be: [1, 2, 3], then the first missing is 3+1 = 4
+          * The missing case may be: [1, None, 3]  5, then the first missing is 2
+      * Approach1: Sorting, Time:O(nlogn), Space:O(logn~n)
+      * Approach2: Generate a sorted array-1, Time O(n), Space O(n)
+        * Use extra space to keep the sorted positve numbers.
+        * Python
+          ```python
+          def firstMissingPositive(self, nums: List[int]) -> int:
+            n = len(nums)
+
+            sorted_positive = [None] * n
+
+            for num in nums:
+                if 1 <= num <= n:
+                    sorted_positive[num-1] = num
+
+            first_missing = n + 1
+            for idx, num in enumerate(sorted_positive):
+                if num is None:
+                    first_missing = idx + 1
+                    break
+
+            return first_missing
+          ```
+      * Approach3: Generate a sorted array-2, Time O(n), Space O(1)
+         * Each number will be put in its right place at most once after first loop *
+         * Traverse the array to find the unmatch number
+         * But this is not a good idea since we change the input array.
+         * Python
+            ```python
+            def firstMissingPositive(self, nums: List[int]) -> int:
+              n = len(nums)
+
+              for i in range(n):
+                  # We visit each number once, and each number will
+                  # be put in its right place at most once
+                  while 0 < nums[i] <= n and nums[nums[i]-1] != nums[i]:
+                      # the correct position of nums[i] is in
+                      # nums[nums[i]#-1]
+                      correct = nums[i]-1  # need this correct
+                      nums[i], nums[correct] = nums[correct] , nums[i]
+
+              res = n + 1
+              for i in range(n):
+                  if n[i] != i+1:
+                      res i+1
+                      break
+              # not found from 0 to length-1, so the first missing is in length-th
+              return res
+            ```
+    * 287: Find the Duplicate Number (M)
+      * Description:
+        * Given an array nums **containing n + 1 integers** where each integer is between 1 and n (inclusive), prove that at least one duplicate number must exist. **Assume that there is only one duplicate number, find the duplicate one.**
+        * intergers range: 1 ~ n (n)
+        * idx range: 0 ~ n (n+1)
+      * Approach1: Sorting, Time:O(nlogn), Space:O(n)
+        * Python
+          ```python
+          def findDuplicate(self, nums: List[int]) -> int:
+            n = len(nums)
+
+            if n <= 1:
+                return None
+
+            nums = sorted(nums)
+            target = None
+            for i in range(0, n-1):
+                if nums[i] == nums[i+1]:
+                    target = nums[i]
+                    break
+
+            return target
+          ```
+      * Approach2: Hash Table, Time:O(n), Space:O(n)
+        * Python
+          ```python
+          def findDuplicate(self, nums: List[int]) -> int:
+            if len(nums) <= 1:
+                return None
+
+            d = dict()
+            target = None
+            for n in nums:
+                if n in d:
+                    target = n
+                    break
+
+                d[n] = True
+
+            return target
+          ```
+      * Approach3: Floyd's Tortoise and Hare (Cycle Detection), Time:O(n), Space:O(1)
+        * The beginning of the loop if the duplicate number
+        * Note
+          * intergers range: 1 ~ n (n)
+          * idx range: 0 ~ n (n+1)
+          * Because each number in nums is between 1 and n, **it will necessarily point to an index that exists**.
+            * **The val is also the idx of next val**
+          * Example:
+            * nums = [1, 2, 3, 2], n = 3
+            * 1 -> 2 nums[1] -> 3 nums[2] -> 2 nums[3] -> 2 nums[1] -> ...
+        * Python
+          ```python
+          def findDuplicate(self, nums):
+            slow = fast = nums[0]
+
+            while True:
+                slow = nums[slow]
+                fast = nums[nums[fast]]
+                if slow is fast:
+                    break
+
+            target = nums[0]
+            while True:
+                # the intersection may be the first element
+                if target is slow:
+                    break
+                target = nums[target]
+                slow = nums[slow]
+
+            return target
+          ```
+    * 765: Couples Holding Hands (H)
   * Other:
-    * 277: Find the Celebrity (M)
+    * 277: Find the **Celebrity** (M)
       * Ref:
         * https://pandaforme.github.io/2016/12/09/Celebrity-Problem/
+      * Description:
+        * The definition of a celebrity is that all the other n - 1 people know him/her but he/she does not know any of them.
       * Approach1:
         1. Find the **celebrity candidate**
         2. Check if the candidate is the celebrity
@@ -3983,7 +4314,7 @@ Table of Content
               * The celebrity does not know them but they know the celebrity.
            * Check the people after the celebrity candidate:
              * They should know the celebrity
-         * Python Solution
+         * Python
             ````python
             # Return True if a knows b
             def knows(a,  b):
@@ -4016,121 +4347,41 @@ Table of Content
 
                 return celebrity
             ````
-    * 041: First missing positive (H)
-      * Ref
-        * https://leetcode.com/problems/first-missing-positive/discuss/17073/Share-my-O(n)-time-O(1)-space-solution
-        * https://leetcode.com/problems/first-missing-positive/discuss/17071/My-short-c%2B%2B-solution-O(1)-space-and-O(n)-time
-      * The idea is **like you put k balls into k+1 bins**, there must be a bin empty, the empty bin can be viewed as the missing number.
-      * For example:
-        * if length of n is 3:
-          * The ideal case would be: [1, 2, 3], then the first missing is 3+1 = 4
-          * The missing case may be: [1, None, 3]  5, then the first missing is 2
-      * Approach1: Time O(n), Space O(n)
-        * Use extra space to keep the sorted positve numbers.
-        * Python Solution
-          ```python
-          def firstMissingPositive(self, nums: List[int]) -> int:
-            n = len(nums)
-            sorted_nums = [None] * n
-
-            for num in nums:
-                if 0 < num <= n:
-                    sorted_nums[num-1] = n
-
-            res = n + 1 # not found
-            for i in range(0, n):
-                if not sorted_nums[i]:
-                    res = i+1
-                    break
-
-            return res
-          ```
-      * Approach2: Time O(n), Space O(1)
-         1. Each number will be put in its right place at most once after first loop *
-         2. Traverse the array to find the unmatch number
-         * Python Solution
-            ```python
-            def firstMissingPositive(self, nums: List[int]) -> int:
-              n = len(nums)
-
-              for i in range(n):
-                  # We visit each number once, and each number will
-                  # be put in its right place at most once
-                  while 0 < nums[i] <= n and nums[nums[i]-1] != nums[i]:
-                      # the correct position of nums[i] is in
-                      # nums[nums[i]#-1]
-                      correct = nums[i]-1  # need this correct
-                      nums[i], nums[correct] = nums[correct] , nums[i]
-
-              res = n + 1
-              for i in range(n):
-                  if n[i] != i+1:
-                      res i+1
-                      break
-              # not found from 0 to length-1, so the first missing is in length-th
-              return res
-            ```
-    * 299: Bulls and Cows (M)
-      * Bull:
-        * Two characters are the same and having the same index.
-      * Cow
-        * Two characters are the same but do not have the same index.
-      * Approach1: Hash TableTime O(n), Space O(n) and **one pass**
-        * Use **hash Table** to count cows.
-        * Python solution
-          ```python
-          def getHint(self, secret: str, guess: str) -> str:
-            bull, cow = 0, 0
-            d = collections.defaultdict(int)
-
-            for s, g in zip(secret, guess):
-
-                if s == g:
-                    bull += 1
-                else:
-                    if d[s] < 0:
-                        cow += 1
-
-                    if d[g] > 0:
-                        cow += 1
-
-                    d[s] += 1
-                    d[g] -= 1
-
-            return f'{bull}A{cow}B'
-          ```
     * 134: Gas Station (M)
-        * Time: O(n)
-          * Concept:
-            * rule1:
-              * **If car starts at A and can not reach B. Any station between A and B can not reach B.**
-              * If A can't reach B, and there exists C between A & B which can reach B, then A can reach C first, then reach B from C, which is conflict with our init statement: A can't reach B. so, the assume that such C exists is invalid.
-            * rule2
-              * **If the total number of gas is bigger than the total number of cost, there must be a solution.**
-              * [Proof](https://leetcode.com/problems/gas-station/discuss/287303/Proof%3A-if-the-sum-of-gas-greater-sum-of-cost-there-will-always-be-a-solution)
-          * Python Solution
-            ```python
+      * Description:
+        * There are N gas stations along a circular route, where the amount of gas at station i is gas[i].
+        * You have a car with an unlimited gas tank and it costs cost[i] of gas to travel from station i to its next station (i+1). You begin the journey with an empty tank at one of the gas stations.
+        * Return the starting gas station's index if you can travel around the circuit once in the clockwise direction, otherwise return -1.
+      * Approach1: Time:O(n), Space:O(1)
+        * Concept:
+          * rule1:
+            * **If car starts at A and can not reach B. Any station between A and B can not reach B.**
+            * If A can't reach B, and there exists C between A & B which can reach B, then A can reach C first, then reach B from C, which is conflict with our init statement: A can't reach B. so, the assume that such C exists is invalid.
+          * rule2
+            * **If the total number of gas is bigger than the total number of cost, there must be a solution.**
+            * [Proof](https://leetcode.com/problems/gas-station/discuss/287303/Proof%3A-if-the-sum-of-gas-greater-sum-of-cost-there-will-always-be-a-solution)
+        * Python
+          ```python
+          def canCompleteCircuit(self, gas: List[int], cost: List[int]) -> int:
             not_found = -1
             start = 0
-            total_tank = 0
-            cur_tank = 0
+            total_tank = cur_tank = 0
 
-            for i in range(len(gas)):
-                remain = gas[i] - cost[i]
+            for i, (g, c) in enumerate(zip(gas, cost)):
+                remain = g - c
                 cur_tank += remain
                 total_tank += remain
 
-                # try another start
-                # rule2
                 if cur_tank < 0:
-                    # rule1
-                    start = i+1
+                    start = i + 1
                     cur_tank = 0
 
+
             return start if total_tank >= 0 else not_found
-            ```
-    * 845: Longest Mountain in Array
+           ```
     * 723：Candy Crush (M)
+    * 845: Longest Mountain in Array
+
 ### Matrix
  * 289: Game of Life (M)
     * Approach1: Time: O(mn), Space: O(mn)
@@ -16143,8 +16394,214 @@ Table of Content
     * 685: Redundant Connection II
     * 323: Number of Connected Components in an Undirected Graph
 ### Bit Manipulation
+  * Tips:
+    * A^0 = A
+      * **adding** "val" to the "set" if "val" is not in the "set"
+    * A^A = 0
+      * **removing** "val" from the "set" if "val" is already in the "set"
+    * (ones ^ A[i]) & ~twos
+      ```txt
+      IF the set "ones" does not have A[i]
+        Add A[i] to the set "ones" if and only if its not there in set "twos"
+      ELSE
+        Remove it from the set "ones"
+      ```
+    * x & -x
+      * get the last set bit
+      ```txt
+      x = 1100
+      -x = ^x + 1 = 0100
+      x & -x = 0100
+      ```
+  * 268: Missing Number (E)
+    * Description:
+      * Given an array containing n distinct numbers taken from 0, 1, 2, ..., n, find the one that is missing from the array.
+      * n number in n + 1 choice
+    * Approach1: Sorting, Time:O(nlogn), Space:O(logn~n)
+    * Approach2: Generate a sorted array-1, Time:O(n), Spaxe:O(n)
+    * Approach3: Bit Manipulation (XOR), Time:O(n), Space:O(1)
+      * example:
+        ```txt
+        idx: 0  1  2  3
+        val: 0  1  3  4
+        missing = 4 ^ (0^0) ^ (1^1) ^ (2^3) ^ (3^4)
+                = 2 ^ (0^0) ^ (1^1) ^ (3^3) ^ (4^4)
+                = 2 ^ 0
+                = 2
+        ```
+      * Python
+        ```python
+        def missingNumber(self, nums: List[int]) -> int:
+          missing = len(nums)
+          for i, n in enumerate(nums):
+              missing ^= i ^ n
+
+          return missing
+        ```
+    * Approach4: Gauss formula, Time:O(n), Space:O(1)
+      * Python
+        ```python
+        def missingNumber(self, nums: List[int]) -> int:
+          expected_sum = (1 + len(nums)) * len(nums) // 2
+          actual_sum = sum(nums)
+          return expected_sum - actual_sum
+        ```
+  * 389: Find the Difference (E)
+    * Description:
+      * String t is generated by random shuffling string s and then add one more letter at a random position.
+    * Approach1: Sorting and Check, Time:O(m+n)log(m+n), Space:O(m+n)
+      * Python
+        ```python
+        def findTheDifference(self, s: str, t: str) -> str:
+          short, long = sorted(s), sorted(t)
+          diff_idx = len(short)
+          for i in range(len(short)):
+              if short[i] != long[i]:
+                  diff_idx = i
+                  break
+
+          return long[diff_idx]
+        ```
+    * Approach2: Counter, Time:O(m+n), Space:O(m)
+    * Approach3: Bit manipulatoin, (XOR), Time:O(m+n), Space:O(1)
+      * Python
+        ```python
+        def findTheDifference(self, s: str, t: str) -> str:
+          res = 0
+
+          for c in s:
+              res ^= ord(c)
+
+          for c in t:
+              res ^= ord(c)
+
+          return chr(res)
+        ```
+  * 136: Single Number (E)
+    * Description:
+      * Given a non-empty array of integers, every element appears twice except for one. Find that single one.
+    * Approach1: Counter, Time:O(n), Space:O(n)
+      * Python
+        ```python
+        def singleNumber(self, nums: List[int]) -> int:
+          counter = collections.Counter(nums)
+          res = None
+          for n, cnt in counter.items():
+              if cnt == 1:
+                  res = n
+                  break
+          return res
+        ```
+    * Approach2: Bit manipulation, XOR, Time:O(n), Space:O(1)
+      * Python
+        ```python
+        def singleNumber(self, nums: List[int]) -> int:
+          res = 0
+          for n in nums:
+              res ^= n
+
+          return res
+        ```
+  * 137: Single Number II (M)
+    * Description:
+      * Given a non-empty array of integers, **every element appears three times except for one**, which appears exactly once. Find that single one.
+    * Approach1: Counter, Time:O(n), Space:O(n)
+      * Python
+        ```python
+        def singleNumber(self, nums: List[int]) -> int:
+          counter = collections.Counter(nums)
+          res = None
+          for c, cnt in counter.items():
+              if cnt == 1:
+                  res = c
+                  break
+
+          return res
+        ```
+    * Approach2: bit manipulation
+      * Ref:
+        * https://leetcode.com/problems/single-number-ii/discuss/43294/Challenge-me-thx
+      * Concept:
+        * **adding** "val" to the "set" if "val" is not in the "set" => A^0 = A
+        * **removing** "val" from the "set" if "val" is already in the "set" => A^A = 0
+        * **(ones ^ A[i]) & ~twos** means
+          ```txt
+          IF the set "ones" does not have A[i]
+            Add A[i] to the set "ones" if and only if its not there in set "twos"
+          ELSE
+            Remove it from the set "ones"
+          ```
+        * **(twos^ A[i]) & ~ones** means
+          ```txt
+          IF the set "twos" does not have A[i]
+            Add A[i] to the set "twos" if and only if its not there in set "ones"
+          ELSE
+            Remove it from the set "twos"
+          ```
+      * Python
+        ```python
+        def singleNumber(self, nums: List[int]) -> int:
+          ones = twos = 0
+          for n in nums:
+              """
+              1st appears
+                  n in ones
+                  n not in twos
+              2nd appears
+                  n not in ones
+                  n in twos
+              3rd appears
+                  n not in ones
+                  n in twos
+              """
+              ones = (ones ^ n) & (~twos)
+              twos = (twos ^ n) & (~ones)
+          return ones
+        ```
+  * 260: Single Number III (M)
+    * Description:
+      * Given an array of numbers nums, in which **exactly two elements appear only once** and all the other elements appear exactly twice. Find the two elements that appear only once.
+    * Approach1: Counter, Time:O(n), Space:O(n)
+      * Python
+        ```python
+        def singleNumber(self, nums: List[int]) -> List[int]:
+          counter = collections.Counter(nums)
+          ones = []
+          for n, cnt in counter.items():
+              if cnt == 1:
+                  ones.append(n)
+                  if len(ones) == 2:
+                    break
+          return ones
+        ```
+    * Approach2: Bit manipulation, Time:O(n), Space:O(1)
+      * Ref:
+        * https://leetcode.com/articles/single-number-iii/
+      * Python
+        ```python
+        def singleNumber(self, nums: List[int]) -> List[int]:
+          """
+          get difference of x and y
+          """
+          diff = 0
+          for n in nums:
+              diff ^= n
+
+          """
+          get the last set bit, use this bit to distinguish x and y
+          """
+          diff &= -diff
+
+          ones = [0, 0]
+          for n in nums:
+              if n & diff:
+                  ones[0] ^= n
+              else:
+                  ones[1] ^= n
+          return ones
+        ```
 ### Union Field
-  * 1135: Connecting Cities With Minimum Cost
+  * 1135: Connecting Cities With Minimum Cost (M)
   * 200: Number of Islands (M)
   * 305: Number of Islands II (H)
 ### Retry List
@@ -16176,14 +16633,14 @@ Table of Content
   * String
     * Edit Distance:
       * all
-    * Sliding Window
+    * **Sliding Window**
     * KMP
-    * Palindrome
+    * **Palindrome**
       * all execept 125: valid Palindrome (E)
-    * Parentheses
+    * **Parentheses**
       * 020: Valid Parentheses (E)
       * 022: Generate Parentheses (M)
-    * Subsequence
+    * **Subsequence**
       * 392: Is Subsequence (E)
       * 1143: Longest Common Subsequence (M)
       * 300: Longest Increasing Subsequence (**LIS**) (M)
@@ -16201,11 +16658,15 @@ Table of Content
       * 220: Contains Duplicate III (M)
       * 287: Find the Duplicate Number (M)
     * Remove Duplicate
-    * Containers
+    * **Containers**
     * Jump Game
-    * Best Time to Buy and Sell Stock
+    * **Best Time to Buy and Sell Stock**
     * Shortest Word Distance
-    * Interval
+    * **Interval**
+      * all
+    * **Subarray**
+      * all
+    * Number
   * LinkedList
     * **Runner** and **Detect Circle**
       * 142: Linked List Cycle II (M)
@@ -16345,5 +16806,4 @@ Table of Content
       * 198: House Robber (E)
       * 213: House Robber II (M)
       * 337: House Robber III (M)
-
-
+  * Bit Manipulation
