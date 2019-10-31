@@ -4381,7 +4381,6 @@ Table of Content
            ```
     * 723：Candy Crush (M)
     * 845: Longest Mountain in Array
-
 ### Matrix
  * 289: Game of Life (M)
     * Approach1: Time: O(mn), Space: O(mn)
@@ -12237,7 +12236,8 @@ Table of Content
 ### BFS & DFS
   * Note:
     * utlities:
-      *
+  * 547: Friend Circles (M)
+    * see union find
   * **Islands**
     * 200: Number of Islands (M)
       * Description:
@@ -12311,7 +12311,6 @@ Table of Content
                           nr, nc = r + n[0], c + n[1]
                           dfs(nr, nc)
 
-
                   if not grid:
                       return 0
 
@@ -12327,6 +12326,103 @@ Table of Content
                   return island_cnt
           ```
       * Approach3: Union Find (Disjoint Set)
+        * Init:
+          * Union find structure with n subsets (each 1 is a subset)
+        * only need to go right and go down
+        * Python
+          ```python
+          LAND, WATER = '1', '0'
+          NEIGHBORS = ((1, 0), (0, 1))
+
+          class UnionFindSet(object):
+
+              def __init__(self, n):
+                  """
+                  default parent is itself
+                  """
+                  self.parents = [i for i in range(n)]
+                  self.ranks = [1] * (n)
+
+              def find(self, x):
+                  """
+                  Find root(cluster) id
+                  """
+                  if x == self.parents[x]:
+                      return x
+
+                  cur = x
+                  stack = []
+                  while cur != self.parents[cur]:
+                      stack.append(cur)
+                      cur = self.parents[cur]
+                  root = cur
+
+                  """
+                  Path Compression
+                  """
+                  while stack:
+                      cur = stack.pop()
+                      self.parents[cur] = root
+
+                  return root
+
+              def union(self, x, y):
+                  r_x, r_y = self.find(x), self.find(y)
+
+                  # x and y are in the same cluster
+                  if r_x == r_y:
+                      return False
+
+                  if self.ranks[r_x] > self.ranks[r_y]:
+                      self.parents[r_y] = r_x
+
+                  elif self.ranks[r_x] < self.ranks[r_y]:
+                      self.parents[r_x] = r_y
+
+                  else:
+                      self.parents[r_y] = r_x
+                      self.ranks[r_x] += 1
+
+                  return True
+
+
+          class Solution:
+              def numIslands(self, grid: List[List[str]]) -> int:
+                  def coor_to_idx(r, c):
+                      return col * r + c
+
+                  def neighbors(r, c):
+                      for d in NEIGHBORS:
+                          nr, nc = r + d[0], c + d[1]
+                          if 0 <= nr < row and 0 <= nc < col:
+                              yield nr, nc
+
+                  if not grid:
+                      return 0
+
+                  row, col = len(grid), len(grid[0])
+                  island_cnt = 0
+                  for r in range(row):
+                      for c in range(col):
+                          if grid[r][c] == LAND:
+                              island_cnt += 1
+
+                  ufs = UnionFindSet(row*col)
+                  for r in range(row):
+                      for c in range(col):
+                          if grid[r][c] == WATER:
+                              continue
+
+                          idx1 = coor_to_idx(r, c)
+                          for nr, nc in neighbors(r, c):
+                              if grid[nr][nc] == WATER:
+                                  continue
+                              idx2 = coor_to_idx(nr, nc)
+                              if ufs.union(idx1, idx2):
+                                  island_cnt -= 1
+
+                  return island_cnt
+          ```
     * 695: Max Area of Island (M)
       * Approach1, BFS, Time:O(mn), Space:O(mn)
         * Python
@@ -12492,6 +12588,7 @@ Table of Content
 
               return len(shapes)
           ```
+    * 463: Island Perimeter
   * **Nested**
     * 339: Nested List Weight Sum (E)
       * Description
@@ -16134,7 +16231,9 @@ Table of Content
     * A finite graph that **visits every edge** exactly once.
     * 332: Reconstruct Itinerary (M)
       * Description:
-        * Given a list of airline tickets represented by pairs of **departure and arrival airports [from, to]**, reconstruct the itinerary in order. All of the tickets belong to a man who departs from JFK. Thus, the itinerary must begin with JFK.
+        * Given a list of airline tickets represented by pairs of **departure and arrival airports [from, to]**, reconstruct the itinerary in order.
+        * All of the tickets belong to a man who departs from JFK. Thus, the itinerary must begin with JFK.
+        * You may assume all tickets form at least one valid itinerary.
         * Note:
           * **If there are multiple valid itineraries, you should return the itinerary that has the smallest lexical order** when read as a single string. For example, the itinerary ["JFK", "LGA"] has a smaller lexical order than ["JFK", "LGB"].
           * You may assume all tickets form at least one valid itinerary.
@@ -16167,7 +16266,7 @@ Table of Content
         * Space: O(E)
           * Adjacency List: O(E)
           * Recursive Call: O(E)
-        * Python Solution:
+        * Python:
           ```python
           def findItinerary(self, tickets: List[List[str]]) -> List[str]:
             def _dfs(departure):
@@ -16198,7 +16297,7 @@ Table of Content
         * Space: O(E)
           * Adjacency List: O(E)
           * Stack: O(E)
-        * Python Solution
+        * Python
           ```python
           def findItinerary(self, tickets: List[List[str]]) -> List[str]:
             g_outdegree = collections.defaultdict(list)
@@ -16247,10 +16346,10 @@ Table of Content
           * Build Outdegree List Graph and Indegree Array
             * O(E)
           * Traverse the Nodes and Edges: O(V+E)
-            * Traverse the Nodes
+            * Traverse the Nodes:
                 * Each node would be traverse at most once.
                 * Operation for push node to queue and pop node from queue.
-            * Traverse the edges.
+            * Traverse the Edges.
               * Each edge would be traversed at most once.
               * Operation for **removing outdegree of the node**.
         * Space:O(V+E)
@@ -16600,10 +16699,325 @@ Table of Content
                   ones[1] ^= n
           return ones
         ```
-### Union Field
+### Union Find (Disjoint-set)
+  * Tips:
+    * What is Union Find Set
+      * Ref:
+        * https://www.youtube.com/watch?v=VJnUwsE4fWA
+      * Find(x): find the root/cluster-id of x
+        * amortized O(1)
+        * **path compression for ancestors**
+      * union(x, y): merge two clusters
+        * amortized O(1)
+        * **Merge low rank tree into high rank one.**
+        * If two sub-tree have the same rank, break tie arbitrarily and increase the merged tree's rank by
+      * check whether two elements are in the same cluster
+        * Optimization: amortized O(1)
+          * Path compression: make tree flat
+          * Union by rank: merge low rank tree to high rank tree
+        * Without Optimization costs O(n)
+      * Space:
+        * O(n)
+     * Implementation:
+       * Python
+        ```python
+        class UnionFindSet(object):
+          def __init__(self, n):
+              """
+              default parent is itself
+              """
+              self.parents = [i for i in range(n+1)]
+              self.ranks = [1] * (n+1)
+
+          def find(self, x):
+              """
+              Find root(cluster) id
+              Time:O(1)
+              Space:O(n)
+              """
+              if x == self.parents[x]:
+                  return x
+
+              cur = x
+              stack = []
+              while cur != self.parents[cur]:
+                  stack.append(cur)
+                  cur = self.parents[cur]
+              root = cur
+
+              """
+              Path Compression
+              Update root of ancestors
+              """
+              while stack:
+                  cur = stack.pop()
+                  self.parents[cur] = root
+
+              return root
+
+          def union(self, x, y):
+              """
+              Time: O(1)
+              """
+              r_x, r_y = self.find(x), self.find(y)
+
+              # x and y are in the same cluster
+              if r_x == r_y:
+                  return False
+
+              if self.ranks[r_x] > self.ranks[r_y]:
+                  self.parents[r_y] = r_x
+
+              elif self.ranks[r_x] < self.ranks[r_y]:
+                  self.parents[r_x] = r_y
+
+              else:
+                  self.parents[r_y] = r_x
+                  self.ranks[r_x] += 1
+
+              return True
+        ```
+  * 684: Redundant Connection (M)
+    * Description:
+      * In this problem, a tree is an undirected graph that is connected and **has no cycles**.
+      * The given input is a graph that started as a tree with N nodes (with distinct values 1, 2, ..., N), with one additional edge added. **The added edge has two different vertices chosen from 1 to N**, **and was not an edge that already existed**.
+      * Return an edge that can be removed so that the resulting graph is a tree of N nodes. If there are multiple answers, return the answer that occurs last in the given 2D-array.
+    * Approach1: DFS, Time:O(|E|^2), Space:O(|E|)
+      * Python
+        ```python
+        def findRedundantConnection(self, edges: List[List[int]]) -> List[int]:
+          def dfs(src, target):
+              visited = set([src])
+              stack = [src]
+              is_found = False
+              while stack:
+                  cur = stack.pop()
+                  if cur == target:
+                      is_found = True
+                      break
+
+                  for nb in graph[cur]:
+                      if nb in visited:
+                          continue
+
+                      visited.add(nb)
+                      stack.append(nb)
+
+              return is_found
+
+          graph = collections.defaultdict(set)
+          for u, v in edges:
+              """
+              check if u and v have been connected
+              """
+              if dfs(src=u, target=v):
+                  res = [u, v]
+              graph[u].add(v)
+              graph[v].add(u)
+          return res
+         ```
+    * Approach2: Union Find, Time:O(|E|), Space:O(|E|)
+      * Python
+        ```python
+        class UnionFindSet(object):
+
+          def __init__(self, n):
+              """
+              default parent is itself
+              """
+              self.parents = [i for i in range(n+1)]
+              self.ranks = [1] * (n+1)
+
+          def find(self, x):
+              """
+              Find root(cluster) id
+              Time:O(1)
+              Space:O(n)
+              """
+              if x == self.parents[x]:
+                  return x
+
+              cur = x
+              stack = []
+              while cur != self.parents[cur]:
+                  stack.append(cur)
+                  cur = self.parents[cur]
+              root = cur
+
+              """
+              Path Compression
+              Update root of ancestors
+              """
+              while stack:
+                  cur = stack.pop()
+                  self.parents[cur] = root
+
+              return root
+
+          def union(self, x, y):
+              """
+              Time: O(1)
+              """
+              r_x, r_y = self.find(x), self.find(y)
+
+              # x and y are in the same cluster
+              if r_x == r_y:
+                  return False
+
+              if self.ranks[r_x] > self.ranks[r_y]:
+                  self.parents[r_y] = r_x
+
+              elif self.ranks[r_x] < self.ranks[r_y]:
+                  self.parents[r_x] = r_y
+
+              else:
+                  self.parents[r_y] = r_x
+                  self.ranks[r_x] += 1
+
+              return True
+
+
+          def findRedundantConnection(self, edges: List[List[int]]) -> List[int]:
+              ufs = UnionFindSet(len(edges))
+              res = None
+              for edge in edges:
+                  if not ufs.union(*edge):
+                      res = edge
+                      break
+
+              return res
+        ```
+  * 685: Redundant Connection II (H)
+  * 547: Friend Circles (M)
+    * Description:
+      * There are **N students** in a class
+      * Their friendship is **transitive** in nature. For example, if A is a direct friend of B, and B is a direct friend of C, then A is an indirect friend of C.
+      * And we defined a friend circle is a group of **students who are direct or indirect friends.**
+      * Given a N*N matrix M representing the friend relationship between students in the class. If M[i][j] = 1, then the ith and jth students are direct friends with each other
+    * Our problem reduces to the problem of finding the number of connected components in an undirected graph.
+    * Approach1: DFS, Time:O(n^2), Space:O(n)
+      * Python
+        ```python
+        def findCircleNum(self, M: List[List[int]]) -> int:
+          def dfs(s):
+              for f in range(n):
+                  if not visited[f] and M[s][f] == 1:
+                      visited[f] = True
+                      dfs(f)
+
+        n = len(M)
+        visited = [False] * n
+        circle_cnt = 0
+        for s in range(n):
+            if visited[s]:
+                continue
+            dfs(s)
+            circle_cnt += 1
+
+        return circle_cnt
+        ```
+    * Approach2: BFS, Time:O(n^2), Space:O(n)
+      * Python
+        ```python
+        def findCircleNum(self, M: List[List[int]]) -> int:
+          def bfs(s):
+              q = collections.deque([s])
+              visited[s] = True
+              while q:
+                  s = q.popleft()
+                  for f in range(n):
+                      if not visited[f] and M[s][f] == 1:
+                          visited[f] = True
+                          q.append(f)
+
+        n = len(M)
+        visited = [False] * n
+        circle_cnt = 0
+        for s in range(n):
+            if visited[s]:
+                continue
+            bfs(s)
+            circle_cnt += 1
+
+        return circle_cnt
+
+        ```
+    * Approach3: Union Find, Time:O(n^2), Space:O(n)
+      * Python
+        ```python
+        class UnionFindSet(object):
+
+          def __init__(self, n):
+              self.parents = [i for i in range(n)]
+              self.ranks = [1] * n
+              self.cnt = n
+
+          def find(self, x):
+              """
+              Find root id
+              """
+              if x == self.parents[x]:
+                  return x
+
+              cur = x
+              stack = []
+              while cur != self.parents[cur]:
+                  stack.append(cur)
+                  cur = self.parents[cur]
+              root = cur
+
+              """
+              Path Compression
+              """
+              while stack:
+                  cur = stack.pop()
+                  self.parents[cur] = root
+
+              return root
+
+          def union(self, x, y):
+              r_x, r_y = self.find(x), self.find(y)
+
+              # in the same cluster
+              if r_x == r_y:
+                  return False
+
+              if self.ranks[r_x] > self.ranks[r_y]:
+                  self.parents[r_y] = r_x
+
+              elif self.ranks[r_x] < self.ranks[r_y]:
+                  self.parents[r_x] = r_y
+
+              else:
+                  self.parents[r_y] = r_x
+                  self.ranks[r_x] += 1
+
+              self.cnt -= 1
+
+              return True
+
+        def findCircleNum(self, M: List[List[int]]) -> int:
+            row = col = len(M)
+            ufs = UnionFindSet(len(M))
+            # student and friend
+            for s in range(row):
+                for f in range(col):
+                    if s != f and M[s][f] == 1:
+                        ufs.union(s, f)
+
+            return ufs.cnt
+        ```
+  * 737: Sentence Similarity II (M)
   * 1135: Connecting Cities With Minimum Cost (M)
+  * 399: Evaluate Division (M)
   * 200: Number of Islands (M)
+    * See BFS & DFS
   * 305: Number of Islands II (H)
+  * 839: Similar String Groups
+  * 959: Regions Cut By Slashes
+  * 261: Graph Valid Tree (M)
+  * 323: Number of Connected Components in an Undirected Graph (M)
+  * 721: Accounts Merge (M)
 ### Retry List
   * Math:
     * Number:
