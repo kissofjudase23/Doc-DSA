@@ -868,6 +868,9 @@ Table of Content
           * Python
             ```python
             def sortArray(self, nums: List[int]) -> List[int]:
+                if len(nums) < 2:
+                  return nums
+
               # 1 to n-1
               for insert in range(1, len(nums)):
                   # insert-1 to 0
@@ -895,14 +898,10 @@ Table of Content
                           break
                       nums[i], nums[i+1] = nums[i+1], nums[i]
 
+              if len(nums) < 2:
+                return nums
 
-              n = len(nums)
-
-              if n < 2:
-                  return nums
-
-              insertion_sort(n-1)
-
+              insertion_sort(len(nums)-1)
               return nums
             ```
       * Approach2: **Selection** Sort, Time:O(n^2), Space:O(1)
@@ -911,50 +910,42 @@ Table of Content
           * Python
             ```python
             def sortArray(self, nums: List[int]) -> List[int]:
-              n = len(nums)
-              if n <= 1:
+              if len(nums) < 2:
                   return nums
 
-              # from 0 to n-2
+              n = len(nums)
+              # 0 ~ n-2
               for select in range(0, n-1):
-                  minimum = select
-                  # from select + 1 to n-1
-                  for compare in range(select+1, n):
-                      if nums[compare] < nums[minimum]:
-                          minimum = compare
-
-                  if minimum != select:
-                      nums[select], nums[minimum] = nums[minimum], nums[select]
+                  # select + 1 ~ n
+                  mini = select
+                  for i in range(select+1, n):
+                      if nums[i] < nums[mini]:
+                          mini = i
+                  nums[mini], nums[select] = nums[select], nums[mini]
 
               return nums
             ```
-        * Recursive: Time:O(n^2), Space:O(1)
+        * Recursive: Time:O(n^2), Space:O(n)
           * Python
             ```python
             def sortArray(self, nums: List[int]) -> List[int]:
               def selection_sort(select):
-                  if select >= n-1:
+                  if select > n-2:
                       return
 
-                  # from select+1 to n-1
-                  min_idx = select
-                  # from select + 1 to n-1
+                  mini = select
                   for i in range(select+1, n):
-                      if nums[i] < nums[min_idx]:
-                          min_idx = i
+                      if nums[i] < nums[mini]:
+                          mini = i
+                  nums[mini], nums[select] = nums[select], nums[mini]
 
-                  if min_idx != select:
-                      nums[select], nums[min_idx] = nums[min_idx], nums[select]
+                  selection_sort(select + 1)
 
-                  selection_sort(select+1)
-
-              n = len(nums)
-
-              if n < 2:
+              if len(nums) < 2:
                   return nums
 
-              selection_sort(select=0)
-
+              n = len(nums)
+              selection_sort(0)
               return nums
             ```
       * Approach3: **Bubble** Sort, Time:O(n^2), Space:O(1)
@@ -963,16 +954,16 @@ Table of Content
           * Python
             ```python
             def sortArray(self, nums: List[int]) -> List[int]:
-              n = len(nums)
-
-              if n < 2:
+              if len(nums) < 2:
                   return nums
 
-              # from n-1 to 1
+              n = len(nums)
+
+              # n-1 to 1
               for bubble in range(n-1, 0, -1):
-                  # from 0 to bubble-1
+                  # 0 to bubble-1
                   is_swap = False
-                  for i in range(bubble):
+                  for i in range(0, bubble):
                       if nums[i] > nums[i+1]:
                           nums[i], nums[i+1] = nums[i+1], nums[i]
                           is_swap = True
@@ -991,7 +982,7 @@ Table of Content
                       return
 
                   is_swap = False
-                  for i in range(bubble):
+                  for i in range(0, bubble):
                       if nums[i] > nums[i+1]:
                           nums[i], nums[i+1] = nums[i+1], nums[i]
                           is_swap = True
@@ -1002,13 +993,11 @@ Table of Content
                   bubble_sort(bubble-1)
 
 
-              n = len(nums)
-
-              if n < 2:
+              if len(nums) < 2:
                   return nums
 
+              n = len(nums)
               bubble_sort(n-1)
-
               return nums
             ```
       * Approach4: **Quick** Sort, Time:O(nlogn), Space:O(logn~n)
@@ -1061,26 +1050,22 @@ Table of Content
                           border += 1
 
                   nums[border], nums[pivot] = nums[pivot], nums[border]
-
                   return border
 
               if len(nums) < 2:
                   return nums
 
-              stack = []
-              stack.append((0, len(nums)-1))
+              n = len(nums)
+              stack = [(0, n-1)]
               while stack:
-                  l, r = stack.pop()
+                  left, right = stack.pop()
+                  p = get_partition(left, right)
 
-                  p = get_partition(l, r)
+                  if left < p-1:
+                      stack.append((left, p-1))
 
-                  # left partition
-                  if l < p-1:
-                      stack.append((l, p-1))
-
-                  # right partition:
-                  if p + 1 < r:
-                      stack.append((p+1, r))
+                  if p+1 < right:
+                      stack.append((p+1, right))
 
               return nums
             ```
@@ -1088,7 +1073,6 @@ Table of Content
           * Python
             ```python
             def sortArray(self, nums: List[int]) -> List[int]:
-
               def get_partition(left, right):
                   pivot = right
                   ran = random.randint(left, right)
@@ -1102,21 +1086,22 @@ Table of Content
                           border += 1
 
                   nums[border], nums[pivot] = nums[pivot], nums[border]
-
                   return border
 
+              def quick_sort(left, right):
+                  p = get_partition(left, right)
 
-              def quick_sort(l, r):
-                  if l >= r:
-                      return
+                  if left < p-1:
+                      quick_sort(left, pivot-1)
 
-                  p = get_partition(l, r)
-                  quick_sort(l, p-1)
-                  quick_sort(p+1, r)
+                  if p+1 < right:
+                      quick_sort(pivot+1, right)
 
+              if len(nums) < 2:
+                  return nums
 
-              quick_sort(0, len(nums)-1)
-
+              n = len(nums)
+              quick_sort(0, n-1)
               return nums
             ```
       * Approach5: **Merge** Sort, Time:O(nlogn), Space:O(n)
@@ -1126,24 +1111,22 @@ Table of Content
         * Iterative
           * Python
             ```python
-             def sortArray(self, nums: List[int]) -> List[int]:
+            def sortArray(self, nums: List[int]) -> List[int]:
               def merge_2_sorted_array(dst_start,
                                       left_start, left_end,
                                       right_start, right_end):
 
-                  left = nums[left_start:left_end+1]
-                  right = nums[right_start:right_end+1]
-
+                  left = nums[left_start: left_end+1]
+                  right = nums[right_start: right_end+1]
                   d = dst_start
                   l = r = 0
                   while l < len(left) and r < len(right):
-                      if left[l] <= right[r]:
+                      if left[l] < right[r]:
                           nums[d] = left[l]
                           l += 1
                       else:
                           nums[d] = right[r]
                           r += 1
-
                       d += 1
 
                   while l < len(left):
@@ -1151,68 +1134,68 @@ Table of Content
                       l += 1
                       d += 1
 
-              window_size = 1
-              while window_size < len(nums):
+              if len(nums) < 2:
+                  return nums
 
+              n = len(nums)
+              win_size = 1
+              while win_size < n:
                   left = 0
-                  while left + window_size < len(nums):
-                      mid = left + window_size
-                      right = mid + window_size
+                  while left + win_size < n:
+                      mid = left + win_size
+                      right = mid + win_size
                       merge_2_sorted_array(left,
-                                           left, mid-1,
-                                           mid, right-1)
-                      left = right
+                                          left, mid-1,
+                                          mid, right-1)
 
-                  window_size *= 2
+                      left = right
+                  win_size *= 2
 
               return nums
             ```
         * Recursive
           ```python
           def sortArray(self, nums: List[int]) -> List[int]:
-              def merge_2_sorted_array(dst_start,
-                                      left_start, left_end,
-                                      right_start, right_end):
+            def merge_2_sorted_array(dst_start,
+                                    left_start, left_end,
+                                    right_start, right_end):
 
-                  left = nums[left_start:left_end+1]
-                  right = nums[right_start:right_end+1]
+                left = nums[left_start: left_end+1]
+                right = nums[right_start: right_end+1]
+                d = dst_start
+                l = r = 0
+                while l < len(left) and r < len(right):
+                    if left[l] < right[r]:
+                        nums[d] = left[l]
+                        l += 1
+                    else:
+                        nums[d] = right[r]
+                        r += 1
+                    d += 1
 
-                  d = dst_start
-                  l = r = 0
+                while l < len(left):
+                    nums[d] = left[l]
+                    l += 1
+                    d += 1
 
-                  while l < len(left) and r < len(right):
-                      if left[l] <= right[r]:
-                          nums[d] = left[l]
-                          l += 1
-                      else:
-                          nums[d] = right[r]
-                          r += 1
+            def merge_sort(left, right):
+                if not left < right:
+                    return
 
-                      d += 1
+                mid = (left + right) // 2
+                merge_sort(left, mid)
+                merge_sort(mid+1, right)
+                merge_2_sorted_array(left,
+                                     left, mid,
+                                     mid+1, right)
 
-                  while l < len(left):
-                      nums[d] = left[l]
-                      l += 1
-                      d += 1
+            if len(nums) < 2:
+                return nums
 
+            n = len(nums)
+            merge_sort(0, n-1)
 
-              def merge_sort(left, right):
-                  if left >= right:
-                      return
-
-                  mid = (left + right) // 2
-
-                  merge_sort(left, mid)
-                  merge_sort(mid+1, right)
-
-                  merge_2_sorted_array(left,
-                                      left, mid,
-                                      mid+1, right)
-
-
-              merge_sort(0, len(nums)-1)
-
-              return nums
+            return nums
           ```
       * Approach6: **Heap** Sort, Time:O(nlogn), Space:O(1)
         * Note:
@@ -1236,6 +1219,9 @@ Table of Content
                   bubble down operation
                   """
                   while True:
+                      """
+                      left child and right child
+                      """
                       left = cur * 2 + 1
                       right = cur * 2 + 2
 
@@ -1767,6 +1753,31 @@ Table of Content
 
             return cnt
           ```
+     * 643: Maximum Average Subarray I (E)
+        * Description:
+          * Given an array consisting of n integers, find the **contiguous subarray of given length k** that has the maximum average value.
+        * Approach1: Sliding window, Time:O(n), Space:O(1)
+          * Python
+            ```python
+            def findMaxAverage(self, nums: List[int], k: int) -> float:
+              if not nums:
+                  return float(0)
+
+              if k == 1:
+                  return float(max(nums))
+
+              max_avg = float('-inf')
+              cur_sum = float(0)
+              for i, n in enumerate(nums):
+                  cur_sum += n
+
+                  if (i + 1) >= k:
+                      max_avg = max(max_avg, cur_sum/k)
+                      cur_sum -= nums[i-k+1]
+
+              return max_avg
+            ```
+     * 644: Maximum Average Subarray II (H)
   * **KMP**:
     * Reference:
       * [Concept](https://www.youtube.com/watch?v=GTJr8OvyEVQ)
@@ -3702,6 +3713,7 @@ Table of Content
 
             return max_product
           ```
+
     * 325: Maximum Size Subarray Sum **Equals k** (M)
       * Description
         * Find the maximum length of a subarray that sums to k
@@ -3952,7 +3964,7 @@ Table of Content
             return output
           ```
     * 239: Sliding Window Maximum (H)
-  * **Reorder**
+  * **Order**
     * 189: Rotate Array (E)
       * Approach1: Time:O(n), Space:O(1)
         * Use **three reverse** operations can solve this problem.
@@ -4029,6 +4041,21 @@ Table of Content
                 nums[border], nums[i] = nums[i], nums[border]
                 border += 1
            ```
+    * 896: Monotonic Array
+      * Approach1: Time:O(n), Space:O(1)
+        * Python
+          ```python
+          def isMonotonic(self, A: List[int]) -> bool:
+            increase = decrease = True
+            for i in range(len(A)-1):
+                if A[i] > A[i+1]:
+                    increase = False
+
+                if A[i] < A[i+1]:
+                    decrease = False
+
+            return increase or decrease
+          ```
   * Counter:
     * 299: Bulls and Cows (M)
       * Description:
@@ -4382,85 +4409,143 @@ Table of Content
     * 723：Candy Crush (M)
     * 845: Longest Mountain in Array
 ### Matrix
- * 289: Game of Life (M)
-    * Approach1: Time: O(mn), Space: O(mn)
-      * Python Solution
-        ```python
-        def gameOfLife(self, board: List[List[int]]) -> None:
-          # coordinate diff for 8 neighbors
-          neighbors = [(1, 0), (1, -1), (0, -1), (-1, -1),
-                      (-1, 0), (-1,1), (0, 1), (1, 1)]
+ * Transformation
+   * 1243: Array Transformation (E)
+   * 289: Game of Life (M)
+      * Description:
+        * Rules:
+          * Any live cell with fewer than two live neighbors dies, as if caused by under-population.
+          * Any live cell with two or three live neighbors lives on to the next generation.
+          * Any live cell with more than three live neighbors dies, as if by over-population..
+          * Any dead cell with exactly three live neighbors becomes a live cell, as if by reproduction.
+        * At 8 neihgbors for each cells
+      * Approach1: Time: O(mn), Space: O(mn)
+        * Python
+          ```python
+          class Status(object):
+              DEAD = 0
+              LIVE = 1
 
-          rows = len(board)
-          cols = len(board[0])
-          copy_board = [[board[row][col] for col in range(cols)] for row in range(rows)]
 
-          for row in range(rows):
-              for col in range(cols):
-                  # calculate the cnt of live neighbors
-                  live_neighbors = 0
-                  for n in neighbors:
-                      r, c = row + n[0], col + n[1]
-                      if 0 <= r < rows and 0 <= c < cols \
-                        and copy_board[r][c] == 1:
-                          live_neighbors += 1
+          DIRECTIONS = ((1, 0), (1, -1), (0, -1), (-1, -1),
+                        (-1, 0), (-1, 1), (0, 1), (1, 1))
 
-                  # change status
-                  if copy_board[row][col] == 1:
-                      if live_neighbors < 2 or live_neighbors > 3:
-                          board[row][col] = 0
 
-                  else: # ref_board[row][col] == 0
-                      if live_neighbors == 3:
-                          board[row][col] = 1
-        ```
-    * Approach2: Time: O(mn), Space: O(1)
-      * Use two temp status, live_2_dead and dead_2_live
-      * Python Solution
-        ```python
-        class Status(object):
-          live_2_dead = -1
-          dead = 0
-          live = 1
-          dead_2_live = 2
+          def gameOfLife(self, board: List[List[int]]) -> None:
+              def neighbors(r, c):
+                  for d in DIRECTIONS:
+                      nr, nc = r + d[0], c + d[1]
+                      if 0 <= nr < row and 0 <= nc < col:
+                          yield nr, nc
 
-        def gameOfLife(self, board: List[List[int]]) -> None:
-          # coordinate diff for 8 neighbors
-          neighbors = [(1, 0), (1, -1), (0, -1), (-1, -1),
-                      (-1, 0), (-1,1), (0, 1), (1, 1)]
+              row, col = len(board), len(board[0])
+              c_board = [[board[r][c] for c in range(col)] for r in range(row)]
 
-          rows = len(board)
-          cols = len(board[0])
+              for r in range(row):
+                  for c in range(col):
+                      live_neighbors = 0
+                      for nr, nc in neighbors(r, c):
+                          #print(nr, nc)
+                          if c_board[nr][nc] == Status.LIVE:
+                              live_neighbors += 1
 
-          for row in range(rows):
-              for col in range(cols):
-                  # calculate the cnt of live neighbors
-                  live_neighbors = 0
-                  for n in neighbors:
-                      r, c = row + n[0], col + n[1]
-                      if 0 <= r < rows and 0 <= c < cols \
-                        and abs(board[r][c]) == 1:  # Status.live and Status.live_2_dead
-                          live_neighbors += 1
+                      if c_board[r][c] == Status.LIVE:
+                          if live_neighbors < 2 or live_neighbors > 3:
+                              board[r][c] = Status.DEAD
 
-                  # change status
-                  if board[row][col] == Status.live:
-                      if live_neighbors < 2 or live_neighbors > 3:
-                          board[row][col] = Status.live_2_dead
+                      else:
+                          if live_neighbors == 3:
+                              board[r][c] = Status.LIVE
+          ```
+      * Approach2: Time: O(mn), Space: O(1)
+        * Use two temp status, live_2_dead and dead_2_live
+        * Python
+          ```python
+          class Status(object):
+            DEAD_2_LIVE = -1
+            DEAD = 0
+            LIVE = 1
+            LIVE_2_DEAD = 2
 
-                  else: # ref_board[row][col] == 0
-                      if live_neighbors == 3:
-                          board[row][col] = Status.dead_2_live
+          DIRECTIONS = ((1, 0), (1, -1), (0, -1), (-1, -1),
+                        (-1, 0), (-1, 1), (0, 1), (1, 1))
 
-          for row in range(rows):
-              for col in range(cols):
-                  if board[row][col] > 0: # live and live to dead
-                      board[row][col] = Status.live
-                  else:                   # dead and dead to live
-                      board[row][col] = Status.dead
-        ```
-    * follow up: Infinite array
-      * [Solution](https://leetcode.com/problems/game-of-life/discuss/73217/Infinite-board-solution/201780)
+          def gameOfLife(self, board: List[List[int]]) -> None:
+              def neighbors(r, c):
+                  for d in DIRECTIONS:
+                      nr, nc = r + d[0], c + d[1]
+                      if 0 <= nr < row and 0 <= nc < col:
+                          yield nr, nc
+
+              row, col = len(board), len(board[0])
+
+              for r in range(row):
+                  for c in range(col):
+                      live_neighbors = 0
+                      for nr, nc in neighbors(r, c):
+
+                          """
+                          Status.LIVE and Status.LIVE_2_DEAD
+                          """
+                          if board[nr][nc] >= Status.LIVE:
+                              live_neighbors += 1
+
+                      if board[r][c] == Status.LIVE:
+                          if live_neighbors < 2 or live_neighbors > 3:
+                              board[r][c] = Status.LIVE_2_DEAD
+
+                      else:
+                          if live_neighbors == 3:
+                              board[r][c] = Status.DEAD_2_LIVE
+
+              for r in range(row):
+                  for c in range(col):
+                      if board[r][c] == Status.LIVE_2_DEAD:
+                          board[r][c] = Status.DEAD
+                      elif board[r][c] == Status.DEAD_2_LIVE:
+                          board[r][c] = Status.LIVE
+          ```
+      * follow up: Infinite array
+        * [Solution](https://leetcode.com/problems/game-of-life/discuss/73217/Infinite-board-solution/201780)
  * **Rotate**:
+   * 048: Rotate Image
+     * Approach1: Transpose and Reverse, Time:O(n^2), Space:O(1)
+       * Python
+        ```python
+        def rotate(self, matrix: List[List[int]]) -> None:
+          n = len(matrix)
+          layers = n // 2
+
+          """
+          Transpose, note that c starting from r
+          """
+          for r in range(n):
+              for c in range(r, n):
+                  matrix[r][c], matrix[c][r] = matrix[c][r], matrix[r][c]
+
+          # reverse each row
+          for r in range(n):
+              matrix[r].reverse()
+        ```
+     * Approach2: Rotate by Layer, Time:O(n^2), Space:O(1)
+       * Python
+        ```python
+        def rotate(self, matrix: List[List[int]]) -> None:
+          n = len(matrix)
+          layers = n // 2
+
+          for layer in range(layers):
+              start = layer
+              end = n-1-layer
+
+              # 0 to end-start-1
+              for offset in range(end-start):
+                  tmp = matrix[start][start+offset]
+                  matrix[start][start+offset] = matrix[end-offset][start]
+                  matrix[end-offset][start] = matrix[end][end-offset]
+                  matrix[end][end-offset] = matrix[start+offset][end]
+                  matrix[start+offset][end] = tmp
+        ```
    * Approach1: m*n arryay, Time:O(mn), Space:O(mn)
      * Python
       ```python
@@ -4476,72 +4561,48 @@ Table of Content
         col_num = len(a[0])
 
         rotated_array = [[None for _ in range(row_num)] for _ in range(col_num)]
-
         for r in range(row_num):
             for c in range(col_num):
                 rotated_array[c][row_num-1-r] = a[r][c]
 
         return rotated_array
       ```
-   * Approach2: n-n array, Time:O(mn), Space:O(1)
-     * Python
-      ```python
-      def rotate_in_place(a):
-        row_num = len(a)
-        col_num = len(a[0])
-
-        if row_num != col_num:
-            raise ArgError()
-
-        dim = row_num
-
-        layers = row_num // 2
-
-        for layer in range(layers):
-            start = layer
-            end = dim - 1 - layer
-
-            for offset in range(end-start):
-                tmp = a[start][start+offset]
-                a[start][start+offset] = a[end-offset][start]
-                a[end-offset][start] = a[end][end-offset]
-                a[end][end-offset] = a[start+offset][end]
-                a[start+offset][end] = tmp
-
-        return a
-      ```
+   * Approach2: n-n array, Time:O(n^2), Space:O(1)
+     * See 048
  * **Spiral**
    * 054:	Spiral Matrix (M)
+     * Description:
+       * Given a matrix of m x n elements (m rows, n columns), return all elements of the matrix in spiral order.
      * Approach1: Simulation, Time:O(mn), Space:O(mn)
        * Draw the path that the spiral makes. We know that the path should turn clockwise whenever it would go out of bounds or into a cell that was previously visited.
        * Python
         ```python
-        def spiralOrder(self, matrix):
+        def spiralOrder(self, matrix: List[List[int]]) -> List[int]:
           if not matrix:
               return []
 
           row, col = len(matrix), len(matrix[0])
-          seen = [[False for _ in range(col)] for _ in range(row)]
+          visited = [[False for _ in range(col)] for _ in range(row)]
 
-          res = []
+          """
+          top, right, bottom, left
+          """
+          DIRECTIONS = ((0, 1), (1, 0), (0,-1), (-1, 0))
+          spiral_order = []
           r = c = d = 0
-          # top, right, bottom, left
-          directions = ((0, 1), (1, 0), (0,-1), (-1, 0))
-
           for _ in range(row*col):
-              res.append(matrix[r][c])
-              seen[r][c] = True
-              cr, cc = r + directions[d][0], c + directions[d][1]
+              spiral_order.append(matrix[r][c])
+              visited[r][c] = True
 
-              if 0 <= cr < row and 0 <= cc < col and not seen[cr][cc]:
+              cr, cc = r + DIRECTIONS[d][0], c + DIRECTIONS[d][1]
+
+              if 0 <= cr < row and 0 <= cc < col and not visited[cr][cc]:
                   r, c = cr, cc
               else:
-                  # change direction when out of bounds or into a cell that was
-                  # previously visited
-                  d = (d + 1) % 4
-                  r, c = r + directions[d][0], c + directions[d][1]
+                  d = (d +1) % 4
+                  r, c = r + DIRECTIONS[d][0], c + DIRECTIONS[d][1]
 
-          return res
+          return spiral_order
         ```
      * Approach2: Layer by Layer, Time:O(mn), Space:O(1)
        * Ref:
@@ -4554,17 +4615,19 @@ Table of Content
          * Notes: need to handle single row, single col and one unit case
        * Python
         ```python
-        def spiralOrder(self, matrix):
-          def spiral_coords(r1, c1, r2, c2):
+        def spiralOrder(self, matrix: List[List[int]]) -> List[int]:
+          def spiral_traverse(r1, c1, r2, c2):
               # Top, go right, c1 to c2
               for c in range(c1, c2+1):
                   yield r1, c
 
               # Right, go down , r1+1 to r2
-              for r in range(r1 + 1, r2 + 1):
+              for r in range(r1+1, r2+1):
                   yield r, c2
 
-              # prevent duplicate for single row and single col
+              """
+              prevent duplicate for single row and single col
+              """
               if r1 < r2 and c1 < c2:
                   # Bottom, go left, c2-1 to c1
                   for c in range(c2-1, c1-1, -1):
@@ -4578,51 +4641,57 @@ Table of Content
               return []
 
           row, col = len(matrix), len(matrix[0])
-          # top left corner
-          r1 = c1 = 0
-          # bottom right corner
-          r2, c2 = row-1, col-1
-          res = []
 
+          """
+          top, right, bottom, left
+          """
+          r1 = c1 = 0
+          r2, c2 = row-1, col-1
+
+          spiral_order = []
           while r1 <= r2 and c1 <= c2:
-              for r, c in spiral_coords(r1, c1, r2, c2):
-                  res.append(matrix[r][c])
+              for r, c in spiral_traverse(r1, c1, r2, c2):
+                  spiral_order.append(matrix[r][c])
 
               # move to next layer
-              r1, c1 = r1 + 1, c1 + 1
+              r1, c1 = r1 +1, c1 + 1
               r2, c2 = r2 - 1, c2 - 1
 
-          return res
+          return spiral_order
         ```
    * 059:	Spiral Matrix II (M)
-     * Approach1:Simulation, Time:O(mn), Space:O(1)
+     * Description:
+       * Given a positive integer n, generate a square matrix filled with elements from 1 to n2 in spiral order.
+     * Approach1:S imulation, Time:O(mn), Space:O(1)
+       * Do not need visited matrix now
        * Python
         ```python
         def generateMatrix(self, n: int) -> List[List[int]]:
-          matrix = [[None] * n for _ in range(n)]
-          # top, right, bottom, left
-          directions = ((0, 1), (1, 0), (0, -1), (-1, 0))
+          row = col = n
+          sparial_m = [[None for _ in range(col)] for _ in range(row)]
 
+          """
+          top, right, bottom, left
+          """
+          DIRECTIONS = ((0, 1), (1, 0), (0,-1), (-1, 0))
           r = c = d = 0
-          val = 1
-          for _ in range(n*n):
-              matrix[r][c] = val
-              val += 1
+          for val in range(1, row*col+1):
+              sparial_m[r][c] = val
 
-              cr, cc = r + directions[d][0], c + directions[d][1]
-              if 0 <= cr < n and 0 <= cc < n and matrix[cr][cc] is None:
+              cr, cc = r + DIRECTIONS[d][0], c + DIRECTIONS[d][1]
+              if 0 <= cr < row and 0 <= cc < col and sparial_m[cr][cc] is None:
                   r, c = cr, cc
               else:
-                  d = (d + 1) % 4
-                  r, c = r + directions[d][0], c + directions[d][1]
+                  d = (d +1) % 4
+                  r, c = r + DIRECTIONS[d][0], c + DIRECTIONS[d][1]
 
-          return matrix
+          return sparial_m
         ```
      * Approach2: Layer by Layer, Time:O(mn), Space:O(1)
        * Python
         ```python
         def generateMatrix(self, n: int) -> List[List[int]]:
-          def spiral_coords(r1, c1, r2, c2):
+          def spiral_traverse(r1, c1, r2, c2):
               # Top, go right, c1 to c2
               for c in range(c1, c2+1):
                   yield r1, c
@@ -4650,7 +4719,7 @@ Table of Content
           matrix = [[None] * n for _ in range(n)]
 
           while r1 <= r2 and c1 <= c2:
-              for r, c in spiral_coords(r1, c1, r2, c2):
+              for r, c in spiral_traverse(r1, c1, r2, c2):
                   matrix[r][c] = val
                   val += 1
 
@@ -4661,40 +4730,38 @@ Table of Content
         ```
  * **Search**:
    * 074:	Search a 2D Matrix (M)
-     * Definitions:
+     * Description:
        * Integers in each row are sorted from left to right.
-       * **The first integer of each row is greater than the last integer of the previous row.**
+       * The first integer of each row is greater than the last integer of the previous row.
      * Approach1: Brute Force, Time:O(mn), Space:O(1)
      * Approach2: Search Space Reduction, O(m+n), Space:O(1)
        * Starting from bottom left of the matrix (or from top right ?)
          * if the target is greater than the cur val, go right
          * if the target is smaller than the cur val, go up
        * Python
-        ```python
-        def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
-          if not matrix:
-              return False
+          ```python
+          def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
+            if not matrix or not matrix[0] or target < matrix[0][0] or target > matrix[-1][-1]:
+                return False
 
-          row, col = len(matrix), len(matrix[0])
+            row, col = len(matrix), len(matrix[0])
+            is_found = False
 
-          if not col:
-              return False
+            r, c = row-1, 0
+            while r >= 0 and c < col:
+                if target == matrix[r][c]:
+                    is_found = True
+                    break
 
-          found = False
-          r, c = row - 1, 0
+                # truncate the col
+                elif target > matrix[r][c]:
+                    c += 1
+                # truncate the row
+                else:
+                    r -= 1
 
-          while r >= 0 and c < col:
-              if target == matrix[r][c]:
-                  found = True
-                  break
-              # truncate the col
-              elif target > matrix[r][c]:
-                  c += 1
-              else:
-                  r -= 1
-
-          return found
-        ```
+            return is_found
+          ```
      * Approach3: Twice Binary Search, Time:O(log(m)+log(n)) = O(log(mn)) , Space:O(1)
        * Determine the row
          * Boundaries:
@@ -4759,33 +4826,44 @@ Table of Content
        * Python
          ```python
          def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
-            if not matrix:
+
+            if not matrix or not matrix[0] or target < matrix[0][0] or target > matrix[-1][-1]:
                 return False
 
             row, col = len(matrix), len(matrix[0])
-            res = False
-            # step1, determine the row
             left, right = 0, row * col - 1
+            is_found = False
+
             while left <= right:
                 mid = (left + right) // 2
-
                 r, c = mid // col, mid % col
 
                 if target == matrix[r][c]:
-                    res = True
+                    is_found = True
                     break
 
                 elif target > matrix[r][c]:
                     left = mid + 1
+
                 else:
                     right = mid - 1
 
-            return res
+            return is_found
          ```
    * 240:	Search a 2D Matrix II (M)
-     * Definitions
+     * Description
        * Integers in each row are sorted in ascending from left to right.
-       * **Integers in each column are sorted in ascending from top to bottom.**
+       * Integers in each column are sorted in ascending from top to bottom.
+       * example:
+          ```txt
+          [
+          [1,   4,  7, 11, 15],
+          [2,   5,  8, 12, 19],
+          [3,   6,  9, 16, 22],
+          [10, 13, 14, 17, 24],
+          [18, 21, 23, 26, 30]
+          ]
+          ```
      * Error Approach: Binary Search, O(logm + logn)
        * Search in first row to determine the column
          * Seach the column
@@ -4801,7 +4879,6 @@ Table of Content
         ```python
         def searchMatrix(self, matrix, target):
           def binary_search_row(row):
-
               left, right = 0, col-1
               found = False
 
@@ -4817,7 +4894,7 @@ Table of Content
 
               return found
 
-          if not matrix:
+          if not matrix or not matrix[0] or target < matrix[0][0] or target > matrix[-1][-1]:
               return False
 
           row, col = len(matrix), len(matrix[0])
@@ -4840,28 +4917,22 @@ Table of Content
 
           return found
         ```
-     * Approach3: Search Space Reduction, Time:O(m+n), Space:O(1)
+     * Approach3: **Search Space Reduction**, Time:O(m + n), Space:O(1)
        * Starting from bottom left of the matrix (or from top right ?)
        * if the target is greater than the cur val, go right
        * if the target is smaller than the cur val, go up
        * Python
         ```python
         def searchMatrix(self, matrix, target):
-          if not matrix:
-              return False
+          if not matrix or not matrix[0] or target < matrix[0][0] or target > matrix[-1][-1]:
 
           row, col = len(matrix), len(matrix[0])
+          is_found = False
 
-          if not col:
-              return False
-
-          found = False
-
-          r = row - 1
-          c = 0
+          r, c= row - 1, 0
           while r >= 0 and c < col:
               if target == matrix[r][c]:
-                  found = True
+                  is_found = True
                   break
               # truncate the col
               elif target > matrix[r][c]:
@@ -4870,15 +4941,15 @@ Table of Content
               else:
                   r -= 1
 
-          return found
+          return is_found
         ```
-     * Approach4: Divide and Conquer, Time:O(nlogn)(not sure), Space:O(log(n))
+     * Approach4: **Divide and Conquer**, Time:O(nlog(m/n)), Space:O(log(n))
+       * Time complexity:
+         * n is rows, m is column
+         * Recursvie relation: T(m, n) = 2T(m/2, n/2) + log(m)
+         * complexity: O(nlog(m/n))
+         * https://stackoverflow.com/questions/2457792/how-do-i-search-for-a-number-in-a-2d-array-sorted-left-to-right-and-top-to-botto/2458113#2458113
        * Divide the matrix into four parts.
-       * Ref:
-         * https://leetcode.com/articles/search-a-2d-matrix-ii/
-         * https://leetcode.com/problems/search-a-2d-matrix-ii/discuss/66154/Is-there's-a-O(log(m)%2Blog(n))-solution-I-know-O(n%2Bm)-and-O(m*log(n))
-       * Time:
-         * How to Evaluate the time complexity ??
        * (r1, c1): top left corner
        * (r2, c2): bottom right corner
        * For each matrix
@@ -4896,68 +4967,62 @@ Table of Content
        * Python
          ```python
          def searchMatrix(self, matrix, target):
-            def bin_search_row(col_num, left, right):
-                found = False
-                while left <= right:
-                    mid = (left + right) // 2
+            def bin_search_col(col_num, top, bottom):
+                is_found = False
+
+                while top <= bottom:
+                    mid = (top + bottom) // 2
 
                     if target == matrix[mid][col_num]:
-                        found = True
+                        is_found = True
                         break
                     elif target > matrix[mid][col_num]:
-                        left = mid + 1
+                        top = mid + 1
                     else:
-                        right = mid - 1
+                        bottom = mid -1
 
-                return found, left
+                return is_found, top
 
-          if not matrix:
-              return False
 
-          row, col = len(matrix), len(matrix[0])
+            if not matrix or not matrix[0] \
+                or target < matrix[0][0] or target > matrix[-1][-1]:
+                return False
 
-          if not col:
-              return False
+            row, col = len(matrix), len(matrix[0])
 
-          found = False
+            # top-left corner
+            r1 = c1 = 0
+            # bottom-right corner
+            r2, c2 = row-1, col-1
 
-          # top-left corner
-          r1 = c1 = 0
-          # bottom-right corner
-          r2, c2 = row-1, col-1
+            stack = [(r1, c1, r2, c2)]
+            is_found = False
+            while stack:
+                r1, c1, r2, c2 = stack.pop()
 
-          stack = [(r1, c1, r2, c2)]
+                # check boundary
+                if r1 > r2 or c1 > c2 \
+                    or target < matrix[r1][c1] or target > matrix[r2][c2]:
+                    continue
 
-          found = False
+                mid_c = (c1 + c2) // 2
+                is_found, mid_r = bin_search_col(mid_c, r1, r2)
 
-          while stack:
-              r1, c1, r2, c2 = stack.pop()
+                if is_found:
+                    break
 
-              # out of boundary
-              if r1 > r2 or c1 > c2:
-                  continue
+                # bottom-left block
+                stack.append((mid_r, c1, r2, mid_c-1))
 
-              # check if the target is in the boundary of the matrix
-              if target < matrix[r1][c1] or taret > matrix[r2][c2]:
-                  continue
+                # top-right block
+                stack.append((r1, mid_c+1, mid_r-1, c2))
 
-              mid_c = (c1 + c2) // 2
-              found, mid_r = bin_search_row(mid_c, r1, r2)
-
-              if found:
-                  break
-
-              # bottom left
-              stack.append((mid_r, c1, r2, mid_c-1))
-
-              # top right
-              stack.append((r1, mid_c+1, mid_r-1, c2))
-
-          return found
+            return is_found
          ```
  * 378:	**Kth Smallest Element** in a Sorted Matrix (M)
-   * Given a n x n matrix where each of the rows and columns are sorted in ascending order, find the kth smallest element in the matrix.
-   * Approach1: Brute Force, Time:O(nm), Space:O(k)
+   * Description
+     * Given a n x n matrix **where each of the rows and columns are sorted in ascending order**, find the kth smallest element in the matrix.
+   * Approach1: Brute Force, min-heap Time:O(nm(logk)), Space:O(k)
      * Python
       ```python
       class Element(object):
@@ -4995,16 +5060,14 @@ Table of Content
         def __lt__(self, other):
             return self.val < other.val
 
-        def __repr__(self):
-            return str(self.val)
-
       def kthSmallest(self, matrix: List[List[int]], k: int) -> int:
           row, col = len(matrix), len(matrix[0])
           heap = []
-
-          # reduce complexity of heapify from mlogm to m
-          # we don't need to push more than 'k' elements in the heap
-          # since the val in those row is greater than matrix[k][0]
+          """
+          reduce complexity of heapify from mlogm to m
+          we don't need to push more than 'k' elements in the heap
+          since the val in those row is greater than matrix[k][0]
+          """
           for r in range(min(k, row)):
             heap.append(Element(r, 0, matrix[r][0]))
           heapq.heapify(heap)
@@ -5123,14 +5186,10 @@ Table of Content
               for r in range(row):
                   matrix[r][c] = 0
 
-          if not matrix:
+          if not matrix or not matrix[0]:
               return
 
           row, col = len(matrix), len(matrix[0])
-
-          if not col:
-              return
-
           zero_first_row = zero_first_col = False
 
           # check first row
@@ -5153,6 +5212,7 @@ Table of Content
                       matrix[r][0] = 0
 
           # check first col to zero row
+          # starting from 1
           for r in range(1, row):
               if matrix[r][0] == 0:
                   set_row_zero(r)
@@ -5267,117 +5327,6 @@ Table of Content
                           res[i][j] += A[i][k] * B[k][j]
 
           return res
-        ```
- * 329: Longest Increasing Path in a Matrix (H)
-    * Do not need to keep visitedd ue to the increasing property.
-    * Approach1: Recursive with memo, Time:O((mn)), Space:O(mn)
-      * Python
-        ```python
-        DIRECTIONS = ((1, 0), (0, 1), (-1, 0), (0, -1))
-        def longestIncreasingPath(self, matrix: List[List[int]]) -> int:
-            def neighbors(r, c):
-                for d in DIRECTIONS:
-                    nr, nc = r + d[0], c + d[1]
-                    if not (0 <= nr < row and 0 <= nc < col):
-                        continue
-
-                    yield nr, nc
-
-            def dfs(r, c):
-                if memo[r][c] != None:
-                    return memo[r][c]
-
-                lip = 1
-                for nr, nc in neighbors(r, c):
-                    if matrix[nr][nc] > matrix[r][c]:
-                        lip = max(lip, 1 + dfs(nr, nc))
-
-                memo[r][c] = lip
-                return memo[r][c]
-
-
-            if not matrix:
-                return 0
-
-            row, col = len(matrix), len(matrix[0])
-
-            if not col:
-                return 0
-
-            memo = [[None for _ in range(col)] for _ in range(row)]
-
-            max_lip = 1
-            for r in range(row):
-                for c in range(col):
-                    max_lip = max(max_lip, dfs(r, c))
-
-            return max_lip
-        ```
-    * Approach2: Topological Sort, Time:O((mn)), Space:O(mn)
-      * Definition:
-        * If matrix[i][j] < matrix[k][l], path: matrix[i][j] -> matrix[k][l]
-        * indegree:
-          * (i, j): 0
-          * (k, l): 1
-        * outdegree:
-          * (i, j): [(k, l)]
-          * (k, l): []
-          * do not need to keep, we can get from neighbros of matrix
-      * Starting from the nodes with indegree == 0 ( max val in the area)
-      * Python
-        ```python
-        import collections
-        DIRECTIONS = ((1, 0), (0, 1), (-1, 0), (0, -1))
-
-        class Solution:
-            def longestIncreasingPath(self, matrix: List[List[int]]) -> int:
-
-                def neighbors(r, c):
-                    for d in DIRECTIONS:
-                        nr, nc = r + d[0], c + d[1]
-                        if not (0 <= nr < row and 0 <= nc < col):
-                            continue
-
-                        yield nr, nc
-
-                if not matrix:
-                    return 0
-
-                row, col = len(matrix), len(matrix[0])
-
-                if not col:
-                    return 0
-
-                indegree = [[0 for _ in range(col)] for _ in range(row)]
-
-                for r in range(row):
-                    for c in range(col):
-                        for nr, nc in neighbors(r, c):
-                            if matrix[nr][nc] > matrix[r][c]:
-                                indegree[nr][nc] += 1
-
-                # topological sorting
-                q = collections.deque()
-                for r in range(row):
-                    for c in range(col):
-                        if indegree[r][c] == 0:
-                            q.append((r, c))
-
-
-                max_lip = 0
-                while q:
-                    q_len = len(q)
-                    max_lip += 1
-                    for _ in range(q_len):
-                        r, c = q.popleft()
-                        for nr, nc in neighbors(r, c):
-                            if matrix[nr][nc] > matrix[r][c]:
-                                indegree[nr][nc] -= 1
-                                if indegree[nr][nc] == 0:
-                                    q.append((nr, nc))
-
-
-                return max_lip
         ```
  * 370:	Range Addition (M)
  * 296:	Best Meeting Point (H)
@@ -9094,35 +9043,33 @@ Table of Content
   * **Preorder**
     * 144: Binary Tree Preorder **Traversal** (M)
       * Approach1: Recursive, Time:O(n), Space:O(n):
-        * Python Solution:
+        * Python:
           ```python
           def preorderTraversal(self, root: TreeNode) -> List[int]:
             def _preorder(node):
                 if not node:
                     return
 
-                output.append(node.val)
+                visited.append(node.val)
                 _preorder(node.left)
                 _preorder(node.right)
 
-            output = []
+            visited = []
             _preorder(root)
-            return output
+            return visited
           ```
       * Approach2: Iterative1, Time:O(n), Space:O(n):
-        * Python Solution
+        * Python
           ```python
           def preorderTraversal(self, root: TreeNode) -> List[int]:
               if not root:
                   return []
 
-              visits = list()
-              stack = list()
-              stack.append(root)
-
+              visited = list()
+              stack = [root]
               while stack:
                   node = stack.pop()
-                  visits.append(node.val)
+                  visited.append(node.val)
 
                   if node.right:
                       stack.append(node.right)
@@ -9130,29 +9077,64 @@ Table of Content
                   if node.left:
                       stack.append(node.left)
 
-              return visits
+              return visited
           ```
       * Approach3: Iterative2, Time:O(n), Space:O(n):
-        * Python Solution
+        * Python
           ```python
           def preorderTraversal(self, root: TreeNode) -> List[int]:
             if not root:
                 return []
 
             stack = []
-            output = []
+            visited = []
 
             cur = root
             while cur or stack:
                 if not cur:
                     cur = stack.pop()
 
-                output.append(cur.val)
+                visited.append(cur.val)
                 if cur.right:
                     stack.append(cur.right)
                 cur = cur.left
 
-            return output
+            return visited
+          ```
+    * 589: N-ary Tree Preorder Traversal (E)
+      * Approah1: Recursive, Time:O(n), Space:O(n)
+        * Python
+          ```python
+          def preorder(self, root: 'Node') -> List[int]:
+            def _preorder(node):
+                visited.append(node.val)
+                for child in node.children:
+                    _preorder(child)
+
+            if not root:
+                return []
+
+            visited = []
+            _preorder(root)
+            return visited
+          ```
+      * Approach2: Iterative, Time:O(n), Space:O(n)
+        * Python
+          ```python
+          def preorder(self, root: 'Node') -> List[int]:
+            if not root:
+                return []
+
+            visited = []
+            stack = [root]
+
+            while stack:
+                node = stack.pop()
+                visited.append(node.val)
+                for i in range(len(node.children)-1, -1, -1):
+                    stack.append(node.children[i])
+
+            return visited
           ```
     * 226. **Invert** Binary Tree (E)
       * Approach1: DFS, Recursive, Time:O(n), Space:O(n)
@@ -9474,7 +9456,7 @@ Table of Content
             dfs(root, 1)
             return max_path
           ```
-    * 617: Merge Two Binary Trees
+    * 617: Merge Two Binary Trees (E)
       * Description:
         * You need to **merge them into a new binary tree**. The merge rule is that if two nodes overlap, then sum node values up as the new value of the merged node. Otherwise, the NOT null node will be used as the node of new tree.
       * Approach1: Iterative (reuse existing node), Time:O(n), Space:O(n)
@@ -9628,19 +9610,20 @@ Table of Content
             if not root:
                 return []
 
-            output = []
-            stack = []
+            visited = []
             cur = root
+            stack = []
             while cur or stack:
                 if cur:
                     stack.append(cur)
                     cur = cur.left
                 else:
-                    cur = stack.pop()
-                    output.append(cur.val)
-                    cur = cur.right
+                    node = stack.pop()
+                    visited.append(node.val)
+                    if node.right:
+                        cur = node.right
 
-            return output
+            return visited
           ```
     * 173: Binary Search Tree **Iterator** (M) *
       * Approach1: In-Order Iterative
@@ -9910,27 +9893,25 @@ Table of Content
           ```
       * Approach2: Iterative, from end to start, Time:O(n), Space:O(n)
         * traverse order: root -> right -> left (use deque)
-        * Python Solution
-            ```python
-              def postorderTraversal(self, root: TreeNode) -> List[int]:
-                if not root:
-                    return
+        * Python
+          ```python
+          def postorderTraversal(self, root: TreeNode) -> List[int]:
+            if not root:
+                return []
 
-                stack = [root]
-                # reverse order
-                output = collections.deque()
+            visited = collections.deque()
+            stack = [root]
 
-                while stack:
-                    node = stack.pop()
-                    output.appendleft(node.val)
+            while stack:
+                node = stack.pop()
+                visited.appendleft(node.val)
+                if node.left:
+                    stack.append(node.left)
+                if node.right:
+                    stack.append(node.right)
 
-                    if node.left:
-                        stack.append(node.left)
-                    if node.right:
-                        stack.append(node.right)
-
-                return output
-            ```
+            return visited
+          ```
       * Approach3: Iterative, from start to end, Time:O(n), Space:O(n)
         * traverse order: left -> right -> root
         * Python
@@ -9940,8 +9921,8 @@ Table of Content
                 return
 
             stack = []
-            output = []
-            prev_traverse = None
+            visited = []
+            prev = None
             cur = root
 
             while cur or stack:
@@ -9951,16 +9932,53 @@ Table of Content
                 else:
                     top = stack[-1]
                     # top.right != prev_traverse means top.right has not traversed yet
-                    if top.right and top.right is not prev_traverse:
+                    if top.right and top.right is not prev:
                         cur = top.right
 
                     else:
-                        output.append(top.val)
-                        prev_traverse = stack.pop()
+                        visited.append(top.val)
+                        prev = stack.pop()
 
-            return output
+            return visited
           ```
       * Approach4: Morris Traversal, Time:O(n), Space:O(1)
+    * 590: N-ary Tree Postorder Traversal (E)
+      * Approach1: Recursive:
+        * Python
+          ```python
+          def postorder(self, root: 'Node') -> List[int]:
+            def dfs(node):
+                for child in node.children:
+                    dfs(child)
+
+                visited.append(node.val)
+
+            if not root:
+                return []
+
+            visited = []
+            dfs(root)
+            return visited
+          ```
+      * Approach2: Iterative:
+        * Python
+          ```python
+          def postorder(self, root: 'Node') -> List[int]:
+            if not root:
+                return []
+
+            visited = collections.deque()
+            stack = [root]
+
+            while stack:
+                node = stack.pop()
+                visited.appendleft(node.val)
+
+                for child in node.children:
+                    stack.append(child)
+
+            return visited
+          ```
     * 110: **Balanced** Binary Tree (E)
       * A binary tree in which the depth of the two subtrees of **every node** never differ by more than 1.
       * Even left subtree and right subtree are balanced trees, the tree may not be balanced tree.
@@ -10896,6 +10914,47 @@ Table of Content
 
             return visits
           ```
+    * 429: N-ary Tree Level Order Traversal (M)
+      * Approach1: Recursive, Time:O(n), Space:O(n)
+        * Python
+          ```python
+          def levelOrder(self, root: 'Node') -> List[List[int]]:
+            def dfs(node, level):
+                if len(visited) < level + 1:
+                    visited.append([])
+
+                visited[level].append(node.val)
+                for child in node.children:
+                    dfs(child, level+1)
+
+            if not root:
+                return []
+
+            visited = []
+            dfs(root, level=0)
+            return visited
+          ```
+      * Approach2: Iterative, Time:O(n), Space:O(n)
+        * Python
+          ```python
+          def levelOrder(self, root: 'Node') -> List[List[int]]:
+            if not root:
+                return []
+
+            visited = []
+            q = collections.deque([root])
+            while q:
+                level_visited = []
+                visited.append(level_visited)
+                for _ in range(len(q)):
+                    node = q.popleft()
+                    level_visited.append(node.val)
+
+                    for child in node.children:
+                        q.append(child)
+
+            return visited
+          ```
     * 637: Average of Levels in Binary Tree (E)
       * Approach1 BFS: Time:O(n), Space:O(n)
         * Python Solution
@@ -11214,6 +11273,7 @@ Table of Content
       * The **left subtree** of a node contains only nodes with keys **less than** the node's key.
       * The **right subtree** of a node contains only nodes with keys **greater than** the node's key.
       * Both the left and right subtrees must also be binary search trees.
+    * 783: Minimum Distance Between BST Nodes
     * 098: **Validate** Binary Search Tree (M)
       * Approach1: Postorder, Recursive, Time:O(h), Space:O(h)
         * For each node
@@ -13222,6 +13282,103 @@ Table of Content
 
                   return False
             ```
+  * 329: Longest Increasing Path in a Matrix (H)
+    * Description:
+      * Given an integer matrix, find the length of the longest increasing path.
+      * From each cell, you can either move to four directions: left, right, up or down.
+    * Note:
+      * Do not need to keep visited due to the increasing property.
+    * Approach1: DFS + memo, Time:O((mn)), Space:O(mn)
+      * Python
+        ```python
+        DIRECTIONS = ((1, 0), (0, 1), (-1, 0), (0, -1))
+        def longestIncreasingPath(self, matrix: List[List[int]]) -> int:
+            def neighbors(r, c):
+                for d in DIRECTIONS:
+                    nr, nc = r + d[0], c + d[1]
+                    if 0 <= nr < row and 0 <= nc < col:
+                        yield nr, nc
+
+            def dfs(r, c):
+                if memo[r][c]:
+                    return memo[r][c]
+
+                lip = 1
+                for nr, nc in neighbors(r, c):
+                    if matrix[r][c] < matrix[nr][nc]:
+                        lip = max(lip, 1+dfs(nr, nc))
+                memo[r][c] = lip
+
+                return memo[r][c]
+
+            if not matrix or not matrix[0]:
+                return 0
+
+            row, col = len(matrix), len(matrix[0])
+            memo = [[None for _ in range(col)] for _ in range(row)]
+            lip = 0
+            for r in range(row):
+                for c in range(col):
+                    lip = max(lip, dfs(r, c))
+
+            return lip
+        ```
+    * Approach2: Topological Sort, Time:O((mn)), Space:O(mn)
+      * Definition:
+        * If matrix[i][j] < matrix[k][l], path: matrix[i][j] -> matrix[k][l]
+        * indegree:
+          * (i, j): 0
+          * (k, l): 1
+        * outdegree:
+          * (i, j): [(k, l)]
+          * (k, l): []
+          * do not need to keep, we can get from neighbros of matrix
+      * Starting from the nodes with indegree == 0 ( max val in the area)
+      * Python
+        ```python
+
+        DIRECTIONS = ((1, 0), (0, 1), (-1, 0), (0, -1))
+        def longestIncreasingPath(self, matrix: List[List[int]]) -> int:
+            def neighbors(r, c):
+                for d in DIRECTIONS:
+                    nr, nc = r + d[0], c + d[1]
+                    if 0 <= nr < row and 0 <= nc < col:
+                        yield nr, nc
+
+            if not matrix or not matrix[0]:
+                return 0
+
+            row, col = len(matrix), len(matrix[0])
+            indegree = [[0 for _ in range(col)] for _ in range(row)]
+
+            # create the graph
+            for r in range(row):
+                for c in range(col):
+                    for nr, nc in neighbors(r, c):
+                        if matrix[nr][nc] > matrix[r][c]:
+                            indegree[nr][nc] += 1
+
+            # topoligical sorting
+            q = collections.deque()
+            for r in range(row):
+                for c in range(col):
+                    if indegree[r][c] == 0:
+                        q.append((r,c))
+
+            lip = 0
+            while q:
+                lip += 1
+                q_len = len(q)
+                for _ in range(q_len):
+                    r, c = q.popleft()
+                    for nr, nc in neighbors(r, c):
+                        if matrix[nr][nc] > matrix[r][c]:
+                            indegree[nr][nc] -= 1
+                            if indegree[nr][nc] == 0:
+                                q.append((nr,nc))
+
+            return lip
+        ```
   * 051: N-Queens (H)
   * 052: N-Queens II (H)
   * 317: Shortest Distance from All Buildings
@@ -13500,7 +13657,7 @@ Table of Content
         ```
   * 685: Redundant Connection II (H)
   * 261: Graph Valid Tree (M)
-    * Approach1: Union Find
+    * Approach1: Union Find, Time:O(E), Space:O(V)
       * Python
         ```python
         class UnionFindSet(object):
@@ -14607,6 +14764,479 @@ Table of Content
     * 031: Next Permutation (M)
     * 060: Permutation Sequence (M)
   * 291: Word Pattern II
+### Graph
+  * **Eulerian trail**
+    * A finite graph that **visits every edge** exactly once.
+    * 332: Reconstruct Itinerary (M)
+      * Description:
+        * Given a list of airline tickets represented by pairs of **departure and arrival airports [from, to]**, reconstruct the itinerary in order.
+        * All of the tickets belong to a man who departs from JFK. Thus, the itinerary must begin with JFK.
+        * You may assume all tickets form at least one valid itinerary.
+        * Note:
+          * **If there are multiple valid itineraries, you should return the itinerary that has the smallest lexical order** when read as a single string. For example, the itinerary ["JFK", "LGA"] has a smaller lexical order than ["JFK", "LGB"].
+          * You may assume all tickets form at least one valid itinerary.
+      * This is the problem of Eulerian trail
+        * vertex: airport
+        * edge: ticket
+      * FAQ
+        * how do you make sure there is no dead end since you always choose the "smallest" arrivals (min heap) ?
+          * Starting at the first node, **we can only get stuck at the ending point, since every node except for the first and the last node has even number of edges, when we enter a node we can always get out**.
+          * Now we are at the destination
+            * case1: if all edges are visited, we are done, and the dfs returns to the very first state.
+            * case2: Otherwise** we need to "insert" the unvisited loop into corresponding position, and in the dfs method, it returns to the node with extra edges, **starts another recursion and adds the result before the next path**. This process continues until all edges are visited.
+          * Example:
+            * A Graph:, start is A, end is E
+              * A -> [B, E]  # start vertex
+              * B -> [C]
+              * C -> [A]
+              * E -> []      # end vertex
+            * Case 1:
+              * s1: A
+              * s2: A -> **B->C->A->E** (Iterative B end)
+            * Case 2:
+              * s1: A
+              * s2: A -> **E** (iterative E end)
+              * s2: A -> **B->C->A** (Iterative B end) -> E
+      * Approach1: Hierholzer's algorithm, DFS Recursive, Time:O(Elog(E)), Space:O(E)
+        * Time: O(ELog(E))
+          * Generate Adjacency List: O(ELog(E))
+          * Traverse every edge: O(ELog(E))
+        * Space: O(E)
+          * Adjacency List: O(E)
+          * Recursive Call: O(E)
+        * Python:
+          ```python
+          def findItinerary(self, tickets: List[List[str]]) -> List[str]:
+            def _dfs(departure):
+                arrival_heap = flights[departure]
+                while arrival_heap:
+                    _dfs(heapq.heappop(arrival_heap))
+
+                # apeendleft to avoid unnecessary reverse
+                route.appendleft(departure)
+
+            flights = collections.defaultdict(list)
+            route = collections.deque()
+
+            for departure, arrivial in tickets:
+                arrival_heap = flights[departure]
+                # put the neighbors in a min-heap for lexical order
+                heapq.heappush(arrival_heap, arrivial)
+
+            # start from JFK
+            _dfs("JFK")
+
+          return route
+          ```
+      * Approach2: Hierholzer's algorithm, DFS Iterative Time:O(Elog(E)), Space:O(E)
+        * Time: O(ELog(E))
+          * Generate Adjacency List: O(ELog(E))
+          * Traverse every edge: O(ELog(E))
+        * Space: O(E)
+          * Adjacency List: O(E)
+          * Stack: O(E)
+        * Python
+          ```python
+          def findItinerary(self, tickets: List[List[str]]) -> List[str]:
+            g_outdegree = collections.defaultdict(list)
+            # create the graph
+            for departure, arrival in tickets:
+                g_outdegree[departure].append(arrival)
+
+            # gnerate the min-heap for each arrival list
+            for arrivals in g_outdegree.values():
+                heapq.heapify(arrivals)
+
+            itinerary = collections.deque()
+
+            stack =["JFK"]
+            while stack:
+                departure = stack[-1]
+                arrivials = g_outdegree[departure]
+                if arrivials:
+                    stack.append(heapq.heappop(arrivials))
+                else:
+                    stack.pop()
+                    itinerary.appendleft(departure)
+
+            return itinerary
+          ```
+  * **Eulerian circuit**
+    * An **Eulerian trail** that **starts and ends on the same vertex**.
+  * **Hamilton path**
+    * A finite graph that **visits every vertex** exactly once.
+  * **Hamilton cycle**
+    * An Hamilton path that **starts and ends on the same vertex**.
+  * **Minimum Spanning Tree**
+    * A minimum spanning tree (MST) or minimum weight spanning tree is **a subset of the edges of a connected, edge-weighted undirected graph that connects all the vertices together, without any cycles and with the minimum possible total edge weight**.
+  * **Shortest Path**
+  * Topological Sort
+    * Ref:
+      * https://www.youtube.com/watch?v=ddTC4Zovtbc
+      * https://leetcode.com/problems/course-schedule-ii/solution/
+    * 207: Course Schedule (M)
+      * Description:
+        * There are a total of n courses you have to take, labeled from 0 to n-1.
+        * Some courses may have prerequisites, for example to take course 0 you have to first take course 1, which is expressed as a pair: [0,1]
+          * [course, prequisite]
+      * Approach1: Peeling Onion, Time: O(V+E), Space: O(V+E)
+        * Time: O(V+E)
+          * Build Outdegree List Graph and Indegree Array
+            * O(E)
+          * Traverse the Nodes and Edges: O(V+E)
+            * Traverse the Nodes:
+                * Each node would be traverse at most once.
+                * Operation for push node to queue and pop node from queue.
+            * Traverse the Edges.
+              * Each edge would be traversed at most once.
+              * Operation for **removing outdegree of the node**.
+        * Space:O(V+E)
+          * Graph of adjency list
+            * O(V+E)
+          * Indegree Array
+            * O(V)
+          * BFS Queue
+            * O(V)
+        * Algorithm
+          * Definition:
+            * **Indegree of the Course:**
+              * How many prequisites courses of it.
+            * **Outdegree of Course**
+              * How many courses' prequisite is this course.
+          * The algorithm
+            * We first process all the nodes/course with **0 in-degree** implying no prerequisite courses required. **If we remove all these courses from the graph, along with their outgoing edges**, we can find out the courses/nodes that should be processed next. These would again be the nodes with 0 in-degree. We can continuously do this until all the courses have been accounted for.
+          * Data Structures
+            * **A graph of adjency list with indegree**
+              * If course u is a prerequisite of course v, then the adjacency list of u will contain v.
+            * **A degree array**
+              * Calculate how many prerequisite courses for each.
+        * Python:
+          ```python
+          def canFinish(self, numCourses: int, prerequisites: List[List[int]]) -> bool:
+            g_outdegree = collections.defaultdict(list)
+            g_indegree = [0] * numCourses
+
+            for course, preq in prerequisites:
+                g_outdegree[preq].append(course)
+                g_indegree[course] += 1
+
+            """
+            Starting from the courses having 0 prequisite (indegree is 0)
+            """
+            q = collections.deque()
+            for course, indegree in enumerate(g_indegree):
+                if indegree == 0:
+                    q.append(course)
+
+            scheduled_courses = 0
+            while q:
+                cur = q.popleft()
+                schedule_cnt += 1
+
+                for nxt in g_outdegree[cur]:
+                    g_indegree[nxt] -= 1
+                    if g_indegree[nxt] == 0:
+                        q.append(nxt)
+
+            return scheduled_courses == numCourses
+          ```
+      * Approach2: DFS:
+        * Algorithm:
+          * For each of the nodes in our graph, we will run a depth first search in case that node was not already visited in some other node's DFS traversal.
+          * Suppose we are executing the depth first search for a node N. We will recursively traverse all of the neighbors of node N which have not been processed before.
+          * Once the processing of all the neighbors is done, we will add the node N to the stack. We are making use of a stack to simulate the ordering we need. When we add the node N to the stack, all the nodes that require the node N as a prerequisites (among others) will already be in the stack.
+        * Python
+          ```python
+          class Status(object):
+            WHITE = 1  # default
+            GRAY =  2  # processing
+            BLACK = 3  # done
+
+          class Solution:
+              def findOrder(self, numCourses: int, prerequisites: List[List[int]]) -> List[int]:
+                  is_cyclic = False
+                  scheduled_course = []
+
+                  def dfs(course):
+                      # !!! don't forget use nonlocal
+                      nonlocal is_cyclic
+
+                      if is_cyclic:
+                          return
+
+                      visits[course] = Status.GRAY
+
+                      for next_course in g_adj[course]:
+                          if visits[next_course] == Status.WHITE:
+                              dfs(next_course)
+
+                          # graph cucle found
+                          elif visits[next_course] == Status.GRAY:
+                              is_cyclic = True
+                              return
+                      # done
+                      visits[course] = Status.BLACK
+                      scheduled_course.append(course)
+
+                  # Adjacency list of outdegree
+                  g_adj = [[] for _ in range(numCourses)]
+                  visits = [Status.WHITE for _ in range(numCourses)]
+
+                  for course, preq in prerequisites:
+                      g_adj[preq].append(course)
+
+                  # perhaps start from indegree 0 ??
+                  for course in range(numCourses):
+                      if visits[course] == Status.WHITE:
+                          dfs(course)
+
+                  return scheduled_course[::-1] if not is_cyclic else []
+          ```
+    * 210: Course Schedule II (M)
+      * Same Concept as 207, the only difference is to keep the scheduled courses list.
+      * Approach1: Peeling Onion
+        * Python
+          ```python
+          def findOrder(self, numCourses: int, prerequisites: List[List[int]]) -> List[int]:
+
+          g_outdegree = collections.defaultdict(list)
+          g_indegree = [0] * numCourses
+
+          for course, preq in prerequisites:
+              g_outdegree[preq].append(course)
+              g_indegree[course] += 1
+
+          """
+          Traverse from the courses having 0 prequisite (indegree is 0)
+          """
+          q = collections.deque()
+          for course, indegree in enumerate(g_indegree):
+              if indegree == 0:
+                  q.append(course)
+
+          scheduled_courses = []
+          while q:
+              cur = q.popleft()
+              scheduled_courses.append(cur)
+
+              for nxt in g_outdegree[cur]:
+                  g_indegree[nxt] -= 1
+                  if g_indegree[nxt] == 0:
+                      q.append(nxt)
+
+          return scheduled_courses if numCourses == len(scheduled_courses) else []
+          ```
+    * 269: Alien Dictionary (H)
+  * Other:
+    * 685: Redundant Connection II
+    * 323: Number of Connected Components in an Undirected Graph
+### Bit Manipulation
+  * Tips:
+    * A^0 = A
+      * **adding** "val" to the "set" if "val" is not in the "set"
+    * A^A = 0
+      * **removing** "val" from the "set" if "val" is already in the "set"
+    * (ones ^ A[i]) & ~twos
+      ```txt
+      IF the set "ones" does not have A[i]
+        Add A[i] to the set "ones" if and only if its not there in set "twos"
+      ELSE
+        Remove it from the set "ones"
+      ```
+    * x & -x
+      * get the last set bit
+      ```txt
+      x = 1100
+      -x = ^x + 1 = 0100
+      x & -x = 0100
+      ```
+  * 268: Missing Number (E)
+    * Description:
+      * Given an array containing n distinct numbers taken from 0, 1, 2, ..., n, find the one that is missing from the array.
+      * n number in n + 1 choice
+    * Approach1: Sorting, Time:O(nlogn), Space:O(logn~n)
+    * Approach2: Generate a sorted array-1, Time:O(n), Spaxe:O(n)
+    * Approach3: Bit Manipulation (XOR), Time:O(n), Space:O(1)
+      * example:
+        ```txt
+        idx: 0  1  2  3
+        val: 0  1  3  4
+        missing = 4 ^ (0^0) ^ (1^1) ^ (2^3) ^ (3^4)
+                = 2 ^ (0^0) ^ (1^1) ^ (3^3) ^ (4^4)
+                = 2 ^ 0
+                = 2
+        ```
+      * Python
+        ```python
+        def missingNumber(self, nums: List[int]) -> int:
+          missing = len(nums)
+          for i, n in enumerate(nums):
+              missing ^= i ^ n
+
+          return missing
+        ```
+    * Approach4: Gauss formula, Time:O(n), Space:O(1)
+      * Python
+        ```python
+        def missingNumber(self, nums: List[int]) -> int:
+          expected_sum = (1 + len(nums)) * len(nums) // 2
+          actual_sum = sum(nums)
+          return expected_sum - actual_sum
+        ```
+  * 389: Find the Difference (E)
+    * Description:
+      * String t is generated by random shuffling string s and then add one more letter at a random position.
+    * Approach1: Sorting and Check, Time:O(m+n)log(m+n), Space:O(m+n)
+      * Python
+        ```python
+        def findTheDifference(self, s: str, t: str) -> str:
+          short, long = sorted(s), sorted(t)
+          diff_idx = len(short)
+          for i in range(len(short)):
+              if short[i] != long[i]:
+                  diff_idx = i
+                  break
+
+          return long[diff_idx]
+        ```
+    * Approach2: Counter, Time:O(m+n), Space:O(m)
+    * Approach3: Bit manipulatoin, (XOR), Time:O(m+n), Space:O(1)
+      * Python
+        ```python
+        def findTheDifference(self, s: str, t: str) -> str:
+          res = 0
+
+          for c in s:
+              res ^= ord(c)
+
+          for c in t:
+              res ^= ord(c)
+
+          return chr(res)
+        ```
+  * 136: Single Number (E)
+    * Description:
+      * Given a non-empty array of integers, every element appears twice except for one. Find that single one.
+    * Approach1: Counter, Time:O(n), Space:O(n)
+      * Python
+        ```python
+        def singleNumber(self, nums: List[int]) -> int:
+          counter = collections.Counter(nums)
+          res = None
+          for n, cnt in counter.items():
+              if cnt == 1:
+                  res = n
+                  break
+          return res
+        ```
+    * Approach2: Bit manipulation, XOR, Time:O(n), Space:O(1)
+      * Python
+        ```python
+        def singleNumber(self, nums: List[int]) -> int:
+          res = 0
+          for n in nums:
+              res ^= n
+
+          return res
+        ```
+  * 137: Single Number II (M)
+    * Description:
+      * Given a non-empty array of integers, **every element appears three times except for one**, which appears exactly once. Find that single one.
+    * Approach1: Counter, Time:O(n), Space:O(n)
+      * Python
+        ```python
+        def singleNumber(self, nums: List[int]) -> int:
+          counter = collections.Counter(nums)
+          res = None
+          for c, cnt in counter.items():
+              if cnt == 1:
+                  res = c
+                  break
+
+          return res
+        ```
+    * Approach2: bit manipulation
+      * Ref:
+        * https://leetcode.com/problems/single-number-ii/discuss/43294/Challenge-me-thx
+      * Concept:
+        * **adding** "val" to the "set" if "val" is not in the "set" => A^0 = A
+        * **removing** "val" from the "set" if "val" is already in the "set" => A^A = 0
+        * **(ones ^ A[i]) & ~twos** means
+          ```txt
+          IF the set "ones" does not have A[i]
+            Add A[i] to the set "ones" if and only if its not there in set "twos"
+          ELSE
+            Remove it from the set "ones"
+          ```
+        * **(twos^ A[i]) & ~ones** means
+          ```txt
+          IF the set "twos" does not have A[i]
+            Add A[i] to the set "twos" if and only if its not there in set "ones"
+          ELSE
+            Remove it from the set "twos"
+          ```
+      * Python
+        ```python
+        def singleNumber(self, nums: List[int]) -> int:
+          ones = twos = 0
+          for n in nums:
+              """
+              1st appears
+                  n in ones
+                  n not in twos
+              2nd appears
+                  n not in ones
+                  n in twos
+              3rd appears
+                  n not in ones
+                  n in twos
+              """
+              ones = (ones ^ n) & (~twos)
+              twos = (twos ^ n) & (~ones)
+          return ones
+        ```
+  * 260: Single Number III (M)
+    * Description:
+      * Given an array of numbers nums, in which **exactly two elements appear only once** and all the other elements appear exactly twice. Find the two elements that appear only once.
+    * Approach1: Counter, Time:O(n), Space:O(n)
+      * Python
+        ```python
+        def singleNumber(self, nums: List[int]) -> List[int]:
+          counter = collections.Counter(nums)
+          ones = []
+          for n, cnt in counter.items():
+              if cnt == 1:
+                  ones.append(n)
+                  if len(ones) == 2:
+                    break
+          return ones
+        ```
+    * Approach2: Bit manipulation, Time:O(n), Space:O(1)
+      * Ref:
+        * https://leetcode.com/articles/single-number-iii/
+      * Python
+        ```python
+        def singleNumber(self, nums: List[int]) -> List[int]:
+          """
+          get difference of x and y
+          """
+          diff = 0
+          for n in nums:
+              diff ^= n
+
+          """
+          get the last set bit, use this bit to distinguish x and y
+          """
+          diff &= -diff
+
+          ones = [0, 0]
+          for n in nums:
+              if n & diff:
+                  ones[0] ^= n
+              else:
+                  ones[1] ^= n
+          return ones
+        ```
 ### Dynamic Programming
   * Ref:
     * [From good to great. How to approach most of DP problems](https://leetcode.com/problems/house-robber/discuss/156523/From-good-to-great.-How-to-approach-most-of-DP-problems.)
@@ -16840,480 +17470,6 @@ Table of Content
     * 039: Combination Sum
       * see backtracking
     * 416: Partition Equal Subset Sum (M)
-### Graph
-  * **Eulerian trail**
-    * A finite graph that **visits every edge** exactly once.
-    * 332: Reconstruct Itinerary (M)
-      * Description:
-        * Given a list of airline tickets represented by pairs of **departure and arrival airports [from, to]**, reconstruct the itinerary in order.
-        * All of the tickets belong to a man who departs from JFK. Thus, the itinerary must begin with JFK.
-        * You may assume all tickets form at least one valid itinerary.
-        * Note:
-          * **If there are multiple valid itineraries, you should return the itinerary that has the smallest lexical order** when read as a single string. For example, the itinerary ["JFK", "LGA"] has a smaller lexical order than ["JFK", "LGB"].
-          * You may assume all tickets form at least one valid itinerary.
-      * This is the problem of Eulerian trail
-        * vertex: airport
-        * edge: ticket
-      * FAQ
-        * how do you make sure there is no dead end since you always choose the "smallest" arrivals (min heap) ?
-          * Starting at the first node, **we can only get stuck at the ending point, since every node except for the first and the last node has even number of edges, when we enter a node we can always get out**.
-          * Now we are at the destination
-            * case1: if all edges are visited, we are done, and the dfs returns to the very first state.
-            * case2: Otherwise** we need to "insert" the unvisited loop into corresponding position, and in the dfs method, it returns to the node with extra edges, **starts another recursion and adds the result before the next path**. This process continues until all edges are visited.
-          * Example:
-            * A Graph:, start is A, end is E
-              * A -> [B, E]  # start vertex
-              * B -> [C]
-              * C -> [A]
-              * E -> []      # end vertex
-            * Case 1:
-              * s1: A
-              * s2: A -> **B->C->A->E** (Iterative B end)
-            * Case 2:
-              * s1: A
-              * s2: A -> **E** (iterative E end)
-              * s2: A -> **B->C->A** (Iterative B end) -> E
-      * Approach1: Hierholzer's algorithm, DFS Recursive, Time:O(Elog(E)), Space:O(E)
-        * Time: O(ELog(E))
-          * Generate Adjacency List: O(ELog(E))
-          * Traverse every edge: O(ELog(E))
-        * Space: O(E)
-          * Adjacency List: O(E)
-          * Recursive Call: O(E)
-        * Python:
-          ```python
-          def findItinerary(self, tickets: List[List[str]]) -> List[str]:
-            def _dfs(departure):
-                arrival_heap = flights[departure]
-                while arrival_heap:
-                    _dfs(heapq.heappop(arrival_heap))
-
-                # apeendleft to avoid unnecessary reverse
-                route.appendleft(departure)
-
-            flights = collections.defaultdict(list)
-            route = collections.deque()
-
-            for departure, arrivial in tickets:
-                arrival_heap = flights[departure]
-                # put the neighbors in a min-heap for lexical order
-                heapq.heappush(arrival_heap, arrivial)
-
-            # start from JFK
-            _dfs("JFK")
-
-          return route
-          ```
-      * Approach2: Hierholzer's algorithm, DFS Iterative Time:O(Elog(E)), Space:O(E)
-        * Time: O(ELog(E))
-          * Generate Adjacency List: O(ELog(E))
-          * Traverse every edge: O(ELog(E))
-        * Space: O(E)
-          * Adjacency List: O(E)
-          * Stack: O(E)
-        * Python
-          ```python
-          def findItinerary(self, tickets: List[List[str]]) -> List[str]:
-            g_outdegree = collections.defaultdict(list)
-            # create the graph
-            for departure, arrival in tickets:
-                g_outdegree[departure].append(arrival)
-
-            # gnerate the min-heap for each arrival list
-            for arrivals in g_outdegree.values():
-                heapq.heapify(arrivals)
-
-            itinerary = collections.deque()
-
-            stack =["JFK"]
-            while stack:
-                departure = stack[-1]
-                arrivials = g_outdegree[departure]
-                if arrivials:
-                    stack.append(heapq.heappop(arrivials))
-                else:
-                    stack.pop()
-                    itinerary.appendleft(departure)
-
-            return itinerary
-          ```
-  * **Eulerian circuit**
-    * An **Eulerian trail** that **starts and ends on the same vertex**.
-  * **Hamilton path**
-    * A finite graph that **visits every vertex** exactly once.
-  * **Hamilton cycle**
-    * An Hamilton path that **starts and ends on the same vertex**.
-  * **Minimum Spanning Tree**
-    * A minimum spanning tree (MST) or minimum weight spanning tree is **a subset of the edges of a connected, edge-weighted undirected graph that connects all the vertices together, without any cycles and with the minimum possible total edge weight**.
-  * **Shortest Path**
-  * Topological Sort
-    * Ref:
-      * https://www.youtube.com/watch?v=ddTC4Zovtbc
-      * https://leetcode.com/problems/course-schedule-ii/solution/
-    * 207: Course Schedule (M)
-      * Description:
-        * There are a total of n courses you have to take, labeled from 0 to n-1.
-        * Some courses may have prerequisites, for example to take course 0 you have to first take course 1, which is expressed as a pair: [0,1]
-          * [course, prequisite]
-      * Approach1: Peeling Onion, Time: O(V+E), Space: O(V+E)
-        * Time: O(V+E)
-          * Build Outdegree List Graph and Indegree Array
-            * O(E)
-          * Traverse the Nodes and Edges: O(V+E)
-            * Traverse the Nodes:
-                * Each node would be traverse at most once.
-                * Operation for push node to queue and pop node from queue.
-            * Traverse the Edges.
-              * Each edge would be traversed at most once.
-              * Operation for **removing outdegree of the node**.
-        * Space:O(V+E)
-          * Graph of adjency list
-            * O(V+E)
-          * Indegree Array
-            * O(V)
-          * BFS Queue
-            * O(V)
-        * Algorithm
-          * Definition:
-            * **Indegree of the Course:**
-              * How many prequisites courses of it.
-            * **Outdegree of Course**
-              * How many courses' prequisite is this course.
-          * The algorithm
-            * We first process all the nodes/course with **0 in-degree** implying no prerequisite courses required. **If we remove all these courses from the graph, along with their outgoing edges**, we can find out the courses/nodes that should be processed next. These would again be the nodes with 0 in-degree. We can continuously do this until all the courses have been accounted for.
-          * Data Structures
-            * **A graph of adjency list with indegree**
-              * If course u is a prerequisite of course v, then the adjacency list of u will contain v.
-            * **A degree array**
-              * Calculate how many prerequisite courses for each.
-        * Python:
-          ```python
-          def canFinish(self, numCourses: int, prerequisites: List[List[int]]) -> bool:
-            g_outdegree = collections.defaultdict(list)
-            g_indegree = [0] * numCourses
-
-            for course, preq in prerequisites:
-                g_outdegree[preq].append(course)
-                g_indegree[course] += 1
-
-            """
-            Starting from the courses having 0 prequisite (indegree is 0)
-            """
-            q = collections.deque()
-            for course, indegree in enumerate(g_indegree):
-                if indegree == 0:
-                    q.append(course)
-
-            scheduled_courses = 0
-            while q:
-                cur = q.popleft()
-                schedule_cnt += 1
-
-                for nxt in g_outdegree[cur]:
-                    g_indegree[nxt] -= 1
-                    if g_indegree[nxt] == 0:
-                        q.append(nxt)
-
-            return scheduled_courses == numCourses
-          ```
-      * Approach2: DFS:
-        * Algorithm:
-          * For each of the nodes in our graph, we will run a depth first search in case that node was not already visited in some other node's DFS traversal.
-          * Suppose we are executing the depth first search for a node N. We will recursively traverse all of the neighbors of node N which have not been processed before.
-          * Once the processing of all the neighbors is done, we will add the node N to the stack. We are making use of a stack to simulate the ordering we need. When we add the node N to the stack, all the nodes that require the node N as a prerequisites (among others) will already be in the stack.
-        * Python
-          ```python
-          class Status(object):
-            WHITE = 1  # default
-            GRAY =  2  # processing
-            BLACK = 3  # done
-
-          class Solution:
-              def findOrder(self, numCourses: int, prerequisites: List[List[int]]) -> List[int]:
-                  is_cyclic = False
-                  scheduled_course = []
-
-                  def dfs(course):
-                      # !!! don't forget use nonlocal
-                      nonlocal is_cyclic
-
-                      if is_cyclic:
-                          return
-
-                      visits[course] = Status.GRAY
-
-                      for next_course in g_adj[course]:
-                          if visits[next_course] == Status.WHITE:
-                              dfs(next_course)
-
-                          # graph cucle found
-                          elif visits[next_course] == Status.GRAY:
-                              is_cyclic = True
-                              return
-                      # done
-                      visits[course] = Status.BLACK
-                      scheduled_course.append(course)
-
-                  # Adjacency list of outdegree
-                  g_adj = [[] for _ in range(numCourses)]
-                  visits = [Status.WHITE for _ in range(numCourses)]
-
-                  for course, preq in prerequisites:
-                      g_adj[preq].append(course)
-
-                  # perhaps start from indegree 0 ??
-                  for course in range(numCourses):
-                      if visits[course] == Status.WHITE:
-                          dfs(course)
-
-                  return scheduled_course[::-1] if not is_cyclic else []
-          ```
-    * 210: Course Schedule II (M)
-      * Same Concept as 207, the only difference is to keep the scheduled courses list.
-      * Approach1: Peeling Onion
-        * Python
-          ```python
-          def findOrder(self, numCourses: int, prerequisites: List[List[int]]) -> List[int]:
-
-          g_outdegree = collections.defaultdict(list)
-          g_indegree = [0] * numCourses
-
-          for course, preq in prerequisites:
-              g_outdegree[preq].append(course)
-              g_indegree[course] += 1
-
-          """
-          Traverse from the courses having 0 prequisite (indegree is 0)
-          """
-          q = collections.deque()
-          for course, indegree in enumerate(g_indegree):
-              if indegree == 0:
-                  q.append(course)
-
-          scheduled_courses = []
-          while q:
-              cur = q.popleft()
-              scheduled_courses.append(cur)
-
-              for nxt in g_outdegree[cur]:
-                  g_indegree[nxt] -= 1
-                  if g_indegree[nxt] == 0:
-                      q.append(nxt)
-
-          return scheduled_courses if numCourses == len(scheduled_courses) else []
-          ```
-    * 269: Alien Dictionary (H)
-  * Other:
-    * 685: Redundant Connection II
-    * 323: Number of Connected Components in an Undirected Graph
-### Bit Manipulation
-  * Tips:
-    * A^0 = A
-      * **adding** "val" to the "set" if "val" is not in the "set"
-    * A^A = 0
-      * **removing** "val" from the "set" if "val" is already in the "set"
-    * (ones ^ A[i]) & ~twos
-      ```txt
-      IF the set "ones" does not have A[i]
-        Add A[i] to the set "ones" if and only if its not there in set "twos"
-      ELSE
-        Remove it from the set "ones"
-      ```
-    * x & -x
-      * get the last set bit
-      ```txt
-      x = 1100
-      -x = ^x + 1 = 0100
-      x & -x = 0100
-      ```
-  * 268: Missing Number (E)
-    * Description:
-      * Given an array containing n distinct numbers taken from 0, 1, 2, ..., n, find the one that is missing from the array.
-      * n number in n + 1 choice
-    * Approach1: Sorting, Time:O(nlogn), Space:O(logn~n)
-    * Approach2: Generate a sorted array-1, Time:O(n), Spaxe:O(n)
-    * Approach3: Bit Manipulation (XOR), Time:O(n), Space:O(1)
-      * example:
-        ```txt
-        idx: 0  1  2  3
-        val: 0  1  3  4
-        missing = 4 ^ (0^0) ^ (1^1) ^ (2^3) ^ (3^4)
-                = 2 ^ (0^0) ^ (1^1) ^ (3^3) ^ (4^4)
-                = 2 ^ 0
-                = 2
-        ```
-      * Python
-        ```python
-        def missingNumber(self, nums: List[int]) -> int:
-          missing = len(nums)
-          for i, n in enumerate(nums):
-              missing ^= i ^ n
-
-          return missing
-        ```
-    * Approach4: Gauss formula, Time:O(n), Space:O(1)
-      * Python
-        ```python
-        def missingNumber(self, nums: List[int]) -> int:
-          expected_sum = (1 + len(nums)) * len(nums) // 2
-          actual_sum = sum(nums)
-          return expected_sum - actual_sum
-        ```
-  * 389: Find the Difference (E)
-    * Description:
-      * String t is generated by random shuffling string s and then add one more letter at a random position.
-    * Approach1: Sorting and Check, Time:O(m+n)log(m+n), Space:O(m+n)
-      * Python
-        ```python
-        def findTheDifference(self, s: str, t: str) -> str:
-          short, long = sorted(s), sorted(t)
-          diff_idx = len(short)
-          for i in range(len(short)):
-              if short[i] != long[i]:
-                  diff_idx = i
-                  break
-
-          return long[diff_idx]
-        ```
-    * Approach2: Counter, Time:O(m+n), Space:O(m)
-    * Approach3: Bit manipulatoin, (XOR), Time:O(m+n), Space:O(1)
-      * Python
-        ```python
-        def findTheDifference(self, s: str, t: str) -> str:
-          res = 0
-
-          for c in s:
-              res ^= ord(c)
-
-          for c in t:
-              res ^= ord(c)
-
-          return chr(res)
-        ```
-  * 136: Single Number (E)
-    * Description:
-      * Given a non-empty array of integers, every element appears twice except for one. Find that single one.
-    * Approach1: Counter, Time:O(n), Space:O(n)
-      * Python
-        ```python
-        def singleNumber(self, nums: List[int]) -> int:
-          counter = collections.Counter(nums)
-          res = None
-          for n, cnt in counter.items():
-              if cnt == 1:
-                  res = n
-                  break
-          return res
-        ```
-    * Approach2: Bit manipulation, XOR, Time:O(n), Space:O(1)
-      * Python
-        ```python
-        def singleNumber(self, nums: List[int]) -> int:
-          res = 0
-          for n in nums:
-              res ^= n
-
-          return res
-        ```
-  * 137: Single Number II (M)
-    * Description:
-      * Given a non-empty array of integers, **every element appears three times except for one**, which appears exactly once. Find that single one.
-    * Approach1: Counter, Time:O(n), Space:O(n)
-      * Python
-        ```python
-        def singleNumber(self, nums: List[int]) -> int:
-          counter = collections.Counter(nums)
-          res = None
-          for c, cnt in counter.items():
-              if cnt == 1:
-                  res = c
-                  break
-
-          return res
-        ```
-    * Approach2: bit manipulation
-      * Ref:
-        * https://leetcode.com/problems/single-number-ii/discuss/43294/Challenge-me-thx
-      * Concept:
-        * **adding** "val" to the "set" if "val" is not in the "set" => A^0 = A
-        * **removing** "val" from the "set" if "val" is already in the "set" => A^A = 0
-        * **(ones ^ A[i]) & ~twos** means
-          ```txt
-          IF the set "ones" does not have A[i]
-            Add A[i] to the set "ones" if and only if its not there in set "twos"
-          ELSE
-            Remove it from the set "ones"
-          ```
-        * **(twos^ A[i]) & ~ones** means
-          ```txt
-          IF the set "twos" does not have A[i]
-            Add A[i] to the set "twos" if and only if its not there in set "ones"
-          ELSE
-            Remove it from the set "twos"
-          ```
-      * Python
-        ```python
-        def singleNumber(self, nums: List[int]) -> int:
-          ones = twos = 0
-          for n in nums:
-              """
-              1st appears
-                  n in ones
-                  n not in twos
-              2nd appears
-                  n not in ones
-                  n in twos
-              3rd appears
-                  n not in ones
-                  n in twos
-              """
-              ones = (ones ^ n) & (~twos)
-              twos = (twos ^ n) & (~ones)
-          return ones
-        ```
-  * 260: Single Number III (M)
-    * Description:
-      * Given an array of numbers nums, in which **exactly two elements appear only once** and all the other elements appear exactly twice. Find the two elements that appear only once.
-    * Approach1: Counter, Time:O(n), Space:O(n)
-      * Python
-        ```python
-        def singleNumber(self, nums: List[int]) -> List[int]:
-          counter = collections.Counter(nums)
-          ones = []
-          for n, cnt in counter.items():
-              if cnt == 1:
-                  ones.append(n)
-                  if len(ones) == 2:
-                    break
-          return ones
-        ```
-    * Approach2: Bit manipulation, Time:O(n), Space:O(1)
-      * Ref:
-        * https://leetcode.com/articles/single-number-iii/
-      * Python
-        ```python
-        def singleNumber(self, nums: List[int]) -> List[int]:
-          """
-          get difference of x and y
-          """
-          diff = 0
-          for n in nums:
-              diff ^= n
-
-          """
-          get the last set bit, use this bit to distinguish x and y
-          """
-          diff &= -diff
-
-          ones = [0, 0]
-          for n in nums:
-              if n & diff:
-                  ones[0] ^= n
-              else:
-                  ones[1] ^= n
-          return ones
-        ```
-
 ### Retry List
   * Math:
     * Number:
@@ -17485,6 +17641,7 @@ Table of Content
       * Start From Gates
     * Surrounded Regions (M)
     * 127: Word Ladder (M)
+  * Union Find
   * Graph
     * Eulerian trail
       * 332: Reconstruct Itinerary (M)
