@@ -3713,7 +3713,6 @@ Table of Content
 
             return max_product
           ```
-
     * 325: Maximum Size Subarray Sum **Equals k** (M)
       * Description
         * Find the maximum length of a subarray that sums to k
@@ -8118,7 +8117,7 @@ Table of Content
 
               return pairs
           ```
-  * Schedule:
+  * **Schedule**:
     * 253: Meeting Rooms II (M)
       * Find the minimum requirement of the meeting rooms.
       * Approach1: Brute Force, Time: O(n^2), Space: O(1)
@@ -8226,6 +8225,10 @@ Table of Content
               return res
           ```
     * 1109: Corporate Flight Bookings (M)
+      * Description:
+        * There are n flights, and they are labeled from 1 to n.
+        * We have a list of flight bookings.  The i-th booking bookings[i] = [i, j, k] means that we booked k seats from flights labeled i to j inclusive.
+        * Return an array answer of length n, representing the number of seats booked on each flight in order of their label.
       * Approach1:
         * Python
           ```python
@@ -8255,7 +8258,7 @@ Table of Content
     * 630: Course Schedule III (H)
       * Ref:
         * https://leetcode.com/problems/course-schedule-iii/discuss/104847/Python-Straightforward-with-Explanation
-  * Kth problem:
+  * **Kth problem**:
     * Ref:
       * Summary:
         * https://leetcode.com/problems/k-closest-points-to-origin/discuss/220235/Java-Three-solutions-to-this-classical-K-th-problem.
@@ -8369,31 +8372,37 @@ Table of Content
           * Implementation1
             ```python
             class Element(object):
-                __slots__ = 'key', 'cnt'
 
-                def __init__(self, key, cnt):
-                    self.key = key
-                    self.cnt = cnt
+             __slots__ = ['key', 'cnt']
 
-                def __lt__(self, other):
-                    return self.cnt < other.cnt
+              def __init__(self, key, cnt):
+                  self.key = key
+                  self.cnt = cnt
+
+              def __lt__(self, other):
+                  return self.cnt < other.cnt
+
+              def __gt__(self, other):
+                  return self.cnt > other.cnt
 
             def topKFrequent(self, nums: List[int], k: int) -> List[int]:
-                if not k:
-                    return []
+                if not nums or k <= 0:
+                  return []
 
                 counter = collections.Counter(nums)
-
                 min_heap = []
+
                 for key, cnt in counter.items():
+                    e = Element(key, cnt)
                     if len(min_heap) < k:
-                        heapq.heappush(min_heap, Element(key, cnt))
-                    elif cnt > min_heap[0].cnt:
-                        heapq.heapreplace(min_heap, Element(key, cnt))
+                        heapq.heappush(min_heap, e)
+                    else:
+                        if e > min_heap[0]:
+                            heapq.heapreplace(min_heap, e)
 
                 return [e.key for e in min_heap]
             ```
-          * Implementation2, use nlargest
+            * Implementation2, use nlargest
             ```python
             def topKFrequent(self, nums: List[int], k: int) -> List[int]:
               counter = collections.Counter(nums)
@@ -8419,50 +8428,46 @@ Table of Content
                 def __ge__(self, other):
                     return self.cnt >= other.cnt
 
-                def __repr__(self):
-                    return f'{self.key}:{self.cnt}'
+            def quick_select(self, array, start, end, k_largest):
+                def partition(start, end):
+                    ran = random.randint(start, end)
+                    pivot = end
+                    array[pivot], array[ran] = array[ran], array[pivot]
 
-            class Solution:
-                def quick_select(self, array, start, end, k_largest):
-                    def partition(start, end):
-                        ran = random.randint(start, end)
-                        pivot = end
-                        array[pivot], array[ran] = array[ran], array[pivot]
+                    border = start
+                    for cur in range(start, end):
+                        if array[cur] >= array[pivot]:
+                            array[cur], array[border] = array[border], array[cur]
+                            border += 1
 
-                        border = start
-                        for cur in range(start, end):
-                            if array[cur] >= array[pivot]:
-                                array[cur], array[border] = array[border], array[cur]
-                                border += 1
+                    array[border], array[pivot] = array[pivot], array[border]
+                    return border
 
-                        array[border], array[pivot] = array[pivot], array[border]
-                        return border
+                while start <= end:
+                    p = partition(start, end)
+                    if p == k_largest:
+                        break
+                    elif p > k_largest:
+                        end = p - 1
+                    else:
+                        start = p + 1
 
-                    while start <= end:
-                        p = partition(start, end)
-                        if p == k_largest:
-                            break
-                        elif p > k_largest:
-                            end = p - 1
-                        else:
-                            start = p + 1
+            def topKFrequent(self, nums: List[int], k: int) -> List[int]:
+                if not nums or k <= 0:
+                    return []
 
-                def topKFrequent(self, nums: List[int], k: int) -> List[int]:
-                    if not k:
-                        return []
+                counter = collections.Counter(nums)
 
-                    counter = collections.Counter(nums)
+                key_cnt_arr = []
+                for key, cnt in counter.items():
+                    key_cnt_arr.append(Element(key, cnt))
 
-                    key_cnt = []
-                    for key, cnt in counter.items():
-                        key_cnt.append(Element(key, cnt))
+                self.quick_select(array=keykey_cnt_arr_cnt,
+                                  start=0,
+                                  end=len(key_cnt_arr)-1,
+                                  k_largest=k-1)
 
-                    self.quick_select(array=key_cnt,
-                                      start=0,
-                                      end=len(key_cnt)-1,
-                                      k_largest=k-1)
-
-                    return [e.key for e in key_cnt[:k]]
+                return [e.key for e in key_cnt_arr[:k]]
             ```
         * Approach4: bucket-sort, Time:O(n), Space:O(n)
           * Since we know the max freq would be len(nums), we can use bucket sort
@@ -8474,27 +8479,39 @@ Table of Content
           * Python
             ```python
             def topKFrequent(self, nums: List[int], k: int) -> List[int]:
-                if not k:
-                    return []
 
-                counter = collections.Counter(nums)
+              if not nums or k <= 0:
+                  return []
 
-                bucket = [None] * (len(nums) + 1)
-                for key, cnt in counter.items():
-                    if not bucket[cnt]:
-                        bucket[cnt] = []
-                    bucket[cnt].append(key)
+              """
+              1. Create the character counter
+              """
+              counter = collections.Counter(nums)
 
-                res = []
-                # from len(nums) to 1
-                for cnt in range(len(nums), 0, -1):
-                    if bucket[cnt]:
-                        res.extend(bucket[cnt])
+              """
+              2. Append the character to the bucket according to the cnt
+              """
+              freq_bucket = [None] * (len(nums) + 1)
+              for key, cnt in counter.items():
+                  # lazy creation
+                  if not freq_bucket[cnt]:
+                      freq_bucket[cnt] = []
+                  freq_bucket[cnt].append(key)
 
-                    if len(res) >= k:
-                        break
+              """
+              3. Create the top k response
+              """
+              top_k = []
+              for cnt in range(len(nums), 0, -1):
+                  if not freq_bucket[cnt]:
+                      continue
 
-                return res
+                  top_k.extend(freq_bucket[cnt])
+
+                  if len(top_k) >= k:
+                      break
+
+              return top_k
             ```
     * 692: **Top K Frequent** Words (M)
       * Description:
@@ -8681,20 +8698,20 @@ Table of Content
                 """
                 return self.distance(*self.point) < self.distance(*other.point)
 
-            def kClosest(self, points: List[List[int]], K: int) -> List[List[int]]:
-                max_heap = []
-                for p in points:
-                    e = Element(p)
-                    #print(e, e.distance(*e.point))
-                    if len(max_heap) < K:
-                        heapq.heappush(max_heap, e)
-                    elif e > max_heap[0]:
-                        """
-                        heapq is min heap, reverse the operator
-                        """
-                        heapq.heapreplace(max_heap, e)
+          def kClosest(self, points: List[List[int]], K: int) -> List[List[int]]:
+              max_heap = []
+              for p in points:
+                  e = Element(p)
+                  #print(e, e.distance(*e.point))
+                  if len(max_heap) < K:
+                      heapq.heappush(max_heap, e)
+                  elif e > max_heap[0]:
+                      """
+                      heapq is min heap, reverse the operator
+                      """
+                      heapq.heapreplace(max_heap, e)
 
-                return [e.point for e in max_heap]
+              return [e.point for e in max_heap]
             ```
       * Approach3: Quick select, Time:O(n), Space:O(n)
         * Python
@@ -9090,101 +9107,716 @@ Table of Content
         ```
 ### Tree
   * **Preorder**
-    * 144: Binary Tree Preorder **Traversal** (M)
-      * Approach1: Recursive, Time:O(n), Space:O(n):
-        * Python:
-          ```python
-          def preorderTraversal(self, root: TreeNode) -> List[int]:
-            def _preorder(node):
-                if not node:
-                    return
+    * Traversal
+      * 144: Binary Tree Preorder **Traversal** (M)
+        * Approach1: Recursive, Time:O(n), Space:O(n):
+          * Python:
+            ```python
+            def preorderTraversal(self, root: TreeNode) -> List[int]:
+              def _preorder(node):
+                  if not node:
+                      return
 
-                visited.append(node.val)
-                _preorder(node.left)
-                _preorder(node.right)
+                  visited.append(node.val)
+                  _preorder(node.left)
+                  _preorder(node.right)
 
-            visited = []
-            _preorder(root)
-            return visited
-          ```
-      * Approach2: Iterative1, Time:O(n), Space:O(n):
-        * Python
-          ```python
-          def preorderTraversal(self, root: TreeNode) -> List[int]:
+              visited = []
+              _preorder(root)
+              return visited
+            ```
+        * Approach2: Iterative1, Time:O(n), Space:O(n):
+          * Python
+            ```python
+            def preorderTraversal(self, root: TreeNode) -> List[int]:
+                if not root:
+                    return []
+
+                visited = list()
+                stack = [root]
+                while stack:
+                    node = stack.pop()
+                    visited.append(node.val)
+
+                    if node.right:
+                        stack.append(node.right)
+
+                    if node.left:
+                        stack.append(node.left)
+
+                return visited
+            ```
+        * Approach3: Iterative2, Time:O(n), Space:O(n):
+          * Python
+            ```python
+            def preorderTraversal(self, root: TreeNode) -> List[int]:
               if not root:
                   return []
 
-              visited = list()
+              stack = []
+              visited = []
+
+              cur = root
+              while cur or stack:
+                  if not cur:
+                      cur = stack.pop()
+
+                  visited.append(cur.val)
+                  if cur.right:
+                      stack.append(cur.right)
+                  cur = cur.left
+
+              return visited
+            ```
+      * 589: N-ary Tree Preorder Traversal (E)
+        * Approah1: Recursive, Time:O(n), Space:O(n)
+          * Python
+            ```python
+            def preorder(self, root: 'Node') -> List[int]:
+              def _preorder(node):
+                  visited.append(node.val)
+                  for child in node.children:
+                      _preorder(child)
+
+              if not root:
+                  return []
+
+              visited = []
+              _preorder(root)
+              return visited
+            ```
+        * Approach2: Iterative, Time:O(n), Space:O(n)
+          * Python
+            ```python
+            def preorder(self, root: 'Node') -> List[int]:
+              if not root:
+                  return []
+
+              visited = []
               stack = [root]
+
               while stack:
                   node = stack.pop()
                   visited.append(node.val)
+                  for i in range(len(node.children)-1, -1, -1):
+                      stack.append(node.children[i])
+
+              return visited
+            ```
+      * 114: **Flatten** Binary Tree to Linked List	(M)
+        * Preorder solution:
+          * Each node's right child points to the next node of a pre-order traversal.
+        * Postorder solution
+          * Right->Left->Root
+        * Approach1: PreOrder: Iterative, Time:O(n), Space:O(n)
+          * Python
+            ```python
+            def flatten(self, root: TreeNode) -> None:
+              if not root:
+                  return
+
+              s = [root]
+              while s:
+                  node = s.pop()
 
                   if node.right:
-                      stack.append(node.right)
+                      s.append(node.right)
+
+                  if node.left:
+                      s.append(node.left)
+
+                  if s:
+                      node.right = s[-1]
+
+                  node.left = None
+            ```
+        * Approach2: PostOrder, Recursive, Time:O(n), Space:O(n)
+          * https://leetcode.com/problems/flatten-binary-tree-to-linked-list/submissions/
+          * Python
+            ```python
+            def flatten(self, root: TreeNode) -> None:
+              def dfs(node):
+                  if not node:
+                      return
+
+                  dfs(node.right)
+                  dfs(node.left)
+
+                  """
+                  prev pointers to previous flattern list
+                  """
+                  nonlocal prev
+                  node.right = prev
+                  node.left = None
+                  prev = node
+
+
+              if not root:
+                  return
+
+              prev = None
+              dfs(root)
+            ```
+        * Approach3: PostOrder, Iterative, Time:O(n), Space:O(n)
+          * Python
+            ```python
+            def flatten(self, root: TreeNode) -> None:
+              if not root:
+                  return
+
+              cur = root
+              s = []
+              prev = None
+              while cur or s:
+                  if cur:
+                      s.append(cur)
+                      cur = cur.right
+                  else:
+                      top = s[-1]
+                      if top.left and top.left is not prev:
+                          cur = top.left
+                      else:
+                          node = s.pop()
+                          node.right = prev
+                          node.left = None
+                          prev = node
+            ```
+    * Same tree
+      * 100: **Same** Tree (E)
+        * Approach1: Recursive Time:O(n), Space:O(n)
+          * Python
+            ```python
+            def isSameTree(self, p: TreeNode, q: TreeNode) -> bool:
+              def dfs(n1, n2):
+                  if not n1 and not n2:
+                      return True
+
+                  if not n1 or not n2 or n1.val != n2.val:
+                      return False
+
+                  return dfs(n1.left, n2.left) and dfs(n1.right, n2.right)
+
+              return dfs(p, q)
+            ```
+        * Approach2: Iterative Time:O(n), Space:O(n)
+            * Python
+            ```python
+            def isSameTree(self, p: TreeNode, q: TreeNode) -> bool:
+              is_same = True
+              stack = [(p, q)]
+              while stack:
+                  n1, n2 = stack.pop()
+
+                  if not n1 and not n2:
+                      continue
+
+                  if not n1 or not n2 or n1.val != n2.val:
+                      is_same = False
+                      break
+
+                  # n1.val == n2.val
+                  stack.append((n1.left, n2.left))
+                  stack.append((n1.right, n2.right))
+
+              return is_same
+            ```
+      * 572: Subtree of Another Tree (E)
+        * Approach1: Recursive: Time:O(mn), Space:O(m+n)
+          * Python
+            ```python
+            def isSubtree(self, s: TreeNode, t: TreeNode) -> bool:
+              def is_same_tree(n1, n2):
+                  if not n1 and not n2:
+                      return True
+
+                  if not n1 or not n2 or n1.val != n2.val:
+                      return False
+
+                  return is_same_tree(n1.left, n2.left) and is_same_tree(n1.right, n2.right)
+
+              def is_sub_tree(s, t):
+                  if not s and not t:
+                      return True
+
+                  if not s or not t:
+                      return False
+
+                  if is_same_tree(s, t):
+                      return True
+
+                  if is_sub_tree(s.left, t):
+                      return True
+
+                  if is_sub_tree(s.right, t):
+                      return True
+
+                  return False
+
+              return is_sub_tree(s, t)
+            ```
+        * Approach2: Iterative: Time:O(mn), Space:O(m+n)
+          * Python
+            ```python
+            def isSubtree(self, s: TreeNode, t: TreeNode) -> bool:
+              def is_same_tree(n1, n2):
+                  is_same = True
+                  stack = [(n1, n2)]
+                  while stack:
+                      n1, n2 = stack.pop()
+
+                      if not n1 and not n2:
+                          continue
+
+                      if not n1 or not n2 or n1.val != n2.val:
+                          is_same = False
+                          break
+
+                      stack.append((n1.left, n2.left))
+                      stack.append((n1.right, n2.right))
+
+                  return is_same
+
+              if not s and not t:
+                  return True
+
+              if not s or not t:
+                  return False
+
+              is_sub_tree = False
+              stack = [s]
+              while stack:
+                  node = stack.pop()
+                  if is_same_tree(node, t):
+                      is_sub_tree = True
+                      break
 
                   if node.left:
                       stack.append(node.left)
 
-              return visited
-          ```
-      * Approach3: Iterative2, Time:O(n), Space:O(n):
-        * Python
-          ```python
-          def preorderTraversal(self, root: TreeNode) -> List[int]:
-            if not root:
-                return []
+                  if node.right:
+                      stack.append(node.right)
 
-            stack = []
-            visited = []
+              return is_sub_tree
+            ```
+      * 101: Symmetric Tree (E)
+        * Approach1: Recursive:
+          * Python
+            ```python
+            def isSymmetric(self, root: TreeNode) -> bool:
+              def dfs(n1, n2):
+                  if not n1 and not n2:
+                      return True
 
-            cur = root
-            while cur or stack:
-                if not cur:
-                    cur = stack.pop()
+                  if not n1 or not n2 or n1.val != n2.val:
+                      return False
 
-                visited.append(cur.val)
-                if cur.right:
-                    stack.append(cur.right)
-                cur = cur.left
+                  return dfs(n1.left, n2.right) and dfs(n1.right, n2.left)
 
-            return visited
-          ```
-    * 589: N-ary Tree Preorder Traversal (E)
-      * Approah1: Recursive, Time:O(n), Space:O(n)
-        * Python
-          ```python
-          def preorder(self, root: 'Node') -> List[int]:
-            def _preorder(node):
-                visited.append(node.val)
-                for child in node.children:
-                    _preorder(child)
+              if not root:
+                  return True
 
-            if not root:
-                return []
+              return dfs(root.left, root.right)
+            ```
+        * Approach2: Iterative:
+          * Python
+            ```python
+            def isSymmetric(self, root: TreeNode) -> bool:
 
-            visited = []
-            _preorder(root)
-            return visited
-          ```
-      * Approach2: Iterative, Time:O(n), Space:O(n)
-        * Python
-          ```python
-          def preorder(self, root: 'Node') -> List[int]:
-            if not root:
-                return []
+              if not root:
+                  return True
 
-            visited = []
-            stack = [root]
+              is_symmetric = True
 
-            while stack:
-                node = stack.pop()
-                visited.append(node.val)
-                for i in range(len(node.children)-1, -1, -1):
-                    stack.append(node.children[i])
+              stack = [(root.left, root.right)]
+              while stack:
+                  n1, n2 = stack.pop()
 
-            return visited
-          ```
+
+                  if not n1 and not n2:
+                      continue
+
+                  if not n1 or not n2 or n1.val != n2.val:
+                      is_symmetric = False
+                      break
+
+                  stack.append((n1.left, n2.right))
+                  stack.append((n1.right, n2.left))
+
+              return is_symmetric
+            ```
+    * Path
+      * 257: Binary Tree Paths (E)
+        * Description:
+          * Given a binary tree, return all **root-to-leaf** paths.
+        * Approach1: Recursive, Time:O(n), Space:O(n)
+          * Python
+            ```python
+            def binaryTreePaths(self, root: TreeNode) -> List[str]:
+              def dfs(node, cur):
+                  cur.append(str(node.val))
+
+                  if not node.left and not node.right:
+                      paths.append('->'.join(cur))
+                  else:
+                      if node.left:
+                          dfs(node.left ,cur)
+
+                      if node.right:
+                          dfs(node.right ,cur)
+
+                  cur.pop()
+
+              if not root:
+                  return []
+
+              paths = []
+              cur = []
+              dfs(root, cur)
+              return paths
+            ```
+        * Approach2: Iterative, Time:O(n), Space:O(n)
+          * Python
+            ```python
+            def binaryTreePaths(self, root: TreeNode) -> List[str]:
+              if not root:
+                  return []
+
+              paths = []
+              cur = []
+              stack = [(root, False)]
+              while stack:
+                  node, backtrack = stack.pop()
+                  if backtrack:
+                      cur.pop()
+                      continue
+
+                  cur.append(str(node.val))
+                  stack.append((None, True))
+                  if not node.left and not node.right:
+                      paths.append('->'.join(cur))
+                      continue
+
+                  if node.right:
+                      stack.append((node.right, False))
+                  if node.left:
+                      stack.append((node.left, False))
+
+              return paths
+            ```
+      * 129: Sum Root to Leaf Numbers (M)
+        * Approach1: Recursive:
+          * Python
+            ```python
+            def sumNumbers(self, root: TreeNode) -> int:
+              def dfs(node, cur_sum):
+
+                  cur_sum = cur_sum * 10 + node.val
+
+                  if not node.left and not node.right:
+                      nonlocal sum_leaf
+                      sum_leaf += cur_sum
+                      return
+
+                  if node.left:
+                      dfs(node.left, cur_sum)
+
+                  if node.right:
+                      dfs(node.right, cur_sum)
+
+              if not root:
+                  return 0
+
+              sum_leaf = 0
+              dfs(root, 0)
+              return sum_leaf
+            ```
+        * Approach2: Iterative:
+          * Python
+            ```python
+            def sumNumbers(self, root: TreeNode) -> int:
+              if not root:
+                  return 0
+
+              stack = [(root, 0)]
+              sum_leaf = 0
+              while stack:
+                  node, cur_sum = stack.pop()
+                  cur_sum = cur_sum * 10 + node.val
+
+                  if not node.left and not node.right:
+                      sum_leaf += cur_sum
+                      continue
+
+                  if node.left:
+                      stack.append((node.left, cur_sum))
+
+                  if node.right:
+                      stack.append((node.right, cur_sum))
+
+              return sum_leaf
+            ```
+      * 112: Path Sum (E)
+        * Description:
+          * determine if the tree has a root-to-leaf path such that adding up all the values along the path equals the given sum.
+        * Approach1: Recursive:
+          * Python
+            ```python
+            def hasPathSum(self, root: TreeNode, sum: int) -> bool:
+              def dfs(node, target):
+                  nonlocal find_path_sum
+
+                  if find_path_sum:
+                      return
+
+                  target -= node.val
+
+                  if not node.left and not node.right and target == 0:
+                      find_path_sum = True
+                      return
+
+                  if node.left:
+                      dfs(node.left, target)
+
+                  if node.right:
+                      dfs(node.right, target)
+
+              if not root:
+                  return False
+
+              find_path_sum = False
+              dfs(node=root, target=sum)
+              return find_path_sum
+            ```
+        * Approach2: Iterative:
+          * Python
+            ```python
+            def hasPathSum(self, root: TreeNode, sum: int) -> bool:
+              if not root:
+                  return False
+
+              find_path_sum = False
+              s = [(root, sum)]
+              while s:
+                  node, target = s.pop()
+                  target -= node.val
+
+                  if not node.left and not node.right and target == 0:
+                      find_path_sum = True
+                      break
+
+                  if node.left:
+                      s.append((node.left, target))
+
+                  if node.right:
+                      s.append((node.right, target))
+
+              return find_path_sum
+
+            ```
+      * 113: Path Sum II (M)
+        * Description:
+          * Given a binary tree and a sum, find all **root-to-leaf** paths where each path's sum equals the given sum.
+        * Approach1: Recursive, Time:O(n), Space:O(n)
+          * Python
+            ```python
+            def pathSum(self, root: TreeNode, sum: int) -> List[List[int]]:
+              def dfs(node, cur, target):
+                  target -= node.val
+                  cur.append(node.val)
+                  if not node.left and not node.right and target == 0:
+                      path_sum_comb.append(cur[:])
+                  else:
+                      if node.left:
+                          dfs(node.left, cur, target)
+
+                      if node.right:
+                          dfs(node.right, cur, target)
+                  cur.pop()
+
+              if not root:
+                  return []
+
+              path_sum_comb = []
+              dfs(root, [], sum)
+
+              return path_sum_comb
+            ```
+        * Approach2: Iterative, Time:O(n), Space:O(n)
+          * Python
+            ```python
+            def pathSum(self, root: TreeNode, sum: int) -> List[List[int]]:
+              if not root:
+                  return []
+
+              path_sum_comb = []
+              cur = []
+              s = [(root, sum, False)]
+              while s:
+                  node, target, backtrack = s.pop()
+                  if backtrack:
+                      cur.pop()
+                      continue
+
+                  target -= node.val
+                  cur.append(node.val)
+                  s.append((None, None, True))
+
+                  if not node.left and not node.right and target == 0:
+                      path_sum_comb.append(cur[:])
+                      continue
+
+                  if node.left:
+                      s.append((node.left, target, False))
+
+                  if node.right:
+                      s.append((node.right, target, False))
+
+              return path_sum_comb
+            ```
+      * 437: Path Sum III (M)
+        * Description:
+          * The path does not need to start or end at the root or a leaf, **but it must go downwards** (traveling only from parent nodes to child nodes).
+        * This is similar to 560: Subarray Sum Equals K
+        * Approach1: Recursive:
+          * Python
+            ```python
+            def pathSum(self, root: TreeNode, sum: int) -> int:
+              def dfs(node, cur_sum, sum_d):
+                  cur_sum += node.val
+                  """
+                  prev_sum + target = cur_sum
+                  try to find cur_sum - target in the dictionary
+                  """
+                  nonlocal path_sum_cnt
+                  path_sum_cnt += sum_d[cur_sum - target]
+                  sum_d[cur_sum] += 1
+
+                  if node.left:
+                      dfs(node.left, cur_sum, sum_d)
+
+                  if node.right:
+                      dfs(node.right, cur_sum, sum_d)
+
+                  """
+                  backtracking
+                  """
+                  sum_d[cur_sum] -= 1
+
+              if not root:
+                  return 0
+
+              target = sum
+              path_sum_cnt = 0
+              sum_d = collections.defaultdict(int)
+              sum_d[0] = 1
+              dfs(root, 0, sum_d)
+              return path_sum_cnt
+            ```
+        * Approach2: Iterative:
+          * Python
+            ```python
+            def pathSum(self, root: TreeNode, sum: int) -> int:
+              if not root:
+                  return 0
+
+              target = sum
+              path_sum_cnt = 0
+              sum_d = collections.defaultdict(int)
+              sum_d[0] = 1
+
+              stack = [(root, 0, False)]
+              while stack:
+                  node, cur_sum, backtrack = stack.pop()
+                  if backtrack:
+                      sum_d[cur_sum] -= 1
+                      continue
+
+                  cur_sum += node.val
+                  # prev_sum + target = cur_sum
+                  path_sum_cnt += sum_d[cur_sum - target]
+
+                  sum_d[cur_sum] += 1
+                  stack.append((None, cur_sum, True))
+                  if node.left:
+                      stack.append((node.left, cur_sum, False))
+
+                  if node.right:
+                      stack.append((node.right, cur_sum, False))
+
+              return path_sum_cnt
+            ```
+      * 988: Smallest String Starting From Leaf (M)
+        * Description:
+          * Find the lexicographically smallest string that **starts at a leaf of this tree and ends at the root**.
+        * d is the avg depth of the tree, n is the number of the nodes
+        * Approach1: Recursive, Time:O(dn), Space:O(n)
+          * Python
+            ```python
+            def smallestFromLeaf(self, root: TreeNode) -> str:
+              def dfs(node, cur):
+                  if not node:
+                      return
+
+                  cur.appendleft(chr(node.val + ord_a))
+                  if not node.left and not node.right:
+                      nonlocal min_str
+                      min_str = min(min_str, "".join(cur))
+
+                  else:
+                      dfs(node.left, cur)
+                      dfs(node.right, cur)
+
+                  cur.popleft()
+
+              if not root:
+                  return ""
+
+              min_str = "~"
+              ord_a = ord('a')
+              cur = collections.deque()
+              dfs(root, cur)
+              return min_str
+            ```
+        * Approach2: Iterative, Time:O(dn), Space:O(n)
+          * Python
+            ```python
+            def smallestFromLeaf(self, root: TreeNode) -> str:
+                if not root:
+                    return ""
+
+                ord_a = ord('a')
+                path = collections.deque()
+                Event = collections.namedtuple('Event', ['node', 'backtrack'])
+                stack = [Event(node=root, backtrack=False)]
+                # ~ is greater than 26
+                min_str = "~"
+                while stack:
+
+                    e = stack.pop()
+                    node, backtrack = e.node, e.backtrack
+
+                    if backtrack:
+                        path.popleft()
+                        continue
+
+                    # number fo chr
+                    path.appendleft(chr(node.val + ord_a))
+
+                    # for backtrack
+                    stack.append(Event(node=None, backtrack=True))
+
+                    if not node.left and not node.right:
+                        min_str = min(min_str, "".join(path))
+                        continue
+
+                    if node.left:
+                        stack.append(Event(node=node.left, backtrack=False))
+
+                    if node.right:
+                        stack.append(Event(node=node.right, backtrack=False))
+
+                return min_str
+            ```
     * 226. **Invert** Binary Tree (E)
       * Approach1: Recursive, Recursive, Time:O(n), Space:O(n)
           ```python
@@ -9215,44 +9847,6 @@ Table of Content
                     stack.append(node.right)
 
             return root
-          ```
-    * 100: **Same** Tree (E)
-      * Approach1: Recursive Time:O(n), Space:O(n)
-        * Python
-          ```python
-          def isSameTree(self, p: TreeNode, q: TreeNode) -> bool:
-            def dfs(n1, n2):
-                if not n1 and not n2:
-                    return True
-
-                if not n1 or not n2 or n1.val != n2.val:
-                    return False
-
-                return dfs(n1.left, n2.left) and dfs(n1.right, n2.right)
-
-            return dfs(p, q)
-          ```
-      * Approach2: Iterative Time:O(n), Space:O(n)
-          * Python
-          ```python
-          def isSameTree(self, p: TreeNode, q: TreeNode) -> bool:
-            is_same = True
-            stack = [(p, q)]
-            while stack:
-                n1, n2 = stack.pop()
-
-                if not n1 and not n2:
-                    continue
-
-                if not n1 or not n2 or n1.val != n2.val:
-                    is_same = False
-                    break
-
-                # n1.val == n2.val
-                stack.append((n1.left, n2.left))
-                stack.append((n1.right, n2.right))
-
-            return is_same
           ```
     * 111: **Minimum Depth** of Binary Tree	(E)
       * Description:
@@ -9398,95 +9992,6 @@ Table of Content
 
           return max_depth
         ```
-    * 298: Binary Tree **Longest Consecutive** Sequence (M)
-      * Description:
-        * Given a binary tree, find the length of the longest consecutive sequence path.
-        * The path refers to any sequence of nodes from some starting node to any node in the tree along the parent-child connections.
-        * The longest consecutive path need to be from parent to child
-      * Approach1: DFS Recursive, Time:O(n), Space:O(n)
-        * Python
-          ```python
-          def longestConsecutive(self, root: TreeNode) -> int:
-            def dfs(node, lcp):
-                nonlocal max_lcp
-                max_lcp = max(max_lcp, lcp)
-                for child in (node.left, node.right):
-                    if not child:
-                        continue
-
-                    if (node.val + 1) == child.val:
-                        dfs(child, lcp+1)
-                    else:
-                        dfs(child, 1)
-
-            if not root:
-                return 0
-
-            max_lcp = 1
-            dfs(root, 1)
-            return max_lcp
-          ```
-      * Approach2-1: BFS Iterative, determine child's depth in the parent Time:O(n), Space:O(n)
-        * From the perspective of parent, can avoid unnecessary prev_val arg passing
-        * python
-          ```python
-          def longestConsecutive(self, root: TreeNode) -> int:
-            if not root:
-                return 0
-
-            # perspective of dummy node before root
-            q = collections.deque([(root, 1)])
-            max_path = 0
-            while q:
-              # current node, cur path
-              node, path = q.popleft()
-              max_path = max(max_path, path)
-
-              for child in (node.left, node.right):
-                  if not child:
-                      continue
-
-                  new_path = 1
-                  if node.val+1 == child.val:
-                      new_path = path+1
-
-                  q.append((child, new_path))
-
-          return max_path
-          ```
-      * Approach2-2: BFS Iterative, pass parent val, Time:O(n), Space:O(n)
-        * Python
-          ```python
-          def longestConsecutive(self, root: TreeNode) -> int:
-            if not root:
-                return 0
-
-            dummy_val = root.val # ensue there is no consecutive for root
-            q = collections.deque([(root, dummy_val, 0)])
-            max_path = 0
-            while q:
-                # current node, prev val, prev acc path length
-                node, p_val, p_acc_path = q.popleft()
-
-                if node.val == p_val+1:
-                    acc_path = p_acc_path + 1
-                else: # node.val != p_val+1, restart
-                    acc_path = 1
-                    max_path = max(max_path, p_acc_path)
-
-                # leaf node
-                if not node.left and not node.right:
-                    max_path = max(max_path, acc_path)
-                    continue
-
-                if node.left:
-                    q.append((node.left, node.val, acc_path))
-
-                if node.right:
-                    q.append((node.right, node.val, acc_path))
-
-            return max_path
-          ```
     * 617: Merge Two Binary Trees (E)
       * Description:
         * You need to **merge them into a new binary tree**. The merge rule is that if two nodes overlap, then sum node values up as the new value of the merged node. Otherwise, the NOT null node will be used as the node of new tree.
@@ -9579,167 +10084,165 @@ Table of Content
 
             return dfs(t1, t2)
           ```
-    * 331: Verify Preorder Serialization of a Binary Tree	(M)
-      * Approach1: Slots, Time:O(n), Space:O(n)
-        * Python
-          ```python
-          def isValidSerialization(self, preorder: str) -> bool:
-            if not preorder:
-                return False
 
-            # init for root
-            is_valid = True
-            slots = 1
-            for node in preorder.split(','):
 
-                if slots <= 0:
-                    is_valid = False
-                    break
-
-                slots -= 1
-                if node != '#':
-                    slots += 2
-
-            return is_valid and slots == 0
-          ```
+      * Description:
+        * Given two non-empty binary trees s and t, check whether tree t has exactly the same structure and node values with a subtree of s. A subtree of s is a tree consists of a node in s and all of this node's descendants.
+    * 872: Leaf-Similar Trees (E)
   * **Inorder**
-    * 094: Binary Tree **Inorder** Traversal (M)
-      * Approach1: Recursive, Time:O(n), Space:O(n):
-        * Python
-          ```python
-          def inorderTraversal(self, root: TreeNode) -> List[int]:
-            def _inorder(node):
-                if not node:
-                    return
+    * Traversal
+      * 094: Binary Tree **Inorder** Traversal (M)
+        * Approach1: Recursive, Time:O(n), Space:O(n):
+          * Python
+            ```python
+            def inorderTraversal(self, root: TreeNode) -> List[int]:
+              def _inorder(node):
+                  if not node:
+                      return
 
-                _inorder(node.left)
-                output.append(node.val)
-                _inorder(node.right)
+                  _inorder(node.left)
+                  output.append(node.val)
+                  _inorder(node.right)
 
 
-            if not root:
-                return []
+              if not root:
+                  return []
 
-            output = []
-            _inorder(root)
-            return output
-          ```
-      * Approach2: Iterative, Time:O(n), Space:O(n):
-        * Python
-          ```python
-          def inorderTraversal(self, root: TreeNode) -> List[int]:
-            if not root:
-                return []
+              output = []
+              _inorder(root)
+              return output
+            ```
+        * Approach2: Iterative, Time:O(n), Space:O(n):
+          * Python
+            ```python
+            def inorderTraversal(self, root: TreeNode) -> List[int]:
+              if not root:
+                  return []
 
-            visited = []
-            cur = root
-            stack = []
-            while cur or stack:
-                if cur:
-                    stack.append(cur)
-                    cur = cur.left
-                else:
-                    node = stack.pop()
-                    visited.append(node.val)
-                    if node.right:
-                        cur = node.right
+              visited = []
+              cur = root
+              stack = []
+              while cur or stack:
+                  if cur:
+                      stack.append(cur)
+                      cur = cur.left
+                  else:
+                      node = stack.pop()
+                      visited.append(node.val)
+                      if node.right:
+                          cur = node.right
 
-            return visited
-          ```
-    * 173: Binary Search Tree **Iterator** (M) *
-      * Approach1: In-Order Iterative
-        * Python Solution
-          ```python
-          class BSTIterator:
-            def __init__(self, root: TreeNode):
-                self.stack = list()
-                self._push_all(root)
+              return visited
+            ```
+      * 173: Binary Search Tree **Iterator** (M) *
+        * Approach1: In-Order Iterative
+          * Python
+            ```python
+            class BSTIterator:
+              def __init__(self, root: TreeNode):
+                  self.stack = list()
+                  self._push_all(root)
 
-            def next(self) -> int:
-                """
-                @return the next smallest number
-                """
-                cur = self.stack.pop()
-                self._push_all(cur.right)
-                return cur.val
+              def next(self) -> int:
+                  """
+                  @return the next smallest number
+                  """
+                  cur = self.stack.pop()
+                  self._push_all(cur.right)
+                  return cur.val
 
-            def hasNext(self) -> bool:
-                """
-                @return whether we have a next smallest number
-                """
-                return len(self.stack) != 0
+              def hasNext(self) -> bool:
+                  """
+                  @return whether we have a next smallest number
+                  """
+                  return len(self.stack) != 0
 
-            def _push_all(self, cur: TreeNode):
-                while cur:
-                    self.stack.append(cur)
-                    cur = cur.left
-          ```
-    * 105: Construct Binary Tree from **Preorder** and **Inorder** Traversal (M)
-      * Preorder -> find the root node (from left)
-      * Inorder -> find the left subtree and right subtree of each root
-      * Approach1: DFS Recursive (first version), Time:O(n^2) Space:O(n)
-        * Python, Time:O(n^2) Space:O(n)
-          * Time:
-            * Find the partition costs O(n) for n nodes
-          * Space:
-            * Call stack and copy the inorder , preorder list cost O(n)
-          ```python
-          def buildTree(self, preorder: List[int], inorder: List[int]) -> TreeNode:
-            def get_subtree_partition(inorder, root_val):
-                # partition is the idx of thr root node
+              def _push_all(self, cur: TreeNode):
+                  while cur:
+                      self.stack.append(cur)
+                      cur = cur.left
+            ```
+    * Construct
+      * 105: Construct Binary Tree from **Preorder** and **Inorder** Traversal (M)
+        * Preorder -> find the root node (from left)
+        * Inorder -> find the left subtree and right subtree of each root
+        * Approach1: DFS Recursive (first version), Time:O(n^2) Space:O(n)
+          * Python, Time:O(n^2) Space:O(n)
+            * Time:
+              * Find the partition costs O(n) for n nodes
+            * Space:
+              * Call stack and copy the inorder , preorder list cost O(n)
+            ```python
+            def buildTree(self, preorder: List[int], inorder: List[int]) -> TreeNode:
+              def get_subtree_partition(inorder, root_val):
+                  # partition is the idx of thr root node
+                  for idx, val in enumerate(inorder):
+                      if val == root_val:
+                          return idx
+
+                  return None
+
+              def build_tree(preorder, inorder):
+                  if not preorder:
+                      return None
+
+                  root_val = preorder[0]
+                  root = TreeNode(root_val)
+                  partition = get_subtree_partition(inorder, root_val)
+                  if partition is None:
+                      return None
+
+                  left_inorder = inorder[:partition]
+                  left_preorder = preorder[1:len(left_inorder)+1]
+                  root.left = build_tree(left_preorder, left_inorder)
+
+                  right_inorder = inorder[partition+1:]
+                  right_preorder = preorder[len(left_inorder)+1:]
+                  root.right = build_tree(right_preorder, right_inorder)
+
+                  return root
+
+              if not preorder or not inorder:
+                  return None
+
+              return build_tree(preorder, inorder)
+            ```
+        * Approach2: DFS Recursive (optimization), Time:O(n), Space:O(n)
+          * Use hash table to speed up the searching
+          * Prevent unused list copy
+          * Time:O(n), Space:O(n)
+            * Python
+              ```python
+              def buildTree(self, preorder: List[int], inorder: List[int]) -> TreeNode:
+                def build_tree(left, right):
+                    if left > right:
+                        return None
+
+                    nonlocal pre_idx
+                    val = preorder[pre_idx]
+                    node = TreeNode(val)
+                    pre_idx += 1
+                    partition = inorder_d[val]
+
+                    node.left = build_tree(left, partition-1)
+                    node.right = build_tree(partition+1, right)
+
+                    return node
+
+                if not preorder or not inorder:
+                    return None
+
+                inorder_d = dict()
                 for idx, val in enumerate(inorder):
-                    if val == root_val:
-                        return idx
+                    inorder_d[val] = idx
 
-                return None
-
-            def build_tree(preorder, inorder):
-                if not preorder:
-                    return None
-
-                root_val = preorder[0]
-                root = TreeNode(root_val)
-                partition = get_subtree_partition(inorder, root_val)
-                if partition is None:
-                    return None
-
-                left_inorder = inorder[:partition]
-                left_preorder = preorder[1:len(left_inorder)+1]
-                root.left = build_tree(left_preorder, left_inorder)
-
-                right_inorder = inorder[partition+1:]
-                right_preorder = preorder[len(left_inorder)+1:]
-                root.right = build_tree(right_preorder, right_inorder)
-
-                return root
-
-            if not preorder or not inorder:
-                return None
-
-            return build_tree(preorder, inorder)
-          ```
-      * Approach2: DFS Recursive (optimization), Time:O(n), Space:O(n)
-        * Use hash table to speed up the searching
-        * Prevent unused list copy
-        * Time:O(n), Space:O(n)
+                pre_idx = 0
+                return build_tree(0, len(inorder)-1)
+              ```
+        * Approach3: Iterative, Time:O(n), Space:O(n)
           * Python
             ```python
             def buildTree(self, preorder: List[int], inorder: List[int]) -> TreeNode:
-              def build_tree(left, right):
-                  if left > right:
-                      return None
-
-                  nonlocal pre_idx
-                  val = preorder[pre_idx]
-                  node = TreeNode(val)
-                  pre_idx += 1
-                  partition = inorder_d[val]
-
-                  node.left = build_tree(left, partition-1)
-                  node.right = build_tree(partition+1, right)
-
-                  return node
-
               if not preorder or not inorder:
                   return None
 
@@ -9748,220 +10251,620 @@ Table of Content
                   inorder_d[val] = idx
 
               pre_idx = 0
+              root = TreeNode(0)
+              stack = [(root, 0, len(inorder)-1)]
+
+              while stack:
+                  node, left, right = stack.pop()
+                  node.val = preorder[pre_idx]
+                  partition = inorder_d[node.val]
+
+                  pre_idx += 1 # control the cur root idx of preorder
+
+                  """
+                  build left subtree first
+                  """
+                  if partition < right:
+                      node.right = TreeNode(0)
+                      stack.append((node.right, partition+1, right))
+
+                  if l < partition:
+                      node.left = TreeNode(0)
+                      stack.append((node.left, left, partition-1))
+
+              return root
+            ```
+      * 106: Construct Binary Tree from **Inorder** and **Postorder** Traversal	(M)
+        * Preorder -> find the root node (from right)
+        * Inorder -> find the left subtree and right subtree of each root
+        * Approach1: Recurisve, Time:O(n), Space:O(n)
+          * Python
+            ```python
+            def buildTree(self, inorder: List[int], postorder: List[int]) -> TreeNode:
+              def build_tree(left, right):
+                  if left > right:
+                      return None
+
+                  nonlocal post_idx
+                  root_val = postorder[post_idx]
+                  root = TreeNode(root_val)
+                  partition = inorder_d[root_val]
+
+                  post_idx -= 1
+                  # complete the right subtree first
+                  root.right = build_tree(partition+1, right)
+                  root.left = build_tree(left, partition-1)
+
+                  return root
+
+              if not inorder or not postorder:
+                  return None
+
+              post_idx = len(postorder) - 1
+
+              inorder_d = dict()
+              for idx, c in enumerate(inorder):
+                  inorder_d[c] = idx
+
               return build_tree(0, len(inorder)-1)
             ```
-      * Approach3: Iterative, Time:O(n), Space:O(n)
+        * Approach2: Iterative, Time:O(n), Space:O(n)
+          * Python
+            ```python
+            def buildTree(self, inorder: List[int], postorder: List[int]) -> TreeNode:
+
+              if not inorder or not postorder:
+                  return None
+
+              post_idx = len(postorder) - 1
+
+              inorder_d = dict()
+              for idx, c in enumerate(inorder):
+                  inorder_d[c] = idx
+
+              root = TreeNode(0)
+              stack = [(root, 0, len(inorder)-1)]
+
+              while stack:
+                  node, left, right = stack.pop()
+                  val = postorder[post_idx]
+                  node.val = val
+                  partition = inorder_d[val]
+
+                  post_idx -= 1
+
+                  """
+                  build right subtree first
+                  """
+                  if left <= partition-1:
+                      node.left = TreeNode(0)
+                      stack.append((node.left, left, partition-1))
+
+                  if partition+1 <= right:
+                      node.right = TreeNode(0)
+                      stack.append((node.right, partition+1, right))
+
+              return root
+            ```
+  * **Postorder**
+    * Traversal
+      * 145: Binary Tree Postorder **Traversal** (H)
+        * Approach1: Recursive, Time:O(n), Space:O(n)
+          * Python Solution
+              ```python
+              def postorderTraversal(self, root: TreeNode) -> List[int]:
+                def _postorder(node):
+                    if not node:
+                        return
+
+                    _postorder(node.left)
+                    _postorder(node.right)
+                    output.append(node.val)
+
+                output = []
+                _postorder(root)
+                return output
+            ```
+        * Approach2: Iterative, from end to start, Time:O(n), Space:O(n)
+          * traverse order: root -> right -> left (use deque)
+          * Python
+            ```python
+            def postorderTraversal(self, root: TreeNode) -> List[int]:
+              if not root:
+                  return []
+
+              visited = collections.deque()
+              stack = [root]
+
+              while stack:
+                  node = stack.pop()
+                  visited.appendleft(node.val)
+                  if node.left:
+                      stack.append(node.left)
+                  if node.right:
+                      stack.append(node.right)
+
+              return visited
+            ```
+        * Approach3: Iterative, from start to end, Time:O(n), Space:O(n)
+          * traverse order: left -> right -> root
+          * Python
+            ```python
+            def postorderTraversal(self, root: TreeNode) -> List[int]:
+              if not root:
+                  return
+
+              stack = []
+              visited = []
+              prev = None
+              cur = root
+
+              while cur or stack:
+                  if cur:
+                      stack.append(cur)
+                      cur = cur.left
+                  else:
+                      top = stack[-1]
+                      # top.right != prev_traverse means top.right has not traversed yet
+                      if top.right and top.right is not prev:
+                          cur = top.right
+
+                      else:
+                          visited.append(top.val)
+                          prev = stack.pop()
+
+              return visited
+            ```
+        * Approach4: Morris Traversal, Time:O(n), Space:O(1)
+      * 590: N-ary Tree Postorder Traversal (E)
+        * Approach1: Recursive:
+          * Python
+            ```python
+            def postorder(self, root: 'Node') -> List[int]:
+              def dfs(node):
+                  for child in node.children:
+                      dfs(child)
+
+                  visited.append(node.val)
+
+              if not root:
+                  return []
+
+              visited = []
+              dfs(root)
+              return visited
+            ```
+        * Approach2: Iterative:
+          * Python
+            ```python
+            def postorder(self, root: 'Node') -> List[int]:
+              if not root:
+                  return []
+
+              visited = collections.deque()
+              stack = [root]
+
+              while stack:
+                  node = stack.pop()
+                  visited.appendleft(node.val)
+
+                  for child in node.children:
+                      stack.append(child)
+
+              return visited
+            ```
+    * Path
+      * Definition:
+        * A path is defined as any sequence of nodes from some starting node to any node in the tree along the parent-child connections.
+        * A "path" is like unicursal, **can't come back**
+      * 124: Binary Tree **Maximum Path Sum** (H)
+        * Description:
+          * Given a non-empty binary tree, find the maximum path sum.
+        * There are two cases for each node:
+          * case1: do not connect with parent, the node can connect with two children.
+          * case2: connect with parent, the node can connect with at most one child.
+        * Approach1: Iterative
+          * Python
+            ```python
+            def maxPathSum(self, root: TreeNode) -> int:
+              def postorder(node):
+                  prev = None
+                  cur = node
+                  s = []
+                  while cur or s:
+                      if cur:
+                          s.append(cur)
+                          cur = cur.left
+                      else:
+                          top = s[-1]
+                          if top.right and top.right != prev:
+                              cur = top.right
+                          else:
+                              prev = top
+                              yield s.pop()
+
+              if not root:
+                  return 0
+
+              max_path_sum = float('-inf')
+              memo = {None: 0}
+              for node in postorder(root):
+
+                  # 0 means do not connet to the subtree
+                  l_p_s, r_p_s = max(0, memo[node.left]), max(0, memo[node.right])
+
+                  # case1: do not connect with parent, the node can connect with two children.
+                  max_path_sum = max(max_path_sum, node.val + l_p_s + r_p_s)
+
+                  # case2: connect with parent, the node can connect with at most one child.
+                  memo[node] = node.val + max(l_p_s, r_p_s)
+
+              return max_path_sum
+            ```
+        * Approach2: Recursive
+          * Python
+            ```python
+            def maxPathSum(self, root: TreeNode) -> int:
+              def dfs(node):
+                  if not node:
+                      return 0
+
+                  l_p_s, r_p_s = max(0, dfs(node.left)), max(0, dfs(node.right))
+                  nonlocal max_path_sum
+                  max_path_sum = max(max_path_sum, node.val + l_p_s + r_p_s)
+
+                  return node.val + max(l_p_s, r_p_s)
+
+              if not root:
+                  return 0
+
+              max_path_sum = float('-inf')
+              dfs(root)
+              return max_path_sum
+            ```
+      * 687: Longest **Univalue Path** (E)
+        * Approach1: Recursive:
+          * Python
+            ```python
+            def longestUnivaluePath(self, root: TreeNode) -> int:
+              def dfs(node):
+                  nonlocal max_cnt
+                  # leaf node
+                  if not node.left and not node.right:
+                      return 1
+
+                  left_cnt = right_cnt = 0
+                  if node.left:
+                      cnt = dfs(node.left)
+                      if node.val == node.left.val:
+                          left_cnt = cnt
+
+                  if node.right:
+                      cnt = dfs(node.right)
+                      if node.val == node.right.val:
+                          right_cnt = cnt
+
+                  # case1: do not connect to parent node
+                  max_cnt = max(max_cnt, 1+left_cnt+right_cnt)
+
+                  # case2: connect to parent node
+                  return 1+max(left_cnt,right_cnt)
+
+
+              if not root:
+                  return 0
+
+              max_cnt = 1
+
+              dfs(root)
+
+              return max_cnt - 1
+            ```
+        * Approach2: Iterative:
+          * Python
+            ```python
+            def longestUnivaluePath(self, root: TreeNode) -> int:
+              def postorder(node):
+                  prev = None
+                  cur = node
+                  s = []
+                  while cur or s:
+                      if cur:
+                          s.append(cur)
+                          cur = cur.left
+                      else:
+                          top = s[-1]
+                          if top.right and top.right != prev:
+                              cur = top.right
+                          else:
+                              prev = top
+                              yield s.pop()
+
+              if not root:
+                  return 0
+
+              max_lup = 1
+              memo = dict()
+
+              for node in postorder(root):
+
+                  left_lup = right_lup = 0
+
+                  if node.left and node.val == node.left.val:
+                      left_lup = memo[node.left]
+
+                  if node.right and node.val == node.right.val:
+                      right_lup = memo[node.right]
+
+
+                  max_lup = max(max_lup, 1 + left_lup + right_lup)
+
+                  memo[node] = 1 + max(left_lup, right_lup)
+
+              return max_lup - 1
+            ```
+      * 298: Binary Tree **Longest Consecutive** Sequence (M)
+        * Description:
+          * Given a binary tree, find the length of the longest consecutive sequence path.
+          * The path refers to any sequence of nodes from some starting node to any node in the tree along the parent-child connections.
+          * The longest consecutive path need to be from parent to child
+        * Approach1: DFS Recursive, Time:O(n), Space:O(n)
+          * Python
+            ```python
+            def longestConsecutive(self, root: TreeNode) -> int:
+              def dfs(node, lcp):
+                  nonlocal max_lcp
+                  max_lcp = max(max_lcp, lcp)
+                  for child in (node.left, node.right):
+                      if not child:
+                          continue
+
+                      if (node.val + 1) == child.val:
+                          dfs(child, lcp+1)
+                      else:
+                          dfs(child, 1)
+
+              if not root:
+                  return 0
+
+              max_lcp = 1
+              dfs(root, 1)
+              return max_lcp
+            ```
+        * Approach2-1: BFS Iterative, determine child's depth in the parent Time:O(n), Space:O(n)
+          * From the perspective of parent, can avoid unnecessary prev_val arg passing
+          * python
+            ```python
+            def longestConsecutive(self, root: TreeNode) -> int:
+              if not root:
+                  return 0
+
+              # perspective of dummy node before root
+              q = collections.deque([(root, 1)])
+              max_path = 0
+              while q:
+                # current node, cur path
+                node, path = q.popleft()
+                max_path = max(max_path, path)
+
+                for child in (node.left, node.right):
+                    if not child:
+                        continue
+
+                    new_path = 1
+                    if node.val+1 == child.val:
+                        new_path = path+1
+
+                    q.append((child, new_path))
+
+            return max_path
+            ```
+        * Approach2-2: BFS Iterative, pass parent val, Time:O(n), Space:O(n)
+          * Python
+            ```python
+            def longestConsecutive(self, root: TreeNode) -> int:
+              if not root:
+                  return 0
+
+              dummy_val = root.val # ensue there is no consecutive for root
+              q = collections.deque([(root, dummy_val, 0)])
+              max_path = 0
+              while q:
+                  # current node, prev val, prev acc path length
+                  node, p_val, p_acc_path = q.popleft()
+
+                  if node.val == p_val+1:
+                      acc_path = p_acc_path + 1
+                  else: # node.val != p_val+1, restart
+                      acc_path = 1
+                      max_path = max(max_path, p_acc_path)
+
+                  # leaf node
+                  if not node.left and not node.right:
+                      max_path = max(max_path, acc_path)
+                      continue
+
+                  if node.left:
+                      q.append((node.left, node.val, acc_path))
+
+                  if node.right:
+                      q.append((node.right, node.val, acc_path))
+
+              return max_path
+            ```
+      * 549: Binary Tree **Longest Consecutive** Sequence II (M)
+        * Description:
+          * Given a binary tree, you need to find the length of Longest Consecutive Path in Binary Tree.
+          * On the other hand, **the path can be in the child-Parent-child order, where not necessarily be parent-child order**.
+          * Especially, this path can be either **increasing or decreasing**.
+        * 3 cases for each node:
+          * 2 increasing subtree.
+          * 2 decreasing subtree.
+          * 1 increasing and 1 decreasing subtrees.
+        * Approach1: Recursive, Time:O(n), Space:O(n)
+          * Python
+            ```python
+            def longestConsecutive(self, root: TreeNode) -> int:
+              def dfs(node):
+                  inc = dec = 1
+                  for child in (node.left, node.right):
+                      if not child:
+                          continue
+                      c_inc, c_dec = dfs(child)
+                      if node.val + 1 == child.val:
+                          inc = max(inc, 1 + c_inc)
+                      elif node.val - 1 == child.val:
+                          dec = max(dec, 1 + c_dec)
+
+                  nonlocal max_lcp
+                  """
+                  For the case that do not connect to the parent
+                  """
+                  max_lcp = max(max_lcp, inc + dec - 1)
+
+                  """
+                  For the case that connects to the parent/
+                  """
+                  return max inc and dec path for parent
+
+                  return inc, dec
+
+              if not root:
+                  return 0
+
+              max_lcp = 1
+              dfs(root)
+              return max_lcp
+            ```
+        * Approach2: Iterative: Time:O(n), Space:O(n)
+          * Python
+            ```python
+            def longestConsecutive(self, root: TreeNode) -> int:
+              def get_postorder(node):
+                  postorder = collections.deque()
+                  stack = [root]
+                  while stack:
+                      node = stack.pop()
+                      postorder.appendleft(node)
+                      if node.left:
+                          stack.append(node.left)
+                      if node.right:
+                          stack.append(node.right)
+
+                  return postorder
+
+              if not root:
+                  return 0
+
+              postorder = get_postorder(root)
+              max_lcp = 1
+              memo = dict()
+              for node in postorder:
+                  inc = dec = 1
+                  for child in (node.left, node.right):
+                      if not child:
+                          continue
+                      c_inc, c_dec = memo[child]
+                      # increasing path
+                      if node.val + 1 == child.val:
+                          inc = max(inc, 1 + c_inc)
+                      # decreasing path
+                      elif node.val - 1 == child.val:
+                          dec = max(dec, 1 + c_dec)
+
+                  """
+                  For the case do not connect to the parent
+                  """
+                  max_lcp = max(max_lcp, inc + dec - 1)
+                  """
+                  For the case that connects to the parent/
+                  """
+                  memo[node] = (inc, dec)
+
+              return max_lcp
+            ```
+    * 236: **Lowest Common Ancestor** of a **Binary Tree** (M)
+      * Description:
+        * The lowest common ancestor is defined between two nodes p and q as the lowest node in T that has both p and q as descendants.
+      * Algo:
+        * https://leetcode.com/articles/lowest-common-ancestor-of-a-binary-tree/
+      * Three cases need to consider:
+        * mid + left
+        * mid + right
+        * left + right
+      * Approach1: Recursive, Time:O(n), Space:O(n)
+        * algo:
+          * Start traversing the tree from the root node.
+          * If either of the left or the right branch returns True, this means one of the two nodes was found below.
+          * If the current node itself is one of p or q, we would mark a variable mid as True and continue the search for the other node in the left and right branches.
+          * If at any point in the traversal, any two of the three flags left, right or mid become True, this means we have found the lowest common ancestor for the nodes p and q.
         * Python
           ```python
-          def buildTree(self, preorder: List[int], inorder: List[int]) -> TreeNode:
-            if not preorder or not inorder:
-                return None
+          def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+            def dfs(node):
+                nonlocal lca
 
-            inorder_d = dict()
-            for idx, val in enumerate(inorder):
-                inorder_d[val] = idx
+                if not node or lca:
+                    return False
 
-            pre_idx = 0
-            root = TreeNode(0)
-            stack = [(root, 0, len(inorder)-1)]
+                mid = False
+                if node is p or node is q:
+                    mid = True
 
-            while stack:
-                node, left, right = stack.pop()
-                node.val = preorder[pre_idx]
-                partition = inorder_d[node.val]
-
-                pre_idx += 1 # control the cur root idx of preorder
+                left = dfs(node.left)
+                right = dfs(node.right)
 
                 """
-                build left subtree first
+                case1: left + right
+                case2: mid + left
+                case3: mid + right
                 """
-                if partition < right:
-                    node.right = TreeNode(0)
-                    stack.append((node.right, partition+1, right))
+                if mid + left + right == 2:
+                    nonlocal lca
+                    lca = node
 
-                if l < partition:
-                    node.left = TreeNode(0)
-                    stack.append((node.left, left, partition-1))
+                return mid or left or right
 
-            return root
-          ```
-    * 106: Construct Binary Tree from **Inorder** and **Postorder** Traversal	(M)
-      * Preorder -> find the root node (from right)
-      * Inorder -> find the left subtree and right subtree of each root
-      * Approach1: Recurisve, Time:O(n), Space:O(n)
-        * Python
-          ```python
-          def buildTree(self, inorder: List[int], postorder: List[int]) -> TreeNode:
-            def build_tree(left, right):
-                if left > right:
-                    return None
-
-                nonlocal post_idx
-                root_val = postorder[post_idx]
-                root = TreeNode(root_val)
-                partition = inorder_d[root_val]
-
-                post_idx -= 1
-                # complete the right subtree first
-                root.right = build_tree(partition+1, right)
-                root.left = build_tree(left, partition-1)
-
-                return root
-
-            if not inorder or not postorder:
-                return None
-
-            post_idx = len(postorder) - 1
-
-            inorder_d = dict()
-            for idx, c in enumerate(inorder):
-                inorder_d[c] = idx
-
-            return build_tree(0, len(inorder)-1)
+            lca = None
+            dfs(root)
+            return lca
           ```
       * Approach2: Iterative, Time:O(n), Space:O(n)
         * Python
           ```python
-          def buildTree(self, inorder: List[int], postorder: List[int]) -> TreeNode:
-
-            if not inorder or not postorder:
-                return None
-
-            post_idx = len(postorder) - 1
-
-            inorder_d = dict()
-            for idx, c in enumerate(inorder):
-                inorder_d[c] = idx
-
-            root = TreeNode(0)
-            stack = [(root, 0, len(inorder)-1)]
-
-            while stack:
-                node, left, right = stack.pop()
-                val = postorder[post_idx]
-                node.val = val
-                partition = inorder_d[val]
-
-                post_idx -= 1
-
-                """
-                build right subtree first
-                """
-                if left <= partition-1:
-                    node.left = TreeNode(0)
-                    stack.append((node.left, left, partition-1))
-
-                if partition+1 <= right:
-                    node.right = TreeNode(0)
-                    stack.append((node.right, partition+1, right))
-
-            return root
-          ```
-  * **Postorder**
-    * 145: Binary Tree Postorder **Traversal** (H)
-      * Approach1: Recursive, Time:O(n), Space:O(n)
-        * Python Solution
-            ```python
-            def postorderTraversal(self, root: TreeNode) -> List[int]:
-              def _postorder(node):
-                  if not node:
-                      return
-
-                  _postorder(node.left)
-                  _postorder(node.right)
-                  output.append(node.val)
-
-              output = []
-              _postorder(root)
-              return output
-          ```
-      * Approach2: Iterative, from end to start, Time:O(n), Space:O(n)
-        * traverse order: root -> right -> left (use deque)
-        * Python
-          ```python
-          def postorderTraversal(self, root: TreeNode) -> List[int]:
-            if not root:
-                return []
-
-            visited = collections.deque()
-            stack = [root]
-
-            while stack:
-                node = stack.pop()
-                visited.appendleft(node.val)
-                if node.left:
-                    stack.append(node.left)
-                if node.right:
-                    stack.append(node.right)
-
-            return visited
-          ```
-      * Approach3: Iterative, from start to end, Time:O(n), Space:O(n)
-        * traverse order: left -> right -> root
-        * Python
-          ```python
-          def postorderTraversal(self, root: TreeNode) -> List[int]:
-            if not root:
-                return
-
-            stack = []
-            visited = []
-            prev = None
-            cur = root
-
-            while cur or stack:
-                if cur:
-                    stack.append(cur)
-                    cur = cur.left
-                else:
-                    top = stack[-1]
-                    # top.right != prev_traverse means top.right has not traversed yet
-                    if top.right and top.right is not prev:
-                        cur = top.right
-
+          def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+            def postorder(node):
+                prev = None
+                cur = node
+                s = []
+                while cur or s:
+                    if cur:
+                        s.append(cur)
+                        cur = cur.left
                     else:
-                        visited.append(top.val)
-                        prev = stack.pop()
+                        top = s[-1]
+                        if top.right and top.right != prev:
+                            cur = top.right
+                        else:
+                            prev = top
+                            yield s.pop()
 
-            return visited
-          ```
-      * Approach4: Morris Traversal, Time:O(n), Space:O(1)
-    * 590: N-ary Tree Postorder Traversal (E)
-      * Approach1: Recursive:
-        * Python
-          ```python
-          def postorder(self, root: 'Node') -> List[int]:
-            def dfs(node):
-                for child in node.children:
-                    dfs(child)
+            lca = None
+            memo = {None: False}
+            for node in postorder(root):
+                mid = False
+                if node is p or node is q:
+                    mid = True
 
-                visited.append(node.val)
+                left, right = memo[node.left], memo[node.right]
 
-            if not root:
-                return []
+                if mid + left + right == 2:
+                    lca = node
+                    break
 
-            visited = []
-            dfs(root)
-            return visited
-          ```
-      * Approach2: Iterative:
-        * Python
-          ```python
-          def postorder(self, root: 'Node') -> List[int]:
-            if not root:
-                return []
+                memo[node] = mid or left or right
 
-            visited = collections.deque()
-            stack = [root]
-
-            while stack:
-                node = stack.pop()
-                visited.appendleft(node.val)
-
-                for child in node.children:
-                    stack.append(child)
-
-            return visited
+            return lca
           ```
     * 110: **Balanced** Binary Tree (E)
       * Description
@@ -10172,857 +11075,202 @@ Table of Content
           ```
     * 337: House Robber III (M)
       * See DP
-    * 236: **Lowest Common Ancestor** of a **Binary Tree** (M)
-      * Algo:
-        * https://leetcode.com/articles/lowest-common-ancestor-of-a-binary-tree/
-      * Three cases to find the LCA:
-        * mid + left
-        * mid + right
-        * left + right
-      * Approach1: postorder recursive, Time:O(n), Space:O(n)
-        * algo:
-          * Start traversing the tree from the root node.
-          * If either of the left or the right branch returns True, this means one of the two nodes was found below.
-          * If the current node itself is one of p or q, we would mark a variable mid as True and continue the search for the other node in the left and right branches.
-          * If at any point in the traversal, any two of the three flags left, right or mid become True, this means we have found the lowest common ancestor for the nodes p and q.
-        * Python
-          ```python
-          def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
-            def dfs(node):
-                if not node:
-                    return False
-
-                mid = True if node is p or node is q else False
-                left = dfs(node.left)
-                right = dfs(node.right)
-
-                """
-                mid + left
-                mid + right
-                left + right
-                """
-                if mid + left + right >=2:
-                    nonlocal lca
-                    lca = node
-
-                return mid or left or right
-
-            if not root:
-                return None
-
-            lca = None
-            dfs(root)
-            return lca
-          ```
-      * Approach2: postorder iterative, Time:O(n), Space:O(n)
-        * Python
-          ```python
-          def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
-            if not root:
-                return None
-
-            stack = [root]
-            post_order = collections.deque()
-            while stack:
-                node = stack.pop()
-                post_order.appendleft(node)
-
-                if node.left:
-                    stack.append(node.left)
-
-                if node.right:
-                    stack.append(node.right)
-
-            memo = collections.defaultdict(bool)
-            lca = None
-            for node in post_order:
-                mid = True if node is p or node is q else False
-                left = memo[node.left]
-                right = memo[node.right]
-
-                """
-                mid + left
-                mid + right
-                left + right
-                """
-                if mid + left + right >= 2:
-                    lca = node
-                    break
-
-                memo[node] = mid or left or right
-
-            return lca
-          ```
-    * 572: Subtree of Another Tree (E)
-      * Description:
-        * Given two non-empty binary trees s and t, check whether tree t has exactly the same structure and node values with a subtree of s. A subtree of s is a tree consists of a node in s and all of this node's descendants.
-    * 114: **Flatten** Binary Tree to Linked List	(M)
-      * Right->Left->Root
-      * Recursive, Time:O(n), Space:O(n)
-        * https://leetcode.com/problems/flatten-binary-tree-to-linked-list/submissions/
-        * Python
-          ```python
-          def flatten(self, root: TreeNode) -> None:
-            def _flatten(node):
-                if not node:
-                    return
-
-                _flatten(node.right)
-                _flatten(node.left)
-
-                nonlocal prev
-                node.right = prev
-                node.left = None
-                prev = node    # prev pointer to flattern list
-
-            if not root:
-                return
-
-            prev = None
-            _flatten(root)
-          ```
-      * Iterative, Time:O(n), Space:O(n)
-        * Python
-          ```python
-          def flatten(self, root: TreeNode) -> None:
-            if not root:
-                return
-
-            cur = root
-            stack = []
-            prev_traversed = None
-
-            # right -> left -> root
-            while cur or stack:
-                if cur:
-                    stack.append(cur)
-                    cur = cur.right
-                else:
-                    top = stack[-1]
-                    if top.left and top.left is not prev_traversed:
-                        cur = top.left
-                    else:
-                        node = stack.pop()
-                        node.right = prev_traversed
-                        node.left = None
-                        prev_traversed = node
-          ```
-    * Path
-      * Definition:
-        * A path is defined as any sequence of nodes from some starting node to any node in the tree along the parent-child connections.
-        * A "path" is like unicursal, **can't come back**
-      * 124: Binary Tree **Maximum Path Sum** (H)
-        * There are two cases for each node:
-          * case1: do not connect with parent, the node can connect with two children.
-          * case2: connect with parent, the node can connect with at most one child.
-        * Approach1: Iterative
-          * Python
+  * **Level Order and BFS**
+    * Traversal:
+      * 102: Binary Tree Level Order Traversal (E)
+        * Approach1: Recursive, Time:O(n), Space:O(n)
+          * Python Solution
             ```python
-            def maxPathSum(self, root: TreeNode) -> int:
-              if not root:
-                  return 0
-
-              # create post order list
-              stack = [root]
-              post_order = collections.deque()
-              while stack:
-                  node = stack.pop()
-                  post_order.appendleft(node)
-                  if node.left:
-                      stack.append(node.left)
-
-                  if node.right:
-                      stack.append(node.right)
-
-              # traverse the post order and calculate the max sum path for each node
-              max_sum = -float('inf')
-              memo = collections.defaultdict(int)
-              for node in post_order:
-                  s = node.val
-                  # get max left path and max right path
-                  max_left = max(memo[node.left], 0)
-                  max_right = max(memo[node.right], 0)
-
-                  # case1: do not connect with parent, the node can connect with two children.
-                  max_sum = max(max_sum, s+max_left+max_right)
-
-                  # case2: connect with parent, the node can connect with at most one child.
-                  memo[node] = s+max(max_left, max_right)
-
-              return max_sum
-            ```
-        * Approach2: Recursive
-          * Python
-            ```python
-            def maxPathSum(self, root: TreeNode) -> int:
-              def dfs(node):
+            def levelOrder(self, root: TreeNode) -> List[List[int]]:
+              def dfs(node, level):
                   if not node:
-                      return 0
+                      return
 
-                  s = node.val
-                  max_left = max(dfs(node.left), 0)
-                  max_right = max(dfs(node.right), 0)
+                  if len(traversal) < level + 1:
+                      traversal.append([])
 
-                  # case1: do not connect with parent, the node can connect with two children.
-                  nonlocal max_sum
-                  max_sum = max(max_sum, s+max_left+max_right)
+                  traversal[level].append(node.val)
 
-                  # case2: connect with parent, the node can connect with at most one child.
-                  return s+max(max_left, max_right)
+                  dfs(node.left, level+1)
+                  dfs(node.right, level+1)
 
-              if not root:
-                  return 0
-
-              max_sum = -float('inf')
-              dfs(root)
-              return max_sum
+              traversal = []
+              dfs(root, 0)
+              return traversal
             ```
-      * 687: Longest **Univalue Path** (E)
-        * Similar to 124
-        * Recursive:
+        * Approach2: Iterative, Time:O(n), Space:O(n)
           * Python
             ```python
-            def longestUnivaluePath(self, root: TreeNode) -> int:
-              def dfs(node):
-                  nonlocal max_cnt
-                  # leaf node
-                  if not node.left and not node.right:
-                      return 1
-
-                  left_cnt = right_cnt = 0
-                  if node.left:
-                      cnt = dfs(node.left)
-                      if node.val == node.left.val:
-                          left_cnt = cnt
-
-                  if node.right:
-                      cnt = dfs(node.right)
-                      if node.val == node.right.val:
-                          right_cnt = cnt
-
-                  # case1: do not connect to parent node
-                  max_cnt = max(max_cnt, 1+left_cnt+right_cnt)
-
-                  # case2: connect to parent node
-                  return 1+max(left_cnt,right_cnt)
-
-
+            def levelOrder(self, root: TreeNode) -> List[List[int]]:
               if not root:
-                  return 0
+                  return []
 
-              max_cnt = 1
+              q = collections.deque([(root)])
+              traversal = []
 
-              dfs(root)
+              while q:
+                  cur_traversal = []
+                  traversal.append(cur_traversal)
 
-              return max_cnt - 1
+                  for _ in range(len(q)):
+                      node = q.popleft()
+                      cur_traversal.append(node.val)
+                      if node.left:
+                          q.append(node.left)
+                      if node.right:
+                          q.append(node.right)
+
+              return traversal
             ```
-        * Iterative:
-          * Python
-            ```python
-            def longestUnivaluePath(self, root: TreeNode) -> int:
-
-              if not root:
-                  return 0
-
-              stack = [root]
-              post_order = collections.deque()
-              while stack:
-                  node = stack.pop()
-                  post_order.appendleft(node)
-
-                  if node.left:
-                      stack.append(node.left)
-
-                  if node.right:
-                      stack.append(node.right)
-
-              max_cnt = 1
-              memo = dict()
-              for node in post_order:
-                  if not node.left and not node.right:
-                      memo[node] = 1
-                      continue
-
-                  left_cnt = right_cnt = 0
-                  if node.left:
-                      cnt = memo[node.left]
-                      if node.val == node.left.val:
-                          left_cnt = cnt
-
-                  if node.right:
-                      cnt = memo[node.right]
-                      if node.val == node.right.val:
-                          right_cnt = cnt
-
-                  # case1, do not connect to parent
-                  max_cnt = max(max_cnt, 1+left_cnt+right_cnt)
-
-                  # case2, connect to parent
-                  memo[node] = 1 + max(left_cnt, right_cnt)
-
-              return max_cnt-1
-            ```
-      * 549: Binary Tree Longest Consecutive Sequence II (M)
+      * 107: Binary Tree Level Order Traversal II (E)
         * Description:
-          * Given a binary tree, you need to find the length of Longest Consecutive Path in Binary Tree.
-          * On the other hand, the path can be in the child-Parent-child order, where not necessarily be parent-child order.
-          * Especially, this path can be either **increasing or decreasing**.
+          * eturn the bottom-up level order traversal of its nodes' values. (ie, from left to right, level by level from leaf to root.
+        * Approach1: Recursive, Time:O(n), Space:O(n)
+          * Same idea like iterative approach, use appendleft when createing new list
+          ```python
+            def levelOrderBottom(self, root: TreeNode) -> List[List[int]]:
+              def dfs(node, level):
+                  if not node:
+                      return
+
+                  if len(traversal) < level + 1:
+                      traversal.appendleft([])
+
+                  # len(traversal)-1-level also works
+                  traversal[-(level+1)].append(node.val)
+
+                  dfs(node.left, level+1)
+                  dfs(node.right, level+1)
+
+              traversal = collections.deque()
+              dfs(root, 0)
+
+              return traversal
+          ```
+        * Approach2: Iterative, Time:O(n), Space:O(n)
+          * Python Solution
+            ```python
+            def levelOrderBottom(self, root: TreeNode) -> List[List[int]]:
+              if not root:
+                  return []
+
+              visits = collections.deque()
+              q = collections.deque([root])
+
+              while q:
+                  cur_visits = []
+                  visits.appendleft(cur_visits)
+                  for _ in range(len(q)):
+                      node = q.popleft()
+                      cur_visits.append(node.val)
+
+                      if node.left:
+                          q.append(node.left)
+
+                      if node.right:
+                          q.append(node.right)
+
+              return visits
+            ```
+      * 429: N-ary Tree Level Order Traversal (M)
         * Approach1: Recursive, Time:O(n), Space:O(n)
           * Python
             ```python
-            def longestConsecutive(self, root: TreeNode) -> int:
-              def dfs(node):
-                  inc = dec = 1
-                  for child in (node.left, node.right):
-                      if not child:
-                          continue
-                      c_inc, c_dec = dfs(child)
-                      if node.val + 1 == child.val:
-                          inc = max(inc, 1 + c_inc)
-                      elif node.val - 1 == child.val:
-                          dec = max(dec, 1 + c_dec)
+            def levelOrder(self, root: 'Node') -> List[List[int]]:
+              def dfs(node, level):
+                  if len(visited) < level + 1:
+                      visited.append([])
 
-                  nonlocal max_lcp
-                  """
-                  For the case that do not connect to the parent
-                  """
-                  max_lcp = max(max_lcp, inc + dec - 1)
-
-                  """
-                  For the case that connects to the parent/
-                  """
-                  return max inc and dec path for parent
-
-                  return inc, dec
-
-              if not root:
-                  return 0
-
-              max_lcp = 1
-              dfs(root)
-              return max_lcp
-            ```
-        * Approach2: Iterative: Time:O(n), Space:O(n)
-          * Python
-            ```python
-            def longestConsecutive(self, root: TreeNode) -> int:
-              def get_postorder(node):
-                  postorder = collections.deque()
-                  stack = [root]
-                  while stack:
-                      node = stack.pop()
-                      postorder.appendleft(node)
-                      if node.left:
-                          stack.append(node.left)
-                      if node.right:
-                          stack.append(node.right)
-
-                  return postorder
-
-              if not root:
-                  return 0
-
-              postorder = get_postorder(root)
-              max_lcp = 1
-              memo = dict()
-              for node in postorder:
-                  inc = dec = 1
-                  for child in (node.left, node.right):
-                      if not child:
-                          continue
-                      c_inc, c_dec = memo[child]
-                      # increasing path
-                      if node.val + 1 == child.val:
-                          inc = max(inc, 1 + c_inc)
-                      # decreasing path
-                      elif node.val - 1 == child.val:
-                          dec = max(dec, 1 + c_dec)
-
-                  """
-                  For the case do not connect to the parent
-                  """
-                  max_lcp = max(max_lcp, inc + dec - 1)
-                  """
-                  For the case that connects to the parent/
-                  """
-                  memo[node] = (inc, dec)
-
-              return max_lcp
-            ```
-  * **BFS & DFS**
-    * 101: **Symmetric** Tree (E)
-      * Approach1: DFS Recursive, Time:O(n), Space:O(n)
-        * Python
-          ```python
-          def isSymmetric(self, root: TreeNode) -> bool:
-            def is_symmetric(left, right):
-                # None
-                if not left and not right:
-                    return True
-
-                # 1 node
-                if not left or not right:
-                    return False
-
-                if left.val != right.val:
-                    return False
-
-                return is_symmetric(left.left, right.right) and \
-                       is_symmetric(left.right, right.left)
-
-            if not root:
-                return True
-
-            return is_symmetric(root, root)
-          ```
-      * Approach2: BFS Iterative, Time:O(n), Space:O(n)
-        * Python
-          ```python
-          def isSymmetric(self, root: TreeNode) -> bool:
-            if not root:
-                return True
-
-              q = collections.deque([(root.left, root.right)])
-              is_symmetric = True
-              while q:
-                  left, right = q.popleft()
-
-                  # 0 node
-                  if not left and not right:
-                      continue
-
-                  # 1 node
-                  if not left or not right:
-                      is_symmetric = False
-                      break
-
-                  if left.val != right.val:
-                      is_symmetric = False
-                      break
-
-                  q.append((left.left, right.right))
-                  q.append((left.right, right.left))
-
-              return is_symmetric
-          ```
-    * 257: Binary Tree **Paths** (E)
-      * Each node has three cases:
-        * no children: here is the end of the path
-        * having left child: having left path
-        * having right child: having left path
-      * Approach1: DFS Recursive, Time:O(n), Space:O(n)
-        * Python
-          ```python
-          def binaryTreePaths(self, root: TreeNode) -> List[str]:
-
-            def tree_path(node, path):
-                path.append(str(node.val))
-                # case1: no children, here is the end of the path
-                if not node.left and not node.right:
-                    output.append('->'.join(path))
-                else:
-                    # case2: having left path
-                    if node.left:
-                        tree_path(node.left, path)
-
-                    # case3: having right path
-                    if node.right:
-                        tree_path(node.right, path)
-
-                path.pop()
-
-            if not root:
-                return []
-
-            output = []
-            path = []
-            tree_path(root, path)
-            return output
-          ```
-      * Approach2: DFS Iterative, Time:O(n), Space:O(n)
-        * Python
-          ```python
-          def binaryTreePaths(self, root: TreeNode) -> List[str]:
-            if not root:
-                return []
-
-            output = []
-            stack = [(root, [])]
-            while stack:
-                node, path = stack.pop()
-                path.append(str(node.val))
-
-                # no children
-                if not node.left and not node.right:
-                    output.append('->'.join(path))
-
-                # having right child
-                if node.right:
-                    stack.append((node.right, path))
-
-                # having left child
-                if node.left:
-                    stack.append((node.left, path[:]))
-
-            return output
-          ```
-    * 112: Path **Sum** (E)
-      * Approach1: BFS, Time:O(n), Space:O(n)
-        * Python
-          ```python
-          def hasPathSum(self, root: TreeNode, sum: int) -> bool:
-            if not root:
-                return False
-
-            target = sum
-            res = False
-            q = collections.deque([(root, 0)])
-
-            while q:
-                node, acc = q.popleft()
-                acc += node.val
-
-                # no child
-                if acc == target and not node.left and not node.right:
-                    res = True
-                    break
-
-                if node.left:
-                    q.append((node.left, acc))
-
-                if node.right:
-                    q.append((node.right, acc))
-
-            return res
-          ```
-      * Approach2: DFS Recursive, Time:O(n), Space:O(n)
-        * Python
-          ```python
-          def hasPathSum(self, root: TreeNode, sum: int) -> bool:
-            def has_path_sum(node, acc):
-              if not node:
-                  return False
-
-              acc += node.val
-
-              if acc == sum and not node.left and not node.right:
-                  return True
-
-              return has_path_sum(node.left, acc) or has_path_sum(node.right, acc)
-
-              if not root:
-                  return False
-
-              return has_path_sum(root, 0)
-          ```
-      * Approach3: DFS Iterative, Time:O(n), Space:O(n)
-        * Python
-          ```python
-          def hasPathSum(self, root: TreeNode, sum: int) -> bool:
-            if not root:
-                return False
-
-            target = sum
-            res = False
-            s = [(root, 0)]
-
-            while s:
-                node, acc = s.pop()
-                acc += node.val
-
-                # no child
-                if acc == target and not node.left and not node.right:
-                    res = True
-                    break
-
-                if node.left:
-                    s.append((node.left, acc))
-
-                if node.right:
-                    s.append((node.right, acc))
-
-            return res
-          ```
-    * 113: Path **Sum** II (M)
-      * Approach1: BFS, Time:O(n), Space:O(n^2)
-        * Space:
-          * Since we keep a list in each queue element
-        * Python
-          ```python
-          def pathSum(self, root: TreeNode, sum: int) -> List[List[int]]:
-            if not root:
-                return []
-
-            target = sum
-            output = []
-            # node, path, accumulated value
-            q = collections.deque([(root, [], 0)])
-
-            while q:
-                node, path, acc = q.popleft()
-                acc += node.val
-                path.append(node.val)
-
-                if acc == target and not node.left and not node.right:
-                    output.append(path[:])
-
-                if node.left:
-                    q.append((node.left, path, acc))
-
-                if node.right:
-                    q.append((node.right, path[:], acc))
-
-            return output
-          ```
-      * Approach2: DFS, Time:O(n), Space:O(n)
-        * Python
-          ```python
-          def pathSum(self, root: TreeNode, sum: int) -> List[List[int]]:
-              def dfs(node, path, acc):
-                  path.append(node.val)
-                  acc += node.val
-
-                  if acc == sum and not node.left and not node.right:
-                      output.append(path[:])
-
-                  else:
-                      if node.left:
-                          dfs(node.left, path, acc)
-
-                      if node.right:
-                          dfs(node.right, path, acc)
-
-                  path.pop()
+                  visited[level].append(node.val)
+                  for child in node.children:
+                      dfs(child, level+1)
 
               if not root:
                   return []
 
-              output = []
-              dfs(root, [], 0)
-              return output
-          ```
-      * Approach3: DFS Iterative, Time:O(n), Space:O(n)
-        * Python
-          ```python
-          def pathSum(self, root: TreeNode, sum: int) -> List[List[int]]:
-            if not root:
-                return []
+              visited = []
+              dfs(root, level=0)
+              return visited
+            ```
+        * Approach2: Iterative, Time:O(n), Space:O(n)
+          * Python
+            ```python
+            def levelOrder(self, root: 'Node') -> List[List[int]]:
+              if not root:
+                  return []
 
-            target = sum
-            output = []
-            # node, path, accumulated value
-            s = [(root, [], 0)]
+              visited = []
+              q = collections.deque([root])
+              while q:
+                  level_visited = []
+                  visited.append(level_visited)
+                  for _ in range(len(q)):
+                      node = q.popleft()
+                      level_visited.append(node.val)
 
-            while s:
-                node, path, acc = s.pop()
-                acc += node.val
-                path.append(node.val)
+                      for child in node.children:
+                          q.append(child)
 
-                if acc == target and not node.left and not node.right:
-                    output.append(path[:])
+              return visited
+            ```
+      * 103: Binary Tree **Zigzag** Level Order Traversal (M)
+        * Approach1: Iterative, Time:O(n), Space:O(n)
+          * Python Solution:
+            ```python
+            def zigzagLevelOrder(self, root: TreeNode) -> List[List[int]]:
+              if not root:
+                  return []
 
-                if node.left:
-                    s.append((node.left, path[:], acc))
+              traversal = []
+              q = collections.deque([root])
+              append_left = False
 
-                if node.right:
-                    s.append((node.right, path, acc))
+              while q:
+                  cur_traversal = collections.deque()
+                  traversal.append(cur_traversal)
+                  for _ in range(len(q)):
+                      node = q.popleft()
+                      if append_left:
+                          cur_traversal.appendleft(node.val)
+                      else:
+                          cur_traversal.append(node.val)
 
-            return output
-          ```
-    * 129: Sum Root to Leaf Numbers (M)
-      * Approach1: BFS Iterative, Time:O(n), Space:O(n)
-        ```python
-        def sumNumbers(self, root: TreeNode) -> int:
-          if not root:
-              return 0
+                      if node.left:
+                          q.append(node.left)
+                      if node.right:
+                          q.append(node.right)
 
-          q = collections.deque([(root, 0)])
-          sum_leaf = 0
-          while q:
-              node, s = q.popleft()
-              s += node.val
+                  append_left = not append_left
 
-              if not node.left and not node.right:
-                  sum_leaf += s
+              return traversal
+            ```
+        * Approach2: Recursive, Time:O(n), Space:O(n)
+          * Python Solution
+            ```python
+            def zigzagLevelOrder(self, root: TreeNode) -> List[List[int]]:
+              def dfs(node, level):
+                  if not node:
+                      return
 
-              if node.left:
-                  q.append((node.left, s*10))
+                  if len(traversal) < level + 1:
+                      traversal.append(collections.deque())
 
-              if node.right:
-                  q.append((node.right, s*10))
+                  if level % 2:
+                      traversal[level].appendleft(node.val)
+                  else:
+                      traversal[level].append(node.val)
 
-          return sum_leaf
-        ```
-      * Approach2: DFS Recursive, Time:O(n), Space:O(n)
-        ```python
-        def sumNumbers(self, root: TreeNode) -> int:
-          def dfs(node, s):
-              nonlocal sum_leaf
-              s += node.val
+                  dfs(node.left, level+1)
+                  dfs(node.right, level+1)
 
-              if not node.left and not node.right:
-                  sum_leaf += s
-                  return
-
-              if node.left:
-                  dfs(node.left, s*10)
-
-              if node.right:
-                  dfs(node.right, s*10)
-
-            if not root:
-                return 0
-
-            sum_leaf = 0
-            dfs(root, 0)
-            return sum_leaf
-
-        ```
-    * 102: Binary Tree Level Order Traversal (E)
-      * Approach1: DFS Recursive, Time:O(n), Space:O(n)
-        * Python Solution
-          ```python
-          def _level_order(node, level):
-            if not node:
-                return
-
-            if len(visits) < (level+1):
-                for _ in range((level+1)-len(visits)):
-                    visits.append([])
-
-            visits[level].append(node.val)
-            _level_order(node.left, level+1)
-            _level_order(node.right, level+1)
-
-            if not root:
-                return []
-
-            visits = []
-            _level_order(root, level=0)
-            return visits
-          ```
-      * Approach2: BFS Iterative, Time:O(n), Space:O(n)
-        * Python Solution
-          ```python
-          def levelOrder(self, root: TreeNode) -> List[List[int]]:
-            if not root:
-                return []
-
-            visits = []
-            q = collections.deque([root])
-
-            while q:
-                q_len = len(q)
-                cur_visits = []
-                visits.append(cur_visits)
-
-                for _ in range(q_len):
-                    node = q.popleft()
-                    cur_visits.append(node.val)
-
-                    if node.left:
-                        q.append(node.left)
-
-                    if node.right:
-                        q.append(node.right)
-
-              return visits
-          ```
-    * 107: Binary Tree Level Order Traversal II (E)
-      * Bottom up
-      * Approach1: DFS Recursive, Time:O(n), Space:O(n)
-        ```python
-          def levelOrderBottom(self, root: TreeNode) -> List[List[int]]:
-          if not root:
-              return []
-
-            def _level_order_bottom(node, level):
-
-                if not node:
-                    return
-
-                if len(visits) < level + 1:
-                    visits.appendleft([])
-
-                # len(visits)-1 Is the right mode index
-                visits[len(visits)-1-level].append(node.val)
-
-                _level_order_bottom(node.left, level+1)
-                _level_order_bottom(node.right, level+1)
-
-            visits = collections.deque()
-            _level_order_bottom(root, level=0)
-            return visits
-        ```
-      * Approach2: BFS Iterative, Time:O(n), Space:O(n)
-        * Python Solution
-          ```python
-          def levelOrderBottom(self, root: TreeNode) -> List[List[int]]:
-            if not root:
-                return []
-
-            visits = collections.deque()
-            q = collections.deque([root])
-
-            while q:
-                q_len = len(q)
-                cur_visits = []
-                visits.appendleft(cur_visits)
-                for _ in range(q_len):
-                    node = q.popleft()
-                    cur_visits.append(node.val)
-
-                    if node.left:
-                        q.append(node.left)
-
-                    if node.right:
-                        q.append(node.right)
-
-            return visits
-          ```
-    * 429: N-ary Tree Level Order Traversal (M)
-      * Approach1: Recursive, Time:O(n), Space:O(n)
-        * Python
-          ```python
-          def levelOrder(self, root: 'Node') -> List[List[int]]:
-            def dfs(node, level):
-                if len(visited) < level + 1:
-                    visited.append([])
-
-                visited[level].append(node.val)
-                for child in node.children:
-                    dfs(child, level+1)
-
-            if not root:
-                return []
-
-            visited = []
-            dfs(root, level=0)
-            return visited
-          ```
-      * Approach2: Iterative, Time:O(n), Space:O(n)
-        * Python
-          ```python
-          def levelOrder(self, root: 'Node') -> List[List[int]]:
-            if not root:
-                return []
-
-            visited = []
-            q = collections.deque([root])
-            while q:
-                level_visited = []
-                visited.append(level_visited)
-                for _ in range(len(q)):
-                    node = q.popleft()
-                    level_visited.append(node.val)
-
-                    for child in node.children:
-                        q.append(child)
-
-            return visited
-          ```
+              traversal = []
+              dfs(root, 0)
+              return traversal
+            ```
     * 637: Average of Levels in Binary Tree (E)
-      * Approach1 BFS: Time:O(n), Space:O(n)
+      * Description:
+        * Given a non-empty binary tree, return the average value of the nodes on each level in the form of an array.
+      * Approach1 Iterative: Time:O(n), Space:O(n)
         * Python Solution
           ```python
           def averageOfLevels(self, root: TreeNode) -> List[float]:
@@ -11046,122 +11294,80 @@ Table of Content
                 output.append(acc/level_cnt)
             return output
           ```
-      * Approach2 DFS
-    * 103: Binary Tree **Zigzag** Level Order Traversal (M)
-      * Approach1: BFS, Time:O(n), Space:O(n)
-        * Python Solution:
+      * Approach2 Recursive: Time:O(n), Space:O(n)
+        * Python
           ```python
-          def zigzagLevelOrder(self, root: TreeNode) -> List[List[int]]:
-            if not root:
-                return []
-
-            visits = []
-            q = collections.deque([root])
-            append_left = False
-            while q:
-                q_len  = len(q)
-                cur_visits = collections.deque()
-                visits.append(cur_visits)
-
-                for _ in range(q_len):
-                    node = q.popleft()
-                    if append_left:
-                        cur_visits.appendleft(node.val)
-                    else:
-                        cur_visits.append(node.val)
-
-                    if node.left:
-                        q.append(node.left)
-                    if node.right:
-                        q.append(node.right)
-
-                append_left = not append_left
-
-            return visits
-          ```
-      * Approach2: DFS, Time:O(n), Space:O(n)
-        * Python Solution
-          ```python
-          def zigzagLevelOrder(self, root: TreeNode) -> List[List[int]]:
-            def _zigzag_level_order(node, level):
-                if not root:
-                    return
-
-                if len(visits) < level + 1:
-                    visits.append(collections.deque())
-
-                if level % 2:
-                    visits[level].appendleft(node.val)
-                else:
-                    visits[level].append(node.val)
-
-                if node.left:
-                    _zigzag_level_order(node.left, level+1)
-                if node.right:
-                    _zigzag_level_order(node.right, level+1)
-
-            if not root:
-                return []
-
-            visits = []
-            _zigzag_level_order(root, 0)
-            return visits
-          ```
-    * 199: Binary Tree **Right Side** View (M)
-      * Approach1 BFS
-        * Python Solution
-          ```python
-          def rightSideView(self, root: TreeNode) -> List[int]:
-            if not root:
-                return []
-
-            visits = []
-            q = collections.deque([root])
-
-            while q:
-                q_len = len(q)
-                cur = None
-                for _ in range(q_len):
-                    cur = q.popleft()
-                    if cur.left:
-                        q.append(cur.left)
-                    if cur.right:
-                        q.append(cur.right)
-
-                visits.append(cur.val)
-            return visits
-          ```
-      * Approach2 DFS Recursive:
-        * Python Solution
-          ```python
-          def rightSideView(self, root: TreeNode) -> List[int]:
-            def right_side_view(node, level):
+          def averageOfLevels(self, root: TreeNode) -> List[float]:
+            def dfs(node, level):
                 if not node:
                     return
 
-                if len(visits) < level + 1:
-                    visits.append(node.val)
+                if len(avg_vals) < level + 1:
+                    avg_vals.append([0, 0])
 
-                # right first
-                if node.right:
-                    right_side_view(node.right, level+1)
+                avg_vals[level][SUM] += node.val
+                avg_vals[level][CNT] += 1
 
-                if node.left:
-                    right_side_view(node.left, level+1)
+                dfs(node.left, level+1)
+                dfs(node.right, level+1)
+
 
             if not root:
                 return []
 
-            visits = []
-            right_side_view(root, 0)
-            return visits
+            SUM, CNT = 0, 1
+            avg_vals = []
+            dfs(root, 0)
+
+            return [float(e[0]/e[1]) for e in avg_vals]
+          ```
+    * 199: Binary Tree **Right Side** View (M)
+      * Approach1 Iterative:
+        * Python
+          ```python
+          def rightSideView(self, root: TreeNode) -> List[int]:
+            if not root:
+                return []
+
+            right_side_view = []
+            q = collections.deque([root])
+            while q:
+                node = None
+                for _ in range(len(q)):
+                    node = q.popleft()
+                    if node.left:
+                        q.append(node.left)
+
+                    if node.right:
+                        q.append(node.right)
+
+                right_side_view.append(node.val)
+
+            return right_side_view
+          ```
+      * Approach2 Recursive:
+        * Python
+          ```python
+          def rightSideView(self, root: TreeNode) -> List[int]:
+            def dfs(node, level):
+                if not node:
+                    return
+
+                if len(right_side_view) < level + 1:
+                    right_side_view.append(node.val)
+
+                dfs(node.right, level+1)
+                dfs(node.left, level+1)
+
+            right_side_view = []
+            dfs(root, 0)
+            return right_side_view
           ```
     * 314: Binary Tree **Vertical Order** Traversal	(M)
-      * Node in the same vertical order should be in the same group (from top to down)
-      * List group from left to right
-      * Approach1: BFS, Time:(n), Space:(n)
-        * BFS for top-down traversal of each group
-        * Sort the key of the dic to output from left to right
+      * Description:
+        * Node in the same vertical order should be in the same group (from top to down)
+        * List group from left to right
+      * Approach1: Iterative, Time:O(nlogn), Space:O(n)
         * Time: (nlog(n))
           * BFS takes O(n)
           * Sort group costs O(nlogn)
@@ -11189,88 +11395,55 @@ Table of Content
 
             return [d[key] for key in sorted(d.keys())]
           ```
-    * 297: **Serialize** and **Deserialize** Binary Tree (H)
-      * Approach1: BFS + pickle, Time:O(n), Space:O(n)
+      * Approach2: Iterative, Time:O(n), Space:O(n)
+        * Use min_idx and max_idx to prevent sorting
         * Python
           ```python
-          class Codec:
-              def serialize(self, root):
-                  """Encodes a tree to a single string.
+          def verticalOrder(self, root: TreeNode) -> List[List[int]]:
+            if not root:
+                return []
 
-                  :type root: TreeNode
-                  :rtype: str
-                  """
-                  if not root:
-                      return []
+            d = collections.defaultdict(list)
+            q = collections.deque([(root, 0)])
+            min_idx = max_idx = 0
+            while q:
+                node, idx = q.popleft()
+                d[idx].append(node.val)
+                if node.left:
+                    min_idx = min(min_idx, idx-1)
+                    q.append((node.left, idx-1))
 
-                  q = collections.deque([root])
-                  bfs = []
-                  while q:
-                      node = q.popleft()
-                      if not node:
-                          # insert None to list can help to deserialize the tree
-                          bfs.append(None)
-                          continue
+                if node.right:
+                    max_idx = max(max_idx, idx+1)
+                    q.append((node.right, idx+1))
 
-                      bfs.append(node.val)
-                      q.append(node.left)
-                      q.append(node.right)
+            vertical_order = []
+            for idx in range(min_idx, max_idx+1):
+                if idx not in d:
+                    continue
 
-                  return pickle.dumps(bfs)
+                vertical_order.append(d[idx])
 
-              def deserialize(self, data):
-                  """Decodes your encoded data to tree.
-
-                  :type data: str
-                  :rtype: TreeNode
-                  """
-                  if not data:
-                      return None
-
-                  bfs = pickle.loads(data)
-
-                  if not bfs:
-                      return None
-
-                  root = TreeNode(bfs[0])
-                  i = 1
-                  q = collections.deque([root])
-
-                  while q:
-                      node = q.popleft()
-                      # left
-                      if bfs[i] != None:
-                          node.left = TreeNode(bfs[i])
-                          q.append(node.left)
-                      i += 1  # move forward even bfs[i] is None
-
-                      # right
-                      if bfs[i] != None:
-                          node.right = TreeNode(bfs[i])
-                          q.append(node.right)
-                      i += 1
-
-                  return root
-           ```
-      * Approach2: DFS + pickle
+            return vertical_order
+          ```
     * 116 & 117: **Populating Next Right Pointers** in Each Node (M)
+      * Description:
+        * Populate each next pointer to point to its next right node. If there is no next right node, the next pointer should be set to NULL.
       * A perfect binary tree
-        * where all leaves are on the same level, and every parent has two children.
+        * **where all leaves are on the same level, and every parent has two children.**
+      * The key of space O(1) solution is use next pointer for level traversal.
       * Approach1: Use queue, Time:O(n), Space:O(n)
         * Python
           ```python
           def connect(self, root: 'Node') -> 'Node':
+            if not root:
+                return root
 
-          if not root:
-              return root
-
-          q = collections.deque([root])
-          dummy = Node(0)
-          while q:
-              q_len = len(q)
-
+            q = collections.deque([root])
+            dummy = Node(0)
+            while q:
               prev = dummy
-              for _ in range(q_len):
+              for _ in range(len(q)):
                   cur = q.popleft()
                   if cur.left:
                       q.append(cur.left)
@@ -11280,9 +11453,9 @@ Table of Content
                   prev.next = cur
                   prev = cur
 
-          return root
+            return root
           ```
-      * Approach2: Use next pointer, perfect binary tree, Time:O(n), Space:O(1)
+      * Approach2: Use next pointer for level traversal, perfect binary tree, Time:O(n), Space:O(1)
         * Python
           ```python
           def connect(self, root: 'Node') -> 'Node':
@@ -11290,55 +11463,148 @@ Table of Content
                 return None
 
             head = root
-            # head.left means the start of next level
-            # traverse from 2nd level
-            # this solution is for perfect binary tree only
-            while head and head.left:
-                cur_root = head
-                while cur_root:
-                    cur_root.left.next = cur_root.right
-                    cur_root.right.next = cur_root.next.left if cur_root.next else None
 
-                    cur_root = cur_root.next
+            while head and head.left:
+
+                """
+                level order traversal
+                this solution is for perfect binary tree only
+                """
+                cur = head
+                while cur:
+                    cur.left.next = cur.right
+                    cur.right.next = cur.next.left if cur.next else None
+                    cur = cur.next
 
                 head = head.left
 
             return root
           ```
-      * Approach3: Use next pointer, general solution, Time:O(n), Space:O(1)
+      * Approach3: Use dummy and next pointer for level traversal, general solution, Time:O(n), Space:O(1)
         * Python
           ```python
           def connect(self, root: 'Node') -> 'Node':
             if not root:
-                return None
+              return None
 
-            prev = dummy = Node(0)
             head = root
-            # traverse from 2nd level
+            dummy = Node(0)
+
             while head:
-                cur_root = head
-                while cur_root:
-                    if cur_root.left:
-                        prev.next = cur_root.left
+                """
+                level order traversal
+                """
+                cur = head
+                prev = dummy
+                while cur:
+                    if cur.left:
+                        prev.next = cur.left
                         prev = prev.next
 
-                    if cur_root.right:
-                        prev.next = cur_root.right
+                    if cur.right:
+                        prev.next = cur.right
                         prev = prev.next
 
-                    cur_root = cur_root.next
+                    cur = cur.next
 
-                head = dummy.next # dummy.next ponters to the head of next level
-                prev = dummy      # init the dummy and prev again
+                """
+                dummy.next ponters to the head of next level
+                """
+                head = dummy.next
                 dummy.next = None
 
             return root
           ```
+  * Binary Tree Slots:
+    * 331: Verify Preorder Serialization of a Binary Tree	(M)
+      * Approach1: Slots, Time:O(n), Space:O(n)
+        * Python
+          ```python
+          def isValidSerialization(self, preorder: str) -> bool:
+            if not preorder:
+                return False
+
+            # init for root
+            is_valid = True
+            slots = 1
+            for node in preorder.split(','):
+
+                if slots <= 0:
+                    is_valid = False
+                    break
+
+                slots -= 1
+                if node != '#':
+                    slots += 2
+
+            return is_valid and slots == 0
+          ```
+    * 297: Serialize and Deserialize Binary Tree (H)
+      * Approach1: BFS + pickle, Time:O(n), Space:O(n)
+        * Python
+          ```python
+          class Codec:
+            def serialize(self, root):
+                """Encodes a tree to a single string.
+
+                :type root: TreeNode
+                :rtype: str
+                """
+                if not root:
+                    return pickle.dumps([])
+
+                bfs = []
+                q = collections.deque([root])
+
+                while q:
+                    node = q.popleft()
+                    if not node:
+                        bfs.append(None)
+                        continue
+
+                    bfs.append(node.val)
+                    q.append(node.left)
+                    q.append(node.right)
+
+                return pickle.dumps(bfs)
+
+            def deserialize(self, data):
+                """Decodes your encoded data to tree.
+
+                :type data: str
+                :rtype: TreeNode
+                """
+                bfs = pickle.loads(data)
+                if not bfs:
+                    return None
+
+                root = TreeNode(bfs[0])
+                i = 1
+                q = collections.deque([root])
+                while q:
+                    node = q.popleft()
+                    """
+                    Each node has at least two slots
+                    """
+                    if bfs[i] != None:
+                        node.left = TreeNode(bfs[i])
+                        q.append(node.left)
+                    i += 1
+
+                    if bfs[i] != None:
+                        node.right = TreeNode(bfs[i])
+                        q.append(node.right)
+                    i += 1
+
+                return root
+           ```
+    * 428: Serialize and Deserialize N-ary Tree (H)
   * **Binary Search Tree** (BST)
     * Definition of BST:
       * The **left subtree** of a node contains only nodes with keys **less than** the node's key.
       * The **right subtree** of a node contains only nodes with keys **greater than** the node's key.
       * Both the left and right subtrees must also be binary search trees.
+    * 700: Search in a Binary Search Tree
     * 783: Minimum Distance Between BST Nodes
     * 098: **Validate** Binary Search Tree (M)
       * Approach1: Postorder, Recursive, Time:O(h), Space:O(h)
@@ -11673,40 +11939,31 @@ Table of Content
           return root
         ```
     * 235: **Lowest Common Ancestor** of a Binary Search Tree (E)
-      * Algo:
-        * https://leetcode.com/articles/lowest-common-ancestor-of-a-binary-search-tree/
-        * 1: Start traversing the tree from the root node.
-        * 2: If both the nodes p and q are in the right subtree, then continue the search with right subtree starting step 1.
-        * 3: If both the nodes p and q are in the left subtree, then continue the search with left subtree starting step 1.
-        * 4: If both step 2 and step 3 are not true, this means we have found the node which is common to node p's and q's subtrees. and hence we return this common node as the LCA.
-          * cur + left
-          * cur + right
-          * left + right
+      * Description:
+        * The lowest common ancestor is defined between two nodes p and q as the lowest node in T that has both p and q as descendants (where we allow a node to be a descendant of itself)
+        * All of the nodes' values will be unique.
+        * p and q are different and both values will exist in the BST.
       * FAQ
         * How to error handling if p and q are not in the tree ?? Use 236 (postorder)
-
+      * 3 cases:
+        * lca in left subtree
+        * lca in rght subtree
+        * cur node is the lca (p in left, q in right or vice versa)
       * Preorder Recursive, Time:O(n), Space:O(n)
         * python
           ```python
           def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
             def dfs(node):
+                if not node:
+                    return None
+
                 val = node.val
-                # find right subtree
-                if node.val < p_val and node.val < q_val:
-                    if node.right:
-                        return dfs(node.right)
-                    else:
-                        return None
-                elif node.val > p_val and node.val > q_val:
-                    if node.left:
-                        return dfs(node.left)
-                    else:
-                        return None
+                if p_val < val and q_val < val:
+                    return dfs(node.left)
+                elif p_val > val and q_val > val:
+                    return dfs(node.right)
                 else:
                     return node
-
-            if not root:
-                return None
 
             p_val = p.val
             q_val = q.val
@@ -11717,24 +11974,23 @@ Table of Content
         * Python
           ```python
           def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
-            if not root:
+            if not root or not p or not q:
                 return None
 
-            p_val = p.val
-            q_val = q.val
-
+            lca = None
+            p_val, q_val = p.val, q.val
             cur = root
             while cur:
-                if cur.val < p_val and cur.val < q_val:
-                    cur = cur.right
-
-                elif cur.val > p_val and cur.val > q_val:
+                val = cur.val
+                if p_val < val and q_val < val:
                     cur = cur.left
-
+                elif p_val > val and q_val > val:
+                    cur = cur.right
                 else:
+                    lca = cur
                     break
 
-            return cur
+            return lca
           ```
     * 108: Convert **Sorted Array** to Binary Search Tree	binary search (E)
       * A **height-balanced binary** tree is defined as a binary tree in which the depth of the two subtrees of every node never differ by more than 1.
@@ -12121,12 +12377,15 @@ Table of Content
     * 095: **Unique** Binary Search **Trees** II (M)
     * 255: Verify Preorder Sequence in Binary Search Tree (M)
       * See Stack and Queue
+    * 449: Serialize and Deserialize BST
     * 333: Largest BST Subtree (M)
+    * 530: Minimum Absolute Difference in BST
     * 938: Range Sum of BST (E)
     * 729: My Calendar I
     * 099: **Recover** Binary Search Tree (H)
-  * **Other**:
+  * TODO:
     * 156: Binary Tree Upside Down (M)
+    * 652: Find Duplicate Subtrees
 ### Trie (Prefix Tree)
   * 208: Implement Trie (M)
     * Approach1: Iterative, Inert:O(k), Search:O(k)
@@ -14219,7 +14478,7 @@ Table of Content
           return parentheses
         ```
      * Approach2-2: Control the left and right, Iterative:
-       * Python Solution:
+       * Python:
           ```python
           def generateParenthesis(self, n: int) -> List[str]:
             parentheses = []
@@ -14279,8 +14538,10 @@ Table of Content
           ```
   * **Subset**
     * 078: Subsets (M)
-      * Ref:
-        * [C++ Recursive/Iterative/Bit-Manipulation](https://leetcode.com/problems/subsets/discuss/27278/C%2B%2B-RecursiveIterativeBit-Manipulation)
+      * Description:
+        * Given a set of **distinct** integers, nums, return all possible subsets (the power set).
+        * Ref:
+          * [C++ Recursive/Iterative/Bit-Manipulation](https://leetcode.com/problems/subsets/discuss/27278/C%2B%2B-RecursiveIterativeBit-Manipulation)
       * Approach1: Recursive, Time: O(n*2^n), Space:(2^n):
         * DFS Traverse
         * Example:
@@ -14352,7 +14613,9 @@ Table of Content
                 sub_len = len(subs)
                 for i in range(sub_len):
                     sub = subs[i]
+                    # make a copy
                     subs.append(sub[:])
+                    # append n to the original sub
                     sub.append(n)
 
             return subs
@@ -14383,7 +14646,7 @@ Table of Content
 
               for sub_idx in range(len(subs)):
                   for num_idx in range(n):
-                      if sub_idx & 1 << num_idx:
+                      if sub_idx & (1 << num_idx):
                           subs[sub_idx].append(nums[num_idx])
 
               return subs
@@ -14470,7 +14733,20 @@ Table of Content
     * 077: Combinations (M)
       * Description
         * Given two integers n and k, return all possible **combinations of k numbers out of 1 ... n**.
-      * Example:
+        * Example:
+          ```txt
+          Input: n = 4, k =2
+          Output:
+               [
+                [1,2],
+                [1,3],
+                [1,4],
+                [2,3],
+                [2,4],
+                [3,4]
+               ]
+          ```
+      * Tracking Example:
         ```txt
           n = 5, k = 3
 
@@ -14566,7 +14842,18 @@ Table of Content
           ```
     * 039: Combination Sum (M)
       * Description:
-        * Given a set of candidate numbers (candidates) (**without duplicates**) and a target number (target), **find all unique combinations** in candidates where the candidate numbers sums to target
+        * Given a set of candidate numbers (candidates) (**without duplicates**) and a target number (target), **find all unique combinations** in candidates where the candidate numbers sums to target.
+        * The same repeated number may be chosen from candidates unlimited number of times.
+        * example:
+          ```txt
+          Input: candidates = [2,3,5], target = 8
+          A solution set is:
+              [
+                [2,2,2,2],
+                [2,3,3],
+                [3,5]
+              ]
+          ```
       * Time:
         * https://leetcode.com/problems/combination-sum/discuss/16634/If-asked-to-discuss-the-time-complexity-of-your-solution-what-would-you-say
       * Approach1: Recursive:
@@ -17632,8 +17919,10 @@ Table of Content
     * Calculator
   * Tree:
     * PreOrder:
-      * 144: Binary Tree Preorder **Traversal** (M)
-      * 100: **Same** Tree (E)
+      * Same Tree
+          * 100: **Same** Tree (E)
+          * 572: Subtree of Another Tree (E)
+      * Path sum
       * 298: Binary Tree **Longest Consecutive** Sequence (M)
     * InOrder:
       * 094: Binary Tree **Inorder** Traversal (M)
@@ -17643,6 +17932,7 @@ Table of Content
       * 145: Binary Tree **Postorder** Traversal (H)
       * 250: Count **Univalue Subtrees** (M)
       * 366: Find Leaves of Binary Tree (M)
+      * **Lowest Common Ancestor** of a **Binary Tree**
       * Path
         * 124: Binary Tree **Maximum Path Sum** (H)
         * 687: Longest **Univalue Path** (E)
