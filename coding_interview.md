@@ -132,7 +132,7 @@ Table of Content
 
               # 2 ** 31          = 2147483648
               # (2 ** 31) // 10  = 214748364
-              boundary = (2 ** 31)//10 # 2147483640
+              boundary = (2 ** 31)//10
 
               if not is_positive:
                   x = -x
@@ -216,7 +216,9 @@ Table of Content
 
               slow = fast = n
               while True:
+                  # once
                   slow = digit_square_sum(slow)
+                  # twice
                   fast = digit_square_sum(digit_square_sum(fast))
 
                   if slow == fast:
@@ -251,7 +253,7 @@ Table of Content
               title = collections.deque()
               ord_a = ord('A')
 
-              while n > 0:
+              while n :
                   # n-1 to get number between 0(A) ~ 25(Z)
                   pop = (n-1) % 26
                   # n-1 to cut the final number completely
@@ -315,7 +317,7 @@ Table of Content
                 symbol = s[i]
                 score = scores[symbol]
                 if score >= cur_max:
-                    cur_max = max(cur_max, score)
+                    cur_max = score
                     num += score
                 else:
                     num -= score
@@ -357,33 +359,77 @@ Table of Content
           * 00
           * 11
       * 246:Strobogrammatic Number (E)
-        * Approach1, Time:O(n), Space:O(1)
+        * Approach1, Time:O(n), Space:O(c)
           * Python
             ```python
             def isStrobogrammatic(self, num):
               d = {'6':'9', '9':'6', '8':'8', '1':'1', '0':'0'}
-              start, end = 0, str(num) - 1
-              ret = True
 
-              while left <= right:
+              is_strobogrammatic = True
+              l, r = 0, len(num)-1
+              while l <= r:
                   # if left == right:
                   # the valid cases would be '8':'8', '1':'1', '0':'0'
-                  c = num[left]
-                  if c not in d or d[c != num[right]:
-                      ret = False
-                      break
+                  n_l, n_r = num[l], num[r]
+                  if n_l not in d or n_r not in d or d[n_l] != n_r:
+                    is_strobogrammatic = False
+                    break
 
-                  left -= 1
-                  right += 1
-
-              return ret
+                  l += 1
+                  r -= 1
+              return is_strobogrammatic
             ```
       * 247 Strobogrammatic Number II (M)
-        * Find all strobogrammatic numbers that are of length = n.
-        * Approach1, Bottom up iterative: Time: O(nk^n), Space:O(nk^n)
+        * Description:
+          * Find all strobogrammatic numbers that are of length = n.
+        * Approach1, backtracking, Time: O(nk^n), Space:O(nk^n)
+          * Python
+            ```python
+            def findStrobogrammatic(self, n: int) -> List[str]:
+
+              def backtrack(cur, idx):
+                  if idx == n // 2:
+                      combs.append("".join(cur))
+                      return
+
+                  append_keys = D_NON_FINAL
+                  if idx == n//2-1:
+                      append_keys = D_FINAL
+
+                  for l, r in append_keys.items():
+                      cur.append(r)
+                      cur.appendleft(l)
+                      backtrack(cur, idx+1)
+                      cur.pop()
+                      cur.popleft()
+
+              if n < 1:
+                  return []
+
+              D_NON_FINAL = {'6':'9', '9':'6', '8':'8', '1':'1', '0':'0'}
+              D_FINAL = {'6':'9', '9':'6', '8':'8', '1':'1'}
+              combs = []
+              cur = collections.deque()
+              if n % 2:
+                  mids= ["0", "1", "8"]
+                  for m in mids:
+                      cur.append(m)
+                      backtrack(cur, 0)
+                      cur.pop()
+              else:
+                  backtrack(cur, 0)
+
+              return combs
+            ```
+        * Approach2, Bottom up iterative: Time: O(nk^n), Space:O(nk^n)
           * Time: O(nk^n)
-            * About O(k^n) combinations
+            * Total n//2 iterations:
+              * for each iteration:
+                * k * prev_combo cnt operations
+            * At first, 1 or 3 combinations
+            * Finally, about k^n combinations
             * each combination cost O(n) to copy
+            * (n * k^n) // 2  = O(nk^n)
           * Space: O(nk^n)
             * About O(k^n) combinations
             * each combination needs O(n) space
@@ -393,26 +439,23 @@ Table of Content
               if n < 1:
                   return []
 
-              d_non_final = {'6':'9', '9':'6', '8':'8', '1':'1', '0':'0'}
-              d_final = {'6':'9', '9':'6', '8':'8', '1':'1'}
+              D_NON_FINAL = {'6':'9', '9':'6', '8':'8', '1':'1', '0':'0'}
+              D_FINAL = {'6':'9', '9':'6', '8':'8', '1':'1'}
 
               if n % 2:
-                  # odd
-                  combs = ["0" , "1", "8"]
+                  combs = ["0", "1", "8"]
               else:
                   combs = [""]
 
               for i in range(n//2):
-
-                  d = d_non_final
-
+                  append_keys = D_NON_FINAL
                   if i == n//2-1:
-                      d = d_final
+                      append_keys = D_FINAL
 
                   next_combs = []
-                  for s in combs:
-                      for l, r in d.items():
-                          next_combs.append(f'{l}{s}{r}')
+                  for comb in combs:
+                      for l, r in append_keys.items():
+                          next_combs.append(f"{l}{comb}{r}")
 
                   combs = next_combs
 
@@ -422,7 +465,7 @@ Table of Content
         * Write a function to count the total strobogrammatic numbers that exist in the range of low <= num <= high.
     * 273: Integer to **English Words** (H)
     * 065: Valid Number (H)
-  * **Sum**
+  * **kSum**
     * 001: Two Sum (E)
       * Approach1: hash table, Time: O(n), Space: O(n)
         * Python
@@ -431,12 +474,12 @@ Table of Content
             """
             Assume exactly one solution
             """
-            res = []
+            res = None
             d = dict()
             for idx, num in enumerate(nums):
                 diff = target - num
                 if diff in d:
-                    res += [d[diff], idx]
+                    res = [d[diff], idx]
                     break
 
                 d[num] = idx
@@ -540,44 +583,39 @@ Table of Content
                 * nums[left+1] + nums[right-1] may be possible.
               * case4: x
                 * nums[left-1] + nums[r+1] has been traverse before.
-        * Python Solution
+        * Python
             ```python
             def threeSum(self, nums: List[int]) -> List[List[int]]:
               def two_sum(l, r, target, cur):
                   while l < r:
                       s = nums[l] + nums[r]
                       if s == target:
-                          results.append(cur + [nums[l], nums[r]])
-
+                          combs.append(cur + [nums[l], nums[r]])
                           while l < r and nums[l] == nums[l+1]:
                               l += 1
                           while l < r and nums[r] == nums[r-1]:
                               r -= 1
-
                           l += 1
                           r -= 1
-
                       elif s < target:
                           l += 1
-                      else: # s > target
+                      else:
                           r -= 1
 
               n = len(nums)
               nums.sort()
-              results, cur = [], []
+              combs = []
+              cur = []
               for i in range(n-2):
-
-                if i > 0 and nums[i] == nums[i-1]:
-                  continue
-
-                cur.append(nums[i])
-                two_sum(l=i+1,
-                        r=n-1,
-                        target=0-nums[i],
-                        cur=cur)
-                cur.pop()
-
-              return results
+                  if i > 0 and nums[i] == nums[i-1]:
+                      continue
+                  cur.append(nums[i])
+                  two_sum(l=i+1,
+                          r=n-1,
+                          target=0-nums[i],
+                          cur=cur)
+                  cur.pop()
+              return combs
             ```
     * 018: 4Sum (M)
       * Time Complexity:
@@ -635,7 +673,7 @@ Table of Content
 
                 else: # k > 2
                     # (r+1) - (k-1) = r + 2 - k
-                    # boundary: r+1 (inclusive)
+                    # boundary: r+1 (exclusive)
                     # remain: k-1
                     for i in range(l, r+2-k):
                       if i > l and nums[i] == nums[i-1]:
@@ -659,12 +697,56 @@ Table of Content
                   cur=cur)
             return results
           ```
+      * Approach3: ksum iterative ?
+    * 016: 3Sum Closest (M)
+      * Approach1: O(n^2), Space:O(1)
+        * Python
+          ```python
+          def threeSumClosest(self, nums: List[int], target: int) -> int:
+            def two_sum(l, r, target, cur):
+                nonlocal min_diff
+                nonlocal comb_sum
+                while l < r:
+                    s = nums[l] + nums[r]
+                    diff = abs(target-s)
+                    if diff < min_diff:
+                        min_diff = diff
+                        comb_sum = sum(cur) + nums[l] + nums[r]
+
+                    if s == target:
+                        break
+                    elif s < target:
+                        l += 1
+                    else:
+                        r -= 1
+
+            n = len(nums)
+            nums.sort()
+            cur = []
+            min_diff, comb_sum = float('inf'), None
+            for i in range(n-2):
+                if i > 0 and nums[i] == nums[i-1]:
+                    continue
+                cur.append(nums[i])
+                two_sum(l=i+1,
+                        r=n-1,
+                        target=target-nums[i],
+                        cur=cur)
+                cur.pop()
+
+                if min_diff == 0:
+                    break
+
+            return comb_sum
+          ```
   * **Majority**
     * Definition:
       * The majority element is **the element that appears more than ⌊ n/2 ⌋ times**.
     * 1150: Check If a Number Is Majority Element in a Sorted Array (E)
       * See Binary Search
     * 169: Majority Element (E)
+      * Description:
+        * You may assume that the array is non-empty and the majority element always exist in the array.
       * Notice the odd and even cases
       * Approach1: Sorting, Time:O(nlogn), Space:O(sorting)
         * Python
@@ -751,7 +833,6 @@ Table of Content
             d = collections.defaultdict(int)
             threshold = len(nums) // 3
             majorities = dict()
-
             for n in nums:
                 if n in majorities:
                     continue
@@ -825,17 +906,13 @@ Table of Content
             if numRows == 1:
                 return [[1]]
 
-            # layer1
             pascal = [[1]]
-            # layer2 to layern
             for layer in range(2, numRows+1):
-                new_layer = [1] * layer
-                prev_layer = pascal[-1]
-
+                new = [1] * layer
+                prev = pascal[-1]
                 for i in range(1, layer-1):
-                    new_layer[i] = prev_layer[i-1] + prev_layer[i]
-
-                pascal.append(new_layer)
+                    new[i] = prev[i-1] + prev[i]
+                pascal.append(new)
 
             return pascal
           ```
@@ -845,17 +922,19 @@ Table of Content
         * Python
           ```python
           def getRow(self, rowIndex: int) -> List[int]:
-            if rowIndex == 0:
-                return [1]
+            num_row = rowIndex + 1
+            if num_row == 0:
+                return []
 
-            pascal = [0] * (rowIndex + 1)
-            pascal[0] = 1
+            pascal = [1] * num_row
 
-            # layer 1 to rowIndex
-            for _ in range(1, rowIndex+1):
-                # from end to beginning
-                for i in range(rowIndex, 0, -1):
-                    pascal[i] += pascal[i-1]
+            if num_row <= 2:
+                return pascal
+
+            for layer in range(3, num_row+1):
+                # from layer-2 to 1
+                for i in range(layer-2, 0, -1):
+                    pascal[i] = pascal[i] + pascal[i-1]
 
             return pascal
           ```
@@ -5357,7 +5436,7 @@ Table of Content
       * Python
         ```python
         def guessNumber(self, n):
-          res = not_found = -1
+          res = None
           left, right = 1, n
 
           while left <= right:
@@ -5394,27 +5473,84 @@ Table of Content
       * Python
         ```python
         def searchInsert(self, nums: List[int], target: int) -> int:
-          # insert to to the first position if nums is empty
+          def bin_search_right(arr, left, right):
+              target_idx = None
+              while left <= right:
+                  mid = (left + right) // 2
+                  if target == arr[mid]:
+                      target_idx = mid
+                      break
+                  elif target < arr[mid]:
+                      right = mid -1
+                  else :
+                      left = mid + 1
+              else:
+                  target_idx = left
+
+              return target_idx
+
           if not nums:
               return 0
 
-          l, r = 0, len(nums)-1
-          res = None
-
-          while l <= r:
-              mid = (l + r) // 2
-              if target == nums[mid]:
-                  res = mid
-                  break
-              elif target < nums[mid]:
-                  r = mid - 1
-              else:
-                  l = mid + 1
-          else:
-              res = l
-
-          return res
+          return bin_search_right(nums, 0, len(nums)-1)
         ```
+  * 658: Find K Closest Elements in a sorted array (M)
+    * Approach1: Expand from center, Time:O(logn + k), Space:O(1)
+      * Python
+        ```python
+        def findClosestElements(self, arr, k, x):
+          def bin_search_right(left, right, target):
+              target_idx = None
+              while left <= right:
+                  mid = (left + right) // 2
+                  if target == arr[mid]:
+                      target_idx = mid
+                      break
+                  elif target < arr[mid]:
+                      right = mid -1
+                  else :
+                      left = mid + 1
+              else:
+                  target_idx = left
+
+              return target_idx
+
+          if not arr or x is None or k <= 0:
+              return []
+
+          if x <= arr[0]:
+              return arr[:k]
+
+          if x >= arr[-1]:
+              return arr[-k:]
+
+          # center
+          target_idx = bin_search_right(0, len(arr)-1, x)
+          if target_idx > 0 and x - arr[target_idx-1] < arr[target_idx] -x:
+              target_idx -= 1
+
+          # expand from center
+          l, r = target_idx-1, target_idx+1
+          while (r - l - 1) < k and l >= 0 and r < len(arr):
+              if (arr[r] - x) < (x - arr[l]):
+                  r += 1
+              else:
+                  l -= 1
+
+          while (r - l - 1) < k and l >= 0:
+              l -= 1
+
+          while (r - l - 1) < k and r < len(arr):
+              r += 1
+
+          # l + 1 to r - 1
+          return arr[l+1: r]
+        ```
+    * Approach2: One binsearch, Time:O(log(n-k)), Space:O(1)
+      * Ref:
+        * https://leetcode.com/problems/find-k-closest-elements/discuss/106426/JavaC%2B%2BPython-Binary-Search-O(log(N-K)-%2B-K)
+      * FAQ:
+        * Why the mid can represent the whole array ?
   * 278: First Bad Version (E)
     * Definitions
       * Assume there exists a bad version
@@ -5540,7 +5676,7 @@ Table of Content
                       l = mid + 1
 
               res = not_found
-              if left <= l <= right and nums[l] == target:
+              if l <= right and nums[l] == target:
                   res = l
               return res
 
@@ -5554,7 +5690,7 @@ Table of Content
                       r = mid - 1
 
               res = not_found
-              if left <= r <= right and nums[r] == target:
+              if r >= left and nums[r] == target:
                   res = r
               return res
 
@@ -5596,7 +5732,7 @@ Table of Content
                       l = mid + 1
 
               res = not_found
-              if left <= l <= right and nums[l] == target:
+              if l <= right and nums[l] == target:
                   res = l
               return res
 
@@ -5610,7 +5746,7 @@ Table of Content
                       r = mid - 1
 
               res = not_found
-              if left <= r <= right and nums[r] == target:
+              if left <= r and nums[r] == target:
                   res = r
               return res
 
@@ -5714,173 +5850,9 @@ Table of Content
         * in the right part, nums[p*:r] is ascending order
       * One solution is to move l to right until nums[left] != nums[right]
     * Approach1: Linear Search, Time:O(n), Space:O(1)
-    * Approach2: Get Rotate Index (unique value), Time:O(logn), Space:O(1)
-      * Algo:
-        * step1: Find the rotate index, this index split the array to 2 parts.
-          * **the (rotate index - 1) is the last element in the left part.**
-          * There are 2 cases
-            * case1: [0, 1, 2, 3, 4, 5] -> rotate idx should be 0
-            * case2: [3, 4, 5, 0, 1, 2] -> rotate idx should be 3
-        * step2: Identify which part has to look for target
-        * step3: Binary seach in the part
-      * When the target is not found:
-        * The result should be the first index, since the array is non-rotated.
-      * Python
-        ```python
-        def search(self, nums: List[int], target: int) -> int:
-          def find_rotate_idx(left, right):
-              """
-                * There are 2 cases
-                * case1: [0, 1, 2, 3, 4, 5] -> rotate idx should be 0
-                * case2: [3, 4, 5, 0, 1, 2] -> rotate idx should be 3
-              """
-              right_boundary = right
-              rotate_idx = 0
-
-              while left <= right:
-
-                  mid = (left + right) // 2
-                  # case1
-                  if mid == right_boundary:
-                      break
-
-                  # case2, no rotate idx found
-                  if nums[mid] > nums[mid+1]:
-                      rotate_idx = mid + 1
-                      break
-
-                  else:
-                      # mid is in the left part, find the last element of the left part
-                      if nums[mid] >= nums[left]:
-                          left = mid + 1
-                      # mid is in the right part, try to go to left part
-                      else:
-                          right = mid - 1
-
-              return rotate_idx
-
-          def binary_search(left, right):
-              res = not_found
-
-              while left <= right:
-                  mid = (left + right) // 2
-
-                  if target == nums[mid]:
-                      res = mid
-                      break
-
-                  elif target < nums[mid]:
-                      right = mid - 1
-                  else:
-                      left = mid + 1
-
-              return res
-
-          not_found = -1
-
-          n = len(nums)
-
-          if n < 1:
-              return not_found
-
-          if n == 1:
-              return 0 if nums[0] == target else not_found
-
-          rotate_idx = find_rotate_idx(0, n-1)
-
-          res = not_found
-          if rotate_idx == 0:
-              res = binary_search(0, n-1)
-          else:
-              # find left part
-              if target >= nums[0]:
-                  res = binary_search(0, rotate_idx-1)
-              # find right part
-              else:
-                  res = binary_search(rotate_idx, n-1)
-
-          return res
-        ```
-    * Approach3: Get Rotate Index (duplicated value), Time:O(logn)~O(n), Space:O(1)
-      * Fix the case [2,2,2,0,1,2,2,2], can not find the correct rotate idx
-      * Python
-        ```python
-        def search(self, nums: List[int], target: int) -> bool:
-          def find_rotate_idx(left, right):
-              """
-              * There are 2 cases
-              * case1: [0, 1, 2, 3, 4, 5] -> rotate idx should be 0
-              * case2: [3, 4, 5, 0, 1, 2] -> rotate idx should be 3
-              """
-              # Previous algorithm can deal with duplicated items
-              # if the head of array is not a duplicated item
-              while left != right and nums[left] == nums[right]:
-                  left += 1
-
-              rotate_idx = left
-              right_boundary = right
-
-              while left <= right:
-                  mid = (left + right)//2
-
-                  # case1:
-                  if mid == right_boundary:
-                      break
-
-                  # case2:
-                  if nums[mid] > nums[mid+1]:
-                      rotate_idx = mid + 1
-                      break
-                  else:
-                      # in the left part
-                      if nums[mid] >= nums[left]:
-                          left = mid + 1
-                      else:
-                          right = mid - 1
-
-              return rotate_idx
-
-          def binary_search(left, right):
-              is_found = False
-
-              while left <= right:
-                  mid = (left + right) // 2
-
-                  if target == nums[mid]:
-                      is_found = True
-                      break
-
-                  elif target <= nums[mid]:
-                      right = mid - 1
-
-                  else:
-                      left = mid + 1
-
-              return is_found
-
-          n = len(nums)
-
-          if n < 1:
-              return False
-
-          if n == 1:
-              return True if nums[0] == target else False
-
-          is_found = False
-
-          rotate_idx = find_rotate_idx(0, n-1)
-
-          if rotate_idx == 0:
-              is_found= binary_search(0, n-1)
-          else:
-              if target >= nums[0]:
-                  is_found = binary_search(0, rotate_idx-1)
-              else:
-                  is_found = binary_search(rotate_idx, n-1)
-
-          return is_found
-        ```
-    * Approach4: One Pass binary Search (unique value), Time:O(logn), Space:O(1)
+    * Approach2: Get Rotated Index (unique value), Time:O(logn), Space:O(1)
+      * See 153 and 154
+    * Approach3: One Pass binary Search (unique value), Time:O(logn), Space:O(1)
       * The key idea is to find the non-roated array
         * example:
           * case1: left  pivot rotate_idx right
@@ -5890,165 +5862,152 @@ Table of Content
       * Python
         ```python
         def search(self, nums: List[int], target: int) -> int:
-          """
-          You may assume no duplicate exists in the array.
-          """
-          l, r = 0, len(nums)-1
-          start = 0
-          res = not_found = -1
+          def search_in_rotated_array(left, right):
+              start = left
+              l, r = left , right
+              res = NOT_FOUND
+              while l <= r:
+                  mid = (l + r) // 2
+                  if target == nums[mid]:
+                      res = mid
+                      break
 
-          while l <= r:
-              mid = (l + r) // 2
-              if nums[mid] == target:
-                  res = mid
-                  break
+                  elif nums[mid] >= nums[start]:
+                      if nums[start] <= target < nums[mid]:
+                          r = mid -1
+                      else:
+                          l = mid + 1
 
-              # in the left part
-              if nums[mid] >= nums[start]:
-                  if nums[l] <= target < nums[mid]:
-                      r = mid - 1
                   else:
-                      l = mid + 1
-              else:
-                  if nums[mid] < target <= nums[r]:
-                      l = mid + 1
-                  else:
-                      r = mid - 1
+                      if nums[mid] < target <= nums[r]:
+                          l = mid + 1
+                      else:
+                          r = mid - 1
+              return res
 
-          return res
+          NOT_FOUND = -1
+          if not nums:
+              return NOT_FOUND
+          return search_in_rotated_array(0, len(nums)-1)
         ```
-    * Approach5: One Pass binary Search (duplicated value), Time:O(logn)~O(n), Space:O(1)
+    * Approach4: One Pass binary Search (duplicated value), Time:O(logn)~O(n), Space:O(1)
       * Note, don't forget to update start
       * Python
         ```python
-          def search(self, nums: List[int], target: int) -> int:
-          """
-          nums may contain duplicates.
-          """
+        def search(self, nums: List[int], target: int) -> bool:
+          def search_in_rotated_array(left, right):
+              start = left
+              l, r = left , right
+              res = False
+              while l <= r:
+                  mid = (l + r) // 2
+                  if target == nums[mid]:
+                      res = True
+                      break
 
-          l , r = 0, len(nums)-1
-          is_found = False
+                  elif nums[mid] >= nums[start]:
+                      if nums[start] <= target < nums[mid]:
+                          r = mid -1
+                      else:
+                          l = mid + 1
+
+                  else:
+                      if nums[mid] < target <= nums[r]:
+                          l = mid + 1
+                      else:
+                          r = mid - 1
+              return res
+
+          if not nums:
+              return False
 
           """
           Previous algorithm can deal with duplicated items
           if the head of array is not a duplicated item
           special case: [4, 4, 1, 2, 3, 4, 4]
           """
-          while l < r and nums[l] == nums[r]:
-              l += 1
-
-          """
-          Don't forget to update start
-          """
-          start = l
-
-          while l <= r:
-
-              mid = (l + r) // 2
-
-              if nums[mid] == target:
-                  is_found = True
-                  break
-
-              # in the left part
-              if nums[mid] >= nums[start]:
-                  if nums[l] <= target < nums[mid]:
-                      r = mid - 1
-                  else:
-                      l = mid + 1
-              else:
-                  if nums[mid] < target <= nums[r]:
-                      l = mid + 1
-                  else:
-                      r = mid - 1
-
-          return is_found
+          left, right = 0, len(nums)-1
+          while left < right and nums[left] == nums[right]:
+              left += 1
+          return search_in_rotated_array(left, right)
         ```
-  * 153 & 154: Find **Minimum** in **Rotated Sorted Array** (M)
-    * The same concept like 33 and 81.
-    * 153: unique
-    * 154: allow duplicates
+  * 153 Find **Minimum** in **Rotated Sorted Array** (M)
+    * unique val in the array
     * Approach1: Linear Search, Time:O(n), Space:O(1)
-    * Approach2: Find Rotate index (unique value), Time:O(logn), Space:O(1)
+    * Approach2: Find Rotated index (unique value), Time:O(logn), Space:O(1)
       * Python
         ```python
         def findMin(self, nums: List[int]) -> int:
+          def find_rotated_idx(left, right):
+            start, end = left, right
+            # the array is not rotated
+            if nums[end] >= nums[start]:
+                return start
 
-          def find_rotate_idx(left, right):
-              l , r = left ,right
-              rotated_idx = left
+            rotated_idx = NOT_FOUND
+            l, r = left ,right
+            while l <= r:
 
+                mid = (l+r) // 2
+                if nums[mid] > nums[mid+1]:
+                    rotated_idx = mid + 1
+                    break
+                # mid is in the left part, search right
+                if nums[mid] >= nums[start]:
+                    l = mid + 1
+                # mid is in the right part, search left
+                else:
+                    r = mid - 1
 
-              while l <= r:
+            return rotated_idx
 
-                  mid = (l + r) // 2
-
-                  # the array is not rotated
-                  if mid == right:
-                      break
-
-                  if nums[mid] > nums[mid+1]:
-                      rotated_idx = mid + 1
-                      break
-
-                  # mid is in the left part, search right
-                  if nums[mid] >= nums[left]:
-                      l = mid + 1
-                  # mid is in the right part, search left
-                  else:
-                      r = mid - 1
-
-              return rotated_idx
-
-
+          NOT_FOUND = -1
           if not nums:
-              return -1
-
-          rotated_idx = find_rotate_idx(left=0,
-                                        right=len(nums)-1)
-
-        return nums[rotated_idx]
+              return NOT_FOUND
+          rotated_idx = find_rotated_idx(left=0, right=len(nums)-1)
+          return nums[rotated_idx]
         ```
-    * Approach3: Find Rotate index (duplicated value), Time:O(logn~n), Space:O(1)
+  * 154: Find **Minimum** in **Rotated Sorted Array** II (H)
+    * allow duplicated val in the array
+    * Approach1: Find Rotated index (duplicated value), Time:O(logn~n), Space:O(1)
       * Python
         ```python
         def findMin(self, nums: List[int]) -> int:
+          def find_rotated_idx(left, right):
+            start, end = left, right
+            # the array is not rotated
+            if nums[end] >= nums[start]:
+                return start
 
-          def find_rotate_idx(left, right):
-              l , r = left ,right
-              rotated_idx = left
+            rotated_idx = NOT_FOUND
+            l, r = left ,right
+            while l <= r:
 
-              while l <= r:
+                mid = (l+r) // 2
+                if nums[mid] > nums[mid+1]:
+                    rotated_idx = mid + 1
+                    break
+                # mid is in the left part, search right
+                if nums[mid] >= nums[start]:
+                    l = mid + 1
+                # mid is in the right part, search left
+                else:
+                    r = mid - 1
 
-                  mid = (l + r) // 2
+            return rotated_idx
 
-                  # the array is not rotated
-                  if mid == right:
-                      break
-
-                  if nums[mid] > nums[mid+1]:
-                      rotated_idx = mid + 1
-                      break
-
-                  # mid is in the left part, search right
-                  if nums[mid] >= nums[left]:
-                      l = mid + 1
-                  # mid is in the right part, search left
-                  else:
-                      r = mid - 1
-
-              return rotated_idx
-
+          NOT_FOUND = -1
           if not nums:
-              return -1
+              return NOT_FOUND
 
           left, right = 0, len(nums)-1
-
+          """
+          [2,2,2,2,4,5,6,7,0,1,2,2,2,2]
+          """
           while left < right and nums[left] == nums[right]:
               left += 1
 
-          rotated_idx = find_rotate_idx(left,
-                                        right)
+          rotated_idx = find_rotated_idx(left, right)
 
           return nums[rotated_idx]
         ```
@@ -6097,25 +6056,25 @@ Table of Content
         ```python
         def countNodes(self, root: TreeNode) -> int:
 
-          def get_depth(cur):
-              d = 0
+          def get_depth(node):
+              depth = 0
 
-              while cur.left:
-                  d += 1
-                  cur = cur.left
+              while node and node.left:
+                  node = node.left
+                  depth += 1
 
-              return d
+              return depth
 
-          def is_leaf_exists(idx, cur, d):
-              l, r = 0, 2**d-1
-
+          def check_leaf_exist(node_idx, root, d):
+              left, right = 0, 2**d-1
+              cur = root
               for _ in range(d):
-                  mid = (l + r) // 2
-                  if idx <= mid:
-                      r = mid
+                  mid = (left + right) // 2
+                  if node_idx <= mid:
+                      right = mid
                       cur = cur.left
                   else:
-                      l = mid + 1
+                      left = mid + 1
                       cur = cur.right
 
               return cur is not None
@@ -6124,24 +6083,22 @@ Table of Content
               return 0
 
           d = get_depth(root)
-          """
-          Last level nodes are enumerated from 0 to 2**d -1
-          we starts from 2th node (index 1), since 1st node always exists.
-          """
-          l, r = 1, 2**d-1
+          left, right = 1, 2**d-1
 
-          while l <= r:
-              mid = (l + r) // 2
-              if is_leaf_exists(mid, root, d):
-                  l = mid + 1
+          while left <= right:
+
+              mid = (left + right) // 2
+
+              if check_leaf_exist(mid, root, d):
+                  left = mid + 1
               else:
-                  r = mid - 1
+                  right = mid - 1
 
-          """
-          The tree contains 2**d - 1 nodes on the first (d - 1) levels
-          And leaf nodes in the last level
-          """
-          return (2**d -1) + l
+            """
+            The tree contains 2**d - 1 nodes on the first (d - 1) levels
+            And leaf nodes in the last level
+            """
+          return (2**d-1) + left
           ```
   * 004: **Median** of **Two Sorted Arrays** (H)
     * Description:
@@ -6336,13 +6293,13 @@ Table of Content
 * Design:
   * 707: Design Linked List (E)
 * **Runner** and **Detect Circle**
-  * 876: Middle of the Linked List
+  * 876: Middle of the Linked List (E)
     * Approach1: Runner, Time:O(n), Space:O(1)
       * Python
         ```python
         def middleNode(self, head: ListNode) -> ListNode:
           if not head:
-              return head
+              return None
 
           slow = fast = head
           while fast and fast.next:
@@ -6351,7 +6308,7 @@ Table of Content
 
           return slow
         ```
-  * 141: Linked List **Cycle** (E)
+  * 141: Linked List Cycle (E)
     * Similar problems:
       * 202: Happy Number (E)
     * Approach1: The runner: Time:O(n), Space:O(1)
@@ -6371,13 +6328,13 @@ Table of Content
 
             return has_cycle
           ```
-  * 142: Linked List Cycle II (M) *
+  * 142: Linked List Cycle II (M)
     * Similar problems:
       * 287: Find the Duplicate Number (M)
     * Given a linked list, return the node **where the cycle begins**. If there is no cycle, return null.
     * The length before the cycle beginning: **d**
     * The length of the cycle: **r**
-    * Approach1: Hash Table, Time:O(n), Space:O(1)
+    * Approach1: Hash Table, Time:O(n), Space:O(n)
       * Python
         ```python
         def detectCycle(self, head: ListNode) -> ListNode:
@@ -6444,7 +6401,8 @@ Table of Content
           node.next = node.next.next
       ```
    * 203: Remove Linked List Elements (E)
-     * Remove all elements from a linked list of integers that have value val.
+     * Description
+       * Remove all elements from a linked list of integers that have value val.
      * Approach1: dummy node, Time:O(n), Space:O(1)
        * Python
           ```python
@@ -6455,7 +6413,7 @@ Table of Content
             cur = dummy = ListNode(0)
             dummy.next = head
 
-            while cur.next:
+            while cur and cur.next:
                 if cur.next.val == val:
                     cur.next = cur.next.next
                 else:
@@ -6464,27 +6422,33 @@ Table of Content
             return dummy.next
           ```
    * 019: Remove Nth Node From End of List (M)
-     * Given a linked list, remove the n-th node **from the end** of list and return its head.
+     * Description:
+       * Given a linked list, remove the n-th node **from the end** of list and return its head.
+       * Intput: 1->2->3->4->5 and n == 2
+       * Output: 1->2->3->5
+       * Given n will always be valid.
      * Approach1: runner + dummy node, Time:O(n), Space:O(1)
        * Python
           ```python
           def removeNthFromEnd(self, head, n):
-            slow = dummy = ListNode(0)
+            dummy = ListNode(0)
             fast = dummy.next = head
 
             for _ in range(n):
                 fast = fast.next
 
+            prev = dummy
             while fast:
-                slow, fast = slow.next, fast.next
+                prev, fast = prev.next, fast.next
 
             # delete the target
-            slow.next = slow.next.next
+            prev.next = prev.next.next
 
             return dummy.next
           ```
    * 083: Remove Duplicates from **Sorted** List (E)
      * Example:
+       * Given a sorted linked list, delete all duplicates such that each element appear only once.
        * Input: 1->1->2->2->3->3
        * Output: 1->2->3
      * Approach1: Time:O(n), Space:O(1)
@@ -6504,60 +6468,97 @@ Table of Content
           return head
         ```
    * 082: Remove Duplicates from **Sorted** List II (M)
-     * Given a sorted linked list, delete all nodes that have duplicate numbers, leaving only distinct numbers from the original list.
-     * Example:
+     * Description:
+       * Given a sorted linked list, delete all nodes that have duplicate numbers, leaving only distinct numbers from the original list.
        * Input: 1->2->3->3->4->4->5
        * Output: 1->2->5
      * Approach1: Dummy node and a flag, Time:O(n), Space:O(1)
        * note:
          * don't forget the last delete_from_prev
        * Python
+          ```python
+            def deleteDuplicates(self, head: ListNode) -> ListNode:
+              if not head:
+                  return head
+
+              prev = dummy = ListNode(0)
+              cur = dummy.next = head
+              delete_from_prev = False
+
+              while cur and cur.next:
+                  if cur.val == cur.next.val:
+                      cur.next = cur.next.next
+                      delete_from_prev = True
+                  else:
+                      if delete_from_prev:
+                          prev.next = cur = cur.next
+                          delete_from_prev = False
+                      else:
+                          prev, cur = cur, cur.next
+
+              if delete_from_prev:
+                  prev.next = cur.next
+
+              return dummy.next
+          ```
+   * 1171: Remove Zero Sum Consecutive Nodes from Linked List (M)
+     * Description:
+       * Given the head of a linked list, we repeatedly delete consecutive sequences of nodes that sum to 0 until there are no such sequences.
+       * Intput: [1,2,3,-3,-2]
+       * Output: [1]
+     * Python, prefix sum, O(n), Space:O(n)
+       * Python
         ```python
-          def deleteDuplicates(self, head: ListNode) -> ListNode:
-            if not head:
-                return head
+        def removeZeroSumSublists(self, head: ListNode) -> ListNode:
+          if not head:
+              return None
 
-            prev = dummy = ListNode(0)
-            cur = dummy.next = head
-            delete_from_prev = False
+          dummy = ListNode(0)
+          cur = dummy.next = head
+          memo = {0: dummy}
+          prefix = 0
+          while cur:
+              prefix += cur.val
+              if prefix in memo:
+                  """
+                  1. remove the prefix sum from memo[prefix].next to cur-1
+                  2. remove the node from memo[prefix].next to cur
+                  """
+                  clean = memo[prefix].next
+                  p = prefix + clean.val
+                  while clean is not cur:
+                      memo.pop(p)
+                      clean = clean.next
+                      p += clean.val
+                  memo[prefix].next = cur.next
+              else:
+                  memo[prefix] = cur
 
-            while cur and cur.next:
-                if cur.val == cur.next.val:
-                    cur.next = cur.next.next
-                    delete_from_prev = True
-                else:
-                    if delete_from_prev:
-                        prev.next = cur = cur.next
-                        delete_from_prev = False
-                    else:
-                        prev, cur = cur, cur.next
+              cur = cur.next
 
-            if delete_from_prev:
-                prev.next = cur.next
-
-            return dummy.next
+          return dummy.next
         ```
 * **Reorder**
   * 206: **Reverse** Linked List (E)
     * Approach1: Time:O(n), Space:O(1)
       * Python
-       ```python
-       def reverseList(self, head: ListNode) -> ListNode:\
-          prev = None
-          cur = head
+        ```python
+        def reverseList(self, head: ListNode) -> ListNode:\
+            prev = None
+            cur = head
 
-          while cur:
-              nxt = cur.next
-              cur.next = prev
-              prev, cur = cur, nxt
-
-          return prev
-       ```
+            while cur:
+                nxt = cur.next
+                cur.next = prev
+                prev, cur = cur, nxt
+            return prev
+        ```
   * 092: **Reverse** Linked List II (M)
-    * From **position m to n**. Do it in **one-pass**.
-    * Example:
-      * Input: 1->2->3->4->5->NULL, m = 2, n = 4
-      * Output: 1->4->3->2->5->NULL
+    * Description:
+      * From **position m to n**. Do it in **one-pass**.
+      * Example:
+        * Input: 1->2->3->4->5->NULL, m = 2, n = 4
+        * Output: 1->4->3->2->5->NULL
     * Approach1: Dummy Node, Time:O(n), Space:O(1)
       * Algo:
         * 1. ind the position before start of reverse node (prev_end)
@@ -6572,12 +6573,12 @@ Table of Content
             prev_end = dummy = ListNode(0)
             dummy.next = head
             # step1: find prev_end
-            for _ in range(0, m-1):
+            for _ in range(m-1):
                 prev_end = prev_end.next
 
             # step2: reverse the nodes in the range
             prev, cur = prev_end, prev_end.next
-            for _ in range(0, n-m+1):
+            for _ in range(n-m+1):
                 nxt = cur.next
                 cur.next = prev
                 prev, cur = cur, nxt
@@ -6589,12 +6590,16 @@ Table of Content
             return dummy.next
         ```
   * 025: **Reverse** Nodes in **k-Group** (H)
-    * Definition:
+    * Description:
       * Given a linked list, reverse the nodes of a linked list k at a time and return its modified list.k is a positive integer and is less than or equal to the length of the linked list.
       * If the number of nodes is not a multiple of k then left-out nodes in the end should remain as it is.
-      * Do not need to check k
+      * example:
+        * Input: 1->2->3->4->5
+        * Output:
+          * k = 2, 2->1->4->3->5
+          * k = 3, 3->2->1->4->5
     * Approach1: Two Passes, Time:O(n), Space:O(1)
-      * Python Solution
+      * Python
         ```python
         def reverseKGroup(self, head: ListNode, k: int) -> ListNode:
           if not head or k <= 1:
@@ -6631,56 +6636,77 @@ Table of Content
       * Python Solution
       ```python
       def reverseKGroup(self, head: ListNode, k: int) -> ListNode:
-        if not head or k <= 1:
-            return head
+        if not head:
+            return None
 
-        prev_end = dummy = ListNode(0)
-        runner = dummy.next = head
+        dummy = ListNode(0)
+        dummy.next = head
+
         cnt = 0
-
-        while runner:
+        cur = head
+        prev_end = dummy
+        while cur:
             cnt += 1
-            runner = runner.next
-
             if cnt % k == 0:
-                # reverse
-                prev = prev_end
-                cur = prev_end.next
+                prev, cur = prev_end, prev_end.next
                 for _ in range(k):
                     nxt = cur.next
                     cur.next = prev
                     prev, cur = cur, nxt
 
-                # connect
                 next_prev_end = prev_end.next
                 prev_end.next = prev
                 next_prev_end.next = cur
                 prev_end = next_prev_end
+            else:
+                cur = cur.next
 
         return dummy.next
       ```
   * 024: **Swap** Nodes in **Pair** (M) *
+    * Description:
+      * Input: 1->2->3->4
+      * Output: 2->1->4->3
     * Approach1: Dummy Node, Time:O(n), Space:O(1)
-      * Use 3 pointers, prev ,current and next.
-      * Python
-        ```python
-        def swapPairs(self, head: ListNode) -> ListNode:
-          if not head:
-              return
+      * Implementation1: 3 pointers
+        * Python
+          ```python
+          def swapPairs(self, head: ListNode) -> ListNode:
+            if not head:
+                return
 
-          prev = dummy = ListNode(0)
-          cur = dummy.next = head
+            prev = dummy = ListNode(0)
+            cur = dummy.next = head
 
-          while cur and cur.next:
-              nxt = cur.next
-              prev.next = nxt
-              cur.next = nxt.next
-              nxt.next = cur
+            while cur and cur.next:
+                nxt = cur.next
+                prev.next = nxt
+                cur.next = nxt.next
+                nxt.next = cur
 
-              prev, cur = cur, cur.next
+                prev, cur = cur, cur.next
 
-          return dummy.next
-        ```
+            return dummy.next
+          ```
+      * Implementation2: 2 pointers
+        * Python
+          ```python
+          def swapPairs(self, head: ListNode) -> ListNode:
+            if not head:
+                return None
+
+            prev = dummy = ListNode(0)
+            cur = dummy.next = head
+
+            while cur and cur.next:
+                prev.next = cur.next
+                cur.next = cur.next.next
+                prev.next.next = cur
+
+                prev, cur = cur, cur.next
+
+            return dummy.next
+          ```
   * 143: **Reorder** List (M)
     * Given a singly linked list L: L0→L1→…→Ln-1→Ln, reorder it to: L0→Ln→L1→Ln-1→L2→Ln-2→…
     * Example
@@ -6693,37 +6719,37 @@ Table of Content
       * Python
         ```python
         def reorderList(self, head: ListNode) -> None:
-          """
-          Do not return anything, modify head in-place instead.
-          """
           if not head or not head.next:
               return
 
-          slow = head
-          fast = head.next  # Ensure the 1st part has the same or one more node
+          # find the tail of the previous linked list
+          prev_tail = head
+          fast = head.next
           while fast and fast.next:
+              prev_tail = prev_tail.next
               fast = fast.next.next
-              slow = slow.next
 
-          cur = slow.next
-          prev = None
-          slow.next = None
-          # reverse the second list
+          # reverse the post linked list
+          # ensure the 1st part has the same or one more node
+          prev, cur = None, prev_tail.next
           while cur:
               nxt = cur.next
               cur.next = prev
               prev, cur = cur, nxt
 
-          # connect
-          first = head
-          second = prev
-          while second:
-              second_nxt = second.next
-              second.next = first.next
-              first.next = second
+          # init and connect
+          prev_head = head
+          prev_tail.next = None
+          post_head = prev
+          while post_head:
+              post_nxt = post_head.next
+              post_head.next = prev_head.next
+              prev_head.next = post_head
 
-              first = second.next
-              second = second_nxt
+              prev_head = post_head.next
+              post_head = post_nxt
+
+          return head
         ```
     * Approach2: Use Stack, Time:O(n), Space O(n):
       * Use a stack to store 2nd part of the linkedlist.
@@ -6758,6 +6784,13 @@ Table of Content
         ```
 * **Partition**
   * 061: Rotate list (M)
+    * Description:
+      * case1:
+        * Input: 1->2->3->4->5, k = 2
+        * Output: 4->5->1->2->3
+      * case2:
+        * Input: 0->1->2, k = 4
+        * Output: 2->0->1
     * Note
       * The rotate length k may be greater than the length of linked list
     * Approach1: Split and Connect, Time O(n), Space O(1)
@@ -6797,7 +6830,8 @@ Table of Content
             return new_head
           ```
   * 086: Partition List (M)
-    * Given a linked list and a value x, partition it such that all nodes less than x come before nodes greater than or equal to x.
+    * Description:
+      * Given a linked list and a value x, partition it such that all nodes less than x come before nodes greater than or equal to x.
     * Approach1: Split and Merge, Time:O(n), Space:O(1)
       * Python
         ```python
@@ -6850,7 +6884,7 @@ Table of Content
             even.next = None
 
             return dummy_odd.next
-      ```
+        ```
   * 725: Split Linked List in Parts (M)
     * Approach1: Split input list, Time: O(n), Space:O(1)
       * Example:
@@ -6865,32 +6899,33 @@ Table of Content
       * Python
         ```python
         def splitListToParts(self, root: ListNode, k: int) -> List[ListNode]:
-          partitions = [None] * k
+          def get_len(node):
+              cnt = 0
+              while node:
+                  node = node.next
+                  cnt += 1
+              return cnt
+
+          partitions = [None for _ in range(k)]
+
           if not root:
-              partitions
+              return partitions
 
-          cnt = 0
+          n = get_len(root)
+
+          base_cnt = n // k
+          extra_cnt = n % k
           cur = root
-          while cur:
-              cnt += 1
-              cur = cur.next
+          for i in range(k):
+              cnt = base_cnt
+              if extra_cnt:
+                  cnt += 1
+                  extra_cnt -=1
 
-          size, extra = cnt // k, cnt % k
-          cur = root
-          for p in range(k):
-              # run out of the list
-              # example: 1->2->3, k = 5
-              if not cur:
-                  break
-
-              # determine the size of each partition
-              partitions[p] = cur
-              p_size = size
-              if extra > 0:
-                  p_size += 1
-                  extra -= 1
-              for _ in range(p_size-1):
+              partitions[i] = cur
+              for _ in range(cnt-1):
                   cur = cur.next
+
               cur.next, cur = None, cur.next
 
           return partitions
@@ -6901,33 +6936,47 @@ Table of Content
       * Python
         ```python
         def mergeTwoLists(self, l1: ListNode, l2: ListNode) -> ListNode:
-          cur = dummy = ListNode(0)
-          while l1 and l2:
-              if l1.val <= l2.val:
+          def merge_2_sorted_lists(l1, l2):
+              cur = dummy = ListNode(0)
+              while l1 and l2:
+                  if l1.val <= l2.val:
+                      cur.next = l1
+                      l1 = l1.next
+                  else:
+                      cur.next = l2
+                      l2 = l2.next
+                  cur = cur.next
+
+              if l1:
                   cur.next = l1
-                  l1 = l1.next
-              else:
+
+              if l2:
                   cur.next = l2
-                  l2 = l2.next
-              cur = cur.next
 
-          if l1:
-              cur.next = l1
+              return dummy.next
 
-          if l2:
-              cur.next = l2
+          if not l1 and not l2:
+              return None
 
-          return dummy.next
+          if not l1:
+              return l2
+
+          if not l2:
+              return l1
+
+          return merge_2_sorted_lists(l1, l2)
         ```
   * 148: Sort list (M)
       * Ref:
         * https://stackoverflow.com/questions/1525117/whats-the-fastest-algorithm-for-sorting-a-linked-list/1525419#1525419
-      * Approach1: Top down merge sort , Time: O(nlog(n), Space:O(logn)
+      * Approach1: Transfer to array,  Time: O(nlog(n), Space:O(n)
+      * Approach2: Top down merge sort , Time: O(nlog(n), Space:O(logn)
         * Python
           ```python
           def sortList(self, head: ListNode) -> ListNode:
             def merge_2_sorted_lists(l1, l2):
                 cur = dummy = ListNode(0)
+
                 while l1 and l2:
                     if l1.val <= l2.val:
                         cur.next = l1
@@ -6935,7 +6984,6 @@ Table of Content
                     else:
                         cur.next = l2
                         l2 = l2.next
-
                     cur = cur.next
 
                 if l1:
@@ -6946,28 +6994,31 @@ Table of Content
 
                 return dummy.next
 
-            if not head or not head.next:
-                return head
+            def merge_sort(head):
+                if not head or not head.next:
+                    return head
 
-            slow = head
-            fast = head.next
-            while fast and fast.next:
-                fast = fast.next.next
-                slow = slow.next
+                mid = head
+                fast = head.next
+                while fast and fast.next:
+                    fast = fast.next.next
+                    mid = mid.next
 
-            left = head
-            right = slow.next
-            slow.next = None  # set tail of left to None
-            # left part
-            left = self.sortList(head)
-            # right part
-            right = self.sortList(right)
+                left = head
+                right = mid.next
+                mid.next = None
 
-            head = merge_2_sorted_lists(left, right)
+                left = merge_sort(left)
+                right = merge_sort(right)
+                merged = merge_2_sorted_lists(left, right)
+                return merged
 
-            return head
+            if not head:
+                return None
+
+            return merge_sort(head)
           ```
-      * Approach2: Bottom up merge sort , Time: O(nlog(n), Space:O(1)
+      * Approach3: Bottom up merge sort , Time: O(nlog(n), Space:O(1)
         * Algo:
         * Like traditional bottom up sorting algorithm:
           * Start from window size 1 to n-1
@@ -6985,16 +7036,32 @@ Table of Content
         * Python
           ```python
           def sortList(self, head: ListNode) -> ListNode:
+            def get_len(node):
+                cnt = 0
+                while node:
+                    node = node.next
+                    cnt += 1
+                return cnt
 
-            def get_len(head):
-                cur = head
-                n = 0
-                while cur:
-                    n += 1
-                    cur = cur.next
-                return n
+            def split_list_with_size(cur, k):
+                """
+                Divide the linked list into two lists,
+                while the first list contains first k ndoes
+                return the second list's head
+                """
+                for _ in range(k-1):
+                    if cur:
+                        cur = cur.next
 
-            def merge_2_sorted_lists(prev_end, l1, l2):
+                if not cur:
+                    return None
+
+                post_head = cur.next
+                cur.next = None
+
+                return post_head
+
+            def merge_2_sorted_lists(l1, l2, prev_end):
                 cur = prev_end
 
                 while l1 and l2:
@@ -7004,7 +7071,6 @@ Table of Content
                     else:
                         cur.next = l2
                         l2 = l2.next
-
                     cur = cur.next
 
                 if l1:
@@ -7013,55 +7079,29 @@ Table of Content
                 if l2:
                     cur.next = l2
 
-                # move cur to the end
-                while cur.next:
+                while cur and cur.next:
                     cur = cur.next
 
-                # cur is tail of the merged list
                 return cur
 
-            def split_list_with_k_len(head, k):
-                """
-                Divide the linked list into two lists,
-                while the first list contains first k ndoes
-                return the second list's head
-                """
-                cur = head
-                second = None
-
-                for _ in range(k-1):
-                    if not cur:
-                        break
-                    cur = cur.next
-
-                if not cur:
-                    return second
-
-                second = cur.next
-                cur.next = None
-
-                return second
-
-            if not head or not head.next:
-                return head
-
-            dummy = ListNode(0)
-            dummy.next = head
+            if not head:
+                return None
 
             n = get_len(head)
-            window_size = 1
-
-            while window_size < n:
+            prev_end = dummy = ListNode(0)
+            dummy.next = head
+            w_size = 1
+            while w_size < n:
                 prev_end = dummy
                 left = dummy.next
 
                 while left:
-                    right = split_list_with_k_len(left, window_size)
-                    next_left = split_list_with_k_len(right, window_size)
-                    prev_end = merge_2_sorted_lists(prev_end, left, right)
+                    right = split_list_with_size(left, w_size)
+                    next_left = split_list_with_size(right, w_size)
+                    prev_end = merge_2_sorted_lists(left, right, prev_end)
                     left = next_left
 
-                window_size *= 2
+                w_size *= 2
 
             return dummy.next
           ```
@@ -7122,15 +7162,13 @@ Table of Content
         * Implementation2: Use min heap
           ```python
           class Element(object):
-
-            __slots__ = 'node'
+            __slots__ = ["node"]
 
             def __init__(self, node):
                 self.node = node
 
             def __lt__(self, other):
               return self.node.val < other.node.val
-
 
           def mergeKLists(self, lists: List[ListNode]) -> ListNode:
               # heapify: O(k)
@@ -7184,14 +7222,14 @@ Table of Content
                 return None
 
             # bottom up merge lists
-            interval = 1
+            w_size = 1
             while interval < len(lists):
                 left = 0
-                while left + interval < len(lists):
-                    right = left+interval
+                while left + w_size < len(lists):
+                    right = left+w_size
                     lists[left] = self.merge_2_sorted_Lists(lists[left], lists[left+right])
-                    left += (2 * interval)
-                interval *= 2
+                    left += (2 * w_size)
+                w_size *= 2
 
             return lists[0]
         ```
@@ -8121,7 +8159,7 @@ Table of Content
     * 253: Meeting Rooms II (M)
       * Find the minimum requirement of the meeting rooms.
       * Approach1: Brute Force, Time: O(n^2), Space: O(1)
-      * Approach2: Min Heap: O(nlog(n)), Space: O(n)
+      * Approach2: Greedy using Min Heap: O(nlog(n)), Space: O(n)
         * Algo
           * Sort the intervals by start time
           * For every meeting room check if the minimum element of the heap is free or not.
@@ -10166,48 +10204,7 @@ Table of Content
       * 105: Construct Binary Tree from **Preorder** and **Inorder** Traversal (M)
         * Preorder -> find the root node (from left)
         * Inorder -> find the left subtree and right subtree of each root
-        * Approach1: DFS Recursive (first version), Time:O(n^2) Space:O(n)
-          * Python, Time:O(n^2) Space:O(n)
-            * Time:
-              * Find the partition costs O(n) for n nodes
-            * Space:
-              * Call stack and copy the inorder , preorder list cost O(n)
-            ```python
-            def buildTree(self, preorder: List[int], inorder: List[int]) -> TreeNode:
-              def get_subtree_partition(inorder, root_val):
-                  # partition is the idx of thr root node
-                  for idx, val in enumerate(inorder):
-                      if val == root_val:
-                          return idx
-
-                  return None
-
-              def build_tree(preorder, inorder):
-                  if not preorder:
-                      return None
-
-                  root_val = preorder[0]
-                  root = TreeNode(root_val)
-                  partition = get_subtree_partition(inorder, root_val)
-                  if partition is None:
-                      return None
-
-                  left_inorder = inorder[:partition]
-                  left_preorder = preorder[1:len(left_inorder)+1]
-                  root.left = build_tree(left_preorder, left_inorder)
-
-                  right_inorder = inorder[partition+1:]
-                  right_preorder = preorder[len(left_inorder)+1:]
-                  root.right = build_tree(right_preorder, right_inorder)
-
-                  return root
-
-              if not preorder or not inorder:
-                  return None
-
-              return build_tree(preorder, inorder)
-            ```
-        * Approach2: DFS Recursive (optimization), Time:O(n), Space:O(n)
+        * Approach1: DFS Recursive (optimization), Time:O(n), Space:O(n)
           * Use hash table to speed up the searching
           * Prevent unused list copy
           * Time:O(n), Space:O(n)
@@ -10229,7 +10226,7 @@ Table of Content
 
                     return node
 
-                if not preorder or not inorder:
+                if not preorder or not inorder or len(preorder) != len(inorder):
                     return None
 
                 inorder_d = dict()
@@ -10239,7 +10236,7 @@ Table of Content
                 pre_idx = 0
                 return build_tree(0, len(inorder)-1)
               ```
-        * Approach3: Iterative, Time:O(n), Space:O(n)
+        * Approach2: Iterative, Time:O(n), Space:O(n)
           * Python
             ```python
             def buildTree(self, preorder: List[int], inorder: List[int]) -> TreeNode:
@@ -10345,6 +10342,163 @@ Table of Content
                       stack.append((node.right, partition+1, right))
 
               return root
+            ```
+      * 108: Convert **Sorted Array** to Binary Search Tree	binary search (E)
+        * Given an array where elements are sorted in ascending order, convert it to a height balanced BST.
+        * A **height-balanced binary** tree is defined as a binary tree in which the depth of the two subtrees of every node never differ by more than 1.
+        * Approach1: Recursive: Time:O(n), Space:O(log(n))
+          * Python
+            ```python
+            def sortedArrayToBST(self, nums: List[int]) -> TreeNode:
+              def build_tree(left, right):
+                  mid = (left + right) // 2
+                  node = TreeNode(nums[mid])
+
+                  if left <= mid - 1:
+                      node.left = build_tree(left, mid-1)
+
+                  if mid + 1 <= right:
+                      node.right = build_tree(mid+1, right)
+
+                  return node
+
+              if not nums:
+                  return None
+
+              return build_tree(0, len(nums)-1)
+            ```
+        * Approach2: Iterative: Time:O(n), Space:(log(n))
+          * Python
+            ```python
+            def sortedArrayToBST(self, nums: List[int]) -> TreeNode:
+              if not nums:
+                  return None
+
+              root = TreeNode(0)
+              stack = [(root, 0, len(nums)-1)]
+
+              while stack:
+                  node, left, right = stack.pop()
+                  mid = (left + right) // 2
+                  node.val = nums[mid]
+
+                  if left < mid:
+                      node.left = TreeNode(0)
+                      stack.append((node.left, left, mid-1))
+
+                  if right > mid:
+                      node.right = TreeNode(0)
+                      stack.append((node.right, mid+1, right))
+
+              return root
+            ```
+      * 109: Convert **Sorted List** to Binary Search Tree binary search (M)
+        * Approach1: Two Pointer to find middle, Time:O(nlog(n)), space:O(log(n))
+          * Time: O(nlogn)
+            * n/2 + 2*n/4 + 4*n/8 + ... logn * 1
+          * This is not a good approach, since the input will be changed.
+        * Approach2: Transfer to array, Time:O(log(n)), Space:O(n)
+            * Pytyon
+              ```python
+              def sortedListToBST(self, head: ListNode) -> TreeNode:
+                if not head:
+                    return None
+
+                nums = []
+                while head:
+                    nums.append(head.val)
+                    head = head.next
+
+                left = 0
+                right = len(nums)-1
+                root = TreeNode(0)
+                stack = [(root, left, right)]
+
+                while stack:
+                    node, left, right = stack.pop()
+                    mid = (left + right)//2
+                    node.val = nums[mid]
+                    if left < mid:
+                        node.left = TreeNode(0)
+                        stack.append((node.left, left, mid-1))
+
+                    if right > mid:
+                        node.right = TreeNode(0)
+                        stack.append((node.right, mid+1, right))
+
+                return root
+              ```
+        * Approach3: Inorder Simulation, Time:O(n), Space:O(log(n)
+    * Successor
+      * The successor of a node p is the node with the smallest key greater than p.val.
+      * 285: **Inorder Successor** in BST (M)
+        * successor:
+          * if the node with the smallest key greater than p.val
+          * Successor is the smallest node in the inorder traversal after the current one.
+        * Approach1: Inorder Traversal: Time:O(h), Space:O(h)
+          * Python
+            ```python
+            def inorderSuccessor(self, root: 'TreeNode', p: 'TreeNode') -> 'TreeNode':
+              def get_inorder(node):
+                  cur = node
+                  stack = []
+                  while cur or stack:
+                      if cur:
+                          stack.append(cur)
+                          cur = cur.left
+                      else:
+                          node = stack.pop()
+                          yield node
+                          cur = node.right
+
+              if not root or not p:
+                  return None
+
+              is_found = False
+              successor = None
+              for node in get_inorder(root):
+                  if is_found:
+                      successor = node
+                      break
+                  if node is p:
+                      is_found = True
+
+              return successor
+            ```
+      * 510: **Inorder Successor** in BST II (M)
+        * Two cases:
+          * Have right subtree:
+            * return minimum value of right subtree
+          * Do not have right subtree
+            * find the successor from ancestors
+        * Approach1: Inorder Traversal, Time:O(h), Space:O(n)
+          * See 285
+        * Approach2: Use parent pointer: Time:O(h), Space:O(1)
+          * Python
+            ```python
+            def inorderSuccessor(self, node: 'Node') -> 'Node':
+              if not node:
+                  return None
+
+              successor = None
+              key = node.val
+
+              # case1, have the right subtree, return the minimum value from right subtree
+              if node.right:
+                  cur = node.right
+                  while cur.left:
+                      cur = cur.left
+                  successor = cur
+
+              # case2, do not have the right subtree, try to find from ancestors
+              else:
+                  cur = node.parent
+                  while cur and cur.val < key:
+                      cur = cur.parent
+                  if cur and cur.val > key:
+                      successor = cur
+
+              return successor
             ```
   * **Postorder**
     * Traversal
@@ -10997,6 +11151,7 @@ Table of Content
     * 250: Count **Univalue Subtrees** (M)
       * Description:
         * A Uni-value subtree means all nodes of the subtree have the same value.
+        * subtree not path
       * Approach1: Recursive:
         * Python
           ```python
@@ -11419,9 +11574,6 @@ Table of Content
 
             vertical_order = []
             for idx in range(min_idx, max_idx+1):
-                if idx not in d:
-                    continue
-
                 vertical_order.append(d[idx])
 
             return vertical_order
@@ -11515,7 +11667,7 @@ Table of Content
 
             return root
           ```
-  * Binary Tree Slots:
+  * Tree Slots:
     * 331: Verify Preorder Serialization of a Binary Tree	(M)
       * Approach1: Slots, Time:O(n), Space:O(n)
         * Python
@@ -11599,345 +11751,526 @@ Table of Content
                 return root
            ```
     * 428: Serialize and Deserialize N-ary Tree (H)
+      * Approach1: Iterative
+        * Python
+          ```python
+          class Codec:
+
+            def serialize(self, root):
+                if not root:
+                    return pickle.dumps([])
+
+                bfs = []
+                bfs.append(root.val)
+                q = collections.deque([root])
+                """
+                [1, 3, 3, 2, 4, 2, 5, 6, 0, 0, 0, 0]
+                """
+                while q:
+                    node = q.popleft()
+                    bfs.append(len(node.children))
+                    for child in node.children:
+                        bfs.append(child.val)
+                        q.append(child)
+                return pickle.dumps(bfs)
+
+            def deserialize(self, data):
+                bfs = pickle.loads(data)
+
+                if not bfs:
+                    return None
+
+                root = Node(bfs[0], [])
+                q = collections.deque([root])
+                i = 1
+
+                while q:
+                    node = q.popleft()
+                    child_cnt = bfs[i]
+                    i += 1
+                    for _ in range(child_cnt):
+                        child = Node(bfs[i], [])
+                        i += 1
+                        node.children.append(child)
+                        q.append(child)
+
+                return root
+          ```
   * **Binary Search Tree** (BST)
     * Definition of BST:
       * The **left subtree** of a node contains only nodes with keys **less than** the node's key.
       * The **right subtree** of a node contains only nodes with keys **greater than** the node's key.
       * Both the left and right subtrees must also be binary search trees.
-    * 700: Search in a Binary Search Tree
-    * 783: Minimum Distance Between BST Nodes
-    * 098: **Validate** Binary Search Tree (M)
-      * Approach1: Postorder, Recursive, Time:O(h), Space:O(h)
-        * For each node
-          * The maximum val of left subtree should be less than the node val
-          * The minimum val of right subtree should be greater than the node val
-          * that is : l_max < node.val < r_min
-        * Python:
-          ```python
-          def isValidBST(self, root: TreeNode) -> bool:
-            def dfs(node):
-                if not node:
-                    # is_valid, min_val, max_val
-                    return True, float('inf'), float('-inf'),
+    * Basic Operations
+      * 098: **Validate** Binary Search Tree (M)
+        * Approach1: Postorder, Recursive, Time:O(h), Space:O(h)
+          * For each node
+            * The maximum val of left subtree should be less than the node val
+            * The minimum val of right subtree should be greater than the node val
+            * that is : l_max < node.val < r_min
+          * Python:
+            ```python
+            def isValidBST(self, root: TreeNode) -> bool:
+              def dfs(node):
+                  if not node:
+                      # is_valid, min_val, max_val
+                      return True, float('inf'), float('-inf'),
 
-                l_is_valid, l_min, l_max = dfs(node.left)
-                if not l_is_valid:
-                    return False, None, None # None means don't care
+                  l_is_valid, l_min, l_max = dfs(node.left)
+                  if not l_is_valid:
+                      return False, None, None # None means don't care
 
-                r_is_valid, r_min, r_max = dfs(node.right)
-                if not r_is_valid:
-                    return False, None, None # None means don't care
+                  r_is_valid, r_min, r_max = dfs(node.right)
+                  if not r_is_valid:
+                      return False, None, None # None means don't care
 
-                # is_valid: if the tree is a binary search tree
-                # minimum value in the tree
-                # maximum value in the tree
-                return l_max < node.val < r_min, \
-                        min(node.val, l_min, r_min), max(node.val, l_max, r_max)
+                  # is_valid: if the tree is a binary search tree
+                  # minimum value in the tree
+                  # maximum value in the tree
+                  return l_max < node.val < r_min, \
+                          min(node.val, l_min, r_min), max(node.val, l_max, r_max)
 
-            return dfs(root)[0]
-          ```
-      * Approach2: Preorder Recursive, Time:O(h), Space:O(h)
-        * Python
-          ```python
-          def isValidBST(self, root: TreeNode) -> bool:
-            def dfs(node, lower, upper):
-                if not node:
-                    return True
+              return dfs(root)[0]
+            ```
+        * Approach2: Preorder Recursive, Time:O(h), Space:O(h)
+          * Python
+            ```python
+            def isValidBST(self, root: TreeNode) -> bool:
+              def dfs(node, lo, hi):
+                  nonlocal is_valid
+                  if not lo < node.val < hi:
+                      is_valid = False
+                      return
 
-                if not lower < node.val < upper:
-                    return False
+                  if node.left:
+                      dfs(node.left, lo, node.val)
 
-                return dfs(node.left, lower, node.val) and dfs(node.right, node.val, upper)
+                  if node.right:
+                      dfs(node.right, node.val, hi)
 
-            return dfs(root, float('-inf'), float('inf'))
-          ```
-      * Approach3: Preorder, Iterative, Time:O(h), Space:O(h)
-        * Python
-          ```python
-          def isValidBST(self, root: TreeNode) -> bool:
-            if not root:
-                return True
-            is_valid = True
-            stack = [(root, float('-inf'), float('inf'))]
-            while stack:
-                node, lower, upper = stack.pop()
-                if not lower < node.val < upper:
-                    is_valid = False
-                    break
-                if node.left:
-                    stack.append((node.left, lower, node.val))
+              if not root:
+                  return True
 
-                if node.right:
-                    stack.append((node.right, node.val, upper))
+              is_valid = True
+              dfs(root, float('-inf'), float('inf'))
+              return is_valid
+            ```
+        * Approach3: Preorder Iterative, Time:O(h), Space:O(h)
+          * Python
+            ```python
+            def isValidBST(self, root: TreeNode) -> bool:
+              if not root:
+                  return True
 
-            return is_valid
-          ```
-      * Approach4: InOrder Iterative, Time:O(h), Space:O(h)
-        * Python
-          ```python
-          def isValidBST(self, root: TreeNode) -> bool:
-            if not root:
-                return True
+              is_valid = True
+              stack = [(root, float('-inf'), float('+inf'))]
 
-            cur = root
-            stack = []
-            in_order = float('-inf')
-            is_valid = True
-            while stack or cur:
-                if cur:
-                    stack.append(cur)
-                    cur = cur.left
-                else:
-                    cur = stack.pop()
-                    if cur.val <= in_order:
-                        is_valid = False
-                        break
-                    in_order = cur.val
-                    cur = cur.right
+              while stack:
+                  node, lo, hi = stack.pop()
 
-            return is_valid
-          ```
-    * 701: **Insert** into a BST (M)
-      * Recursive: Time:O(h), Space:O(h)
-        * Python
-          ```python
-          def insertIntoBST(self, root: TreeNode, val: int) -> TreeNode:
-            def dfs(node):
-                if val > node.val:
-                    if node.right:
-                        dfs(node.right)
-                    else:
-                        node.right = TreeNode(val)
+                  if not lo < node.val < hi:
+                      is_valid = False
+                      break
 
-                elif val < node.val:
-                    if node.left:
-                        dfs(node.left)
-                    else:
-                        node.left = TreeNode(val)
+                  if node.left:
+                      stack.append((node.left, lo, node.val))
 
-            if not root:
-                return TreeNode(val)
+                  if node.right:
+                      stack.append((node.right, node.val, hi))
 
-            dfs(root)
+              return is_valid
+            ```
+        * Approach4: InOrder Traversal, Time:O(h), Space:O(h)
+          * Python
+            ```python
+            def isValidBST(self, root: TreeNode) -> bool:
+              if not root:
+                  return True
 
-            return root
-          ```
-      * Iterative: Time:O(h), Space:O(h)
-        * Python
-          ```python
-          def insertIntoBST(self, root: TreeNode, val: int) -> TreeNode:
-            if not root:
-                return TreeNode(val)
+              cur = root
+              stack = []
+              in_order = float('-inf')
+              is_valid = True
+              while stack or cur:
+                  if cur:
+                      stack.append(cur)
+                      cur = cur.left
+                  else:
+                      cur = stack.pop()
+                      if cur.val <= in_order:
+                          is_valid = False
+                          break
+                      in_order = cur.val
+                      cur = cur.right
 
-            cur = root
-            prev = None
-            while cur:
-                prev = cur
-                if val > cur.val:
-                    if cur.right:
-                        cur = cur.right
-                    else:
-                        cur.right = TreeNode(val)
-                        break
-
-                elif val < cur.val:
-                    if cur.left:
-                        cur = cur.left
-                    else:
-                        cur.left = TreeNode(val)
-                        break
-                else:
-                    break
-
-            return root
-          ```
-    * 450: **Delete** Node in a BST (M)
-      * Definition
-        * Predecessor:
-          * maxium value in the left subtree
-        * Successor:
-          * minimum value in the right subtree
-      * 2 Cases for parent node:
-        * It is the root.
-        * It is not the root.
-      * 3 Cases for delete node
-        * It is a leaf node
-          * Return None to parent node
-        * It has only one subtree
-          * Return the one subtree to parent
-        * It has two subtrees:
-      * Recursive1: Time:O(h), Space:O(h)
-        * Ref:
-          * https://leetcode.com/articles/delete-node-in-a-bst/
-        * Python
-          ```python
-          def deleteNode(self, root: TreeNode, key: int) -> TreeNode:
-            def get_predecessor(node):
-                "maximum value in the left subtree"
-                cur = node.left
-                while cur.right:
-                    cur = cur.right
-
-                return cur
-
-            def get_successor(node):
-                "minimum value in the right subtree"
-                cur = node.right
-                while cur.left:
-                    cur = cur.left
-
-                return cur
-
-            def dfs(node, val):
-
-                if not node:  # not found
-                    return None
-
-                if val < node.val:
-                    node.left = dfs(node.left, val)
-
-                elif val > node.val:
-                    node.right = dfs(node.right, val)
-
-                else: # val == node.val:
-                    if not node.left and not node.right:
-                        return None  # leaf node
-
-                    if not node.left:
-                        return node.right
-
-                    if not node.right:
-                        return node.left
-
-                    if node.right:
-                        # minimum value in the right subtree
-                        successor = get_successor(node)
-                        node.val = successor.val
-                        node.right = dfs(node.right, successor.val)
-
-                    else:
-                        # maximum value in the left subtree
-                        predecessor = get_predecessor(node)
-                        node.val = predecessor.val
-                        node.left = dfs(node.left, predecessor.val)
-
-                return node
-
-            return dfs(root, key)
-          ```
-      * Recursive2: Time:O(h), Space:O(h)
-        * Find the node:
-          * case1: leaf node, return None to parent node
-          * case2: no left subtree, return right subtree
-          * case3: no right subtree, return left subtree
-          * case4: node.right replaces the node, and append node.left to the left of the successor
-        * Python
-          ```python
-          def deleteNode(self, root: TreeNode, key: int) -> TreeNode:
-            def get_successor(node):
-                cur = node.right
-                while cur.left:
-                    cur = cur.left
-                return cur
-
-            def dfs(node):
-                if not node:
-                    return None # not found
-
-                if key < node.val:
-                    node.left = dfs(node.left)
-                    return node
-
-                elif key > node.val:
-                    node.right = dfs(node.right)
-                    return node
-
-                else: # key == node.val
-
-                    # leaf node
-                    if not node.left and not node.right:
-                        return None
-
-                    if not node.left:
-                        return node.right
-
-                    if not node.right:
-                        return node.left
-
-                    right_min = get_successor(node)
-                    right_min.left = node.left
-
-                    # node.right replaces the node
-                    return node.right
-
-            if not root:
-                return None
-
-            return dfs(root)
-          ```
-      * Iterative2: Time:O(h), Space:O(h)
-        * Find the node:
-          * case1: leaf node, return None to parent node
-          * case2: no left subtree, return right subtree
-          * case3: no right subtree, return left subtree
-          * case4: node.right replaces the node, and append node.left to the left of the successor
-        * Python
-        ```python
-        def deleteNode(self, root: TreeNode, key: int) -> TreeNode:
-
-          def get_successor(node):
-              cur = node.right
-              while cur.left:
-                  cur = cur.left
-              return cur
-
-          def delete_node(node):
-
-              # leaf node
-              if not node.left and not node.right:
+              return is_valid
+            ```
+      * 700: **Search** in a Binary Search Tree (E)
+        * Approach1: Iterative, Time:O(n), Space:O(1)
+          * Python
+            ```python
+            def searchBST(self, root: TreeNode, val: int) -> TreeNode:
+              if not root:
                   return None
 
-              if not node.left:
+              target = None
+              cur = root
+              while cur:
+                  if val == cur.val:
+                      target = cur
+                      break
+                  elif val < cur.val:
+                      cur = cur.left
+                  else:
+                      cur = cur.right
+
+              return target
+            ```
+        * Approach2: Recursive, Time:O(n), Space:O(n)
+          * Python
+            ```python
+            def searchBST(self, root: TreeNode, val: int) -> TreeNode:
+              def dfs(node):
+                  if not node:
+                      return None
+
+                  if val == node.val:
+                      return node
+                  elif val < node.val:
+                      return dfs(node.left)
+                  else:
+                      return dfs(node.right)
+
+              return dfs(root)
+            ```
+      * 701: **Insert** into a BST (M)
+        * Recursive backtrack: Time:O(h), Space:O(h)
+          * Python
+            ```python
+            def insertIntoBST(self, root: TreeNode, val: int) -> TreeNode:
+              def dfs(node):
+                  if not node:
+                      return TreeNode(val)
+
+                  if val < node.val:
+                      node.left = dfs(node.left)
+                  else:
+                      node.right = dfs(node.right)
+
+                  return node
+
+              if not root:
+                  return TreeNode(val)
+
+              dfs(root)
+              return root
+            ```
+        * Recursive: Time:O(h), Space:O(h)
+          * Python
+            ```python
+            def insertIntoBST(self, root: TreeNode, val: int) -> TreeNode:
+              def dfs(node):
+                  if val > node.val:
+                      if node.right:
+                          dfs(node.right)
+                      else:
+                          node.right = TreeNode(val)
+
+                  elif val < node.val:
+                      if node.left:
+                          dfs(node.left)
+                      else:
+                          node.left = TreeNode(val)
+
+              if not root:
+                  return TreeNode(val)
+
+              dfs(root)
+
+              return root
+            ```
+        * Iterative: Time:O(h), Space:O(h)
+          * Python
+            ```python
+            def insertIntoBST(self, root: TreeNode, val: int) -> TreeNode:
+              if not root:
+                  return TreeNode(val)
+
+              cur = root
+              while cur:
+                  if val > cur.val:
+                      if cur.right:
+                          cur = cur.right
+                      else:
+                          cur.right = TreeNode(val)
+                          break
+
+                  elif val < cur.val:
+                      if cur.left:
+                          cur = cur.left
+                      else:
+                          cur.left = TreeNode(val)
+                          break
+                  else:
+                      break
+
+              return root
+            ```
+      * 450: **Delete** Node in a BST (M)
+        * Definition
+          * Predecessor:
+            * maxium value in the left subtree
+          * Successor:
+            * minimum value in the right subtree
+        * 2 Cases for parent of the target node:
+          * No parent : the target node is root -> return new root
+          * Having parent: the target node is not root -> return old root
+        * 3 Cases for subtrees of the target node:
+          * No subtrees: It is a leaf node.
+          * It has only one subtree.
+          * It has two subtrees.
+        * Recursive1: Time:O(h), Space:O(h)
+          * Ref:
+            * https://leetcode.com/articles/delete-node-in-a-bst/
+          * Python
+            ```python
+            def deleteNode(self, root: TreeNode, key: int) -> TreeNode:
+              def get_predecessor(node):
+                  "maximum value in the left subtree"
+                  cur = node.left
+                  while cur.right:
+                      cur = cur.right
+
+                  return cur
+
+              def get_successor(node):
+                  "minimum value in the right subtree"
+                  cur = node.right
+                  while cur.left:
+                      cur = cur.left
+
+                  return cur
+
+              def dfs(node, val):
+
+                  if not node:  # not found
+                      return None
+
+                  if val < node.val:
+                      node.left = dfs(node.left, val)
+
+                  elif val > node.val:
+                      node.right = dfs(node.right, val)
+
+                  else: # val == node.val:
+                      if not node.left and not node.right:
+                          return None  # leaf node
+
+                      if not node.left:
+                          return node.right
+
+                      if not node.right:
+                          return node.left
+
+                      if node.right:
+                          # minimum value in the right subtree
+                          successor = get_successor(node)
+                          node.val = successor.val
+                          node.right = dfs(node.right, successor.val)
+
+                      else:
+                          # maximum value in the left subtree
+                          predecessor = get_predecessor(node)
+                          node.val = predecessor.val
+                          node.left = dfs(node.left, predecessor.val)
+
+                  return node
+
+              return dfs(root, key)
+            ```
+        * Recursive2: Time:O(h), Space:O(h)
+          * Find the node:
+            * case1: leaf node, return None to parent node
+            * case2: no left subtree, return right subtree
+            * case3: no right subtree, return left subtree
+            * case4: node.right replaces the node, and append node.left to the left of the successor
+          * Python
+            ```python
+            def deleteNode(self, root: TreeNode, key: int) -> TreeNode:
+              def get_successor(node):
+                  cur = node.right
+                  while cur.left:
+                      cur = cur.left
+                  return cur
+
+              def dfs(node):
+                  if not node:
+                      return None # not found
+
+                  if key < node.val:
+                      node.left = dfs(node.left)
+                      return node
+
+                  elif key > node.val:
+                      node.right = dfs(node.right)
+                      return node
+
+                  else: # key == node.val
+
+                      # leaf node
+                      if not node.left and not node.right:
+                          return None
+
+                      if not node.left:
+                          return node.right
+
+                      if not node.right:
+                          return node.left
+
+                      right_min = get_successor(node)
+                      right_min.left = node.left
+
+                      # node.right replaces the node
+                      return node.right
+
+              if not root:
+                  return None
+
+              return dfs(root)
+            ```
+        * Iterative2: Time:O(h), Space:O(h)
+          * Find the node:
+            * case1: leaf node, return None to parent node
+            * case2: no left subtree, return right subtree
+            * case3: no right subtree, return left subtree
+            * case4: node.right replaces the node, and append node.left to the left of the successor
+          * Python
+            ```python
+            def deleteNode(self, root: TreeNode, key: int) -> TreeNode:
+
+              def get_right_min(node):
+                  cur = node.right
+                  while cur and cur.left:
+                      cur = cur.left
+                  return cur
+
+              def delete_node(node):
+                  # leaf node
+                  if not node.left and not node.right:
+                      return None
+
+                  # no left subtree
+                  if not node.left:
+                      return node.right
+
+                  # no right subtree
+                  if not node.right:
+                      return node.left
+
+                  right_min = get_right_min(node)
+                  right_min.left = node.left
+
+                  # node.right replaces the node
                   return node.right
 
-              if not node.right:
-                  return node.left
+              def find_target_and_parent(node):
+                  # find the target
+                  parent = None
+                  cur = node
+                  while cur:
+                      if key < cur.val:
+                          parent = cur
+                          cur = cur.left
 
-              right_min = get_successor(node)
-              right_min.left = node.left
+                      elif key > cur.val:
+                          parent = cur
+                          cur = cur.right
+                      else:
+                          break
 
-              # node.right replace the node
-              return node.right
+                  return parent, cur
 
+                if not root:
+                    return None
 
-          if not root:
-              return None
+                parent, target = find_target_and_parent(root)
 
-          prev = None
-          cur = root
-          while cur:
-              if key < cur.val:
+                # can not find the target node
+                if not target:
+                    return root
+
+                # target node is the root (no parent)
+                if not parent:
+                    return delete_node(target)
+
+                # target node has parent
+                if key < parent.val:
+                    parent.left = delete_node(target)
+                else:
+                    parent.right = delete_node(target)
+
+                return root
+            ```
+    * Inorder (sorting)
+      * 783: Minimum Distance Between BST Nodes
+        * Approach1: Inorder Traversal, Time:O(n), Space:O(n)
+          * Python
+            ```python
+            def minDiffInBST(self, root: TreeNode) -> int:
+              def get_inorder(node):
+                  cur = node
+                  stack = []
+                  while cur or stack:
+                      if cur:
+                          stack.append(cur)
+                          cur = cur.left
+                      else:
+                          node = stack.pop()
+                          yield node
+                          cur = node.right
+
+              if not root:
+                  return 0
+
+              min_diff = float('inf')
+              prev = None
+              for cur in get_inorder(root):
+                  if prev:
+                      min_diff = min(min_diff, cur.val - prev.val)
                   prev = cur
-                  cur = cur.left
-              elif key > cur.val:
-                  prev = cur
-                  cur = cur.right
-              else:  # cur.val == key
-                  break
 
-          if not cur:
-              return root # not found
+              return min_diff
+            ```
+      * 230: **Kth Smallest** Element in a BST (M)
+        * Approach1: Inorder Traversal, Time:O(h+k), Space:O(h)
+          * Python
+            ```python
+            def kthSmallest(self, root: TreeNode, k: int) -> int:
+              def get_inorder(node):
+                  cur = node
+                  stack = []
+                  while cur or stack:
+                      if cur:
+                          stack.append(cur)
+                          cur = cur.left
+                      else:
+                          node = stack.pop()
+                          yield node
+                          cur = node.right
 
-          if not prev:    # delete root node
-              return delete_node(cur)
+              cnt = 0
+              target = None
+              for node in get_inorder(root):
+                  cnt += 1
+                  if cnt == k:
+                      target = node.val
+                      break
 
-          if key < prev.val:
-              prev.left = delete_node(cur)
-          else:
-              prev.right = delete_node(cur)
-
-          return root
-        ```
+              return target
+            ```
+      * Follow up:
+        * What if the BST is modified (insert/delete operations) often and you need to find the kth smallest frequently? How would you optimize the kth Smallest routine?
+        * Doubly Linked List + Dict + Tree ??
     * 235: **Lowest Common Ancestor** of a Binary Search Tree (E)
       * Description:
         * The lowest common ancestor is defined between two nodes p and q as the lowest node in T that has both p and q as descendants (where we allow a node to be a descendant of itself)
@@ -11991,188 +12324,6 @@ Table of Content
                     break
 
             return lca
-          ```
-    * 108: Convert **Sorted Array** to Binary Search Tree	binary search (E)
-      * A **height-balanced binary** tree is defined as a binary tree in which the depth of the two subtrees of every node never differ by more than 1.
-      * Recursive: Time:O(n), Space:O(log(n))
-        * Python
-          ```python
-          def sortedArrayToBST(self, nums: List[int]) -> TreeNode:
-            def dfs(node, left, right):
-                mid = (left + right) // 2
-                node.val = nums[mid]
-
-                if left < mid:
-                    node.left = TreeNode(0)
-                    dfs(node.left, left, mid-1)
-
-                if right > mid:
-                    node.right = TreeNode(0)
-                    dfs(node.right, mid+1, right)
-
-            if not nums:
-                return None
-
-            root = TreeNode(0)
-            dfs(root, 0, len(nums)-1)
-            return root
-          ```
-      * Iterative: Time:O(n), Space:(log(n))
-        * Python
-          ```python
-          def sortedArrayToBST(self, nums: List[int]) -> TreeNode:
-            if not nums:
-                return None
-
-            root = TreeNode(0)
-            stack = [(root, 0, len(nums)-1)]
-
-            while stack:
-                node, left, right = stack.pop()
-                mid = (left + right) // 2
-                node.val = nums[mid]
-
-                if left < mid:
-                    node.left = TreeNode(0)
-                    stack.append((node.left, left, mid-1))
-
-                if right > mid:
-                    node.right = TreeNode(0)
-                    stack.append((node.right, mid+1, right))
-
-            return root
-
-          ```
-    * 109: Convert **Sorted List** to Binary Search Tree binary search (M)
-      * Approach1: Two Pointer to find middle, Time:O(nlog(n)), space:O(log(n))
-        * Time: O(nlogn)
-          * n/2 + 2*n/4 + 4*n/8 + ... logn * 1
-        * This is not a good approach, since the input will be changed.
-      * Approach2: Transfer to array, Time:O(log(n)), Space:O(n)
-        * Pytyon
-          ```python
-          def sortedListToBST(self, head: ListNode) -> TreeNode:
-            if not head:
-                return None
-
-            nums = []
-            while head:
-                nums.append(head.val)
-                head = head.next
-
-            left = 0
-            right = len(nums)-1
-            root = TreeNode(0)
-            stack = [(root, left, right)]
-
-            while stack:
-                node, left, right = stack.pop()
-                mid = (left + right)//2
-                node.val = nums[mid]
-                if left < mid:
-                    node.left = TreeNode(0)
-                    stack.append((node.left, left, mid-1))
-
-                if right > mid:
-                    node.right = TreeNode(0)
-                    stack.append((node.right, mid+1, right))
-
-            return root
-          ```
-      * Approach3: Inorder Simulation, Time:O(n), Space:O(log(n)
-    * 230: **Kth Smallest** Element in a BST (M)
-      * Approach1: Inorder Traversal, Time:O(h+k), Space:O(h)
-        * Python
-          ```python
-          def kthSmallest(self, root: TreeNode, k: int) -> int:
-            cur = root
-            stack = []
-            cnt = 0
-            target = None
-            while cur or stack:
-                if cur:
-                    stack.append(cur)
-                    cur = cur.left
-                else:
-                    cur = stack.pop()
-                    cnt += 1
-                    if cnt == k:
-                        target = cur.val
-                        break
-
-                    cur = cur.right
-
-            return target
-          ```
-      * Follow up:
-        * What if the BST is modified (insert/delete operations) often and you need to find the kth smallest frequently? How would you optimize the kth Smallest routine?
-        * Doubly Linked List + Dict + Tree ??
-    * 285: **Inorder Successor** in BST (M)
-      * successor:
-        * if the node with the smallest key greater than p.val
-        * Successor is the smallest node in the inorder traversal after the current one.
-      * Approach1: Inorder Traversal: Time:O(h), Space:O(h)
-        * Python
-          ```python
-          def inorderSuccessor(self, root: 'TreeNode', p: 'TreeNode') -> 'TreeNode':
-            if not root or not p:
-                return None
-
-            cur = root
-            stack = []
-            is_found = False
-            successor = None
-            while cur or stack:
-                if cur:
-                    stack.append(cur)
-                    cur = cur.left
-
-                else:
-                    cur = stack.pop()
-
-                    if is_found:
-                        successor = cur
-                        break
-
-                    if cur is p:
-                        is_found = True
-
-                    cur = cur.right
-
-            return successor
-          ```
-    * 510: **Inorder Successor** in BST II (M)
-      * Two cases:
-        * Have right subtree:
-          * return minimum value of right subtree
-        * Do not have right subtree
-          * find the successor from ancestors
-      * Approach1: Iterative: Time:O(h), Space:O(1)
-        * Python
-          ```python
-          def inorderSuccessor(self, node: 'Node') -> 'Node':
-            if not node:
-                return None
-
-            successor = None
-            key = node.val
-
-            # case1, have the right subtree, return the minimum value from right subtree
-            if node.right:
-                cur = node.right
-                while cur.left:
-                    cur = cur.left
-                successor = cur
-
-            # case2, do not have the right subtree, try to find from ancestors
-            else:
-                cur = node.parent
-                while cur and cur.val < key:
-                    cur = cur.parent
-                if cur and cur.val > key:
-                    successor = cur
-
-            return successor
           ```
     * 270: **Closest** Binary Search Tree Value (E)
       * Inorder Recursive:
@@ -17929,7 +18080,6 @@ Table of Content
       * 105: Construct Binary Tree from **Preorder** and **Inorder** Traversal (M)
       * 106: Construct Binary Tree from **Inorder** and **Postorder** Traversal	(M)
     * PostOrder:
-      * 145: Binary Tree **Postorder** Traversal (H)
       * 250: Count **Univalue Subtrees** (M)
       * 366: Find Leaves of Binary Tree (M)
       * **Lowest Common Ancestor** of a **Binary Tree**
@@ -17937,14 +18087,12 @@ Table of Content
         * 124: Binary Tree **Maximum Path Sum** (H)
         * 687: Longest **Univalue Path** (E)
         * 549: Binary Tree Longest Consecutive Sequence II (M)
-    * BFS & DFS:
+    * Level Order:
       * 107: Binary Tree Level Order Traversal II
-        * Recursive
-      * 113: Path **Sum** II (M)
+      * 199: Binary Tree **Right Side** View
       * 314: Binary Tree **Vertical Order** Traversal	(M)
-      * 101: **Symmetric** Tree (E)
-      * 297: **Serialize** and **Deserialize** Binary Tree (H)
       * 116 & 117: **Populating Next Right Pointers** in Each Node (M)
+    * Binary Tree Slots
     * Binary Search Tree (BST)
       * 098: Validate Binary Search Tree (M)
       * 450: **Delete** Node in a BST (M)
