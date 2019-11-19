@@ -1,4 +1,8 @@
 Table of Contents
+- [FAQ](#faq)
+- [Walking through a Problem](#walking-through-a-problem)
+- [Optimize & Solve Technique](#optimize--solve-technique)
+- [Codeforces](#codeforces)
 - [Complexity](#complexity)
 - [Data Structures](#data-structures)
   - [Linked List](#linked-list)
@@ -23,6 +27,70 @@ Table of Contents
   - [Dynamic Programming](#dynamic-programming)
     - [Recursion and Dynamic Programming](#recursion-and-dynamic-programming)
     - [Dynamic Programming & Memorization](#dynamic-programming--memorization)
+
+
+## FAQ
+  * [What is tail recursion?](https://stackoverflow.com/questions/33923/what-is-tail-recursion)
+
+## [Walking through a Problem](http://www.crackingthecodinginterview.com/resources.html)
+  1. Listen Carefully
+     * For example:
+       * Given two arrays that are **sorted** ...
+  2. Draw an Example
+     * **There'a an art to drawing an example though**.
+     * Most examples are too small or are special cases.
+  3. State a Brute Force
+     * Even if it's obvious for you, it's not ncecessarily obvious for all candidates. You don't want your interviewer to think you're struggling to see even the wasy solution.
+  4. Optimize
+     * Look for any **unused information**.
+     * Use a fresh example
+     * Solve it "incorrectly"
+     * Make **time vs. space** tradeoff
+     * **Precompute** information
+       * Is there a way that you can reorganize the data (sortig, etc.)
+     * Use a **hash table**
+     * Thank about the best conceivable runtime
+  5. Walk Through
+     * Whiteboard coding is **slow**, you need to make sure that you get is as close to "perfect" in the beginning as possible.
+  6. Implement
+     * Modularized code
+     * Error checks
+       * A good compromise here is to add a todo and then just explain out loud what you'd like to test
+     * Use other classes/structs where appropriate
+     * Good variable names
+  7. Test
+     * Conceptual test
+       * Does the code do what you think it should do?
+     * Weird looking code
+       * Doulbe check that line of code that says x = length -2.
+     * Hot spots
+       * Like base cases in recursive code. Integer division. Null nodes in binary tree.
+     * Small test cases
+     * Special cases
+       * null of single element values.
+
+## [Optimize & Solve Technique](http://www.crackingthecodinginterview.com/resources.html)
+1. Look for **BUD**
+   * **B**ottlenecks *
+    * For example, suppose you have a two-step algorithm where you first sort the array and then you find elements with a particular property.
+      * The first step is O(nlong(n)) and the second step if O(n).
+      * Perhaps you could reduce the second step to O(1), but would it matter? Not too much as o(nlong(n)) is the bottleneck
+   * **U**nnecessary work
+   * **D**uplicated work
+2. Do it yourself
+3. **Simplify and Generalize** *
+   * First, we simplify or tweak some constraint, such as the data type. Then we solve this new simplified version of the problem. Finally, once we have an algorithm for the simplified problem, we try to adapt it for the more complex version.
+4. **Base case and Build** **
+   * Solve the problem first for a base case (e.g., n=1) and then try to build up from there. **When we get to more complex cases (often n=3 or n=4), we try to build those using the prior solution**.
+5. Data Structure Brainstorm **
+   * Try to run through a list of data structures and try to apply each one.
+6. **Best Conceivable Runtime** (BCR)
+   * The best conceivable runtie is, literally, the **best runtime** you could conceive of a solution to a problem. You can easily prove that there is no way you could beat the BCR.
+
+
+## [Codeforces](https://codeforces.com/)
+  * If you can achieve **1800 scores within 1 hour** that would be highly recommended for Google applicants.
+
 
 
 ## Complexity
