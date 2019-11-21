@@ -1423,7 +1423,32 @@ Table of Content
      * 340: Longest Substring with At Most K Distinct Characters (H)
      * 159: Longest Substring with At Most Two Distinct Characters (H)
   * **Sliding Window:**
-     * 003:	Longest Substring **Without Repeating** Characters (M)
+     * 643: Maximum Average Subarray I (E)
+        * Description:
+          * Given an array consisting of n integers, find the **contiguous subarray of given length k** that has the maximum average value.
+        * Approach1: Sliding window, Time:O(n), Space:O(1)
+          * Python
+            ```python
+            def findMaxAverage(self, nums: List[int], k: int) -> float:
+              if not nums:
+                  return float(0)
+
+              if k == 1:
+                  return float(max(nums))
+
+              max_avg = float('-inf')
+              cur_sum = float(0)
+              for i, n in enumerate(nums):
+                  cur_sum += n
+
+                  # maintain the window with size k
+                  if (i + 1) >= k:
+                      max_avg = max(max_avg, cur_sum/k)
+                      cur_sum -= nums[i-k+1]
+
+              return max_avg
+            ```
+     * 003:	Longest Substring Without Repeating Characters (M)
        * Description:
          * Given a string, find the length of the longest substring without repeating characters.
        * Approach1: Brute Force, Time:O(n^2), Space:O(n)
@@ -1582,8 +1607,8 @@ Table of Content
               UPPER_BOUND = len(s) + 1
               res = [UPPER_BOUND, None, None]
 
-              start = end = 0
-              while end < len(txt):
+              start = 0
+              for end in range(len(txt)):
                   c = txt[end]
                   if c in COUNTER_P:
                       counter_t[c] += 1
@@ -1605,8 +1630,6 @@ Table of Content
                           if counter_t[r_c] < COUNTER_P[r_c]:
                               formed_t -= 1
                       start += 1
-
-                  end += 1
 
               return "" if res[0] == UPPER_BOUND else s[res[1]: res[2]+1]
             ```
@@ -1656,19 +1679,17 @@ Table of Content
 
               UPPER_BOUND = len(nums) + 1
               min_len = UPPER_BOUND
-              start = end = 0
               acc = 0
-
-              while end < len(nums):
+              start = 0
+              for end in range(len(txt)):
                   acc += nums[end]
 
                   while start <= end and acc >= s:
                       w_len = end - start + 1
                       min_len = min(min_len, w_len)
+                      # shrink the window
                       acc -= nums[start]
                       start += 1
-
-                  end += 1
 
               return 0 if min_len == UPPER_BOUND else min_len
             ```
@@ -1676,10 +1697,10 @@ Table of Content
        * Description:
         * Your are given an array of **positive integers nums**.
         * Count and print the number of (**contiguous**) subarrays where the product of all the elements in the subarray is less than k.
-        *
-       * Approach1: Brute Force
-       * Approach2: Sliding window
-         * **It would be better to think about the subarray is endied with right.**
+       * Approach1: Brute Force, Time:O(n^2), Space:O(1)
+       * Approach2: Sliding window, Time:O(n), Space:O(1)
+         * The challenge is how to add all subarray once.
+         * **It would be better to think about the subarray is ended with right.**
          * Example:
           ```
           step1:
@@ -1699,18 +1720,17 @@ Table of Content
             [ 1, 2, 3, 4]
               l      r
               l = 0, r = 2
-             all contiguous subarray ending with 2 and < k is 3
+             all contiguous subarray ending with 3 and < k is 3
              [3]
              [2,3]
              [1,2,3]
-
           step4:
             [ 1, 2, 3, 4]
               l  l`    r
               l = 0, r = 3 but prod >= k
-              move left until find new left whose produt < k>
+              move left until find new left whose produt < k
               if new left is l`
-              all contiguous subarray ending with 2 and < k is 3
+              all contiguous subarray ending with 4 and < k is 3
               [4]
               [3,4]
               [2,3,4]
@@ -1727,40 +1747,20 @@ Table of Content
             while right < len(nums):
                 prod *= nums[right]
 
-                while prod >= k:
+                while left <= right and prod >= k:
                     prod /= nums[left]
                     left += 1
 
+                # It would be better to think about the subarray is endied with right
                 cnt += (right - left + 1)
                 right += 1
 
             return cnt
           ```
-     * 643: Maximum Average Subarray I (E)
-        * Description:
-          * Given an array consisting of n integers, find the **contiguous subarray of given length k** that has the maximum average value.
-        * Approach1: Sliding window, Time:O(n), Space:O(1)
-          * Python
-            ```python
-            def findMaxAverage(self, nums: List[int], k: int) -> float:
-              if not nums:
-                  return float(0)
-
-              if k == 1:
-                  return float(max(nums))
-
-              max_avg = float('-inf')
-              cur_sum = float(0)
-              for i, n in enumerate(nums):
-                  cur_sum += n
-
-                  if (i + 1) >= k:
-                      max_avg = max(max_avg, cur_sum/k)
-                      cur_sum -= nums[i-k+1]
-
-              return max_avg
-            ```
      * 644: Maximum Average Subarray II (H)
+       * Description:
+         * Given an array consisting of n integers, find the contiguous subarray whose length is greater than or equal to k that has the maximum average value. And you need to output the maximum average value.
+     * 239: Sliding Window Maximum (H)
   * **KMP**:
     * Reference:
       * [Concept](https://www.youtube.com/watch?v=GTJr8OvyEVQ)
@@ -1785,35 +1785,38 @@ Table of Content
           * Seach from LPS array and find the proper start position of pattern comparison pointer (in this example, index 3).
     * 028: Implement **strStr** (E)
       * Approach1: Brute Force, Time: O(mn), Space(1)
-         * Python Solution
-         ```python
-         def strStr(self, haystack: str, needle: str) -> int:
-            txt, pattern = haystack, needle
-            res = not_found = -1
+         * Python
+          ```python
+          def strStr(self, haystack: str, needle: str) -> int:
+              txt, pattern = haystack, needle
+              res = NOT_FOUND = -1
 
-            if not txt and not pattern:
-                return 0
+              if not txt and not pattern:
+                  return 0
 
-            if not pattern:
-                return 0
+              if not pattern:
+                  return 0
 
-            if len(pattern) > len(txt):
-                return not_found
+              if len(pattern) > len(txt):
+                  return NOT_FOUND
 
-            for start in range(len(txt)-len(pattern)+1):
-                t, p = start, 0
-                while p < len(pattern):
-                    if txt[t] != pattern[p]:
-                        break
-                    t, p = t+1, p+1
-                    if p == len(pattern):
-                        res = t - len(pattern)
+              for start in range(len(txt)-len(pattern)+1):
+                  t, p = start, 0
+                  for p in range(len(pattern)):
+                      if txt[t] != pattern[p]:
+                          break
 
-                if res != not_found:
-                    break
+                      t += 1
+                      p += 1
+                      if p == len(pattern):
+                          res = t - len(pattern)
+                          break
 
-            return res
-         ```
+                  if res != NOT_FOUND:
+                      break
+
+              return res
+            ```
       * Approach2: **KMP (substring match)**, Time: O(m+n), Space: O(n)
          * Python
            ```python
@@ -2269,16 +2272,16 @@ Table of Content
             if not pattern:
                 return True
 
-            is_subsequence = False
+            is_subseq = False
             i = 0
             for c in txt:
                 if pattern[i] == c:
                     i += 1
                     if i == len(pattern):
-                        is_subsequence = True
+                        is_subseq = True
                         break
 
-            return is_subsequence
+            return is_subseq
           ```
     * 1143: Longest Common Subsequence (M)
       * See DP
@@ -2286,6 +2289,7 @@ Table of Content
       * See DP
     * 300: Longest Increasing Subsequence (**LIS**) (M)
       * See Binary Search
+    * 792: Number of Matching Subsequences
     * 187: Repeated DNA Sequences (M)
     * 115: Distinct Subsequences (H)
   * **Reorder**
@@ -2853,6 +2857,60 @@ Table of Content
 
             return d.values()
          ```
+    * 848: Shifting Letters (M)
+      * Approach1: shift array, Time:O(n), Space:O(n)
+        * Python
+          ```python
+          def shiftingLetters(self, S: str, shifts: List[int]) -> str:
+            if not S:
+                return None
+
+            if not shifts:
+                return S
+
+            ORD_A = ord('a')
+            array = list(S)
+
+            shift_memo = [0] * len(shifts)
+            for i, shift in enumerate(shifts):
+                shift_memo[0] += shift
+                if i + 1 < len(shift_memo):
+                    shift_memo[i+1] -= shift
+
+            cur_shift = 0
+            for i, shift in enumerate(shift_memo):
+                cur_shift += shift
+                shift_memo[i] = cur_shift
+
+            for i, shift in enumerate(shift_memo):
+                c = array[i]
+                # ord(c)-ORD_A is the base shift
+                array[i] = chr(ORD_A + (ord(c)-ORD_A + shift)%26)
+
+            return "".join(array)
+          ```
+      * Approach2: maintain a shift variable, Time:O(n), Space:O(1)
+        * Python
+          ```python
+          def shiftingLetters(self, S: str, shifts: List[int]) -> str:
+            if not S:
+                return None
+
+            if not shifts:
+                return S
+
+            ORD_A = ord('a')
+            array = list(S)
+
+            cur_shifts = sum(shifts)
+            for i, shift in enumerate(shifts):
+                c = array[i]
+                # ord(c)-ORD_A is the base shift
+                array[i] = chr(ORD_A + (ord(c)-ORD_A + cur_shifts)%26)
+                cur_shifts -= shift
+
+            return "".join(array)
+          ```
   * Deduction:
     * 293: Flip Game (E)
         * python solution
@@ -3452,33 +3510,34 @@ Table of Content
           case3: [------------]
                           [--------]
 
-         ```
+          ```
       * Approach1: Brute Force, Time:O(n^2)
       * Approach2: Greedy, Time: O(nlogn), Space: O(n)
         * Sort the intervals by start time,
         * Update the output if there exists interval overlap.
         * Python
-          ```python
-          def merge(self, intervals: List[List[int]]) -> List[List[int]]:
-            if not intervals:
-                return []
+            ```python
+            def merge(self, intervals: List[List[int]]) -> List[List[int]]:
+              if not intervals:
+                  return []
 
-            START, END = 0, 1
+              START, END = 0, 1
 
-            intervals.sort(key=lambda interval: interval[START])
-            merged_interval = [intervals[0][:]]
+              intervals.sort(key=lambda interval: interval[START])
+              merged_intervals = [intervals[0][:]]
 
-            for i in range(1, len(intervals)):
-                last = merged_interval[-1]
-                cur = intervals[i]
+              for i in range(1, len(intervals)):
+                  last = merged_intervals[-1]
+                  nxt = intervals[i]
 
-                if last[END] >= cur[START]:
-                    last[END] = max(last[END], cur[END])
-                else:
-                    merged_interval.append(cur[:])
+                  if last[END] >= nxt[START]:
+                      # merge
+                      last[END] = max(last[END], nxt[END])
+                  else:
+                      merged_intervals.append(nxt[:])
 
-            return merged_interval
-          ```
+              return merged_intervals
+            ```
     * 435: Non-overlapping Intervals (M)
       * Description:
         * Given a collection of intervals, find the minimum number of intervals you need to remove to make the rest of the intervals non-overlapping.
@@ -3546,19 +3605,19 @@ Table of Content
             prev_end = intervals[0][END]
 
             for i in range(1, len(intervals)):
-                cur = intervals[i]
+                nxt = intervals[i]
                 """
                 END == START is not overlap
                 """
-                if prev_end <= cur[START]:
-                    prev_end = cur[END]
+                if prev_end <= nxt[START]:
+                    prev_end = nxt[END]
                 else:
                     """
                     keep the interval with smaller end time,
                     that is, remove the interval with bigger end time
                     """
                     remove_cnt += 1
-                    prev_end = min(prev_end, cur[END])
+                    prev_end = min(prev_end, nxt[END])
 
             return remove_cnt
           ```
@@ -3643,20 +3702,19 @@ Table of Content
               if not nums:
                   return 0
 
-              max_sum = nums[0]
-              cur = nums[0]
+              cur_sum = max_sum = nums[0]
               for i in range(1, len(nums)):
-                  n = nums[i]
-                  cur = max(cur + n, n)
-                  max_sum = max(max_sum, cur)
+                  cur_sum = max(cur_sum+nums[i], nums[i])
+                  max_sum = max(max_sum, cur_sum)
 
               return max_sum
-          ```
+            ```
     * 152: Maximum **Product** Subarray (M)
       * Description:
         * Given an integer array nums, find the contiguous subarray within an array (containing at least one number) which has the largest product.
+      * The challenge is how to handle negative values.
       * Approach1: Brute Force, Time:O(n^2)
-      * Approach2: DP-1, Time: O(n), Space: O(1)
+      * Approach2: DP with memo, Time: O(n), Space: O(n)
         * Python
           ```python
           def maxProduct(self, nums: List[int]) -> int:
@@ -3677,24 +3735,207 @@ Table of Content
 
             return max_product
           ```
-      * Approach3: DP-2, Time: O(n), Space: O(1)
+      * Approach3: DP with variables, Time: O(n), Space: O(1)
         * The concept is just like 53: maximum subarray, but need to notice negative value in the array.
-        * Python Solution
+        * Python
           ```python
           def maxProduct(self, nums: List[int]) -> int:
-            max_product = cur_min = cur_max = nums[0]
+            max_product = cur_max = cur_min = nums[0]
+
             for i in range(1, len(nums)):
-                # we redefine the extremums by swapping them
-                # when multiplied by a negative
-                if nums[i] < 0:
-                    cur_min, cur_max = cur_max, cur_min
+                n = nums[i]
 
-                cur_max = max(nums[i], cur_max*nums[i])
-                cur_min = min(nums[i], cur_min*nums[i])
+                if n < 0:
+                    cur_max, cur_min = cur_min, cur_max
 
-                max_product = max(max_product, g_max)
+                cur_max = max(n, cur_max*n)
+                cur_min = max(n, cur_min*n)
+                max_product = max(max_product, cur_max)
 
             return max_product
+          ```
+    * 238: **Product** of Array **Except Self** (M)
+      * Description:
+        * example:
+          * Input: [1,2,3,4], Output: [24,12,8,6]
+      * Approach1: Allow to use Division, Time:O(n), Space:O(1)
+        * We can simply take the product of all the elements in the given array and then, for each of the elements xx of the array, we can simply find product of array except self value by dividing the product by xx.
+        * Containing zero cases
+          * exactly 1 zero
+          * more than 1 zero
+        * Python
+          ```python
+          def productExceptSelf(self, nums: List[int]) -> List[int]:
+            product = 1
+            zero_idx = zero_cnt = 0
+            output = [0] * len(nums)
+
+            for idx, n in enumerate(nums):
+                if n == 0:
+                    zero_cnt += 1
+                    zero_idx = idx
+                else:
+                    product *= n
+
+            if zero_cnt == 1:
+              output[zero_idx] = product
+            elif zero_cnt == 0:
+              for idx, n in enumerate(nums):
+                output[idx] = product // n
+            return output
+            ```
+      * Approach2: Not Allow to use Division dp-1: Time:O(n), Space:O(n)
+        * **For every given index i, we will make use of the product of all the numbers to the left of it and multiply it by the product of all the numbers to the right**.
+        * Python:
+        ```python
+        def productExceptSelf(self, nums: List[int]) -> List[int]:
+          n = len(nums)
+          output = [0] * n
+          left_p = [1] * n
+          right_p = [1] * n
+
+          # 1 to n-1
+          for i in range(1, n):
+              left_p[i] = left_p[i-1] * nums[i-1]
+
+          # n-2 to 0
+          for i in range(n-2, -1, -1):
+              right_p[i] = right_p[i+1] * nums[i+1]
+
+          for i, (l, r) in enumerate(zip(left, right)):
+              output[i] = l * r
+
+          return output
+        ```
+      * Approach3: Not Allow to use Division dp-2: Time:O(n), Space:O(n)
+          * We can use a variable to replace right_product array
+          * Python:
+            ```python
+            def productExceptSelf(self, nums: List[int]) -> List[int]:
+              n = len(nums)
+              output = [0] * n
+              left_p = [1] * n
+
+              # 1 to n-1
+              for i in range(1, n):
+                  left_p[i] = left_p[i-1] * nums[i-1]
+
+              right = 1
+              for i in range(n-1, -1, -1):
+                  output[i] = left_p[i] * right
+                  right *= nums[i]
+
+              return output
+            ```
+    * 228: **Summary Ranges** (M)
+      * Description
+        * Given a sorted integer array without duplicates, return the summary of its ranges.
+        * Input:
+          * [0,1,2,4,5,7]
+        * Output:
+          * ["0->2","4->5","7"]
+      * Approach1: Time:O(n), Space:O(1)
+        * Python
+          ```python
+          def summaryRanges(self, nums: List[int]) -> List[str]:
+              def append_output(start, end):
+                if start == end:
+                    output.append(str(nums[start]))
+                else:
+                    output.append(f'{nums[start]}->{nums[end]}')
+
+            n = len(nums)
+            output = list()
+            start = 0
+            while start < n:
+                end = start
+                while end + 1 < n and nums[end]+1 == nums[end+1]:
+                    end += 1
+
+                append_output(start, end)
+
+                start = end + 1
+
+            return output
+          ```
+      * Approach2: Change input, Time:O(n), Space:O(1)
+        * This is not a good paractice
+        * Python
+          ```python
+          def findMissingRanges(self, nums: List[int], lower: int, upper: int) -> List[str]:
+            def format_output(left_b, right_b):
+                if right_b - left_b <= 1:
+                    return
+                elif right_b - left_b == 2:
+                    output.append(str(left_b+1))
+                else:
+                    output.append(f'{left_b+1}->{right_b-1}')
+
+            left_b = lower - 1
+            output = []
+            nums.append(upper+1)
+            for n in nums:
+                right_b = n
+                format_output(left_b, right_b)
+                left_b = right_b
+
+            return output
+          ```
+    * 163: **Missing Ranges** (M)
+      * Description
+        * Given a sorted integer array nums, where the range of elements are in the inclusive range [lower, upper], return its missing ranges.
+        * Example:
+          * Input: nums = [0, 1, 3, 50, 75], lower = 0 and upper = 99
+          * Output: ["2", "4->49", "51->74", "76->99"]
+      * Approach1: Time:O(n), Space:O(1)
+        * Need to know how to handle the boundary properly.
+        * Python
+          ```python
+          def findMissingRanges(self, nums: List[int], lower: int, upper: int) -> List[str]:
+            def append_output(left_b, right_b):
+                diff = right_b - left_b
+                if diff == 2:
+                    output.append(str(left_b+1))
+                elif diff > 2:
+                    output.append(f"{left_b+1}->{right_b-1}")
+
+            output = []
+            left_b = lower - 1
+
+            for n in nums:
+                right_b = n
+                append_output(left_b, right_b)
+                left_b = right_b
+
+            right_b = upper + 1
+            append_output(left_b, right_b)
+
+            return outputt(left_boundary, right_boundary, output)
+            return output
+          ```
+  * Prefix Sum:
+    * 303: Range Sum Query - Immutable (E)
+      * Approach1: Prefix sum
+        * Python
+          ```python
+          class NumArray:
+            def __init__(self, nums: List[int]):
+                self.n = len(nums)
+                self.d = {-1: 0}
+                prefix = 0
+                for idx, n in enumerate(nums):
+                    prefix += n
+                    self.d[idx] = prefix
+
+            def sumRange(self, i: int, j: int) -> int:
+                if i < 0 or j > self.n-1 or i > j:
+                    return None
+
+                # prefix[start] + target = prefix[end]
+                start = i-1
+                end = j
+                target = self.d[end] - self.d[start]
+                return target
           ```
     * 325: Maximum Size Subarray Sum **Equals k** (M)
       * Description
@@ -3713,7 +3954,7 @@ Table of Content
                   max_len = max(end-start, max_len)
             return max_len
           ```
-      * Approach2: Hash Table, Time: O(n), Space: O(n)
+      * Approach2: prefix sum, Time: O(n), Space: O(n)
         * [Concept](https://leetcode.com/problems/maximum-size-subarray-sum-equals-k/discuss/77784/O(n)-super-clean-9-line-Java-solution-with-HashMap)
           * Use hash table
             * key: accumulation value
@@ -3803,149 +4044,13 @@ Table of Content
                     cnt += 1
 
                 if cnt in d:
+                    # don't update d since we want to find max
                     max_len = max(max_len, idx-d[cnt])
                 else:
                     d[cnt] = idx
 
             return max_len
           ```
-    * 238: **Product** of Array **Except Self** (M)
-      * Description:
-        * example:
-          * Input: [1,2,3,4], Output: [24,12,8,6]
-      * Approach1: Allow to use Division, Time:O(n), Space:O(1)
-        * We can simply take the product of all the elements in the given array and then, for each of the elements xx of the array, we can simply find product of array except self value by dividing the product by xx.
-        * Containing zero cases
-          * exactly 1 zero
-          * more than 1 zero
-        * Python
-          ```python
-          def productExceptSelf(self, nums: List[int]) -> List[int]:
-            product = 1
-            zero_idx = zero_cnt = 0
-            output = [0] * len(nums)
-
-            for idx, n in enumerate(nums):
-                if n == 0:
-                    zero_cnt += 1
-                    zero_idx = idx
-                else:
-                    product *= n
-
-            if zero_cnt == 1:
-              output[zero_idx] = product
-            elif zero_cnt == 0:
-              for idx, n in enumerate(nums):
-                output[idx] = product // n
-            return output
-            ```
-      * Approach2: Not Allow to use Division1: Time:O(n), Space:O(n)
-        * **For every given index i, we will make use of the product of all the numbers to the left of it and multiply it by the product of all the numbers to the right**.
-        * Python:
-        ```python
-        def productExceptSelf(self, nums: List[int]) -> List[int]:
-          n = len(nums)
-          output = [0] * n
-          left_p = [1] * n
-          right_p = [1] * n
-
-          # 1 to n-1
-          for i in range(1, n):
-              left_p[i] = left_p[i-1] * nums[i-1]
-
-          # n-2 to 0
-          for i in range(n-2, -1, -1):
-              right_p[i] = right_p[i+1] * nums[i+1]
-
-          for i, (l, r) in enumerate(zip(left, right)):
-              output[i] = l * r
-
-          return output
-        ```
-      * Approach3: Not Allow to use Division2: Time:O(n), Space:O(n)
-          * We can use a variable to replace right_product array
-          * Python:
-            ```python
-            def productExceptSelf(self, nums: List[int]) -> List[int]:
-              n = len(nums)
-              output = [0] * n
-              left_p = [1] * n
-
-              # 1 to n-1
-              for i in range(1, n):
-                  left_p[i] = left_p[i-1] * nums[i-1]
-
-              right = 1
-              for i in range(n-1, -1, -1):
-                  output[i] = left_p[i] * right
-                  right *= nums[i]
-
-              return output
-            ```
-    * 228: **Summary Ranges** (M)
-      * Description
-        * Given a sorted integer array without duplicates, return the summary of its ranges.
-        * Input:
-          * [0,1,2,4,5,7]
-        * Output:
-          * ["0->2","4->5","7"]
-      * Approach1: Time:O(n), Space:O(1)
-        * Python
-          ```python
-          def summaryRanges(self, nums: List[int]) -> List[str]:
-              def append_output(start, end):
-                if start == end:
-                    output.append(str(nums[start]))
-                else:
-                    output.append(f'{nums[start]}->{nums[end]}')
-
-            n = len(nums)
-            output = list()
-            start = 0
-            while start < n:
-                end = start
-                while end + 1 < n and nums[end]+1 == nums[end+1]:
-                    end += 1
-
-                append_output(start, end)
-
-                start = end + 1
-
-            return output
-          ```
-    * 163: **Missing Ranges** (M)
-      * Description
-        * Given a sorted integer array nums, where the range of elements are in the inclusive range [lower, upper], return its missing ranges.
-        * Example:
-          * Input: nums = [0, 1, 3, 50, 75], lower = 0 and upper = 99
-          * Output: ["2", "4->49", "51->74", "76->99"]
-      * Approach1: Time:O(n), Space:O(1)
-        * Need to know how to handle the boundary properly.
-        * Python
-          ```python
-          def findMissingRanges(self, nums: List[int], lower: int, upper: int) -> List[str]:
-            def append_output(left_b, right_b):
-                diff = right_b - left_b
-                if diff == 2:
-                    output.append(str(left_b+1))
-                elif diff > 2:
-                    output.append(f"{left_b+1}->{right_b-1}")
-
-            output = []
-            left_b = lower - 1
-
-            for n in nums:
-                right_b = n
-                append_output(left_b, right_b)
-                left_b = right_b
-
-            right_b = upper + 1
-            append_output(left_b, right_b)
-
-            return outputt(left_boundary, right_boundary, output)
-            return output
-          ```
-    * 239: Sliding Window Maximum (H)
   * **Order**
     * 189: Rotate Array (E)
       * Approach1: Time:O(n), Space:O(1)
@@ -5049,29 +5154,27 @@ Table of Content
             return self.val < other.val
 
       def kthSmallest(self, matrix: List[List[int]], k: int) -> int:
+          if not matrix or not matrix[0]:
+              return None
+
           row, col = len(matrix), len(matrix[0])
-          heap = []
-          """
-          reduce complexity of heapify from mlogm to m
-          we don't need to push more than 'k' elements in the heap
-          since the val in those row is greater than matrix[k][0]
-          """
-          for r in range(min(k, row)):
-            heap.append(Element(r, 0, matrix[r][0]))
-          heapq.heapify(heap)
 
-          cnt = 0
+          min_heap = []
+          for i in range(min(row, k)):
+              min_heap.append(Element(r=i, c=0, val=matrix[i][0]))
+          heapq.heapify(min_heap)
+
           kth_min = None
-          while heap and cnt < k:
-              r, c, kth_min = heap[0].r, heap[0].c, heap[0].val
+          cnt = 0
+          while min_heap and cnt < k:
+              r, c, kth_min = min_heap[0].r, min_heap[0].c, min_heap[0].val
               cnt += 1
-
               if c + 1 < col:
-                  heapq.heapreplace(heap, Element(r, c+1, matrix[r][c+1]))
+                heapq.heapreplace(min_heap, Element(r, c+1, matrix[r][c+1]))
               else:
-                  heapq.heappop(heap)
+                heapq.heappop(min_heap)
 
-          return kth_min
+          return kth_min if cnt == k else None
       ```
    * Approach3: Binary Search, Time:O(log(mn)*(m+n)), Space:O(1)
      * Ref:
@@ -6101,26 +6204,24 @@ Table of Content
       * Python
         ```python
         def lengthOfLIS(self, nums: List[int]) -> int:
-          n = len(nums)
+          if not nums:
+              return 0
 
-          if n <= 1:
-              return n
+          memo = [1] * len(nums)
+          max_lcis = 1
+          for i in range(len(nums)):
+              lcis = 1
+              for j in range(i):
+                  if nums[i] > nums[j]:
+                      lcis = max(lcis, 1 + memo[j])
 
-          max_lis = 1
-          memo = [1] * n
-          for i in range(1, n):
-              lis = 1
-              for prev in range(0, i):
-                  if nums[i] > nums[prev]:
-                      lis = max(lis, memo[prev]+1)
-
-              memo[i] = lis
-              max_lis = max(max_lis, lis)
+              memo[i] = lcis
+              max_lcis = max(max_lcis, lcis)
 
           """
           max lis is not memo[-1]
           """
-          return max_lis
+          return max_lcis
         ```
     * Approach2: Binary Search, Time:O(nlogn), Space:O(n)
       * Ref:
@@ -7968,7 +8069,7 @@ Table of Content
     * For Python, heapq is min-heap
   * Merge k Sorted Lists
     * 023: Merge k Sorted Lists (H)
-      * Please refer linked list section (use min heap)
+      * Please refer linked list section
     * 378: **Kth Smallest Element** in a Sorted Matrix (M)
       * Please refer matrix section
     * 373: **Find K Pairs** with Smallest Sums (M)
@@ -8033,9 +8134,6 @@ Table of Content
             def __lt__(self, other):
                 return self.val < other.val
 
-            def __repr__(self):
-                return str(self.val)
-
           def kSmallestPairs(self, nums1: List[int], nums2: List[int], k: int) -> List[List[int]]:
               if not nums1 or not nums2:
                   return []
@@ -8061,7 +8159,8 @@ Table of Content
           ```
   * **Schedule**:
     * 253: Meeting Rooms II (M)
-      * Find the minimum requirement of the meeting rooms.
+      * Description:
+        * Find the minimum requirement of the meeting rooms.
       * Approach1: Brute Force, Time: O(n^2), Space: O(1)
       * Approach2: Greedy using Min Heap: O(nlog(n)), Space: O(n)
         * Algo
@@ -8077,20 +8176,16 @@ Table of Content
                 return 0
 
             START, END = 0, 1
-            intervals.sort(key=lambda interval: interval[START])
+            intervals.sort(key = lambda interval: interval[START])
+
             min_heap = [intervals[0][END]]
 
             for i in range(1, len(intervals)):
-                cur = intervals[i]
-
-                if min_heap[0] > cur[START]:
-                    heapq.heappush(min_heap, cur[END])
-
+                nxt = intervals[i]
+                if nxt[START] >= min_heap[0]:
+                    heapq.heapreplace(min_heap, nxt[END])
                 else:
-                    """
-                    replace the ending meeting
-                    """
-                    heapq.heapreplace(min_heap, cur[END])
+                    heapq.heappush(min_heap, nxt[END])
 
             return len(min_heap)
           ```
@@ -8103,11 +8198,9 @@ Table of Content
         * trip[i] = [num_passengers, start_location, end_location]
       * Similar to Meeting Rooms II
       * Approach1: Brute Force, Time:O(n^2), Space:O(1)
-      * Approach2: min-heap, Time:O(nlogn), Space:O(n)
+      * Approach2: greedy, min-heap, Time:O(nlogn), Space:O(n)
         * Python
           ```python
-          CNT, START, END = 0, 1, 2
-
           class Element(object):
               def __init__(self, trip):
                   self.trip = trip
@@ -8122,16 +8215,16 @@ Table of Content
               trips.sort(key=lambda trip: trip[START])
               min_heap = []
 
-              res = True
+              passengers = True
               for trip in trips:
                   # any passengers need to get off?
                   while min_heap and min_heap[0].trip[END] <= trip[START]:
-                      top = heapq.heappop(min_heap)
+                      pop = heapq.heappop(min_heap)
                       # release the seats
-                      capacity += top.trip[CNT]
+                      passengers -= pop.trip[CNT]
 
-                  capacity -= trip[CNT]
-                  if capacity < 0:
+                  passengers += trip[CNT]
+                  if passengers > capacity:
                       res = False
                       break
 
@@ -8139,7 +8232,7 @@ Table of Content
 
               return res
           ```
-      * Approach3: Time:O(max(n, m)), Space:O(m)
+      * Approach3: diff array, Time:O(max(n, m)), Space:O(m)
         * M is the number of stations
         * Since stations cnt is limited, we can add passenger count to the start location, and remove them from the end location, and process the array the check if the current people exceeds the capacity.
         * Python
@@ -8150,17 +8243,16 @@ Table of Content
               if not trips:
                   return True
 
-              stations = [0] * 1000
-
+              stations = [0] * 1001
               for trip in trips:
                   stations[trip[START]] += trip[CNT]
                   stations[trip[END]] -= trip[CNT]
 
               res = True
-              acc_cnt = 0
+              passengers = 0
               for cnt in stations:
-                  acc_cnt += cnt
-                  if acc_cnt > capacity:
+                  passengers += cnt
+                  if passengers > capacity:
                       res = False
                       break
 
@@ -8171,7 +8263,8 @@ Table of Content
         * There are n flights, and they are labeled from 1 to n.
         * We have a list of flight bookings.  The i-th booking bookings[i] = [i, j, k] means that we booked k seats from flights labeled i to j inclusive.
         * Return an array answer of length n, representing the number of seats booked on each flight in order of their label.
-      * Approach1:
+      * Approach1: brute force, Time:O(n^2), Space:O(n)
+      * Approach2: diff array, Time:O(n), Space:O(n)
         * Python
           ```python
           def corpFlightBookings(self, bookings: List[List[int]], n: int) -> List[int]:
@@ -8180,10 +8273,7 @@ Table of Content
 
             for b in bookings:
                 flights[b[START]-1] += b[CNT]
-                """
-                booking from booking[START] to booking[END]
-                release day is booking[END] + 1
-                """
+                # b[END]-1+1
                 end = b[END]
                 if end < n:
                     flights[end] -= b[CNT]
@@ -8431,7 +8521,7 @@ Table of Content
               counter = collections.Counter(nums)
 
               """
-              2. Append the character to the bucket according to the cnt
+              1. Append the character to the bucket according to the cnt
               """
               freq_bucket = [None] * (len(nums) + 1)
               for key, cnt in counter.items():
@@ -8441,7 +8531,7 @@ Table of Content
                   freq_bucket[cnt].append(key)
 
               """
-              3. Create the top k response
+              1. Create the top k response
               """
               top_k = []
               for cnt in range(len(nums), 0, -1):
@@ -15936,7 +16026,7 @@ Table of Content
             return cur
         ```
   * **Subsequence**:
-    * 1143: Longest Common Subsequence, LCS (M)
+    * 1143: Longest Common Subsequence, (LCS) (M)
       * Ref:
          * https://www.youtube.com/watch?v=NnD96abizww
          * https://leetcode.com/problems/longest-common-subsequence/discuss/348884/C%2B%2B-with-picture-O(nm)
@@ -16099,8 +16189,78 @@ Table of Content
 
           return memo[-1]
         ```
-    * 300: Longest Increasing Subsequence (**LIS**) (M)
+    * 300: Longest Increasing Subsequence (LIS) (M)
       * see binary search
+    * 673: Number of Longest Increasing Subsequence (LIS) (M)
+      * Approach1: DP-1, Time:O(n^2), Space:O(n)
+        * Python
+          ```python
+          def findNumberOfLIS(self, nums: List[int]) -> int:
+            if not nums:
+                return 0
+
+            lis_memo = [0] * len(nums)
+            cnt_memo = [0] * len(nums)
+            max_lis = 1
+
+            for j in range(len(nums)):
+                lis = 1
+                # 1. find the lip of end with position j
+                for i in range(j):
+                    if nums[j] > nums[i]:
+                        lis = max(lis, 1+lis_memo[i])
+
+                lis_memo[j] = lis
+                max_lis = max(max_lis, lis)
+
+                if lis == 1:
+                    cnt_memo[j] = 1
+                else:
+                    # 2. update the lcs cnt with lis
+                    for i in range(j):
+                        if nums[j] > nums[i] and lis_memo[i] + 1 == lis:
+                            cnt_memo[j] += cnt_memo[i]
+
+            lis_cnt = 0
+            for lis, cnt in zip(lis_memo, cnt_memo):
+                if lis == max_lis:
+                    lis_cnt += cnt
+
+            return lis_cnt
+          ```
+      * Approach2: DP-2, Time:O(n^2), Space:O(n)
+        * Python
+          ```python
+          def findNumberOfLIS(self, nums: List[int]) -> int:
+            if not nums:
+                return 0
+
+            lis_memo = [1] * len(nums)
+            cnt_memo = [1] * len(nums)
+            max_lis = 1
+
+            for j in range(len(nums)):
+                lis = 1
+                # 1. find the lip of end with position j
+                for i in range(j):
+                    if nums[j] <= nums[i]:
+                        continue
+                    if lis_memo[i] + 1 > lis_memo[j]:
+                        lis_memo[j] = 1 + lis_memo[i]
+                        cnt_memo[j] = cnt_memo[i]
+                    elif lis_memo[i] + 1 == lis_memo[j]:
+                        cnt_memo[j] += cnt_memo[i]
+
+                max_lis = max(max_lis, lis_memo[j])
+
+            lis_cnt = 0
+            for lis, cnt in zip(lis_memo, cnt_memo):
+                if lis == max_lis:
+                    lis_cnt += cnt
+
+            return lis_cnt
+          ```
+      * Approach3: Segment Tree, Time:O(nlogn)
     * 674: Longest Continuous Increasing Subsequence (**LCIS**) (E)
       * Approach1: Iterative + memo, Time:O(n), Space:O(n)
         * Python
@@ -16139,7 +16299,7 @@ Table of Content
                     lcis = 1
 
             return max_lcis
-          ```    *
+          ```
   * **Best Time to Buy and Sell Stock**
     * Ref:
       * [General solution](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/discuss/108870/Most-consistent-ways-of-dealing-with-the-series-of-stock-problems)
