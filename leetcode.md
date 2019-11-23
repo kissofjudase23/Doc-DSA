@@ -7838,46 +7838,43 @@ Table of Content
         * example:
           * " 2-1 + 2 " = 3
           *  "(1+(4+5+2)-3)+(6+8)" = 23
-      * Appraoch1 One Stack, Time:O(n), Space:O(n)
+      * Appraoch1 2 Stacks, Time:O(n), Space:O(n)
         * Python
           ```python
           def calculate(self, s: str) -> int:
-            stack = []
-            """
-            default sign is positive (1)
-            """
+            if not s:
+                return 0
+
+            n_s = []
+            sign_s = []
             result, sign = 0, 1
+
             i = 0
             while i < len(s):
                 c = s[i]
+
                 if c.isdigit():
                     n = 0
                     while i < len(s) and s[i].isdigit():
                         n = n * 10 + (ord(s[i]) - ord('0'))
                         i += 1
-
                     result += sign * n
-
-                elif c == '(':
-                    stack.append(result)
-                    stack.append(sign)
-                    result, sign = 0, 1
-                    i += 1
-
-                elif c == ')':
-                    sign = stack.pop()
-                    prev = stack.pop()
-                    result = prev + sign * result
-                    i += 1
-
                 elif c == '+':
                     sign = 1
                     i += 1
-
                 elif c == '-':
                     sign = -1
                     i += 1
-
+                elif c == '(':
+                    sign_s.append(sign)
+                    n_s.append(result)
+                    result, sign = 0, 1
+                    i += 1
+                elif c == ')':
+                    sign = sign_s.pop()
+                    prev = n_s.pop()
+                    result = prev + sign * result
+                    i += 1
                 else:
                     i += 1
 
@@ -7892,6 +7889,7 @@ Table of Content
           * " 6-4 / 2 " = 4
           * "2*(5+5*2)/3+(6/2+8)" = 21
           * "(2+6* 3+5- (3*14/7+2)*5)+3"=-12
+    * 770: Basic Calculator IV (H)
   * 394: Decode String (M)
     * Description:
       * example:
@@ -7904,8 +7902,11 @@ Table of Content
       * Python
         ```python
         def decodeString(self, s: str) -> str:
+          if not s:
+              return ""
+
           buf = []
-          prfix_s = []
+          buf_s = []
           cnt_s = []
           ord_0 = ord('0')
 
@@ -7915,24 +7916,22 @@ Table of Content
               if c.isdigit():
                   cnt = 0
                   while i < len(s) and s[i].isdigit():
-                      cnt = cnt * 10 + (ord(s[i]) - ord('0'))
+                      cnt = cnt * 10 + (ord(s[i]) - ord_0)
                       i += 1
-                  cnt_s.append(cnt)
-
               elif c == '[':
-                  prfix_s.append([''.join(buf)])
+                  cnt_s.append(cnt)
+                  buf_s.append(''.join(buf))
+                  # or clean the buffer
                   buf = []
                   i += 1
-
               elif c == ']':
+                  prefix = buf_s.pop()
                   cnt = cnt_s.pop()
-                  repeated_str = ''.join(buf)
-                  buf = prfix_s.pop()
-                  buf.append(cnt * repeated_str)
+                  postfix = ''.join(buf)
+                  buf = [prefix + cnt*postfix]
                   i += 1
-
               else:
-                  buf.append(s[i])
+                  buf.append(c)
                   i += 1
 
           return ''.join(buf)
@@ -7948,18 +7947,20 @@ Table of Content
       * Python
         ```python
         def verifyPreorder(self, preorder: List[int]) -> bool:
-          low_boundary = float('-inf')
+          low = float('-inf')
           stack = []
           is_bst = True
           for n in preorder:
 
-              if n < low_boundary:
+              if n < low:
                   is_bst = False
                   break
 
               while stack and n > stack[-1]:
-                  # pop until find the current lower bound
-                  lower = stack.pop()
+                  """
+                  pop until find the current lower bound
+                  """
+                  low = stack.pop()
 
               stack.append(n)
 
@@ -8026,34 +8027,23 @@ Table of Content
     * Approach1: one stack, Time:O(n), Space:O(N)
       * Python
         ```python
-        def str2tree(self, s: str) -> TreeNode:
+        def str2tree(self, s):
           if not s:
               return None
 
-          i = 0
+          root = None
           stack = []
+          ORD_0 = ord('0')
+          i = 0
           sign = 1
-          while i < len(s):
+          for i in range(len(s)):
               c = s[i]
-              if c == '(':
-                  i += 1
-              elif c == ')':
-                  stack.pop()
-                  i += 1
-              else:
-                  """
-                  c == '-' or c.isdigit()
-                  """
+              if c == '-':
+                  sign = -1
+              elif c.isdigit():
+                  val = ord(c)-ORD_0
+                  new = TreeNode(sign*val)
                   sign = 1
-                  if c == '-':
-                      sign = -1
-                      i += 1
-                  n = 0
-                  while i < len(s) and s[i].isdigit():
-                      n = n * 10 + (ord(s[i]) - ord('0'))
-                      i += 1
-
-                  new = TreeNode(sign * n)
                   if stack:
                       parent = stack[-1]
                       if not parent.left:
@@ -8061,8 +8051,11 @@ Table of Content
                       else:
                           parent.right = new
                   stack.append(new)
+              elif c == ')':
+                  root = stack.pop()
+                  print(root.val)
 
-          return stack[-1]
+          return stack[0]
         ```
 ### Heap (Priority Queue)
   * Note:
@@ -8913,79 +8906,95 @@ Table of Content
         ```python
         class DLinkedNode(object):
 
-            __slots__ == ['key', 'val', 'prev', 'next']
+          __slots__ = ['key', 'val', 'prev', 'next']
 
-            def __init__(self, key=None, val=None):
-                # key is necessary for key pop operation
-                self.key = key
-                self.val = val
-                self.prev = None
-                self.next = None
-
-
-        class DLinkedList(object):
-
-            def __init__(self):
-                self.head = DLinkedNode(0)
-                self.tail = DLinkedNode(0)
-
-                self.head.next = self.tail
-                self.tail.prev = self.head
-
-            def insert_to_head(self, node) -> None:
-                node.prev = self.head
-                node.next = self.head.next
-
-                self.head.next.prev = node
-                self.head.next = node
-
-            def remove_node(self, node) -> None:
-                node.prev.next = node.next
-                node.next.prev = node.prev
-
-            def pop_tail(self) -> DLinkedNode:
-                if self.tail.prev is self.head:
-                    return None
-
-                pop = self.tail.prev
-                self.remove_node(pop)
-                return pop
-
-            def move_to_head(self, node) -> None:
-                self.remove_node(node)
-                self.insert_to_head(node)
+          def __init__(self, key=None, val=None):
+              # key is necessary for key pop operation
+              self.key = key
+              self.val = val
+              self.prev = None
+              self.next = None
 
 
-        class LRUCache:
-            def __init__(self, capacity: int):
-                self.nodes = dict()
-                self.list = DLinkedList()
-                self.cap = capacity
-                self.len = 0
+      class DLinkedList(object):
 
-            def get(self, key: int) -> int:
-                if key not in self.nodes:
-                    return -1
+          def __init__(self):
+              self.head = DLinkedNode(0)
+              self.tail = DLinkedNode(0)
 
-                node = self.nodes[key]
-                self.list.move_to_head(node)
-                return node.val
+              self.head.next = self.tail
+              self.tail.prev = self.head
 
-            def put(self, key: int, value: int) -> None:
-                if key in self.nodes:
-                    node = self.nodes[key]
-                    node.val = value
-                    self.list.move_to_head(node)
-                else:
-                    if self.len == self.cap:
-                        pop = self.list.pop_tail()
-                        self.nodes.pop(pop.key)
-                        self.len -= 1
+          def append_to_head(self, new):
+              new.prev = self.head
+              new.next = self.head.next
 
-                    new = DLinkedNode(key, value)
-                    self.nodes[key] = new
-                    self.list.insert_to_head(new)
-                    self.len += 1
+              self.head.next.prev = new
+              self.head.next = new
+
+          def pop_from_tail(self):
+              if self.tail.prev is self.head:
+                  return None
+
+              pop = self.tail.prev
+              self._remove_node(pop)
+              return pop
+
+          def _remove_node(self, node):
+              node.prev.next = node.next
+              node.next.prev = node.prev
+
+          def move_to_head(self, node):
+              self._remove_node(node)
+              self.append_to_head(node)
+
+
+      class LRUCache(object):
+
+          def __init__(self, capacity):
+              """
+              :type capacity: int
+              """
+              self.nodes = dict()
+              self.dlist = DLinkedList()
+              self.cap = capacity
+              self.len = 0
+
+          def get(self, key):
+              """
+              :type key: int
+              :rtype: int
+              """
+              if key not in self.nodes:
+                  return -1
+
+              node = self.nodes[key]
+              self.dlist.move_to_head(node)
+              return node.val
+
+          def put(self, key, value):
+              """
+              :type key: int
+              :type value: int
+              :rtype: None
+              """
+              if self.cap < 1:
+                  return
+
+              if key in self.nodes:
+                  node = self.nodes[key]
+                  node.val = value
+                  self.dlist.move_to_head(node)
+              else:
+                  if self.len == self.cap:
+                      pop_node = self.dlist.pop_from_tail()
+                      self.nodes.pop(pop_node.key)
+                      self.len -= 1
+
+                  new = DLinkedNode(key, value)
+                  self.nodes[key] = new
+                  self.dlist.append_to_head(new)
+                  self.len += 1
         ```
   * 460: LFU Cache (H)
     * Example:
@@ -9035,15 +9044,15 @@ Table of Content
         ```python
         class DLinkedNode(object):
 
-          __slots__ == ['key', 'val', 'freq', 'prev', 'next']
+            __slots__ = ['key', 'val', 'prev', 'next', 'freq']
 
-          def __init__(self, key=None, val=None, freq=0):
-              # key is necessary for key pop operation
-              self.key = key
-              self.val = val
-              self.freq = freq
-              self.prev = None
-              self.next = None
+            def __init__(self, key=None, val=None, freq=None):
+                # key is necessary for key pop operation
+                self.key = key
+                self.val = val
+                self.freq = freq
+                self.prev = None
+                self.next = None
 
 
         class DLinkedList(object):
@@ -9051,58 +9060,60 @@ Table of Content
             def __init__(self):
                 self.head = DLinkedNode(0)
                 self.tail = DLinkedNode(0)
+
                 self.head.next = self.tail
                 self.tail.prev = self.head
+
                 self.len = 0
 
-            def __len__(self) -> int:
-                return self.len
+            def __len__(self):
+                    return self.len
 
-            def insert_to_head(self, node) -> None:
-                node.prev = self.head
-                node.next = self.head.next
+            def append_to_head(self, new):
+                new.prev = self.head
+                new.next = self.head.next
 
-                self.head.next.prev = node
-                self.head.next = node
+                self.head.next.prev = new
+                self.head.next = new
                 self.len += 1
 
-            def remove_node(self, node) -> None:
-                node.prev.next = node.next
-                node.next.prev = node.prev
-                self.len -= 1
-
-            def pop_tail(self) -> DLinkedNode:
-                if not self.len:
+            def pop_from_tail(self):
+                if self.tail.prev is self.head:
                     return None
 
                 pop = self.tail.prev
                 self.remove_node(pop)
                 return pop
 
+            def remove_node(self, node):
+                node.prev.next = node.next
+                node.next.prev = node.prev
+                self.len -= 1
 
-        class LFUCache:
 
-            def __init__(self, capacity: int):
+        class LFUCache(object):
+
+            def __init__(self, capacity):
                 self.nodes = dict()
                 self.freq_lists = collections.defaultdict(DLinkedList)
                 self.min_freq = 0
                 self.cap = capacity
                 self.len = 0
 
-            def _update(self, node) -> None:
+            def _update(self, node):
                 # 1. remove node from old linked list
                 prev_list = self.freq_lists[node.freq]
                 prev_list.remove_node(node)
 
                 # 2. update min_freq if lengh of prev_list is 0
-                if self.min_freq == node.freq and not prev_list:
+                if self.min_freq == node.freq and len(prev_list) == 0:
                     self.min_freq += 1
 
                 # 3. increase freq and append the node to the new list
                 node.freq += 1
-                self.freq_lists[node.freq].insert_to_head(node)
+                self.freq_lists[node.freq].append_to_head(node)
 
-            def get(self, key: int) -> int:
+            def get(self, key):
                 if key not in self.nodes:
                     return -1
 
@@ -9110,20 +9121,19 @@ Table of Content
                 self._update(node)
                 return node.val
 
-            def put(self, key: int, value: int) -> None:
-
-                if self.cap <= 0:
+            def put(self, key, value):
+                if self.cap < 1:
                     return
 
                 if key in self.nodes:
                     node = self.nodes[key]
-                    self._update(node)
                     node.val = value
+                    self._update(node)
 
                 else:
                     # 1. pop node from linked list with min frequency if necessary
                     if self.len == self.cap:
-                        pop = self.freq_lists[self.min_freq].pop_tail()
+                        pop = self.freq_lists[self.min_freq].pop_from_tail()
                         self.nodes.pop(pop.key)
                         self.len -= 1
 
@@ -9131,7 +9141,7 @@ Table of Content
                     freq = 1
                     new = DLinkedNode(key, value, freq)
                     self.nodes[key] = new
-                    pop = self.freq_lists[freq].insert_to_head(new)
+                    self.freq_lists[freq].append_to_head(new)
 
                     # 3. update freq and len
                     self.min_freq = freq
@@ -9315,6 +9325,8 @@ Table of Content
             ```
     * Same tree
       * 100: **Same** Tree (E)
+        * Description:
+          * Given two non-empty binary trees s and t, check whether tree t has exactly the same structure and node values with a subtree of s. A subtree of s is a tree consists of a node in s and all of this node's descendants.
         * Approach1: Recursive Time:O(n), Space:O(n)
           * Python
             ```python
@@ -10116,10 +10128,6 @@ Table of Content
 
             return dfs(t1, t2)
           ```
-
-
-      * Description:
-        * Given two non-empty binary trees s and t, check whether tree t has exactly the same structure and node values with a subtree of s. A subtree of s is a tree consists of a node in s and all of this node's descendants.
     * 872: Leaf-Similar Trees (E)
   * **Inorder**
     * Traversal
@@ -14681,10 +14689,10 @@ Table of Content
 
           return parentheses[-1]
           ```
-  * **Subset**
+  * **Subset** (set)
     * 078: Subsets (M)
       * Description:
-        * Given a set of **distinct** integers, nums, return all possible subsets (the power set).
+        * Given a set of **distinct integers**, nums, return all possible subsets (the power set).
         * Ref:
           * [C++ Recursive/Iterative/Bit-Manipulation](https://leetcode.com/problems/subsets/discuss/27278/C%2B%2B-RecursiveIterativeBit-Manipulation)
       * Approach1: Recursive, Time: O(n*2^n), Space:(2^n):
@@ -14786,19 +14794,21 @@ Table of Content
         * Python
             ```python
             def subsets(self, nums: List[int]) -> List[List[int]]:
-              n = len(nums)
-              subs = [[] for i in range(2**n)]
+              if not nums:
+                  return []
 
-              for sub_idx in range(len(subs)):
-                  for num_idx in range(n):
-                      if sub_idx & (1 << num_idx):
-                          subs[sub_idx].append(nums[num_idx])
+              subs = [[] for _ in range(2**len(nums))]
+
+              for sub_idx, sub in enumerate(subs):
+                  for n_idx, n in enumerate(nums):
+                      if sub_idx & (1 << n_idx):
+                          sub.append(n)
 
               return subs
             ```
     * 090: Subsets II (M)
       * Given a collection of integers that might **contain duplicates**, nums, return all possible subsets (the power set).
-      * Approach1: Recursive
+      * Approach1: backtracking
         * Python
           ```python
           def subsetsWithDup(self, nums: List[int]) -> List[List[int]]:
@@ -14809,7 +14819,11 @@ Table of Content
                     return
 
                 for i in range(start, n):
-                    # skip duplicate in the same position
+                    """
+                    skip duplicate in the same position
+                    for example: [1,1,2]
+                                  ^ ^
+                    """
                     if i > start and nums[i] == nums[i-1]:
                         continue
 
@@ -14864,10 +14878,15 @@ Table of Content
             for i in range(len(nums)):
                 n = nums[i]
 
-                # same idea, we can not insert duplicate val in the same position
+                """
+                same idea like backtracking
+                we can not insert duplicate val in the same position
+                """
                 if i > 0 and nums[i] == nums[i-1]:
+                    # the source is previous cur
                     cur = [sub + [n] for sub in cur]
                 else:
+                    # the source is subs
                     cur = [sub + [n] for sub in subs]
 
                 subs.extend(cur)
@@ -14920,7 +14939,7 @@ Table of Content
               -> [2,5] -> not enough elements, backtrack
           ...
         ```
-      * Approach1: Recursive Time: O(k * n!/(n!*(n-k))!), Space: O(n!/(n!*(n-k)!)
+      * Approach1: backtracking Time: O(k * n!/(n!*(n-k))!), Space: O(n!/(n!*(n-k)!)
         * Time: O(k* n!/(n!*(n-k)!)
           * total n!/(n!*(n-k)! combinations
           * k is the time to pupulate each combinations
@@ -14931,7 +14950,7 @@ Table of Content
             def combine(self, n: int, k: int) -> List[List[int]]:
               def backtrack(start, cur):
                   if len(cur) == k:
-                      comb.append(cur[:])
+                      combs.append(cur[:])
                       return
 
                   # skip the cases that can not satisfy k == len(cur) in the future
@@ -14946,28 +14965,27 @@ Table of Content
               if k > n:
                   return []
 
-              comb = []
+              combs = []
               cur = []
               backtrack(1, cur)
-              return comb
+              return combs
             ```
       * Approach2: Iterative
         * The same idea like recursive approach, use stack to control backtrack
         * Python
           ```python
-          def combin_iter_v2(n: int, k: int) -> List[List[int]]:
-            """
-            Ref: https://leetcode.com/problems/combinations/discuss/27029/AC-Python-backtracking-iterative-solution-60-ms
-            Time: O(k* n!/(n!*(n-k)!))
-            Space: O(n!/(n!*(n-k)!))   (extra space: O(k))
-            """
-            comb, cur = [], []
+          def combine(self, n: int, k: int) -> List[List[int]]:
+            if n < k or k < 1:
+                return []
+
+            combs = []
+            cur = []
             start = 1
             while True:
-                l = len(cur)
 
-                if l == k:
-                    comb.append(cur[:])
+                if len(cur) == k:
+                    combs.append(cur[:])
+
                 """
                 k - l > n - start + 1 means that l will not satisfy k in the future
                 in fact, (k - l) > (n - start + 1)  can cover start > n when (l-k) = -1
@@ -14976,14 +14994,17 @@ Table of Content
                 2. can not satisfity in the future: (k - l) > (n - start + 1)
                 3. out of boundary
                 """
-                if l == k or (k - l) > (n - start + 1) or start > n:
-                    if not cur: # done !
+                if len(cur) == k or k - len(cur) > n - start + 1 or start > n:
+                    if not cur:
                         break
+
                     start = cur.pop() + 1
+
                 else:
                     cur.append(start)
                     start += 1
-            return comb
+
+            return combs
           ```
     * 039: Combination Sum (M)
       * Description:
@@ -15001,7 +15022,7 @@ Table of Content
           ```
       * Time:
         * https://leetcode.com/problems/combination-sum/discuss/16634/If-asked-to-discuss-the-time-complexity-of-your-solution-what-would-you-say
-      * Approach1: Recursive:
+      * Approach1: backtracking:
         * Python
           ```python
           def combinationSum(self, candidates: List[int], target: int) -> List[List[int]]:
@@ -15038,7 +15059,7 @@ Table of Content
     * 040: Combination Sum II (M)
       * Given a collection of candidate numbers (candidates) and a target number (target), **find all unique combinations** in candidates where the candidate numbers sums to target.
       * Each number in candidates **may only be used once** in the combination.
-      * Approach1: BackTracking:
+      * Approach1: backtracking:
         * Python
           ```python
           def combinationSum2(self, candidates: List[int], target: int) -> List[List[int]]:
@@ -15119,14 +15140,14 @@ Table of Content
               perms = [[nums[0]]]
 
               for i in range(1, len(nums)):
-                  num = nums[i]
-                  new_perms = []
+                  n = nums[i]
+                  next_perms = []
 
                   for perm in perms:
-                      for b in range(0, len(perm)+1):
-                          new_perms.append(perm[:b] + [num] + perm[b:])
+                      for b in range(len(perm)+1):
+                          next_perms.append(perm[:b] + [n] + perm[b:])
 
-                  perms = new_perms
+                  perms = next_perms
 
               return perms
             ```
@@ -15143,34 +15164,31 @@ Table of Content
             * Use Counter to Control recursive call.
         * Python
           ```python
-          def permuteUnique(self, nums):
-              def backtrack(counter, cur):
-                  if len(cur) == n:
-                      results.append(cur[:])
-                      return
+          def permuteUnique(self, nums: List[int]) -> List[List[int]]:
+            def backtrack(counter, cur):
+                if len(cur) == len(nums):
+                    perms.append(cur[:])
+                    return
 
-                  # don't pick duplicates in the same position
-                  for num in counter:
-                      # take only once in each permuation
-                      if counter[num] == 0:
-                          continue
+                # don't pick duplicates in the same position
+                for c, cnt in counter.items():
+                    if cnt == 0:
+                        continue
 
-                      cur.append(num)
-                      counter[num] -= 1
+                    cur.append(c)
+                    counter[c] -= 1
+                    backtrack(counter, cur)
+                    cur.pop()
+                    counter[c] += 1
 
-                      # pop the key when the number == 0 and append later ??
-                      backtrack(counter, cur)
+            if not nums:
+                return []
 
-                      cur.pop()
-                      counter[num] += 1
-
-              n = len(nums)
-              results = []
-              cur = []
-              counter = Counter(nums)
-              backtrack(counter, cur)
-
-              return results
+            perms = []
+            cur = []
+            counter = collections.Counter(nums)
+            backtrack(counter, cur)
+            return perms
           ```
       * Approach2: Iterative bottom up
         * Ref
@@ -15202,53 +15220,60 @@ Table of Content
 
             perms = [[]]
             for n in nums:
-                new_perms = []
+                next_perms = []
                 for perm in perms:
                     for b in range(len(perm)+1):
-                        new_perms.append(perm[:b] + [n] + perm[b:])
+                        next_perms.append(perm[:b] + [n] + perm[b:])
                         # To handle duplication
                         # just avoid inserting a number AFTER any of its duplicates.
                         if b < len(perm) and perm[b] == n:
                             break
 
-                perms = new_perms
+                perms = next_perms
             return perms
           ```
-    * 267: Palindrome **Permutation** II (M)
+    * 267: Palindrome Permutation II (M)
        * Description:
          * Given a string s, return all the **palindromic permutations** (without duplicates) of it. Return an empty list if no palindromic permutation could be form.
        * Approach1: backtrack, Time:O(n!), Space:O(n)
          * Python
           ```python
           def generatePalindromes(self, s: str) -> List[str]:
-            def get_odd_cnt_char(counter):
+            def get_odd_cnt_chr(counter):
                 odd_cnt = 0
-                odd_char = None
+                odd_chr = None
                 for c, cnt in counter.items():
                     if cnt % 2:
                         odd_cnt += 1
-                        odd_char = c
-                return odd_cnt, odd_char
+                        odd_chr = c
 
-            def backtrack(cur, counter):
+                return odd_cnt, odd_chr
+
+            def backtrack(counter, cur):
                 if len(cur) == len(s):
-                    perm.append(''.join(cur))
+                    perms.append("".join(cur))
                     return
 
                 for c, cnt in counter.items():
                     if cnt < 2:
                         continue
-                    counter[c] -= 2
+
                     cur.append(c)
                     cur.appendleft(c)
-                    backtrack(cur, counter)
+                    counter[c] -= 2
+                    backtrack(counter, cur)
+                    counter[c] += 2
                     cur.pop()
                     cur.popleft()
-                    counter[c] += 2
+
+
+            if not s:
+                return []
 
             counter = collections.Counter(s)
-            odd_cnt, odd_chr = get_odd_cnt_char(counter)
+            odd_cnt, odd_chr = get_odd_cnt_chr(counter)
 
+            # can not form valid palindrmic permutation
             if odd_cnt > 1:
                 return []
 
@@ -15256,13 +15281,110 @@ Table of Content
             if odd_cnt == 1:
                 cur.append(odd_chr)
 
-            perm = []
-            backtrack(cur, counter)
-            return perm
+            perms = []
+            backtrack(counter, cur)
+            return perms
+          ```
+    * 784: Letter Case Permutation (E)
+      * Approach1: backtracking, Time:O(n^2n), Space: O(n^2n)
+        * Python
+          ```python
+          def letterCasePermutation(self, S: str) -> List[str]:
+            def backtrack(i, cur):
+                if i == len(S):
+                    perms.append("".join(cur))
+                    return
+
+                if cur[i].isdigit():
+                    backtrack(i+1, cur)
+                else:
+                    cur[i] = cur[i].upper()
+                    backtrack(i+1, cur)
+                    cur[i] = cur[i].lower()
+                    backtrack(i+1, cur)
+
+            if not S:
+                return []
+
+            perms = []
+            cur = list(S)
+            backtrack(0, cur)
+            return perms
+          ```
+      * Approach2: iterative, Time:O(n^2n), Space: O(n^2n)
+        * Python
+          ```python
+          def letterCasePermutation(self, S: str) -> List[str]:
+            if not S:
+                return []
+
+            perms = [[]]
+
+            for c in S:
+                if c.isdigit():
+                    for perm in perms:
+                        perm.append(c)
+                else:
+                    next_perms = []
+                    for lower_perm in perms:
+                        # make a copy
+                        upper_perm = lower_perm[:]
+                        lower_perm.append(c.lower())
+                        upper_perm.append(c.upper())
+
+                        next_perms.append(lower_perm)
+                        next_perms.append(upper_perm)
+
+                    perms = next_perms
+
+            return [''.join(perm) for perm in perms]
+          ```
+    * 060: Permutation Sequence (M)
+      * Description:
+        * Given n and k, return the kth permutation sequence.
+        * example:
+          * n = 3, k = 3
+          ```txt
+          "123"
+          "132"
+          "213" <--- k = 3, retrun "213"
+          "231"
+          "312"
+          "321"
+          ```
+       * Ref:
+         *  https://leetcode.com/problems/permutation-sequence/discuss/22507/%22Explain-like-I'm-five%22-Java-Solution-in-O(n)
+      * Approach1: Time:O(n^2), Space:O(n)
+        * Python
+          ```python
+          def getPermutation(self, n: int, k: int) -> str:
+          """
+          if n = 4
+          cnt of permutation is
+          factorial(4) = 24
+          """
+          permute_cnt = math.factorial(n)
+          nums = [str(i) for i in range(1, n+1)]
+          kth_permute = []
+          k = k - 1
+
+          # n to 1
+          for first_element_cnt in range(n, 0, -1):
+              permute_cnt //= first_element_cnt
+              idx = k // permute_cnt
+
+              kth_permute.append(nums[idx])
+              # cost O(n), how to enhance ?
+              nums.pop(idx)
+
+              k = k % permute_cnt
+
+          return "".join(kth_permute)
           ```
     * 031: Next Permutation (M)
-    * 060: Permutation Sequence (M)
-  * 291: Word Pattern II
+  * Others:
+    * 320. Generalized Abbreviation (M)
+    * 291: Word Pattern II (H)
 ### Graph
   * **Eulerian trail**
     * A finite graph that **visits every edge** exactly once.
@@ -15551,7 +15673,7 @@ Table of Content
       ```
   * 268: Missing Number (E)
     * Description:
-      * Given an array containing n distinct numbers taken from 0, 1, 2, ..., n, find the one that is missing from the array.
+      * Given an array containing n distinct numbers taken from 0, 1, 2, ..., n, find the one that is **missing** from the array.
       * n number in n + 1 choice
     * Approach1: Sorting, Time:O(nlogn), Space:O(logn~n)
     * Approach2: Generate a sorted array-1, Time:O(n), Spaxe:O(n)
@@ -15585,6 +15707,9 @@ Table of Content
   * 389: Find the Difference (E)
     * Description:
       * String t is generated by random shuffling string s and then add one more letter at a random position.
+      * example:
+        * s = "abcd"
+        * t = "abcde"
     * Approach1: Sorting and Check, Time:O(m+n)log(m+n), Space:O(m+n)
       * Python
         ```python
@@ -15615,7 +15740,7 @@ Table of Content
         ```
   * 136: Single Number (E)
     * Description:
-      * Given a non-empty array of integers, every element appears twice except for one. Find that single one.
+      * Given a non-empty array of integers, **every element appears twice except for one.** Find that single one.
     * Approach1: Counter, Time:O(n), Space:O(n)
       * Python
         ```python
@@ -16241,7 +16366,6 @@ Table of Content
 
             for j in range(len(nums)):
                 lis = 1
-                # 1. find the lip of end with position j
                 for i in range(j):
                     if nums[j] <= nums[i]:
                         continue
