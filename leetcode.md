@@ -4503,7 +4503,6 @@ Table of Content
     * 845: Longest Mountain in Array
 ### Matrix
  * Transformation
-   * 1243: Array Transformation (E)
    * 289: Game of Life (M)
       * Description:
         * Rules:
@@ -7340,6 +7339,7 @@ Table of Content
                     val += l2.val
                     l2 = l2.next
 
+                 # append new node to the left
                  new = ListNode(val%10)
                  new.next = head
                  head = new
@@ -7373,6 +7373,7 @@ Table of Content
               if s2:
                   val += s2.pop().val
 
+              # append new node to the left
               new = ListNode(val%10)
               new.next = head
               head = new
@@ -7390,7 +7391,7 @@ Table of Content
         * 1. **Reverse** given linked list. For example, 1-> 9-> 9 -> 9 is converted to 9-> 9 -> 9 ->1.
         * 2. Start traversing linked list from leftmost node and add 1 to it. If there is a carry, move to the next node. Keep moving to the next node while there is a carry.
         * 3. **Reverse** modified linked list and return head.
-      * Python Solution
+      * Python
         ```python
         def plusOne(self, head: ListNode) -> ListNode:
           def reverse(cur):
@@ -7411,7 +7412,7 @@ Table of Content
           # 2. plus one
           cur = head
           carry = 1
-          while cur:
+          while cur and carry:
               val = carry + cur.val
               cur.val = val % 10
               carry = val // 10
@@ -10521,7 +10522,7 @@ Table of Content
                 _postorder(root)
                 return output
             ```
-        * Approach2: Iterative, from end to start, Time:O(n), Space:O(n)
+        * Approach2: Iterative1, from end to start, Time:O(n), Space:O(n)
           * traverse order: root -> right -> left (use deque)
           * Python
             ```python
@@ -10542,7 +10543,7 @@ Table of Content
 
               return visited
             ```
-        * Approach3: Iterative, from start to end, Time:O(n), Space:O(n)
+        * Approach3: Iterative2, from start to end, Time:O(n), Space:O(n)
           * traverse order: left -> right -> root
           * Python
             ```python
@@ -10561,7 +10562,10 @@ Table of Content
                       cur = cur.left
                   else:
                       top = stack[-1]
-                      # top.right != prev_traverse means top.right has not traversed yet
+                      """
+                      top.right != prev_traverse means top.right has not traversed yet
+                      check if right subtree has been traversed.
+                      """
                       if top.right and top.right is not prev:
                           cur = top.right
 
@@ -12785,48 +12789,45 @@ Table of Content
         * Set visits to True before append to the queue to **reduce unnecessary iterations.**
         * Python
           ```python
-          class NumberOfIsland(object):
+          DIRECTIONS = ((1, 0), (0, -1), (-1, 0), (0, 1))
+          WATER = '0'
+          LAND = '1'
 
-            LAND, WATER = '1', '0'
-            NEIGHBORS = ((1, 0), (0, -1), (-1, 0), (0, 1))
+          def numIslands(self, grid: List[List[str]]) -> int:
+              def neighbors(r, c):
+                  for d in DIRECTIONS:
+                      nr, nc = r + d[0], c + d[1]
+                      if 0 <= nr < row and 0 <= nc < col:
+                          yield nr, nc
 
-            @classmethod
-            def bfs(cls, grid: List[List[str]]) -> int:
-                def _bfs(r, c):
-                  if grid[r][c] == cls.WATER or visits[r][c]:
-                    return 0
-
+              def bfs(r, c):
                   visits[r][c] = True
-                  q = collections.deque()
-                  q.append((r, c))
+                  q = collections.deque([(r, c)])
 
                   while q:
                       r, c = q.popleft()
-                      for neigbor in cls.NEIGHBORS:
-                          nr, nc = r+neigbor[0], c+neigbor[1]
-
-                          # out of range
-                          if nr < 0 or nr >= row or nc < 0 or nc >= col:
+                      for nr, nc in neighbors(r, c):
+                          if grid[nr][nc] == WATER or visits[nr][nc]:
                               continue
-
-                          if grid[nr][nc] == cls.WATER or visits[nr][nc]:
-                              continue
-
                           visits[nr][nc] = True
                           q.append((nr, nc))
 
-                  return 1
 
-                if not grid or not grid[0]:
-                    return 0
+              if not grid or not grid[0]:
+                  return 0
 
-                row, col = len(grid), len(grid[0])
-                area_cnt = 0
-                visits = [[False for _ in range(col)] for _ in range(row)]
-                for r in range(row):
-                    for c in range(col):
-                        area_cnt += _bfs(r, c)
-                return area_cnt
+              row, col = len(grid), len(grid[0])
+              visits = [[False for _ in range(col)] for _ in range(row)]
+              island_cnt = 0
+              for r in range(row):
+                  for c in range(col):
+                      if grid[r][c] == WATER or visits[r][c]:
+                          continue
+
+                      bfs(r, c)
+                      island_cnt += 1
+
+              return island_cnt
           ```
       * Approach2: DFS recursive,
         * Python
@@ -12966,45 +12967,45 @@ Table of Content
       * Approach1, BFS, Time:O(mn), Space:O(mn)
         * Python
           ```python
-          NEIGHBORS = ((1, 0), (0, -1), (-1, 0), (0, 1))
-          WATER = 0
-          LAND = 1
+          DIRECTIONS = ((1, 0), (0, -1), (-1, 0), (0, 1))
+          WATER = '0'
+          LAND = '1'
 
-          def maxAreaOfIsland(self, grid: List[List[int]]) -> int:
+          def numIslands(self, grid: List[List[str]]) -> int:
+              def neighbors(r, c):
+                  for d in DIRECTIONS:
+                      nr, nc = r + d[0], c + d[1]
+                      if 0 <= nr < row and 0 <= nc < col:
+                          yield nr, nc
+
               def bfs(r, c):
                   visits[r][c] = True
-                  area = 1
                   q = collections.deque([(r, c)])
 
                   while q:
                       r, c = q.popleft()
-                      for n in NEIGHBORS:
-                          nr, nc = r + n[0], c + n[1]
-
-                          if not 0 <= nr < row or not 0 <= nc < col:
-                              continue
-
+                      for nr, nc in neighbors(r, c):
                           if grid[nr][nc] == WATER or visits[nr][nc]:
                               continue
-
                           visits[nr][nc] = True
-                          area += 1
                           q.append((nr, nc))
 
-                  return area
 
-              if not grid:
+              if not grid or not grid[0]:
                   return 0
 
               row, col = len(grid), len(grid[0])
               visits = [[False for _ in range(col)] for _ in range(row)]
-              max_area = 0
+              island_cnt = 0
               for r in range(row):
                   for c in range(col):
-                      if grid[r][c] == LAND and not visits[r][c]:
-                          max_area = max(max_area, bfs(r, c))
+                      if grid[r][c] == WATER or visits[r][c]:
+                          continue
 
-              return max_area
+                      bfs(r, c)
+                      island_cnt += 1
+
+              return island_cnt
           ```
       * Approach2, DFS, Time:O(mn), Space:O(mn)
         * Python
@@ -13043,7 +13044,7 @@ Table of Content
 
               return max_area
           ```
-    * 694: Number of Distinct Islands (M) (L)
+    * 694: Number of Distinct Islands (M)
       * Description:
         * Count the number of distinct islands.
         * An island is considered to be the same as another if and only if one island can be translated (and not rotated or reflected) to equal the other.
@@ -13127,7 +13128,38 @@ Table of Content
 
               return len(shapes)
           ```
-    * 463: Island Perimeter
+    * 463: Island Perimeter (E)
+      * Approach1: BFS, Time:O(mn), Space:O(mn)
+      * Approach2: Simple iteration, Time:O(mn), Space:O(1)
+        * Python
+          ```python
+          DIRECTIONS = ((1, 0), (0, 1))
+          WATER = 0
+          LAND = 1
+
+          def islandPerimeter(self, grid: List[List[int]]) -> int:
+              def neighbors(r, c):
+                  for d in DIRECTIONS:
+                      nr, nc = r + d[0], c + d[1]
+                      if 0 <= nr < row and 0 <= nc < col:
+                          yield nr, nc
+
+              row, col = len(grid), len(grid[0])
+              cnt = 0
+              nb_cnt = 0
+              for r in range(row):
+                  for c in range(col):
+                      if grid[r][c] == WATER:
+                          continue
+
+                      cnt += 1
+                      # only check right and down directions
+                      for nr, nc in neighbors(r, c):
+                          if grid[nr][nc] == LAND:
+                              nb_cnt += 1
+
+              return cnt * 4 - nb_cnt * 2
+          ```
   * **Nested**
     * 339: Nested List Weight Sum (E)
       * Description
@@ -13348,7 +13380,7 @@ Table of Content
 
               return max_circle_len
             ```
-  * 286: Walls and Gates (M) (L)
+  * 286: Walls and Gates (M)
     * Description:
       * -1: A wall or an obstacle.
       * 0: A gate.
@@ -13456,6 +13488,7 @@ Table of Content
                         if not 0 <= nr < row or not 0 <= nc < col:
                             continue
 
+                        # skip the WALL and GATE
                         if rooms[nr][nc] != EMPTY:
                             continue
 
@@ -13465,59 +13498,59 @@ Table of Content
   * 130: Surrounded Regions (M)
     * Description
       * A region is captured by flipping all 'O's into 'X's in that surrounded region.
-    * BFS: Time:O(rc), Space:O(rc)
+    * Approach2: BFS: Time:O(rc), Space:O(rc)
       * Try to Group region
       * Python
         ```python
         NEIGHBORS = ((1, 0), (0, -1), (-1, 0), (0, 1))
-        START, END = 'O', 'X'
 
-        class Solution:
-            def solve(self, board: List[List[str]]) -> None:
-                def _flip_surround_region(r, c):
-                    q = collections.deque([(r, c)])
-                    flip_regions = [(r, c)]
-                    visits[r][c] = True
-                    should_flip = True
+        def solve(self, board: List[List[str]]) -> None:
+            def _flip_surround_region(r, c):
+                q = collections.deque([(r, c)])
+                flip_regions = [(r, c)]
+                visits[r][c] = True
+                should_flip = True
 
-                    while q:
-                        r, c = q.popleft()
+                while q:
+                    r, c = q.popleft()
 
-                        for n in NEIGHBORS:
-                            nr, nc = r + n[0], c + n[1]
+                    for n in NEIGHBORS:
+                        nr, nc = r + n[0], c + n[1]
 
-                            if not 0 <= nr < row or not 0 <= nc < col:
-                                """
-                                do not break here since we try to extend the max regino as possible
-                                """
-                                should_flip = False
-                                continue
+                        if not 0 <= nr < row or not 0 <= nc < col:
+                            """
+                            do not break here since we try to extend the max regino as possible
+                            """
+                            should_flip = False
+                            continue
 
-                            if board[nr][nc] == 'X' or visits[nr][nc]:
-                                continue
+                        if board[nr][nc] == 'X' or visits[nr][nc]:
+                            continue
 
-                            # group region
-                            if board[nr][nc] == 'O':
-                                visits[nr][nc] = True
-                                flip_regions.append((nr, nc))
-                                q.append((nr, nc))
-
-                    if should_flip:
-                      while flip_regions:
-                          r, c = flip_regions.pop()
-                          board[r][c] = 'X'
+                        # group region
+                        if board[nr][nc] == 'O':
+                            visits[nr][nc] = True
+                            q.append((nr, nc))
+                            if should_flip:
+                              flip_regions.append((nr, nc))
 
 
-                if not board:
-                    return
+                if should_flip:
+                  while flip_regions:
+                      r, c = flip_regions.pop()
+                      board[r][c] = 'X'
 
-                row, col = len(board), len(board[0])
-                visits = [[False for _ in range(col)] for _ in range(row)]
 
-                for r in range(row):
-                    for c in range(col):
-                        if board[r][c] == 'O' and not visits[r][c]:
-                            _flip_surround_region(r, c)
+            if not board:
+                return
+
+            row, col = len(board), len(board[0])
+            visits = [[False for _ in range(col)] for _ in range(row)]
+
+            for r in range(row):
+                for c in range(col):
+                    if board[r][c] == 'O' and not visits[r][c]:
+                        _flip_surround_region(r, c)
         ```
   * 127: **Word Ladder** (M)
     * Description:
@@ -13537,11 +13570,10 @@ Table of Content
       * Space: O(n*k^2)
         * Transformatino dict cost: O((n * k)*k)
           * Each word has k transformations, each transformation cost k
-        * Max queue size: O(n*k)
+        * Max queue size: O((n * k))
       * Python
         ```python
         def ladderLength(self, beginWord: str, endWord: str, wordList: List[str]) -> int:
-
           if not wordList:
               return 0
 
@@ -13552,7 +13584,7 @@ Table of Content
           Generate word dictionary,
           hit -> *it, h*t, hi*
           """
-          # generate dict
+          # generate the word dict
           w_dict = collections.defaultdict(list)
           for w in wordList:
               for i in range(len(w)):
@@ -13591,177 +13623,138 @@ Table of Content
           return 0
         ```
     * Approach2: Bidirectional BFS
-  * 126: **Word Ladder** II (H)
-  * 079: Word Search (M)
+  * 126: Word Ladder II (H)
+  * 079: **Word Search** (M)
     * Description:
      * L is the word length
      * The word can be constructed from letters of sequentially adjacent cell, where "adjacent" cells are those **horizontally** or **vertically** neighboring. The same letter cell **can not be used more than once**.
-     * The key concept is that we need to clean the visited infomation.
+     * Note
+       * Notice the boundary handling, for example: board: [["a"]],  word:"a"
+       * Need to clean the visited infomation for each traverse.
     * Approach1: DFS Recursive: Time:O(mn*4^L), Space:O(mn)
        * Time:
          * The first character takes O(mn)
          * Remain characters take O(4^L)
        * Python
          ```python
+          DIRECTIONS = ((1, 0), (0, -1), (-1, 0), (0, 1))
+
           def exist(self, board: List[List[str]], word: str) -> bool:
-            def dfs(w_idx, r, c):
+              def neighbors(r, c):
+                  for d in DIRECTIONS:
+                      nr, nc = r + d[0], c + d[1]
+                      if 0 <= nr < row and 0 <= nc < col:
+                          yield nr, nc
 
-                if w_idx == len(word):
-                    return True
+              def dfs(idx, r, c):
+                  if board[r][c] != word[idx]:
+                      return False
 
-                if not (0 <= r < row and 0 <= c < col):
-                    return False
+                  """
+                  note1: can not use idx == len(word)
+                  for example: board: [["a"]],  word:"a"
+                  """
+                  if idx == len(word)-1:
+                      return True
 
-                """
-                The same letter cell can not be used more than once
-                """
-                if visits[r][c] or board[r][c] != word[w_idx]:
-                    return False
+                  is_found = False
+                  visited[r][c] = True
+                  for nr, nc in neighbors(r, c):
+                      if not visited[nr][nc]:
+                          is_found = dfs(idx+1, nr, nc)
+                          if is_found:
+                              break
+                  """
+                  note2: backtrak, restore the vistied information
+                  """
+                  visited[r][c] = False
+                  return is_found
 
-                visits[r][c] = True
-                found = False
-                for n in NEIGHBORS:
-                    nr, nc = r + n[0], c + n[1]
-                    found = dfs(w_idx+1, nr, nc)
-                    if found:
-                        break
+              if not board or not board[0]:
+                  return False
 
-                """
-                Clean the visited info
-                """
-                visits[r][c] = False
-                return found
+              if not word:
+                  return True
 
+              row, col = len(board), len(board[0])
+              visited = [[False for _ in range(col)] for _ in range(row)]
+              is_found = False
+              for r in range(row):
+                  for c in range(col):
+                      is_found = dfs(0, r, c)
+                      if is_found:
+                          break
+                  else:
+                      continue
+                  break
 
-            row, col = len(board), len(board[0])
-
-            NEIGHBORS = ((1, 0), (0, -1), (-1, 0), (0, 1))
-
-            visits = [[False] * col for _ in range(row)]
-
-            found = False
-            for r in range(row):
-                for c in range(col):
-                    found = dfs(0, r, c)
-                    if found:
-                        break
-                else:
-                    continue
-
-                # break if inner loop break
-                break
-
-            return found
+              return is_found
          ```
     * Approach2: DFS Iterative: Time:O(mn*4^L), Space:O(mn)
        * Use another stack to track unsed info
        * Python
-         * Implementation1
-            ```python
-            def exist(self, board: List[List[str]], word: str) -> bool:
+         ```python
+         DIRECTIONS = ((1, 0), (0, -1), (-1, 0), (0, 1))
+        def exist(self, board: List[List[str]], word: str) -> bool:
+            def neighbors(r, c):
+                for d in DIRECTIONS:
+                    nr, nc = r + d[0], c + d[1]
+                    if 0 <= nr < row and 0 <= nc < col:
+                        yield nr, nc
 
-              def dfs(w_idx, r, c):
-                  s = [(w_idx, r, c, False)]
-                  found = False
-                  while s:
+            def dfs(idx, r, c):
+                is_found = False
+                s = [(idx, r, c, False)]
 
-                      w_idx, r, c, backtrack = s.pop()
+                while s:
+                    idx, r, c, backtrack = s.pop()
+                    if backtrack:
+                        visited[r][c] = False
+                        continue
 
-                      if backtrack:
-                          visits[r][c] = False
-                          continue
+                    if board[r][c] != word[idx]:
+                        continue
 
-                      if w_idx == len(word):
-                          found = True
-                          break
+                    """
+                    note1: can not use idx == len(word)
+                    for example: board: [["a"]],  word:"a"
+                    """
+                    if idx == len(word)-1:
+                        is_found = True
+                        break
 
-                      if not (0 <= r < row and 0 <= c < col):
-                          continue
+                    visited[r][c] = True
+                    """
+                    note2: backtrack the visited info
+                    """
+                    s.append((-1, r, c, True))
+                    for nr, nc in neighbors(r, c):
+                        if not visited[nr][nc]:
+                            s.append((idx+1, nr, nc, False))
 
-                      if visits[r][c] or board[r][c] != word[w_idx]:
-                          continue
+                return is_found
 
-                      visits[r][c] = True
-                      # clean visited info
-                      s.append((-1, r, c, True))
-                      for n in NEIGHBORS:
-                          nr, nc = r + n[0], c + n[1]
-                          s.append((w_idx+1, nr, nc, False))
+            if not board or not board[0]:
+                return False
 
+            if not word:
+                return True
 
-                  return found
+            row, col = len(board), len(board[0])
+            visited = [[False for _ in range(col)] for _ in range(row)]
+            is_found = False
+            for r in range(row):
+                for c in range(col):
+                    is_found = dfs(0, r, c)
+                    if is_found:
+                        break
+                else:
+                    continue
+                break
 
-
-              row, col = len(board), len(board[0])
-              NEIGHBORS = ((1, 0), (0, -1), (-1, 0), (0, 1))
-              visits = [[False] * col for _ in range(row)]
-
-              found = False
-              for r in range(row):
-                  for c in range(col):
-                      if word[0] == board[r][c]:
-                          found = dfs(0, r, c)
-                          if found:
-                              break
-                  else:
-                      continue
-
-                  # break if inner loop break
-                  break
-
-              return found
-            ```
-         * Implementation2
-            ```python
-            class Solution(object):
-
-              Directions = [(1, 0), (0, 1), (-1, 0), (0, -1)]
-
-              @classmethod
-              def neighbors(cls, board, r, c):
-                  for d in cls.Directions:
-                      nr = r + d[0]
-                      nc = c + d[1]
-                      if (0 <= nr < len(board)) and (0 <= nc < len(board[nr])):
-                          yield nr, nc
-
-              def exist(self, board, word):
-                  """
-                  :type board: List[List[str]]
-                  :type word: str
-                  :rtype: bool
-                  """
-                  q = list()
-
-                  for r in range(len(board)): # find starting points
-                      for c in range(len(board[r])):
-                          if board[r][c] == word[0]:
-                              q.append((r, c))
-
-                  for (r, c) in q:
-                      visited = set()
-                      stack = list()
-                      stack.append((r, c, 0, False)) # regular forward moving node
-                      while stack:
-                          cr, cc, i, backtrack = stack.pop()
-                          if backtrack:
-                              visited.remove((cr, cc))
-                              continue
-
-                          visited.add((cr, cc))
-                          stack.append((cr, cc, i, True)) # add backtracking node
-                          if i == (len(word) - 1):
-                              return True
-
-                          for nr, nc in self.neighbors(board, cr, cc):
-                              if (nr, nc) in visited:
-                                  continue
-                              if board[nr][nc] == word[i + 1]:
-                                  stack.append((nr, nc, i + 1, False)) # forward-moving node
-
-                  return False
-            ```
-  * 329: Longest Increasing Path in a Matrix (H)
+            return is_found
+         ```
+  * 329: **Longest Increasing Path** in a Matrix (H)
     * Description:
       * Given an integer matrix, find the length of the longest increasing path.
       * From each cell, you can either move to four directions: left, right, up or down.
@@ -13815,7 +13808,6 @@ Table of Content
       * Starting from the nodes with indegree == 0 ( max val in the area)
       * Python
         ```python
-
         DIRECTIONS = ((1, 0), (0, 1), (-1, 0), (0, -1))
         def longestIncreasingPath(self, matrix: List[List[int]]) -> int:
             def neighbors(r, c):
