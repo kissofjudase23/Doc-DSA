@@ -1003,18 +1003,18 @@ Table of Content
               nums[border], nums[pivot] = nums[pivot], nums[border]
               return border
 
-          def quick_select(nums, start, end, k_smallest):
-              res = None
-              while start <= end:
-                  p = partition(nums, start, end)
-                  if p == k_smallest:
-                      res = nums[k_smallest]
-                      break
-                  elif p > k_smallest:
-                      end = p - 1
-                  else:
-                      start = p + 1
-              return res
+            def quick_select(nums, start, end, k_smallest):
+                res = None
+                while start <= end:
+                    p = partition(nums, start, end)
+                    if p == k_smallest:
+                        res = nums[k_smallest]
+                        break
+                    elif p > k_smallest:
+                        end = p - 1
+                    else:
+                        start = p + 1
+                return res
             ```
         * Iterative, Time:O(nlogn), Space:O(logn~n):
           * Python
@@ -4493,7 +4493,6 @@ Table of Content
 
             return start if total_tank >= 0 else not_found
            ```
-    * 723：Candy Crush (M)
     * 128: Longest Consecutive Sequence (H)
       * Description:
         * Given an unsorted array of integers, find the length of the longest consecutive elements sequence.
@@ -4599,6 +4598,64 @@ Table of Content
           ```
       * follow up: Infinite array
         * [Solution](https://leetcode.com/problems/game-of-life/discuss/73217/Infinite-board-solution/201780)
+   * 723：Candy Crush (M)
+     * Approach1: Time: O(mn)^2, Space:O(1)
+       * Time
+         * In the worst case, we might crush only 3 candies each time.
+         * so tottal mn/3 iteration, each iteration costs 3mn
+       * Python
+        ```python
+        def candyCrush(self, board: List[List[int]]) -> List[List[int]]:
+          if not board or not board[0]:
+              return []
+
+          """
+          for crush_size k, consider to use sliding window and memo
+          """
+          EMPTY = 0
+          crush_size = 3
+          move_step = crush_size - 1
+          row, col = len(board), len(board[0])
+
+          while True:
+              need_crush = False
+
+              # label the horizontal crush
+              for r in range(row):
+                  for c in range(col-move_step):
+                      if board[r][c] != EMPTY and \
+                          abs(board[r][c]) == abs(board[r][c+1]) == abs(board[r][c+2]):
+                          board[r][c] = board[r][c+1] = board[r][c+2] = -abs(board[r][c])
+                          need_crush = True
+
+
+              # label the vertical crush
+              for c in range(col):
+                  for r in range(row-move_step):
+                      if board[r][c] != EMPTY and \
+                          abs(board[r][c]) == abs(board[r+1][c]) == abs(board[r+2][c]):
+                          board[r][c] = board[r+1][c] = board[r+2][c] = -abs(board[r][c])
+                          need_crush = True
+
+              if not need_crush:
+                  break
+
+              # crush and gravity
+              for c in range(col):
+                  border = row-1
+                  """
+                  scan the col and move non-zero val to the border
+                  """
+                  for r in range(row-1, -1, -1):
+                      if board[r][c] > 0:
+                          board[border][c] = abs(board[r][c])
+                          border -= 1
+
+                  for r in range(border, -1, -1):
+                      board[r][c] = EMPTY
+
+          return board
+        ```
  * **Rotate**:
    * 048: Rotate Image
      * Approach1: Transpose and Reverse, Time:O(n^2), Space:O(1)
@@ -4606,8 +4663,6 @@ Table of Content
         ```python
         def rotate(self, matrix: List[List[int]]) -> None:
           n = len(matrix)
-          layers = n // 2
-
           """
           Transpose, note that c starting from r
           """
@@ -4619,32 +4674,38 @@ Table of Content
           for r in range(n):
               matrix[r].reverse()
         ```
-     * Approach2: Rotate by Layer, Time:O(n^2), Space:O(1)
+     * Approach2: Layer by Layer, Time:O(n^2), Space:O(1)
        * Python
-        ```python
-        def rotate(self, matrix: List[List[int]]) -> None:
-          n = len(matrix)
-          layers = n // 2
+         * Implementation1:
+           * Python
+            ```python
+            def rotate(self, matrix: List[List[int]]) -> None:
+              n = len(matrix)
+              layers = n // 2
 
-          for layer in range(layers):
-              start = layer
-              end = n-1-layer
-
-              # 0 to end-start-1
-              for offset in range(end-start):
-                  tmp = matrix[start][start+offset]
-                  matrix[start][start+offset] = matrix[end-offset][start]
-                  matrix[end-offset][start] = matrix[end][end-offset]
-                  matrix[end][end-offset] = matrix[start+offset][end]
-                  matrix[start+offset][end] = tmp
-        ```
+              for layer in range(layers):
+                  start = layer
+                  end = n-1-layer
+                  """
+                  if n = 4, layer = 2
+                  top left:   [0][0], [0][0]
+                  down right: [3][3], [2][2]
+                  """
+                  for offset in range(end-start):
+                      tmp = matrix[start][start+offset]
+                      matrix[start][start+offset] = matrix[end-offset][start]
+                      matrix[end-offset][start] = matrix[end][end-offset]
+                      matrix[end][end-offset] = matrix[start+offset][end]
+                      matrix[start+offset][end] = tmp
+            ```
+         * Implementation2:
+           * Python
+           *
    * Approach1: m*n arryay, Time:O(mn), Space:O(mn)
      * Python
       ```python
       def rotate_v2(a):
         """
-        non-np version
-
         Complexity:
         Time  : O(rc)
         Space : O(rc)
@@ -4670,14 +4731,14 @@ Table of Content
        * Python
         ```python
         def spiralOrder(self, matrix: List[List[int]]) -> List[int]:
-          if not matrix:
+          if not matrix or not matrix[0]:
               return []
 
           row, col = len(matrix), len(matrix[0])
           visited = [[False for _ in range(col)] for _ in range(row)]
 
           """
-          top, right, bottom, left
+          4 directions top, right, bottom, left
           """
           DIRECTIONS = ((0, 1), (1, 0), (0,-1), (-1, 0))
           spiral_order = []
@@ -4691,6 +4752,7 @@ Table of Content
               if 0 <= cr < row and 0 <= cc < col and not visited[cr][cc]:
                   r, c = cr, cc
               else:
+                  # change direction
                   d = (d +1) % 4
                   r, c = r + DIRECTIONS[d][0], c + DIRECTIONS[d][1]
 
@@ -4718,16 +4780,18 @@ Table of Content
                   yield r, c2
 
               """
-              prevent duplicate for single row and single col
+              prevent duplicated traverse for single row and single col cases
               """
-              if r1 < r2 and c1 < c2:
-                  # Bottom, go left, c2-1 to c1
-                  for c in range(c2-1, c1-1, -1):
-                      yield r2, c
+              if r1 == r2 or c1 == c2:
+                return
 
-                  # Left, go up  r2-1 to r1-1
-                  for r in range(r2-1, r1, -1):
-                      yield r, c1
+              # Down, c2-1 to c1
+              for c in range(c2-1, c1-1, -1):
+                  yield r2, c
+
+              # Left, go up  r2-1 to r1-1
+              for r in range(r2-1, r1, -1):
+                  yield r, c1
 
           if not matrix:
               return []
@@ -4918,8 +4982,8 @@ Table of Content
        * Python
          ```python
          def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
-
-            if not matrix or not matrix[0] or target < matrix[0][0] or target > matrix[-1][-1]:
+            if not matrix or not matrix[0] or \
+                target < matrix[0][0] or target > matrix[-1][-1]:
                 return False
 
             row, col = len(matrix), len(matrix[0])
@@ -4944,8 +5008,8 @@ Table of Content
          ```
    * 240:	Search a 2D Matrix II (M)
      * Description
-       * Integers in each row are sorted in ascending from left to right.
-       * Integers in each column are sorted in ascending from top to bottom.
+       * Integers in **each row** are sorted in **ascending from left to right**.
+       * Integers in **each column** are sorted in **ascending** from top to bottom.
        * example:
           ```txt
           [
@@ -5021,7 +5085,7 @@ Table of Content
           row, col = len(matrix), len(matrix[0])
           is_found = False
 
-          r, c= row - 1, 0
+          r, c = row - 1, 0
           while r >= 0 and c < col:
               if target == matrix[r][c]:
                   is_found = True
@@ -5418,6 +5482,27 @@ Table of Content
 
           return res
         ```
+ * 766: Toeplitz Matrix (E)
+   * Approach1: row by row
+     * Python
+      ```python
+      def isToeplitzMatrix(self, matrix: List[List[int]]) -> bool:
+        if not matrix or not matrix[0]:
+            return True
+
+        row, col = len(matrix), len(matrix[0])
+        is_toeplitz = True
+        for r in range(1, row):
+            for c in range(1, col):
+                if matrix[r][c] != matrix[r-1][c-1]:
+                    is_toeplitz = False
+                    break
+            else:
+                continue
+            break
+
+        return is_toeplitz
+      ```
  * 370:	Range Addition (M)
  * 296:	Best Meeting Point (H)
  * 361: Bomb Enemy (M)
@@ -6280,6 +6365,7 @@ Table of Content
 
           return length
         ```
+  * 1060: Missing Element in Sorted Array (M)
   * 187: Repeated DNA Sequences (M)
   * 315: Count of Smaller Numbers After Self (H)
   * 354: Russian Doll Envelopes (H)
@@ -6999,6 +7085,7 @@ Table of Content
                 return dummy.next
 
             def merge_sort(head):
+                # need at least two nodes
                 if not head or not head.next:
                     return head
 
@@ -7010,6 +7097,7 @@ Table of Content
 
                 left = head
                 right = mid.next
+                # split the list
                 mid.next = None
 
                 left = merge_sort(left)
@@ -10883,10 +10971,9 @@ Table of Content
                   max_lcp = max(max_lcp, inc + dec - 1)
 
                   """
-                  For the case that connects to the parent/
-                  """
+                  For the case that connects to the parent
                   return max inc and dec path for parent
-
+                  """
                   return inc, dec
 
               if not root:
